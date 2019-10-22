@@ -14,8 +14,13 @@ pip install .
 
 popd
 
-pip install .
+if ! pip install ; then
+    exit 1
+fi
 
-polyswarm -h
+
+if ! polyswarm -h; then
+    exit 2
+fi
 
 pytest -s -v

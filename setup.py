@@ -30,7 +30,7 @@ setup(
     package_dir={'': 'src'},
     entry_points={
         'console_scripts': [
-            'polyswarm=polyswarm_api.__main__:polyswarm',
+            'polyswarm=polyswarm.__main__:polyswarm',
         ],
     },
     classifiers=[
