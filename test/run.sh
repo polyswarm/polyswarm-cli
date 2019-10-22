@@ -8,7 +8,11 @@ git clone https://github.com/polyswarm/polyswarm-api
 cd polyswarm-api
 
 # ignore if fails
-git checkout $BRANCH || true
+if git checkout $BRANCH ; then
+    echo "checked out $BRANCH"
+else
+    echo "couldn't find $BRANCH, using master"
+fi
 
 pip install .
 
