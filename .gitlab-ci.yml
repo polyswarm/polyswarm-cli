@@ -1,0 +1,70 @@
+image: docker:stable
+
+services:
+  - docker:dind
+
+stages:
+  - test
+  - release
+
+test-run27:
+  tags:
+    - kube
+  image: python:2.7
+  stage: test
+  before_script:
+    - pip install --upgrade pip
+  script:
+    - pip install .
+    - polyswarm -h
+    - pytest -s -v
+
+test-run35:
+  tags:
+    - kube
+  image: python:3.5
+  stage: test
+  before_script:
+    - pip3 install --upgrade pip
+  script:
+    - pip3 install .
+    - polyswarm -h
+    - pytest -s -v
+
+test-run36:
+  tags:
+    - kube
+  image: python:3.6
+  stage: test
+  before_script:
+    - pip3 install --upgrade pip
+  script:
+    - pip3 install .
+    - polyswarm -h
+    - pytest -s -v
+
+
+push-to-pypi:
+  tags:
+    - kube
+  image: python:3.6
+  stage: release
+  only:
+    - tags
+  before_script:
+    - pip3 install --upgrade pip setuptools twine wheel
+  script:
+    - python setup.py sdist bdist_wheel
+
+    # check git tag version vs setup.py version. bail if not equal.
+    - >-
+      tagver=$(git describe --abbrev=0 --tags)
+      setupver=$(grep "version=" setup.py | cut -d"'" -f 2)
+
+      if [ $tagver != $setupver ]; then
+        echo "git tag version ($tagver) does not match setup.py version ($setupver)"
+        exit 1
+      fi
+
+    # using env variables from Gitlab: TWINE_USERNAME, TWINE_PASSWORD, TWINE_REPOSITORY_URL
+    - twine upload dist/*
