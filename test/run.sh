@@ -14,7 +14,7 @@ pip install .
 
 popd
 
-if ! pip install ; then
+if ! pip install . ; then
     exit 1
 fi
 
