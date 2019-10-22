@@ -1,6 +1,5 @@
 #!/bin/bash
 
-BRANCH=`git rev-parse --abbrev-ref HEAD`
 pushd /tmp
 
 git clone https://github.com/polyswarm/polyswarm-api
@@ -8,7 +7,7 @@ git clone https://github.com/polyswarm/polyswarm-api
 cd polyswarm-api
 
 # ignore if fails
-if git checkout $BRANCH ; then
+if git checkout $CI_COMMIT_REF_NAME ; then
     echo "checked out $BRANCH"
 else
     echo "couldn't find $BRANCH, using master"
