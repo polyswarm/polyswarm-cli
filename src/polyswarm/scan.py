@@ -4,8 +4,9 @@ import sys
 import click
 from polyswarm_api.log import logger
 from polyswarm_api import exceptions, const
-from polyswarm_api.utils import validate_uuid, is_valid_uuid, validate_hashes, parse_hashes
+from polyswarm_api.utils import parse_hashes
 
+from .utils import validate_uuid, is_valid_uuid, validate_hashes
 from .base import polyswarm
 
 @click.option('-f', '--force', is_flag=True, default=False,

@@ -2,7 +2,7 @@ import click
 
 from polyswarm_api.api import PolyswarmAPI
 from polyswarm_api.formatters import formatters
-from polyswarm_api.utils import validate_key
+from .utils import validate_key
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
