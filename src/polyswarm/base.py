@@ -1,4 +1,6 @@
 import click
+import logging
+import sys
 
 from polyswarm_api.api import PolyswarmAPI
 from polyswarm_api.formatters import formatters

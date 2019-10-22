@@ -3,7 +3,8 @@ import sys
 
 import click
 from polyswarm_api import exceptions
-from .utils import validate_hashes, parse_hashes, validate_hash
+from .utils import validate_hashes, validate_hash
+from polyswarm_api.utils import parse_hashes
 
 from .base import polyswarm
 
