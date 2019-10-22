@@ -8,9 +8,9 @@ cd polyswarm-api
 
 # ignore if fails
 if git checkout $CI_COMMIT_REF_NAME ; then
-    echo "checked out $BRANCH"
+    echo "checked out $CI_COMMIT_REF_NAME"
 else
-    echo "couldn't find $BRANCH, using master"
+    echo "couldn't find $CI_COMMIT_REF_NAME, using master"
 fi
 
 pip install .
