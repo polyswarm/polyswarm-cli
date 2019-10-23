@@ -63,5 +63,3 @@ commands = [scan, url_scan, search, live, historical, download, cat, stream]
 
 for command in commands:
     polyswarm.add_command(command)
-
-print("got here")
