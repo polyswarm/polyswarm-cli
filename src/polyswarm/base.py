@@ -1,11 +1,17 @@
 import click
+import logging
+import sys
 
 from polyswarm_api.api import PolyswarmAPI
 from polyswarm_api.formatters import formatters
 from .utils import validate_key
 
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+from .hunt import live, historical
+from .scan import scan, url_scan, rescan, lookup
+from .download import download, cat, stream
+from .search import search
 
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.option('-a', '--api-key', help='Your API key for polyswarm.network (required)',
@@ -52,3 +58,8 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     ctx.obj['api'] = PolyswarmAPI(api_key, api_uri, community=community, validate_schemas=validate)
 
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
+
+commands = [scan, url_scan, rescan, lookup, search, live, historical, download, cat, stream]
+
+for command in commands:
+    polyswarm.add_command(command)

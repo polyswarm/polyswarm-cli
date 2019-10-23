@@ -15,9 +15,7 @@ test-run27:
   before_script:
     - pip install --upgrade pip
   script:
-    - pip install .
-    - polyswarm -h
-    - pytest -s -v
+    - ./test/run.sh
 
 test-run35:
   tags:
@@ -27,9 +25,7 @@ test-run35:
   before_script:
     - pip3 install --upgrade pip
   script:
-    - pip3 install .
-    - polyswarm -h
-    - pytest -s -v
+    - ./test/run.sh
 
 test-run36:
   tags:
@@ -39,9 +35,7 @@ test-run36:
   before_script:
     - pip3 install --upgrade pip
   script:
-    - pip3 install .
-    - polyswarm -h
-    - pytest -s -v
+    - ./test/run.sh
 
 
 push-to-pypi:

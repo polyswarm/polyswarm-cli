@@ -3,19 +3,17 @@ import sys
 
 import click
 from polyswarm_api import exceptions
-from .utils import validate_hashes, parse_hashes, validate_hash
-
-from .base import polyswarm
+from .utils import validate_hashes, validate_hash
+from polyswarm_api.utils import parse_hashes
 
 
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
-@click.option('-m', '--metadata', is_flag=True, default=False, help='Save file metadata into associated JSON file')
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5]', default=None)
 @click.argument('hash', nargs=-1, callback=validate_hashes)
 @click.argument('destination', nargs=1, type=click.Path(file_okay=False))
-@polyswarm.command('download', short_help='download file(s)')
+@click.command('download', short_help='download file(s)')
 @click.pass_context
-def download(ctx, metadata, hash_file, hash_type, hash, destination):
+def download(ctx, hash_file, hash_type, hash, destination):
     """
     Download files from matching hashes
     """
@@ -38,7 +36,7 @@ def download(ctx, metadata, hash_file, hash_type, hash, destination):
 @click.option('-s', '--since', type=click.IntRange(1, 2880), default=1440,
               help='Request archives X minutes into the past. Default: 1440, Max: 2880')
 @click.argument('destination', nargs=1, type=click.Path(file_okay=False))
-@polyswarm.command('stream', short_help='access the polyswarm file stream')
+@click.command('stream', short_help='access the polyswarm file stream')
 @click.pass_context
 def stream(ctx, since, destination):
     api = ctx.obj['api']
@@ -58,7 +56,7 @@ def stream(ctx, since, destination):
 
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5]', default=None)
 @click.argument('hash', nargs=1, callback=validate_hash)
-@polyswarm.command('cat', short_help='cat artifact to stdout')
+@click.command('cat', short_help='cat artifact to stdout')
 @click.pass_context
 def cat(ctx, hash_type, hash):
     api = ctx.obj['api']

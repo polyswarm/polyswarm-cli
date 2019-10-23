@@ -1,5 +1,5 @@
 from unittest import TestCase
-from polyswarm_api.__main__ import polyswarm
+from polyswarm.__main__ import polyswarm
 from polyswarm_api.types import result
 from polyswarm_api.types.hash import to_hash
 from polyswarm_api.types.query import MetadataQuery

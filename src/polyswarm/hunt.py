@@ -3,15 +3,12 @@ import sys
 import click
 from polyswarm_api import exceptions
 
-from .base import polyswarm
-
-
-@polyswarm.group(short_help='interact with live scans')
+@click.group(short_help='interact with live scans')
 def live():
     pass
 
 
-@polyswarm.group(short_help='interact with historical scans)')
+@click.group(short_help='interact with historical scans)')
 def historical():
     pass
 
@@ -68,13 +65,16 @@ def live_list(ctx):
               help='Don\'t request artifact metadata.')
 @click.option('-b', '--without-bounties', is_flag=True, default=False,
               help='Don\'t request bounties.')
+@click.option('-s', '--since', type=click.INT, default=0,
+              help='How far back in minutes to request results (default: 0, or all)')
 @click.pass_context
-def live_results(ctx, hunt_id, without_metadata, without_bounties):
+def live_results(ctx, hunt_id, without_metadata, without_bounties, since):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
     try:
-        result = api.live_results(hunt_id, with_metadata=not without_metadata, with_instances=not without_bounties)
+        result = api.live_results(hunt_id, with_metadata=not without_metadata, with_instances=not without_bounties,
+                                  since=since)
         output.hunt_result(result)
     except exceptions.UsageLimitsExceeded:
         output.usage_exceeded()
@@ -132,14 +132,17 @@ def historical_list(ctx):
               help='Don\'t request artifact metadata.')
 @click.option('-b', '--without-bounties', is_flag=True, default=False,
               help='Don\'t request bounties.')
+@click.option('-s', '--since', type=click.INT, default=0,
+              help='How far back in minutes to request results (default: 0, or all)')
 @historical.command('results', short_help='get results from historical hunt')
 @click.pass_context
-def historical_results(ctx, hunt_id, without_metadata, without_bounties):
+def historical_results(ctx, hunt_id, without_metadata, without_bounties, since):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
     try:
-        result = api.historical_results(hunt_id, with_metadata=not without_metadata, with_instances=not without_bounties)
+        result = api.historical_results(hunt_id, with_metadata=not without_metadata, with_instances=not without_bounties,
+                                        since=since)
 
         output.hunt_result(result)
     except exceptions.UsageLimitsExceeded:

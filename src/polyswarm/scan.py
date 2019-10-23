@@ -7,7 +7,6 @@ from polyswarm_api import exceptions, const
 from polyswarm_api.utils import parse_hashes
 
 from .utils import validate_uuid, is_valid_uuid, validate_hashes
-from .base import polyswarm
 
 @click.option('-f', '--force', is_flag=True, default=False,
               help='Force re-scan even if file has already been analyzed.')
@@ -15,7 +14,7 @@ from .base import polyswarm
 @click.option('-t', '--timeout', type=click.INT, default=const.DEFAULT_SCAN_TIMEOUT,
               help='How long to wait for results (default: {})'.format(const.DEFAULT_SCAN_TIMEOUT))
 @click.argument('path', nargs=-1, type=click.Path(exists=True))
-@polyswarm.command('scan', short_help='scan files/directories')
+@click.command('scan', short_help='scan files/directories')
 @click.pass_context
 def scan(ctx, path, force, recursive, timeout):
     """
@@ -54,7 +53,7 @@ def scan(ctx, path, force, recursive, timeout):
               help='Force re-scan even if file has already been analyzed.')
 @click.option('-t', '--timeout', type=click.INT, default=-1, help='How long to wait for results (default: forever, -1)')
 @click.argument('url', nargs=-1, type=click.STRING)
-@polyswarm.command('url', short_help='scan url')
+@click.command('url', short_help='scan url')
 @click.pass_context
 def url_scan(ctx, url, url_file, force, timeout):
     """
@@ -80,7 +79,7 @@ def url_scan(ctx, url, url_file, force, timeout):
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5]', default=None)
 @click.argument('hash', nargs=-1, callback=validate_hashes)
-@polyswarm.command('rescan', short_help='rescan files(s) by hash')
+@click.command('rescan', short_help='rescan files(s) by hash')
 @click.pass_context
 def rescan(ctx, hash_file, hash_type, hash):
     """
@@ -104,7 +103,7 @@ def rescan(ctx, hash_file, hash_type, hash):
 
 @click.option('-r', '--uuid-file', help='File of UUIDs, one per line.', type=click.File('r'))
 @click.argument('uuid', nargs=-1, callback=validate_uuid)
-@polyswarm.command('lookup', short_help='lookup UUID(s)')
+@click.command('lookup', short_help='lookup UUID(s)')
 @click.pass_context
 def lookup(ctx, uuid, uuid_file):
     """

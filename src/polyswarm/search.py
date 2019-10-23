@@ -7,10 +7,8 @@ from polyswarm_api import exceptions
 from polyswarm_api.types.query import MetadataQuery
 from polyswarm_api.utils import parse_hashes
 
-from .base import polyswarm
 
-
-@polyswarm.group(short_help='interact with PolySwarm search api')
+@click.group(short_help='interact with PolySwarm search api')
 def search():
     pass
 
