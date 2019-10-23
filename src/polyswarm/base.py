@@ -7,7 +7,7 @@ from polyswarm_api.formatters import formatters
 from .utils import validate_key
 
 from .hunt import live, historical
-from .scan import scan, url_scan
+from .scan import scan, url_scan, lookup
 from .download import download, cat, stream
 from .search import search
 
@@ -59,7 +59,7 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
 
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
 
-commands = [scan, url_scan, search, live, historical, download, cat, stream]
+commands = [scan, url_scan, lookup, search, live, historical, download, cat, stream]
 
 for command in commands:
     polyswarm.add_command(command)
