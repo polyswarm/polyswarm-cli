@@ -3,15 +3,12 @@ import sys
 import click
 from polyswarm_api import exceptions
 
-from .base import polyswarm
-
-
-@polyswarm.group(short_help='interact with live scans')
+@click.group(short_help='interact with live scans')
 def live():
     pass
 
 
-@polyswarm.group(short_help='interact with historical scans)')
+@click.group(short_help='interact with historical scans)')
 def historical():
     pass
 
