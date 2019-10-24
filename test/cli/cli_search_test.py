@@ -1,62 +1,44 @@
 from unittest import TestCase
-from polyswarm.__main__ import polyswarm
-from polyswarm_api.types import result
 from polyswarm_api.types.hash import to_hash
 from polyswarm_api.types.query import MetadataQuery
-import requests_mock
-import requests
-from pkg_resources import resource_string
-import json
+from .base import BaseTestCase
+
 from click.testing import CliRunner
-import os
-import traceback
 try:
     from unittest.mock import patch
 except ImportError:
     from mock import patch
 
-try:
-    FileNotFoundError
-except NameError:
-    FileNotFoundError = IOError
-
 TestCase.maxDiff = None
 
 
-class SearchTest(TestCase):
+class SearchTest(BaseTestCase):
 
     def __init__(self, *args, **kwargs):
         super(SearchTest, self).__init__(*args, **kwargs)
         self.test_runner = CliRunner()
         self.test_api_key = '963da5a463b0ab61fe0f96f82846490d'
+        self.bad_hash = 'lmao'
         self.test_hash = '08666dae57ea6a8ef21cfa38cf41db395e8c39c61b1f281cb6927b2bca07fb1d'
-        self.test_captured_output_file = '/tmp/output.txt'
         self.test_query = "_exists_:lief.libraries"
-        self.session = requests.Session()
-        self.adapter = requests_mock.Adapter()
-        self.session.mount('mock', self.adapter)
 
-    def setUp(self):
-        self._remove_file(self.test_captured_output_file)
+    def test_search_with_hash_parameter(self):
+        commands = ['search', 'hash', self.test_hash]
+        self._do_success_test(self.request_generator.search_hash, [to_hash(self.test_hash)],
+                              'json', 'expected_search_hashes_output.txt', 'expected_search_success_results_hash.json',
+                              commands)
 
-    def test_everything_is_ok(self):
-        # yes, everything is ok
-        pass
+    def test_search_with_query_parameter(self):
+        commands = ['search', 'metadata', self.test_query]
+        self._do_success_test(self.request_generator.search_metadata, [MetadataQuery(self.test_query)],
+                              'json', 'expected_cli_search_query_output.txt', 'expected_search_success_results.json',
+                              commands)
 
-    @staticmethod
-    def _remove_file(file_path):
-        try:
-            os.remove(file_path)
-        except FileNotFoundError:
-            print('File {file_path} does not exist'.format(**{'file_path': file_path}))
-        except OSError:
-            print('File {file_path} does not exist'.format(**{'file_path': file_path}))
+    def test_search_invalid_hash(self):
+        commands = ['search', 'hash', self.bad_hash]
+        self._do_fail_test(None, None, 'text', 'expected_cli_search_bad_hash.txt', None, commands)
 
-    @staticmethod
-    def _get_file_content(file_path):
-        with open(file_path, 'r') as file:
-            return file.read()
-"""
+    """
     def test_search_with_hash_parameter(self):
         expected_output = self._get_test_text_resource_content('expected_search_hashes_output.txt')
         with patch('polyswarm_api.api.PolyswarmAPI.search') as mock_search_hashes:

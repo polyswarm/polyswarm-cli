@@ -1,50 +1,17 @@
-[{
+{
   "result": [
     {
-      "artifact_metadata": [
-        {
-          "tool": "strings",
-          "tool_metadata": {
-          "strings": {
-            "some": "stuff"
-          },
-          "exiftool": {
-            "some": "stuff"
-          },
-          "lief": {
-            "some": "stuff"
-          }
-        }
+      "artifact_metadata": {
+        "strings": {
+          "some": "stuff"
         },
-        {
-          "tool": "exiftool",
-          "tool_metadata": {
-          "strings": {
-            "some": "stuff"
-          },
-          "exiftool": {
-            "some": "stuff"
-          },
-          "lief": {
-            "some": "stuff"
-          }
-        }
+        "exiftool": {
+          "some": "stuff"
         },
-        {
-          "tool": "leif",
-          "tool_metadata": {
-          "strings": {
-            "some": "stuff"
-          },
-          "exiftool": {
-            "some": "stuff"
-          },
-          "lief": {
-            "some": "stuff"
-          }
+        "lief": {
+          "some": "stuff"
         }
-        }
-      ],
+      },
       "extended_type": null,
       "first_seen": "Wed, 21 Oct 2015 19:20:00 GMT",
       "id": 111,
@@ -55,50 +22,17 @@
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     },
     {
-      "artifact_metadata": [
-        {
-          "tool": "strings",
-          "tool_metadata": {
-          "strings": {
-            "some": "stuff"
-          },
-          "exiftool": {
-            "some": "stuff"
-          },
-          "lief": {
-            "some": "stuff"
-          }
-        }
+      "artifact_metadata": {
+        "strings": {
+          "some": "stuff"
         },
-        {
-          "tool": "exiftool",
-          "tool_metadata": {
-          "strings": {
-            "some": "stuff"
-          },
-          "exiftool": {
-            "some": "stuff"
-          },
-          "lief": {
-            "some": "stuff"
-          }
-        }
+        "exiftool": {
+          "some": "stuff"
         },
-        {
-          "tool": "leif",
-          "tool_metadata": {
-          "strings": {
-            "some": "stuff"
-          },
-          "exiftool": {
-            "some": "stuff"
-          },
-          "lief": {
-            "some": "stuff"
-          }
+        "lief": {
+          "some": "stuff"
         }
-        }
-      ],
+      },
       "extended_type": null,
       "first_seen": "Wed, 21 Oct 2015 19:20:00 GMT",
       "id": 222,
@@ -109,50 +43,17 @@
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     },
     {
-      "artifact_metadata": [
-        {
-          "tool": "strings",
-          "tool_metadata": {
-          "strings": {
-            "some": "stuff"
-          },
-          "exiftool": {
-            "some": "stuff"
-          },
-          "lief": {
-            "some": "stuff"
-          }
-        }
+      "artifact_metadata": {
+        "strings": {
+          "some": "stuff"
         },
-        {
-          "tool": "exiftool",
-          "tool_metadata": {
-          "strings": {
-            "some": "stuff"
-          },
-          "exiftool": {
-            "some": "stuff"
-          },
-          "lief": {
-            "some": "stuff"
-          }
-        }
+        "exiftool": {
+          "some": "stuff"
         },
-        {
-          "tool": "leif",
-          "tool_metadata": {
-          "strings": {
-            "some": "stuff"
-          },
-          "exiftool": {
-            "some": "stuff"
-          },
-          "lief": {
-            "some": "stuff"
-          }
+        "lief": {
+          "some": "stuff"
         }
-        }
-      ],
+      },
       "extended_type": null,
       "first_seen": "Wed, 21 Oct 2015 19:20:00 GMT",
       "id": 333,
@@ -171,4 +72,4 @@
       }
     }
   }
-}]
+}

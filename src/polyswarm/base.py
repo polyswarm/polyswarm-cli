@@ -13,6 +13,7 @@ from .search import search
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
+
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.option('-a', '--api-key', help='Your API key for polyswarm.network (required)',
               default='', callback=validate_key, envvar='POLYSWARM_API_KEY')
@@ -58,6 +59,7 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     ctx.obj['api'] = PolyswarmAPI(api_key, api_uri, community=community, validate_schemas=validate)
 
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
+
 
 commands = [scan, url_scan, rescan, lookup, search, live, historical, download, cat, stream]
 
