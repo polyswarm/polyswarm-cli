@@ -4,6 +4,13 @@ from uuid import UUID
 from polyswarm_api.types.hash import is_valid_sha256, is_valid_sha1, is_valid_md5, is_hex
 
 
+HASH_VALIDATORS = {
+    'sha256': is_valid_sha256,
+    'sha1': is_valid_sha1,
+    'md5': is_valid_md5,
+}
+
+
 def is_valid_uuid(value):
     try:
         val = UUID(value, version=4)
@@ -20,9 +27,15 @@ def validate_uuid(ctx, param, value):
 
 
 def validate_hash(ctx, param, h):
-    if not (is_valid_sha256(h) or is_valid_md5(h) or is_valid_sha1(h)):
-        raise click.BadParameter('Hash {} not valid, must be sha256|md5|sha1 in hexadecimal format'.format(h))
-    return h
+    hash_type = ctx.params.get('hash_type')
+    if hash_type:
+        validator = HASH_VALIDATORS.get(hash_type)
+        if validator and validator(h):
+            return h
+    elif any(validator(h) for validator in HASH_VALIDATORS.values()):
+        return h
+
+    raise click.BadParameter('Hash {} not valid, must be sha256|md5|sha1 in hexadecimal format'.format(h))
 
 
 def validate_hashes(ctx, param, value):
