@@ -3,7 +3,6 @@
 **Table of Contents**
 
 - [polyswarm](#polyswarm)
-  - [Dependencies](#dependencies)
   - [Installation](#installation)
   - [Usage](#usage)
     - [Configuration](#configuration)
@@ -22,10 +21,6 @@
 A CLI tool for interacting with the public and private PolySwarm APIs.
 
 Supports Python 2.7 and greater.
-
-## Dependencies
-
-You may need to install your platforms' equivalent `python-dev` package.
 
 ## Installation
 
