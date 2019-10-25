@@ -33,12 +33,13 @@ class BaseTestCase(TestCase):
 
     @staticmethod
     def _remove_file(file_path):
-        try:
-            os.remove(file_path)
-        except FileNotFoundError:
-            print('File {file_path} does not exist'.format(**{'file_path': file_path}))
-        except OSError:
-            print('File {file_path} does not exist'.format(**{'file_path': file_path}))
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except FileNotFoundError:
+                print('File {file_path} does not exist'.format(**{'file_path': file_path}))
+            except OSError:
+                print('File {file_path} does not exist'.format(**{'file_path': file_path}))
 
     @staticmethod
     def _get_file_content(file_path):

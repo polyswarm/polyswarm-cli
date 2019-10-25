@@ -36,8 +36,11 @@ def hashes(ctx, hashes, hash_file, hash_type, without_metadata, without_bounties
             results = api.search(*hashes, with_instances=not without_bounties, with_metadata=not without_metadata)
 
             # for json, this is effectively jsonlines
+            result_objs = []
             for result in results:
                 output.search_result(result)
+                result_objs.append(result)
+            sys.exit(0 if any(r.result for r in result_objs) else 1)
         else:
             raise click.BadParameter('Hash not valid, must be sha256|md5|sha1 in hexadecimal format')
     except exceptions.UsageLimitsExceeded:
@@ -75,9 +78,12 @@ def metadata(ctx, query_string, query_file, without_metadata, without_bounties):
         return 0
 
     try:
+        result_objs = []
         for result in api.search_by_metadata(*queries, with_instances=not without_bounties,
                                              with_metadata=not without_metadata):
             output.search_result(result)
+            result_objs.append(result)
+        sys.exit(0 if any(r.result for r in result_objs) else 1)
     except exceptions.UsageLimitsExceeded:
         output.usage_exceeded()
         sys.exit(1)
