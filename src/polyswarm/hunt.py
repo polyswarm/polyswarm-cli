@@ -8,7 +8,7 @@ def live():
     pass
 
 
-@click.group(short_help='interact with historical scans)')
+@click.group(short_help='interact with historical scans')
 def historical():
     pass
 

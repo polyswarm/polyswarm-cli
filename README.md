@@ -64,7 +64,7 @@ Options:
 
 Commands:
   download    download file(s)
-  historical  interact with historical scans)
+  historical  interact with historical scans
   live        interact with live scans
   lookup      lookup UUID(s)
   rescan      rescan files(s) by hash
@@ -137,13 +137,13 @@ $ polyswarm -o /tmp/test.txt search metadata "strings.domains:en.wikipedia.org A
 $ cat /tmp/test.txt | more
 Found 1000 matches to the search query.
 Search results for {'query': {'query_string': {'query': 'strings.domains:en.wikipedia.org AND exiftool.ZipFileName:AndroidManifest.xml'}}}
-File 55f9d374e0d16ecaa047f2af9f2dcbb0a6576847caee0a2cbdc36a079961a991 
+File 55f9d374e0d16ecaa047f2af9f2dcbb0a6576847caee0a2cbdc36a079961a991
         File type: mimetype: application/x-dosexec, extended_info: PE32 executable (GUI) Intel 80386, for MS Windows
         SHA256: 55f9d374e0d16ecaa047f2af9f2dcbb0a6576847caee0a2cbdc36a079961a991
         SHA1: 4a0da13003a36fc299ea5c7ebd54d59e42854f22
-        MD5: ba72c9d80b336ae481a3eceaace1844e                                                                                 
+        MD5: ba72c9d80b336ae481a3eceaace1844e
         First seen: Mon, 02 Sep 2019 13:48:06 GMT
-        Observed countries: US                                           
+        Observed countries: US
         Observed filenames: 55f9d374e0d16ecaa047f2af9f2dcbb0a6576847caee0a2cbdc36a079961a991
         Scan permalink: https://polyswarm.network/scan/results/9c50c2ca-31a8-42cd-b067-b864eff57409
         Detections: 12/19 engines reported malicious
@@ -207,7 +207,7 @@ Some commands in the CLI are composable using the `sha256` format option. For in
 ```bash
 $ polyswarm --fmt sha256 search metadata 'strings.domains:malicious.com' | polyswarm download malicious -r -
 Successfully downloaded artifact 131f95c51cc819465fa1797f6ccacf9d494aaaff46fa3eac73ae63ffbdfd8267 to /home/user/malicious/131f95c51cc819465fa1797f6ccacf9d494aaaff46fa3eac73ae63ffbdfd8267
-``` 
+```
 
 ## Questions? Problems?
 
