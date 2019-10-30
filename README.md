@@ -63,6 +63,7 @@ Options:
   -h, --help                      Show this message and exit.
 
 Commands:
+  cat         cat artifact to stdout
   download    download file(s)
   historical  interact with historical scans
   live        interact with live scans
