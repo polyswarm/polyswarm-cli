@@ -14,9 +14,9 @@ def historical():
 
 
 @click.argument('rule_file', type=click.File('r'))
-@live.command('install', short_help='install a new YARA rule file')
+@live.command('start', short_help='start a new live hunt')
 @click.pass_context
-def live_install(ctx, rule_file):
+def live_start(ctx, rule_file):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
