@@ -15,8 +15,8 @@ with open('README.md', 'r') as readme:
 
 setup(
     name='polyswarm',
-    version='1.0.0',
-    description='CLI for using the PolySwarm public and private APIs',
+    version='1.0.1',
+    description='CLI for using the PolySwarm Customer APIs',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='PolySwarm Developers',
