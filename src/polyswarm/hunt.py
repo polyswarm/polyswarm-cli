@@ -14,7 +14,7 @@ def historical():
 
 
 @click.argument('rule_file', type=click.File('r'))
-@live.command('start', short_help='start a new live hunt')
+@live.command('start', short_help='Start a new live hunt')
 @click.pass_context
 def live_start(ctx, rule_file):
     api = ctx.obj['api']
@@ -60,7 +60,7 @@ def live_list(ctx):
 
 
 @click.option('-i', '--hunt-id', type=int, help='ID of the rule file (defaults to latest)')
-@live.command('results', short_help='get results from live hunt')
+@live.command('results', short_help='Get results from live hunt')
 @click.option('-m', '--without-metadata', is_flag=True, default=False,
               help='Don\'t request artifact metadata.')
 @click.option('-b', '--without-bounties', is_flag=True, default=False,
@@ -82,7 +82,7 @@ def live_results(ctx, hunt_id, without_metadata, without_bounties, since):
 
 
 @click.argument('rule_file', type=click.File('r'))
-@historical.command('start', short_help='start a new historical hunt')
+@historical.command('start', short_help='Start a new historical hunt')
 @click.pass_context
 def historical_start(ctx, rule_file):
     api = ctx.obj['api']
@@ -134,7 +134,7 @@ def historical_list(ctx):
               help='Don\'t request bounties.')
 @click.option('-s', '--since', type=click.INT, default=0,
               help='How far back in minutes to request results (default: 0, or all)')
-@historical.command('results', short_help='get results from historical hunt')
+@historical.command('results', short_help='Get results from historical hunt')
 @click.pass_context
 def historical_results(ctx, hunt_id, without_metadata, without_bounties, since):
     api = ctx.obj['api']
