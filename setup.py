@@ -23,6 +23,7 @@ setup(
         'click==7.0',
         'pytest==3.9.2'
     ],
+    extras_requires=['requests_mock'],
     include_package_data=True,
     packages=find_packages('src'),
     package_dir={'': 'src'},
