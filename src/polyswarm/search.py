@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 
@@ -78,6 +79,41 @@ def metadata(ctx, query_string, query_file, without_metadata, without_bounties):
         for result in api.search_by_metadata(*queries, with_instances=not without_bounties,
                                              with_metadata=not without_metadata):
             output.search_result(result)
+    except exceptions.UsageLimitsExceeded:
+        output.usage_exceeded()
+        sys.exit(1)
+
+
+@click.option('-r', '--recursive', is_flag=True, default=False, help='Scan directories recursively')
+@click.argument('path', nargs=-1, type=click.Path(exists=True))
+@search.command('features', short_help='search features of files')
+@click.pass_context
+def features(ctx, path, recursive):
+
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+
+    paths = path
+
+    files = []
+    for path in paths:
+        if os.path.isfile(path):
+            files.append(path)
+        elif os.path.isdir(path):
+            if recursive:
+                files.extend([os.path.join(path, file)
+                             for (path, dirs, fs) in os.walk(path)
+                             for file in fs if os.path.isfile(os.path.join(path, file))])
+            else:
+                files.extend([os.path.join(path, file) for file in os.listdir(path)
+                             if os.path.isfile(os.path.join(path, file))])
+        else:
+            logger.warning('Path %s is neither a file nor a directory, ignoring.', path)
+
+    try:
+        for result in api.search_by_feature(None, *files):
+            output.search_result(result)
+
     except exceptions.UsageLimitsExceeded:
         output.usage_exceeded()
         sys.exit(1)
