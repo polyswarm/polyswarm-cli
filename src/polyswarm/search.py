@@ -7,6 +7,7 @@ from polyswarm_api.log import logger
 from polyswarm_api import exceptions
 from polyswarm_api.types.query import MetadataQuery
 from polyswarm_api.utils import parse_hashes
+from polyswarm_api.analyzers import DEFAULT_FEATURES
 
 
 @click.group(short_help='interact with PolySwarm search api')
@@ -85,13 +86,16 @@ def metadata(ctx, query_string, query_file, without_metadata, without_bounties):
 
 
 @click.option('-r', '--recursive', is_flag=True, default=False, help='Scan directories recursively')
+@click.option('-f', '--features', type=click.STRING, help='Comma seperated list of features to search (i.e. strings.domains,pefile.imphash)')
 @click.argument('path', nargs=-1, type=click.Path(exists=True))
 @search.command('features', short_help='search features of files')
 @click.pass_context
-def features(ctx, path, recursive):
+def features(ctx, path, recursive, features):
 
     api = ctx.obj['api']
     output = ctx.obj['output']
+
+    features = features.split(',') if features else DEFAULT_FEATURES
 
     paths = path
 
@@ -111,7 +115,7 @@ def features(ctx, path, recursive):
             logger.warning('Path %s is neither a file nor a directory, ignoring.', path)
 
     try:
-        for result in api.search_by_feature(None, *files):
+        for result in api.search_by_feature(features, *files):
             output.search_result(result)
 
     except exceptions.UsageLimitsExceeded:
