@@ -23,10 +23,13 @@ def live_start(ctx, rule_file):
     rules = rule_file.read()
 
     try:
-        output.hunt_submission(api.live(rules))
+        result = api.live(rules)
+        output.hunt_submission(result)
+        if result.failed:
+            sys.exit(1)
     except exceptions.UsageLimitsExceeded:
         output.usage_exceeded()
-        sys.exit(1)
+        sys.exit(2)
     except exceptions.InvalidYaraRules as e:
         output.invalid_rule(e)
         sys.exit(2)
@@ -40,10 +43,14 @@ def live_delete(ctx, hunt_id):
     output = ctx.obj['output']
 
     try:
-        output.hunt_deletion(api.live_delete(hunt_id))
+        result = api.live_delete(hunt_id)
+        output.hunt_deletion(result)
+
+        if result.failed:
+            sys.exit(1)
     except exceptions.UsageLimitsExceeded:
         output.usage_exceeded()
-        sys.exit(1)
+        sys.exit(2)
 
 
 @live.command('list', short_help='List all live hunts performed')
@@ -53,10 +60,13 @@ def live_list(ctx):
     output = ctx.obj['output']
 
     try:
-        output.hunt_list(api.live_list())
+        result = api.live_list()
+        output.hunt_list(result)
+        if result.failed:
+            sys.exit(1)
     except exceptions.UsageLimitsExceeded:
         output.usage_exceeded()
-        sys.exit(1)
+        sys.exit(2)
 
 
 @click.option('-i', '--hunt-id', type=int, help='ID of the rule file (defaults to latest)')
@@ -76,6 +86,8 @@ def live_results(ctx, hunt_id, without_metadata, without_bounties, since):
         result = api.live_results(hunt_id, with_metadata=not without_metadata, with_instances=not without_bounties,
                                   since=since)
         output.hunt_result(result)
+        if result.failed:
+            sys.exit(1)
     except exceptions.UsageLimitsExceeded:
         output.usage_exceeded()
         sys.exit(1)
@@ -91,10 +103,14 @@ def historical_start(ctx, rule_file):
     rules = rule_file.read()
 
     try:
-        output.hunt_submission(api.historical(rules))
+        result = api.historical(rules)
+        output.hunt_submission(result)
+
+        if result.failed:
+            sys.exit(1)
     except exceptions.UsageLimitsExceeded:
         output.usage_exceeded()
-        sys.exit(1)
+        sys.exit(2)
     except exceptions.InvalidYaraRules as e:
         output.invalid_rule(e)
         sys.exit(2)
@@ -108,10 +124,14 @@ def historical_delete(ctx, hunt_id):
     output = ctx.obj['output']
 
     try:
-        output.hunt_deletion(api.historical_delete(hunt_id))
+        result = api.historical_delete(hunt_id)
+        output.hunt_deletion(result)
+
+        if result.failed:
+            sys.exit(1)
     except exceptions.UsageLimitsExceeded:
         output.usage_exceeded()
-        sys.exit(1)
+        sys.exit(2)
 
 
 @historical.command('list', short_help='List all historical hunts performed')
@@ -121,10 +141,14 @@ def historical_list(ctx):
     output = ctx.obj['output']
 
     try:
-        output.hunt_list(api.historical_list())
+        result = api.historical_list()
+        output.hunt_list(result)
+
+        if result.failed:
+            sys.exit(1)
     except exceptions.UsageLimitsExceeded:
         output.usage_exceeded()
-        sys.exit(1)
+        sys.exit(2)
 
 
 @click.option('-i', '--hunt-id', type=int, help='ID of the rule file (defaults to latest)')
@@ -145,6 +169,9 @@ def historical_results(ctx, hunt_id, without_metadata, without_bounties, since):
                                         since=since)
 
         output.hunt_result(result)
+
+        if result.failed:
+            sys.exit(1)
     except exceptions.UsageLimitsExceeded:
         output.usage_exceeded()
-        sys.exit(1)
+        sys.exit(2)
