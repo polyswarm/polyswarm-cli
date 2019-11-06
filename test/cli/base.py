@@ -10,7 +10,7 @@ import traceback
 from polyswarm_api.const import DEFAULT_GLOBAL_API, DEFAULT_COMMUNITY
 from polyswarm_api.endpoint import PolyswarmRequestGenerator
 
-from polyswarm.__main__ import polyswarm
+from polyswarm import base
 
 
 try:
@@ -74,8 +74,9 @@ class BaseTestCase(TestCase):
                         if p in req:
                             del req[p]
                     mock.request(text=result, **req)
-                return self.test_runner.invoke(polyswarm, cmd)
-        return self.test_runner.invoke(polyswarm, cmd)
+                return self.test_runner.invoke(base.polyswarm, cmd)
+
+        return self.test_runner.invoke(base.polyswarm, cmd)
 
     def _do_success_test(self, reqs,  output_format, output_path, commands, with_auth=True):
 
@@ -88,6 +89,7 @@ class BaseTestCase(TestCase):
 
     def _do_fail_test(self, reqs, output_format, output_path, commands, with_auth=True):
         result = self._do_test(reqs, output_format, commands, with_auth)
+
         self.assertNotEqual(result.exit_code, 0, msg=traceback.format_tb(result.exc_info[2]))
         if output_path:
             expected_output = self._get_test_text_resource_content(output_path)
