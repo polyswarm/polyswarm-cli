@@ -37,15 +37,22 @@ def scan(ctx, path, force, recursive, timeout):
             logger.warning('Path %s is neither a file nor a directory, ignoring.', path)
 
     try:
+        any_failed = False
         for result in api.scan(*files):
             output.scan_result(result)
+            any_failed = result.failed or any_failed
 
         for d in directories:
             for result in api.scan_directory(d, recursive=recursive):
                 output.scan_result(result)
+                any_failed = result.failed or any_failed
+
+        if any_failed:
+            sys.exit(1)
+
     except exceptions.UsageLimitsExceeded:
         output.usage_exceeded()
-        sys.exit(1)
+        sys.exit(2)
 
 
 @click.option('-r', '--url-file', help='File of URLs, one per line.', type=click.File('r'))
@@ -69,11 +76,16 @@ def url_scan(ctx, url, url_file, force, timeout):
         urls.extend([u.strip() for u in url_file.readlines()])
 
     try:
+        any_failed = False
         for result in api.scan_urls(*urls):
-           output.scan_result(result)
+            output.scan_result(result)
+            any_failed = result.failed or any_failed
+
+        if any_failed:
+            sys.exit(1)
     except exceptions.UsageLimitsExceeded:
         output.usage_exceeded()
-        sys.exit(1)
+        sys.exit(2)
 
 
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
@@ -91,11 +103,15 @@ def rescan(ctx, hash_file, hash_type, hash):
     hashes = parse_hashes(hash, hash_type, hash_file)
 
     if hashes:
+        any_failed = False
         try:
             for result in api.rescan(*hashes):
                 output.scan_result(result)
+                any_failed = result.failed or any_failed
         except exceptions.UsageLimitsExceeded:
             output.usage_exceeded()
+            sys.exit(1)
+        if any_failed:
             sys.exit(1)
     else:
         raise click.BadParameter('Hash not valid, must be sha256|md5|sha1 in hexadecimal format')
@@ -124,8 +140,12 @@ def lookup(ctx, uuid, uuid_file):
                 logger.warning('Invalid uuid %s in file, ignoring.', u)
 
     try:
+        any_failed = False
         for result in api.lookup(*uuids):
             output.scan_result(result)
+            any_failed = result.failed or any_failed
+        if any_failed:
+            sys.exit(1)
     except exceptions.UsageLimitsExceeded:
         output.usage_exceeded()
         sys.exit(1)

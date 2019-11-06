@@ -24,11 +24,16 @@ def download(ctx, hash_file, hash_type, hash, destination):
 
     if hashes:
         try:
+            any_failed = False
             for result in api.download(destination, *hashes):
                 output.download_result(result)
+                any_failed = result.failed or any_failed
+
+            if any_failed:
+                sys.exit(1)
         except exceptions.UsageLimitsExceeded:
             output.usage_exceeded()
-            sys.exit(1)
+            sys.exit(2)
     else:
         raise click.BadParameter('Hash not valid, must be sha256|md5|sha1 in hexadecimal format')
 
@@ -47,11 +52,16 @@ def stream(ctx, since, destination):
             os.makedirs(destination)
 
     try:
+        any_failed = False
         for download in api.stream(destination, since=since):
             out.download_result(download)
+            any_failed = download.failed or any_failed
+
+        if any_failed:
+            sys.exit(1)
     except exceptions.UsageLimitsExceeded:
         out.usage_exceeded()
-        sys.exit(1)
+        sys.exit(2)
 
 
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5]', default=None)
@@ -67,6 +77,8 @@ def cat(ctx, hash_type, hash):
         out = sys.stdout.buffer
     try:
         result = api.download_to_filehandle(hash, out)
+        if result.failed:
+            sys.exit(1)
     except exceptions.UsageLimitsExceeded:
         output.usage_exceeded()
-        sys.exit(1)
+        sys.exit(2)
