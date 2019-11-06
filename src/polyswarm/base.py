@@ -4,6 +4,7 @@ import sys
 
 from polyswarm_api.api import PolyswarmAPI
 from polyswarm_api.formatters import formatters
+from polyswarm_api import get_version as get_polyswarm_api_version
 from .utils import validate_key
 
 from .hunt import live, historical
@@ -12,6 +13,9 @@ from .download import download, cat, stream
 from .search import search
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+
+VERSION = '1.0.1'
+
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.option('-a', '--api-key', help='Your API key for polyswarm.network (required)',
@@ -28,6 +32,8 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
               help='Enable/disable GitHub release version check.')
 @click.option('--validate', default=False, is_flag=True,
               envvar='POLYSWARM_VALIDATE', help='Validate incoming schemas (note: slow).')
+@click.version_option(VERSION, '--version', prog_name='polyswarm-cli')
+@click.version_option(get_polyswarm_api_version(), '--api-version', prog_name='polyswarm-api')
 @click.pass_context
 def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose, community,
               advanced_disable_version_check, validate):
@@ -35,6 +41,7 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
     """
+
     # TODO shouldn't need to do this here
     ctx.obj = {}
 
@@ -58,6 +65,7 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     ctx.obj['api'] = PolyswarmAPI(api_key, api_uri, community=community, validate_schemas=validate)
 
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
+
 
 commands = [scan, url_scan, rescan, lookup, search, live, historical, download, cat, stream]
 
