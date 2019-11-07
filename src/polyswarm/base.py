@@ -14,7 +14,7 @@ from .search import search
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
-VERSION = '1.1.0'
+VERSION = '1.1.1'
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
