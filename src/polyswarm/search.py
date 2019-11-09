@@ -79,9 +79,11 @@ def metadata(ctx, query_string, query_file, without_metadata, without_bounties):
     except UnicodeDecodeError:
         logger.error('Failed to parse JSON due to Unicode error')
         return 0
+    except Exception as e:
+        logger.error('Something really bad happened')
+        logger.exception(e)
 
     try:
-
         all_failed = True
         for result in api.search_by_metadata(*queries, with_instances=not without_bounties,
                                              with_metadata=not without_metadata):

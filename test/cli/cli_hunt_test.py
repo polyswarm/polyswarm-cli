@@ -1,7 +1,5 @@
 from unittest import TestCase
-from polyswarm_api.types.hash import to_hash
-from polyswarm_api.types.query import MetadataQuery
-from .base import BaseTestCase
+from test.utils.base_test_case import BaseTestCase
 
 from click.testing import CliRunner
 try:
