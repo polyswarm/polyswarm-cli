@@ -141,3 +141,16 @@ class SearchTest(BaseTestCase):
             expected_output=self._get_test_json_resource_content('expectations/expected_search_metadata_output.json'),
             expected_return_code=0)
 
+    def test_search_metadata_with_invalid_json(self, mock_server):
+        self._setup_mock_response(mock_server,
+                                  request=self._create_metadata_request(self.test_query),
+                                  response=self._get_test_text_resource_content(
+                                      'responses/search_success_results.json'))
+        query_file = self._get_test_resource_file_path('search_metadata_invalid_elastic_query.json')
+        with patch('polyswarm_api.log.logger.error', side_effect=self.mock_logger):
+            result = self._run_cli(['--output-format', 'text', 'search', 'metadata',
+                                    '--query-file', query_file])
+        self._assert_text_result(
+            result,
+            expected_output='Failed to parse JSON',
+            expected_return_code=0)

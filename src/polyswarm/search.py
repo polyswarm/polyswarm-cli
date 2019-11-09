@@ -7,6 +7,11 @@ from polyswarm_api import exceptions
 from polyswarm_api.types.query import MetadataQuery
 from polyswarm_api.utils import parse_hashes
 
+try:
+    from json import JSONDecodeError
+except ImportError:
+    JSONDecodeError = ValueError
+
 
 @click.group(short_help='interact with PolySwarm search api')
 def search():
@@ -73,7 +78,7 @@ def metadata(ctx, query_string, query_file, without_metadata, without_bounties):
         else:
             logger.error('No query specified')
             return 0
-    except json.decoder.JSONDecodeError:
+    except JSONDecodeError:
         logger.error('Failed to parse JSON')
         return 0
     except UnicodeDecodeError:
