@@ -154,7 +154,7 @@ class BaseTestCase(TestCase):
     @staticmethod
     def _text_to_normalized_lines(text):
         return [re.sub(r'[^\S\r\n]+', ' ', diff_line)
-                for diff_line in text.splitlines(keepends=False) if not re.match(r'^[\s\n]*$', diff_line)]
+                for diff_line in text.splitlines() if not re.match(r'^[\s\n]*$', diff_line)]
 
     def _is_different(self, diff):
         result = False
