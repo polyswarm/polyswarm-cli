@@ -1,1 +1,1 @@
-from .poly_api_base_test_case import *
+from test.utils.base_test_case import *

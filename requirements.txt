@@ -1,4 +1,7 @@
 polyswarm-api>=1.0.1
 click==7.0
 pytest==3.9.2
+deepdiff==3.3.0
+requests-mock==1.7.0
 bump2version==0.5.11
+

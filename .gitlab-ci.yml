@@ -14,6 +14,7 @@ test-run27:
   stage: test
   before_script:
     - pip install --upgrade pip
+    - pip install -r requirements.txt
   script:
     - ./test/run.sh
 
@@ -24,6 +25,7 @@ test-run35:
   stage: test
   before_script:
     - pip3 install --upgrade pip
+    - pip install -r requirements.txt
   script:
     - ./test/run.sh
 
@@ -34,6 +36,7 @@ test-run36:
   stage: test
   before_script:
     - pip3 install --upgrade pip
+    - pip install -r requirements.txt
   script:
     - ./test/run.sh
 
