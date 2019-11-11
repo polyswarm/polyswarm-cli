@@ -45,9 +45,20 @@ class BaseTestCase(TestCase):
             self._add_auth(request)
         mock_server.request(text=response, **request)
 
-    def _create_hash_request(self, file_hash, with_instances=True, with_metadata=True):
+    def _create_search_hash_request(self, file_hash, with_instances=True, with_metadata=True):
         request = self.request_generator.search_hash(polyswarm_api_to_hash(file_hash), with_instances, with_metadata)
         self.convert_polyswarm_api_request_to_mock_request(request)
+        return request
+
+    def _create_search_metadata_request(self, query, with_instances=True, with_metadata=True):
+        request = self.request_generator.search_metadata(MetadataQuery(query), with_instances, with_metadata)
+        self.convert_polyswarm_api_request_to_mock_request(request)
+        return request
+
+    def _create_hunt_live_list_request(self):
+        request = self.request_generator.live_list()
+        self.convert_polyswarm_api_request_to_mock_request(request)
+        print(request)
         return request
 
     def convert_polyswarm_api_request_to_mock_request(self, request):
@@ -63,16 +74,11 @@ class BaseTestCase(TestCase):
     def _params_to_string(params):
         return '&'.join(['%s=%s' % (param, value) for param, value in params.items()])
 
-    def _create_metadata_request(self, query, with_instances=True, with_metadata=True):
-        request = self.request_generator.search_metadata(MetadataQuery(query), with_instances, with_metadata)
-        self.convert_polyswarm_api_request_to_mock_request(request)
-        return request
-
     @staticmethod
     def _remove_keys(request, params):
-        for parameter in params:
-            if parameter in request:
-                del request[parameter]
+        for param in params:
+            if param in request:
+                del request[param]
 
     def _add_auth(self, request):
         if 'headers' not in request:
@@ -167,40 +173,3 @@ class BaseTestCase(TestCase):
     def _get_test_resource_file_path(filename):
         return resource_filename('test.resources', filename)
 
-    def _do_test(self, reqs, output_format, commands, with_auth=True):
-        bad_keys = ['params', 'json']
-
-        cmd = ['--api-key', self.test_api_key, '--output-format', output_format,
-               '--output-file', self.test_captured_output_file]
-        cmd.extend(commands)
-
-        if reqs:
-            with requests_mock.Mocker() as mock:
-                for req, result in reqs:
-                    if with_auth:
-                        self._add_auth(req)
-                    for p in bad_keys:
-                        if p in req:
-                            del req[p]
-                    mock.request(text=result, **req)
-                return self.test_runner.invoke(base.polyswarm, cmd)
-
-        return self.test_runner.invoke(base.polyswarm, cmd)
-
-    def _do_success_test(self, reqs, output_format, output_path, commands, with_auth=True):
-
-        result = self._do_test(reqs, output_format, commands, with_auth)
-        self.assertEqual(result.exit_code, 0, msg=traceback.format_tb(result.exc_info[2]))
-        if output_path:
-            expected_output = self._get_test_text_resource_content(output_path)
-            output = self._get_text_file_content(self.test_captured_output_file)
-            self.assertEqual(output, expected_output)
-
-    def _do_fail_test(self, reqs, output_format, output_path, commands, with_auth=True):
-        result = self._do_test(reqs, output_format, commands, with_auth)
-
-        self.assertNotEqual(result.exit_code, 0, msg=traceback.format_tb(result.exc_info[2]))
-        if output_path:
-            expected_output = self._get_test_text_resource_content(output_path)
-            output = result.stdout
-            self.assertEqual(output, expected_output)

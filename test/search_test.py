@@ -25,7 +25,7 @@ class SearchTest(BaseTestCase):
 
     def test_search_hash_with_json_output(self, mock_server):
         self._setup_mock_response(mock_server,
-                                  request=self._create_hash_request(self.test_hash),
+                                  request=self._create_search_hash_request(self.test_hash),
                                   response=self._get_test_text_resource_content(
                                       'mock_server_responses/search_success_single_result.json'))
         result = self._run_cli(['--output-format', 'json', 'search', 'hash', self.test_hash])
@@ -36,7 +36,7 @@ class SearchTest(BaseTestCase):
 
     def test_search_hash_without_metadata_with_json_output(self, mock_server):
         self._setup_mock_response(mock_server,
-                                  request=self._create_hash_request(self.test_hash, with_metadata=False),
+                                  request=self._create_search_hash_request(self.test_hash, with_metadata=False),
                                   response=self._get_test_text_resource_content(
                                       'mock_server_responses/search_success_single_result_without_metadata.json'))
         result = self._run_cli(['--output-format', 'json', 'search', 'hash', self.test_hash, '--without-metadata'])
@@ -48,7 +48,7 @@ class SearchTest(BaseTestCase):
 
     def test_search_hash_without_bounties_with_json_output(self, mock_server):
         self._setup_mock_response(mock_server,
-                                  request=self._create_hash_request(self.test_hash, with_instances=False),
+                                  request=self._create_search_hash_request(self.test_hash, with_instances=False),
                                   response=self._get_test_text_resource_content(
                                       'mock_server_responses/search_success_single_result_without_instances.json'))
         result = self._run_cli(['--output-format', 'json', 'search', 'hash', self.test_hash, '--without-bounties'])
@@ -60,7 +60,7 @@ class SearchTest(BaseTestCase):
 
     def test_search_hash_with_text_output(self, mock_server):
         self._setup_mock_response(mock_server,
-                                  request=self._create_hash_request(self.test_hash),
+                                  request=self._create_search_hash_request(self.test_hash),
                                   response=self._get_test_text_resource_content(
                                       'mock_server_responses/search_success_single_result.json'))
         result = self._run_cli(['--output-format', 'text', 'search', 'hash', self.test_hash])
@@ -71,7 +71,7 @@ class SearchTest(BaseTestCase):
 
     def test_search_hash_with_no_result(self, mock_server):
         self._setup_mock_response(mock_server,
-                                  request=self._create_hash_request(self.test_hash),
+                                  request=self._create_search_hash_request(self.test_hash),
                                   response=self._get_test_text_resource_content(
                                       'mock_server_responses/search_not_found_result.json'))
         result = self._run_cli(['--output-format', 'text', 'search', 'hash', self.test_hash])
@@ -82,7 +82,7 @@ class SearchTest(BaseTestCase):
 
     def test_search_hash_with_invalid_hash(self, mock_server):
         self._setup_mock_response(mock_server,
-                                  request=self._create_hash_request(self.test_hash),
+                                  request=self._create_search_hash_request(self.test_hash),
                                   response=self._get_test_text_resource_content(
                                       'mock_server_responses/search_success_single_result.json'))
         result = self._run_cli(['--output-format', 'text', 'search', 'hash', self.invalid_hash])
@@ -94,7 +94,7 @@ class SearchTest(BaseTestCase):
 
     def test_search_metadata_with_text_output(self, mock_server):
         self._setup_mock_response(mock_server,
-                                  request=self._create_metadata_request(self.test_query),
+                                  request=self._create_search_metadata_request(self.test_query),
                                   response=self._get_test_text_resource_content(
                                       'mock_server_responses/search_success_results.json'))
         result = self._run_cli(['--output-format', 'text', 'search', 'metadata', self.test_query])
@@ -105,7 +105,7 @@ class SearchTest(BaseTestCase):
 
     def test_search_metadata_with_json_output(self, mock_server):
         self._setup_mock_response(mock_server,
-                                  request=self._create_metadata_request(self.test_query),
+                                  request=self._create_search_metadata_request(self.test_query),
                                   response=self._get_test_text_resource_content(
                                       'mock_server_responses/search_success_results.json'))
         result = self._run_cli(['--output-format', 'json', 'search', 'metadata', self.test_query])
@@ -116,7 +116,7 @@ class SearchTest(BaseTestCase):
 
     def test_search_metadata_without_metadata_and_with_json_output(self, mock_server):
         self._setup_mock_response(mock_server,
-                                  request=self._create_metadata_request(self.test_query, with_metadata=False),
+                                  request=self._create_search_metadata_request(self.test_query, with_metadata=False),
                                   response=self._get_test_text_resource_content(
                                       'mock_server_responses/search_success_results_without_metadata.json'))
         result = self._run_cli(['--output-format', 'json', 'search', 'metadata', self.test_query, '--without-metadata'])
@@ -128,7 +128,7 @@ class SearchTest(BaseTestCase):
 
     def test_search_metadata_without_bounties_and_with_json_output(self, mock_server):
         self._setup_mock_response(mock_server,
-                                  request=self._create_metadata_request(self.test_query, with_instances=False),
+                                  request=self._create_search_metadata_request(self.test_query, with_instances=False),
                                   response=self._get_test_text_resource_content(
                                       'mock_server_responses/search_success_results_without_instances.json'))
         result = self._run_cli(['--output-format', 'json', 'search', 'metadata', self.test_query, '--without-bounties'])
@@ -140,7 +140,7 @@ class SearchTest(BaseTestCase):
 
     def test_search_metadata_with_no_result(self, mock_server):
         self._setup_mock_response(mock_server,
-                                  request=self._create_metadata_request(self.test_query),
+                                  request=self._create_search_metadata_request(self.test_query),
                                   response=self._get_test_text_resource_content(
                                       'mock_server_responses/search_not_found_result.json'))
         result = self._run_cli(['--output-format', 'text', 'search', 'metadata', self.test_query])
@@ -151,7 +151,7 @@ class SearchTest(BaseTestCase):
 
     def test_search_metadata_with_query_file_and_text_output(self, mock_server):
         self._setup_mock_response(mock_server,
-                                  request=self._create_metadata_request(self.test_query),
+                                  request=self._create_search_metadata_request(self.test_query),
                                   response=self._get_test_text_resource_content(
                                       'mock_server_responses/search_success_results.json'))
         query_file = self._get_test_resource_file_path('inputs/search_metadata_elastic_query.json')
@@ -164,7 +164,7 @@ class SearchTest(BaseTestCase):
 
     def test_search_metadata_with_query_file_and_json_output(self, mock_server):
         self._setup_mock_response(mock_server,
-                                  request=self._create_metadata_request(self.test_query),
+                                  request=self._create_search_metadata_request(self.test_query),
                                   response=self._get_test_text_resource_content(
                                       'mock_server_responses/search_success_results.json'))
         query_file = self._get_test_resource_file_path('inputs/search_metadata_elastic_query.json')
@@ -177,7 +177,7 @@ class SearchTest(BaseTestCase):
 
     def test_search_metadata_with_invalid_json(self, mock_server):
         self._setup_mock_response(mock_server,
-                                  request=self._create_metadata_request(self.test_query),
+                                  request=self._create_search_metadata_request(self.test_query),
                                   response=self._get_test_text_resource_content(
                                       'mock_server_responses/search_success_results.json'))
         query_file = self._get_test_resource_file_path('inputs/search_metadata_invalid_elastic_query.json')
