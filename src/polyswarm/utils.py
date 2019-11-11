@@ -1,7 +1,7 @@
 import click
 
 from uuid import UUID
-from polyswarm_api.types.hash import is_valid_sha256, is_valid_sha1, is_valid_md5, is_hex
+from polyswarm_api.types.base import is_valid_sha256, is_valid_sha1, is_valid_md5, is_hex
 
 
 HASH_VALIDATORS = {
