@@ -1,7 +1,5 @@
-import sys
-
 import click
-from polyswarm_api import exceptions
+
 
 @click.group(short_help='interact with live scans')
 def live():
@@ -19,20 +17,9 @@ def historical():
 def live_start(ctx, rule_file):
     api = ctx.obj['api']
     output = ctx.obj['output']
-
     rules = rule_file.read()
-
-    try:
-        result = api.live(rules)
-        output.hunt_submission(result)
-        if result.failed:
-            sys.exit(1)
-    except exceptions.UsageLimitsExceeded:
-        output.usage_exceeded()
-        sys.exit(2)
-    except exceptions.InvalidYaraRules as e:
-        output.invalid_rule(e)
-        sys.exit(2)
+    result = api.live_create(rules)
+    output.hunt_submission(result)
 
 
 @live.command('delete', short_help='Delete the live hunt associate with the given hunt_id')
@@ -41,16 +28,8 @@ def live_start(ctx, rule_file):
 def live_delete(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-
-    try:
-        result = api.live_delete(hunt_id)
-        output.hunt_deletion(result)
-
-        if result.failed:
-            sys.exit(1)
-    except exceptions.UsageLimitsExceeded:
-        output.usage_exceeded()
-        sys.exit(2)
+    result = api.delete_live_hunt(hunt_id)
+    output.hunt_deletion(result)
 
 
 @live.command('list', short_help='List all live hunts performed')
@@ -58,15 +37,8 @@ def live_delete(ctx, hunt_id):
 def live_list(ctx):
     api = ctx.obj['api']
     output = ctx.obj['output']
-
-    try:
-        result = api.live_list()
-        output.hunt_list(result)
-        if result.failed:
-            sys.exit(1)
-    except exceptions.UsageLimitsExceeded:
-        output.usage_exceeded()
-        sys.exit(2)
+    result = api.live_list()
+    output.hunt_list(result)
 
 
 @click.option('-i', '--hunt-id', type=int, help='ID of the rule file (defaults to latest)')
@@ -81,16 +53,9 @@ def live_list(ctx):
 def live_results(ctx, hunt_id, without_metadata, without_bounties, since):
     api = ctx.obj['api']
     output = ctx.obj['output']
-
-    try:
-        result = api.live_results(hunt_id, with_metadata=not without_metadata, with_instances=not without_bounties,
-                                  since=since)
-        output.hunt_result(result)
-        if result.failed:
-            sys.exit(1)
-    except exceptions.UsageLimitsExceeded:
-        output.usage_exceeded()
-        sys.exit(1)
+    result = api.live_results(hunt_id, with_metadata=not without_metadata, with_instances=not without_bounties,
+                              since=since)
+    output.hunt_result(result)
 
 
 @click.argument('rule_file', type=click.File('r'))
@@ -99,21 +64,9 @@ def live_results(ctx, hunt_id, without_metadata, without_bounties, since):
 def historical_start(ctx, rule_file):
     api = ctx.obj['api']
     output = ctx.obj['output']
-
     rules = rule_file.read()
-
-    try:
-        result = api.historical(rules)
-        output.hunt_submission(result)
-
-        if result.failed:
-            sys.exit(1)
-    except exceptions.UsageLimitsExceeded:
-        output.usage_exceeded()
-        sys.exit(2)
-    except exceptions.InvalidYaraRules as e:
-        output.invalid_rule(e)
-        sys.exit(2)
+    result = api.historical_create(rules)
+    output.hunt_submission(result)
 
 
 @historical.command('delete', short_help='Delete the historical hunt associate with the given hunt_id')
@@ -122,16 +75,8 @@ def historical_start(ctx, rule_file):
 def historical_delete(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-
-    try:
-        result = api.historical_delete(hunt_id)
-        output.hunt_deletion(result)
-
-        if result.failed:
-            sys.exit(1)
-    except exceptions.UsageLimitsExceeded:
-        output.usage_exceeded()
-        sys.exit(2)
+    result = api.delete_historical_hunt(hunt_id)
+    output.hunt_deletion(result)
 
 
 @historical.command('list', short_help='List all historical hunts performed')
@@ -139,16 +84,8 @@ def historical_delete(ctx, hunt_id):
 def historical_list(ctx):
     api = ctx.obj['api']
     output = ctx.obj['output']
-
-    try:
-        result = api.historical_list()
-        output.hunt_list(result)
-
-        if result.failed:
-            sys.exit(1)
-    except exceptions.UsageLimitsExceeded:
-        output.usage_exceeded()
-        sys.exit(2)
+    result = api.historical_list()
+    output.hunt_list(result)
 
 
 @click.option('-i', '--hunt-id', type=int, help='ID of the rule file (defaults to latest)')
@@ -163,15 +100,6 @@ def historical_list(ctx):
 def historical_results(ctx, hunt_id, without_metadata, without_bounties, since):
     api = ctx.obj['api']
     output = ctx.obj['output']
-
-    try:
-        result = api.historical_results(hunt_id, with_metadata=not without_metadata, with_instances=not without_bounties,
-                                        since=since)
-
-        output.hunt_result(result)
-
-        if result.failed:
-            sys.exit(1)
-    except exceptions.UsageLimitsExceeded:
-        output.usage_exceeded()
-        sys.exit(2)
+    result = api.historical_results(hunt_id, with_metadata=not without_metadata, with_instances=not without_bounties,
+                                    since=since)
+    output.hunt_result(result)

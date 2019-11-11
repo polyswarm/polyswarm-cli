@@ -1,10 +1,6 @@
-import os
-import sys
-
 import click
-from polyswarm_api import exceptions
 from .utils import validate_hashes, validate_hash
-from polyswarm_api.utils import parse_hashes
+from polyswarm_api.types.base import parse_hashes
 
 
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
@@ -21,21 +17,11 @@ def download(ctx, hash_file, hash_type, hash, destination):
     output = ctx.obj['output']
 
     hashes = parse_hashes(hash, hash_type, hash_file)
-
-    if hashes:
-        try:
-            any_failed = False
-            for result in api.download(destination, *hashes):
-                output.download_result(result)
-                any_failed = result.failed or any_failed
-
-            if any_failed:
-                sys.exit(1)
-        except exceptions.UsageLimitsExceeded:
-            output.usage_exceeded()
-            sys.exit(2)
-    else:
+    if not hashes:
         raise click.BadParameter('Hash not valid, must be sha256|md5|sha1 in hexadecimal format')
+
+    for result in api.download(destination, *hashes):
+        output.download_result(result)
 
 
 @click.option('-s', '--since', type=click.IntRange(1, 2880), default=1440,
@@ -47,21 +33,8 @@ def stream(ctx, since, destination):
     api = ctx.obj['api']
     out = ctx.obj['output']
 
-    if destination is not None:
-        if not os.path.exists(destination):
-            os.makedirs(destination)
-
-    try:
-        any_failed = False
-        for download in api.stream(destination, since=since):
-            out.download_result(download)
-            any_failed = download.failed or any_failed
-
-        if any_failed:
-            sys.exit(1)
-    except exceptions.UsageLimitsExceeded:
-        out.usage_exceeded()
-        sys.exit(2)
+    for download in api.stream(destination, since=since):
+        out.download_result(download)
 
 
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5]', default=None)
@@ -70,15 +43,5 @@ def stream(ctx, since, destination):
 @click.pass_context
 def cat(ctx, hash_type, hash):
     api = ctx.obj['api']
-    output = ctx.obj['output']
-    # handle 2.7
-    out = sys.stdout
-    if hasattr(sys.stdout, 'buffer'):
-        out = sys.stdout.buffer
-    try:
-        result = api.download_to_filehandle(hash, out)
-        if result.failed:
-            sys.exit(1)
-    except exceptions.UsageLimitsExceeded:
-        output.usage_exceeded()
-        sys.exit(2)
+    out = click.get_binary_stream('stdout')
+    api.download_to_filehandle(hash, out)
