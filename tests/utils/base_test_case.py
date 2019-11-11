@@ -1,6 +1,6 @@
+import logging
 import os
 from unittest import TestCase
-import requests_mock
 import re
 import json
 import difflib
@@ -10,13 +10,13 @@ from deepdiff import DeepDiff
 from click.testing import CliRunner
 from pkg_resources import resource_string, resource_filename
 
-from polyswarm_api import const as polyswarm_api_const
-from polyswarm_api.endpoint import PolyswarmRequestGenerator
-from polyswarm_api.types.hash import to_hash as polyswarm_api_to_hash
-from polyswarm_api.types.query import MetadataQuery
-from polyswarm_api.log import logger
+from polyswarm_api.types.base import to_hash as polyswarm_api_to_hash
+from polyswarm_api.types.local import MetadataQuery
 
 from polyswarm import base
+
+logger = logging.getLogger(__name__)
+
 
 TestCase.maxDiff = None
 
@@ -31,10 +31,8 @@ class BaseTestCase(TestCase):
         super(BaseTestCase, self).__init__(*args, **kwargs)
         self.test_runner = CliRunner()
         self.test_api_key = '963da5a463b0ab61fe0f96f82846490d'
-        self.request_generator = PolyswarmRequestGenerator(polyswarm_api_const.DEFAULT_GLOBAL_API,
-                                                           polyswarm_api_const.DEFAULT_COMMUNITY)
-
         self.test_captured_output_file = '/tmp/output.txt'
+        self.api_url = 'http://localhost:9696/v2'
 
     def setUp(self):
         self._remove_file(self.test_captured_output_file)
@@ -112,8 +110,10 @@ class BaseTestCase(TestCase):
         return json.loads(self._get_test_text_resource_content(resource))
 
     def _run_cli(self, commands):
-        commands = ['--api-key', self.test_api_key,
-                    '--output-file', self.test_captured_output_file] + commands
+        commands = [
+            '--api-key', self.test_api_key,
+            '-u', self.api_url,
+        ] + commands
         return self.test_runner.invoke(base.polyswarm, commands)
 
     def _assert_text_result(self, result, expected_output=None, expected_return_code=None):
