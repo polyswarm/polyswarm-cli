@@ -40,17 +40,6 @@
         "window_closed": false
       }
     ],
-    "artifact_metadata": {
-      "exiftool": {
-        "some": "stuff"
-      },
-      "lief": {
-        "some": "stuff"
-      },
-      "strings": {
-        "some": "stuff"
-      }
-    },
     "extended_type": null,
     "first_seen": "Wed, 21 Oct 2015 19:20:00 GMT",
     "id": 111,

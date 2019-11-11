@@ -84,9 +84,6 @@ def metadata(ctx, query_string, query_file, without_metadata, without_bounties):
     except UnicodeDecodeError:
         logger.error('Failed to parse JSON due to Unicode error')
         return 0
-    except Exception as e:
-        logger.error('Something really bad happened')
-        logger.exception(e)
 
     try:
         all_failed = True
@@ -99,6 +96,11 @@ def metadata(ctx, query_string, query_file, without_metadata, without_bounties):
     except exceptions.UsageLimitsExceeded:
         output.usage_exceeded()
         sys.exit(2)
+
+    except Exception as e:
+        logger.error('Something really back happend')
+        logger.exception(e)
+        print(e)
 
     if all_failed:
         sys.exit(1)

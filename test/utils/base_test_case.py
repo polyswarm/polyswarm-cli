@@ -39,12 +39,14 @@ class BaseTestCase(TestCase):
     def setUp(self):
         self._remove_file(self.test_captured_output_file)
 
-    @staticmethod
-    def _setup_mock_response(mock_server, request, response):
+    def _setup_mock_response(self, mock_server, request, response, with_auth=True):
+        self._remove_keys(request, ['params', 'json'])
+        if with_auth:
+            self._add_auth(request)
         mock_server.request(text=response, **request)
 
-    def _create_hash_request(self, file_hash):
-        request = self.request_generator.search_hash(polyswarm_api_to_hash(file_hash))
+    def _create_hash_request(self, file_hash, with_instances=True, with_metadata=True):
+        request = self.request_generator.search_hash(polyswarm_api_to_hash(file_hash), with_instances, with_metadata)
         self.convert_polyswarm_api_request_to_mock_request(request)
         return request
 
@@ -103,32 +105,21 @@ class BaseTestCase(TestCase):
     def _get_test_json_resource_content(self, resource):
         return json.loads(self._get_test_text_resource_content(resource))
 
-    def _setup_mock_server_response(self, request, response, with_auth=True):
-        self._remove_keys(request)
-        with requests_mock.Mocker() as mock:
-            if with_auth:
-                self._add_auth(request)
-            mock.request(text=response, **request)
-
     def _run_cli(self, commands):
         commands = ['--api-key', self.test_api_key,
                     '--output-file', self.test_captured_output_file] + commands
         return self.test_runner.invoke(base.polyswarm, commands)
 
     def _assert_text_result(self, result, expected_output=None, expected_return_code=None):
-        output = self._get_result_output(result)
+        result_output = self._get_result_output(result)
         if expected_output is not None:
-            self._assert_text_equal(output, expected_output)
+            self._assert_text_equal(result_output, expected_output)
         if expected_return_code is not None:
             self.assertEqual(result.exit_code, expected_return_code, msg=traceback.format_tb(result.exc_info[2]))
 
     def _assert_json_result(self, result, expected_output, expected_return_code):
         result_output = self._get_result_output(result)
-        try:
-            output = json.loads(result_output)
-        except json.JSONDecodeError as e:
-            print('Error JSON decoding [%s]' % result_output)
-            raise e
+        output = json.loads(result_output)
         if expected_output is not None:
             self._assert_json_equal(output, expected_output)
         if expected_return_code is not None:
