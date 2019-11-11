@@ -2,7 +2,6 @@ import logging
 import json
 
 import click
-from polyswarm_api.log import logger
 from polyswarm_api.types.local import MetadataQuery
 from polyswarm_api.types.base import parse_hashes
 
