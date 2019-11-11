@@ -2,8 +2,10 @@ import click
 import logging
 import sys
 
+from polyswarm_api import exceptions
+from polyswarm_api import const
 from polyswarm_api.api import PolyswarmAPI
-from polyswarm_api.formatters import formatters
+from polyswarm.formatters import formatters
 from polyswarm_api import get_version as get_polyswarm_api_version
 from .utils import validate_key
 
@@ -16,12 +18,31 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 VERSION = '1.1.1'
 
 
-@click.group(context_settings=CONTEXT_SETTINGS)
+class ExceptionHandlingGroup(click.Group):
+    def invoke(self, ctx):
+        try:
+            return super(ExceptionHandlingGroup, self).invoke(ctx)
+        except exceptions.UsageLimitsExceededException as e:
+            output = ctx.obj.get('output')
+            if output:
+                output.usage_exceeded()
+            sys.exit(2)
+        except exceptions.InvalidYaraRulesException as e:
+            output = ctx.obj.get('output')
+            if output:
+                output.invalid_rule(e)
+            sys.exit(2)
+        except exceptions.PolyswarmAPIException as e:
+            click.echo(e)
+            sys.exit(1)
+
+
+@click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS)
 @click.option('-a', '--api-key', help='Your API key for polyswarm.network (required)',
               default='', callback=validate_key, envvar='POLYSWARM_API_KEY')
 @click.option('-u', '--api-uri', default='https://api.polyswarm.network/v1',
               envvar='POLYSWARM_API_URI', help='The API endpoint (ADVANCED)')
-@click.option('-o', '--output-file', default=sys.stdout, type=click.File('w'), help='Path to output file.')
+@click.option('-o', '--output-file', type=click.File('w'), help='Path to output file.')
 @click.option('--output-format', '--fmt', default='text', type=click.Choice(formatters.keys()),
               help='Output format. Human-readable text or JSON.')
 @click.option('--color/--no-color', default=True, help='Use colored output in text mode.')
@@ -31,11 +52,13 @@ VERSION = '1.1.1'
               help='Enable/disable GitHub release version check.')
 @click.option('--validate', default=False, is_flag=True,
               envvar='POLYSWARM_VALIDATE', help='Validate incoming schemas (note: slow).')
+@click.option('-t', '--timeout', type=click.INT, default=const.DEFAULT_SCAN_TIMEOUT,
+              help='How long to wait for results (default: {})'.format(const.DEFAULT_SCAN_TIMEOUT))
 @click.version_option(VERSION, '--version', prog_name='polyswarm-cli')
 @click.version_option(get_polyswarm_api_version(), '--api-version', prog_name='polyswarm-api')
 @click.pass_context
 def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose, community,
-              advanced_disable_version_check, validate):
+              advanced_disable_version_check, validate, timeout):
     """
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
@@ -55,11 +78,13 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     logging.basicConfig(level=log_level)
 
     # only allow color for stdout
-    if output_file != sys.stdout:
+    if output_file is not None:
         color = False
+    else:
+        output_file = click.get_text_stream('stdout')
 
     logging.debug('Creating API instance: api_key: %s, api_uri: %s', api_key, api_uri)
-    ctx.obj['api'] = PolyswarmAPI(api_key, api_uri, community=community, validate_schemas=validate)
+    ctx.obj['api'] = PolyswarmAPI(api_key, api_uri, community=community, validate_schemas=validate, timeout=timeout)
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
 
 
