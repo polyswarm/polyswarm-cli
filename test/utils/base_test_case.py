@@ -115,10 +115,12 @@ class BaseTestCase(TestCase):
                     '--output-file', self.test_captured_output_file] + commands
         return self.test_runner.invoke(base.polyswarm, commands)
 
-    def _assert_text_result(self, result, expected_output, expected_return_code):
+    def _assert_text_result(self, result, expected_output=None, expected_return_code=None):
         output = self._get_result_output(result)
-        self._assert_text_equal(output, expected_output)
-        self.assertEqual(result.exit_code, expected_return_code, msg=traceback.format_tb(result.exc_info[2]))
+        if expected_output is not None:
+            self._assert_text_equal(output, expected_output)
+        if expected_return_code is not None:
+            self.assertEqual(result.exit_code, expected_return_code, msg=traceback.format_tb(result.exc_info[2]))
 
     def _assert_json_result(self, result, expected_output, expected_return_code):
         result_output = self._get_result_output(result)
@@ -127,8 +129,10 @@ class BaseTestCase(TestCase):
         except json.JSONDecodeError as e:
             print('Error JSON decoding [%s]' % result_output)
             raise e
-        self._assert_json_equal(output, expected_output)
-        self.assertEqual(result.exit_code, expected_return_code, msg=traceback.format_tb(result.exc_info[2]))
+        if expected_output is not None:
+            self._assert_json_equal(output, expected_output)
+        if expected_return_code is not None:
+            self.assertEqual(result.exit_code, expected_return_code, msg=traceback.format_tb(result.exc_info[2]))
 
     def _get_result_output(self, result):
         output = ''
@@ -171,14 +175,6 @@ class BaseTestCase(TestCase):
     @staticmethod
     def _get_test_resource_file_path(filename):
         return resource_filename('test.resources', filename)
-
-    @staticmethod
-    def mock_logger(msg, *args, **kwargs):
-        """
-        Click's CliRunner doesn't capture logging messages, thus we need to patch it in tests so it will use
-        the standard output.
-        """
-        print(msg % args)
 
     def _do_test(self, reqs, output_format, commands, with_auth=True):
         bad_keys = ['params', 'json']
