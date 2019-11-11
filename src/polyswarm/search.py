@@ -1,16 +1,17 @@
-import sys
+import logging
 import json
 
 import click
 from polyswarm_api.log import logger
-from polyswarm_api import exceptions
-from polyswarm_api.types.query import MetadataQuery
-from polyswarm_api.utils import parse_hashes
+from polyswarm_api.types.local import MetadataQuery
+from polyswarm_api.types.base import parse_hashes
 
 try:
     from json import JSONDecodeError
 except ImportError:
     JSONDecodeError = ValueError
+
+logger = logging.getLogger(__name__)
 
 
 @click.group(short_help='interact with PolySwarm search api')
@@ -20,51 +21,32 @@ def search():
 
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5]', default=None)
-@click.option('-m', '--without-metadata', is_flag=True, default=False,
-              help='Don\'t request artifact metadata.')
-@click.option('-b', '--without-bounties', is_flag=True, default=False,
-              help='Don\'t request bounties.')
 @click.argument('hashes', nargs=-1)
 @search.command('hash', short_help='search for hashes separated by space')
 @click.pass_context
-def hashes(ctx, hashes, hash_file, hash_type, without_metadata, without_bounties):
+def hashes(ctx, hashes, hash_file, hash_type):
     """
     Search PolySwarm for files matching hashes
     """
-
     api = ctx.obj['api']
     output = ctx.obj['output']
 
     hashes = parse_hashes(hashes, hash_type, hash_file)
-    try:
-        if hashes:
-            results = api.search(*hashes, with_instances=not without_bounties, with_metadata=not without_metadata)
+    if not hashes:
+        raise click.BadParameter('Hash not valid, must be sha256|md5|sha1 in hexadecimal format')
 
-            # for json, this is effectively jsonlines
-            all_failed = True
-            for result in results:
-                output.search_result(result)
-                if not result.failed:
-                    all_failed = False
+    results = api.search(*hashes)
 
-            if all_failed:
-                sys.exit(1)
-        else:
-            raise click.BadParameter('Hash not valid, must be sha256|md5|sha1 in hexadecimal format')
-    except exceptions.UsageLimitsExceeded:
-        output.usage_exceeded()
-        sys.exit(1)
+    # for json, this is effectively jsonlines
+    for result in results:
+        output.artifact_instance(result)
 
 
 @click.option('-r', '--query-file', help='Properly formatted JSON search file', type=click.File('r'))
-@click.option('-m', '--without-metadata', is_flag=True, default=False,
-              help='Don\'t request artifact metadata.')
-@click.option('-b', '--without-bounties', is_flag=True, default=False,
-              help='Don\'t request bounties.')
 @click.argument('query_string', nargs=-1)
 @search.command('metadata', short_help='search metadata of files')
 @click.pass_context
-def metadata(ctx, query_string, query_file, without_metadata, without_bounties):
+def metadata(ctx, query_string, query_file):
 
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -85,22 +67,5 @@ def metadata(ctx, query_string, query_file, without_metadata, without_bounties):
         logger.error('Failed to parse JSON due to Unicode error')
         return 0
 
-    try:
-        all_failed = True
-        for result in api.search_by_metadata(*queries, with_instances=not without_bounties,
-                                             with_metadata=not without_metadata):
-            output.search_result(result)
-            if not result.failed:
-                all_failed = False
-
-    except exceptions.UsageLimitsExceeded:
-        output.usage_exceeded()
-        sys.exit(2)
-
-    except Exception as e:
-        logger.error('Something really back happend')
-        logger.exception(e)
-        print(e)
-
-    if all_failed:
-        sys.exit(1)
+    for result in api.search_by_metadata(*queries):
+        output.artifact_instance(result)
