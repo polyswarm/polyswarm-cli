@@ -10,7 +10,7 @@ from deepdiff import DeepDiff
 from click.testing import CliRunner
 from pkg_resources import resource_string, resource_filename
 
-from polyswarm_api.types.resources import MetadataQuery, to_hash as polyswarm_api_to_hash
+from polyswarm_api.types import resources
 
 from polyswarm import base
 
@@ -43,12 +43,12 @@ class BaseTestCase(TestCase):
         mock_server.request(text=response, **request)
 
     def _create_search_hash_request(self, file_hash, with_instances=True, with_metadata=True):
-        request = self.request_generator.search_hash(polyswarm_api_to_hash(file_hash), with_instances, with_metadata)
+        request = self.request_generator.search_hash(resources.Hash.from_hashable(file_hash), with_instances, with_metadata)
         self.convert_polyswarm_api_request_to_mock_request(request)
         return request
 
     def _create_search_metadata_request(self, query, with_instances=True, with_metadata=True):
-        request = self.request_generator.search_metadata(MetadataQuery(query), with_instances, with_metadata)
+        request = self.request_generator.search_metadata(resources.MetadataQuery(query), with_instances, with_metadata)
         self.convert_polyswarm_api_request_to_mock_request(request)
         return request
 
@@ -113,7 +113,7 @@ class BaseTestCase(TestCase):
             '--api-key', self.test_api_key,
             '-u', self.api_url,
         ] + commands
-        return self.test_runner.invoke(base.polyswarm, commands)
+        return self.test_runner.invoke(base.polyswarm, commands, catch_exceptions=False)
 
     def _assert_text_result(self, result, expected_output=None, expected_return_code=None):
         result_output = self._get_result_output(result)

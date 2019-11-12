@@ -1,10 +1,10 @@
 import click
 
 from uuid import UUID
-from polyswarm_api.types.resources import Hash
+from polyswarm_api.types import resources
 
 
-HASH_VALIDATORS = Hash.SUPPORTED_HASH_TYPES
+HASH_VALIDATORS = resources.Hash.SUPPORTED_HASH_TYPES
 
 
 def is_valid_uuid(value):
@@ -41,6 +41,6 @@ def validate_hashes(ctx, param, value):
 
 
 def validate_key(ctx, param, value):
-    if not is_hex(value) or len(value) != 32:
+    if not resources.is_hex(value) or len(value) != 32:
         raise click.BadParameter('Invalid API key. Make sure you specified your key via -a or environment variable and try again.')
     return value

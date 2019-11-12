@@ -1,5 +1,3 @@
-import pytest
-
 from tests.utils.base_test_case import BaseTestCase
 
 from click.testing import CliRunner
@@ -13,10 +11,10 @@ except ImportError:
 from tests.resources.mock_server_responses import resources
 
 
-class SearchTest(BaseTestCase):
+class HuntTest(BaseTestCase):
 
     def __init__(self, *args, **kwargs):
-        super(SearchTest, self).__init__(*args, **kwargs)
+        super(HuntTest, self).__init__(*args, **kwargs)
         self.test_runner = CliRunner()
         self.test_api_key = '11111111111111111111111111111111'
         self.test_hash = '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'

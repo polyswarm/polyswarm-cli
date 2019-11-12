@@ -1,20 +1,19 @@
-import pytest
-
-from tests.utils.base_test_case import BaseTestCase
-
-from click.testing import CliRunner
-
+import logging
 try:
     from unittest.mock import patch
 except ImportError:
     from mock import patch
 
+import pytest
+from click.testing import CliRunner
 
+from tests.utils.base_test_case import BaseTestCase
 from tests.resources.mock_server_responses import resources
+
+logger = logging.getLogger(__name__)
 
 
 class SearchTest(BaseTestCase):
-
     def __init__(self, *args, **kwargs):
         super(SearchTest, self).__init__(*args, **kwargs)
         self.test_runner = CliRunner()
