@@ -1,14 +1,10 @@
 import click
 
 from uuid import UUID
-from polyswarm_api.types.base import is_valid_sha256, is_valid_sha1, is_valid_md5, is_hex
+from polyswarm_api.types.resources import Hash
 
 
-HASH_VALIDATORS = {
-    'sha256': is_valid_sha256,
-    'sha1': is_valid_sha1,
-    'md5': is_valid_md5,
-}
+HASH_VALIDATORS = Hash.SUPPORTED_HASH_TYPES
 
 
 def is_valid_uuid(value):

@@ -1,6 +1,6 @@
 import click
 from .utils import validate_hashes, validate_hash
-from polyswarm_api.types.base import parse_hashes
+from polyswarm_api.types.resources import Hash
 
 
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
@@ -16,7 +16,7 @@ def download(ctx, hash_file, hash_type, hash, destination):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    hashes = parse_hashes(hash, hash_type, hash_file)
+    hashes = Hash.from_strings(hash, hash_type, hash_file)
     if not hashes:
         raise click.BadParameter('Hash not valid, must be sha256|md5|sha1 in hexadecimal format')
 

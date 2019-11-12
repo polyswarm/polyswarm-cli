@@ -10,8 +10,7 @@ from deepdiff import DeepDiff
 from click.testing import CliRunner
 from pkg_resources import resource_string, resource_filename
 
-from polyswarm_api.types.base import to_hash as polyswarm_api_to_hash
-from polyswarm_api.types.local import MetadataQuery
+from polyswarm_api.types.resources import MetadataQuery, to_hash as polyswarm_api_to_hash
 
 from polyswarm import base
 
