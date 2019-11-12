@@ -38,26 +38,32 @@ class TextOutput(base.BaseOutput):
         else:
             return self._bad
 
-    def _format_hunt_match(self, match):
+    def _format_hunt_match(self, match, write=True):
         output = []
         output.append(self._good('Match on rule {name}'.format(name=match.rule_name) +
                                  (', tags: {result_tags}'.format(
                                      result_tags=match.tags) if match.tags != '' else '')))
         output.append(self._format_artifact(match.artifact))
-        return '\n'.join(output)
+        if write:
+            self.out.write('\n'.join(output))
+        else:
+            return output
 
-    def artifact_instance(self, instance):
+    def _write_output(self, output):
+        self.out.write('\n'.join(output) + '\n\n')
+
+    def artifact(self, artifact, write=True):
         output = []
-        output.append(self._unknown('File %s' % instance.sha256))
+        output.append(self._unknown('File %s' % artifact.sha256))
         output.append(self._info('File type: mimetype: {mimetype}, extended_info: {extended_type}'.
-                           format(mimetype=instance.mimetype, extended_type=instance.extended_type)))
-        output.append(self._info('SHA256: {hash}'.format(hash=instance.sha256)))
-        output.append(self._info('SHA1: {hash}'.format(hash=instance.sha1)))
-        output.append(self._info('MD5: {hash}'.format(hash=instance.md5)))
+                                 format(mimetype=artifact.mimetype, extended_type=artifact.extended_type)))
+        output.append(self._info('SHA256: {hash}'.format(hash=artifact.sha256)))
+        output.append(self._info('SHA1: {hash}'.format(hash=artifact.sha1)))
+        output.append(self._info('MD5: {hash}'.format(hash=artifact.md5)))
 
-        if instance.metadata:
-            if instance.metadata.hash:
-                h = instance.metadata.hash
+        if artifact.metadata:
+            if artifact.metadata.hash:
+                h = artifact.metadata.hash
 
                 if 'ssdeep' in h:
                     output.append(self._info('SSDEEP: {}'.format(h['ssdeep'])))
@@ -67,19 +73,27 @@ class TextOutput(base.BaseOutput):
 
                 if 'authentihash' in h:
                     output.append(self._info('Authentihash: {}'.format(h['authentihash'])))
-            if instance.metadata.pefile:
-                p = instance.metadata.pefile
+            if artifact.metadata.pefile:
+                p = artifact.metadata.pefile
 
                 if 'imphash' in p:
                     output.append(self._info('Imphash: {}'.format(p['imphash'])))
 
-        output.append(self._info('First seen: {first_seen}'.format(first_seen=instance.first_seen)))
+        output.append(self._info('First seen: {first_seen}'.format(first_seen=artifact.first_seen)))
+        if write:
+            self._write_output(output)
+        else:
+            return output
+
+    def artifact_instance(self, instance, write=True):
+        output = []
+        output.extend(self.artifact(instance, write=False))
+
         output.append(self._info('Filename: {filename}'.format(filename=instance.filename)))
         if instance.country:
             output.append(self._info('Country: {country}'.format(country=instance.country)))
 
         # only report information if we have scanned the file before
-
         if instance.permalink:
             output.append(self._info('Scan permalink: {}'.format(instance.permalink)))
         if len(instance.detections) > 0:
@@ -93,9 +107,12 @@ class TextOutput(base.BaseOutput):
             formatter = self._get_score_format(instance.polyscore)
             output.append(self._normal('PolyScore: '+formatter('{}'.format(instance.polyscore))))
 
-        self.out.write('\n'.join(output) + '\n\n')
+        if write:
+            self._write_output(output)
+        else:
+            return output
 
-    def submission(self, result):
+    def submission(self, result, write=True):
         output = []
         bounty = result.result
 
@@ -113,9 +130,12 @@ class TextOutput(base.BaseOutput):
             if f:
                 files = [f]
 
-        self.out.write("\n".join([self._format_bounty_file(f) for f in files]) + '\n')
+        if write:
+            self.out.write("\n".join([self._format_bounty_file(f) for f in files]) + '\n')
+        else:
+            return output
 
-    def _format_bounty_file(self, f):
+    def _format_bounty_file(self, f, write=True):
         output = [self._open_group('Report for artifact %s, hash: %s' %
                                    (f.filename, f.hash))]
         if not f.ready:
@@ -160,41 +180,54 @@ class TextOutput(base.BaseOutput):
                 output.append(self._normal('PolyScore: '+formatter('{}'.format(score))))
 
         output.append(self._close_group())
-        return '\n'.join(output)
+        if write:
+            self.out.write('\n'.join(output))
+        else:
+            return output
 
-    def hunt(self, result):
-        if result.failed:
-            self.out.write(self._bad(result.failure_reason)+'\n')
-            return
-        self.out.write(self._info('Successfully submitted rules, hunt id: {hunt_id}\n'.
-                       format(hunt_id=result.result.hunt_id)))
-
-    def hunt_deletion(self, result):
-        if result.failed:
-            self.out.write(self._bad(result.failure_reason)+'\n')
-            return
-        self.out.write(self._info('Successfully deleted hunt id: {hunt_id}\n'.
-                       format(hunt_id=result.result)))
-
-    def hunt_result(self, result):
+    def hunt(self, result, write=True):
         output = []
-
         if result.failed:
             self.out.write(self._bad(result.failure_reason)+'\n')
             return
 
-        status_response = result.hunt_status
+        if write:
+            self.out.write(self._info('Successfully submitted rules, hunt id: {hunt_id}\n'.
+                                      format(hunt_id=result.result.hunt_id)))
+        else:
+            return output
 
-        status = status_response.result
+    def hunt_deletion(self, result, write=True):
+        output = []
+        if result.failed:
+            self.out.write(self._bad(result.failure_reason)+'\n')
+            return
+        if write:
+            self.out.write(self._info('Successfully deleted hunt id: {hunt_id}\n'.
+                                      format(hunt_id=result.result)))
+        else:
+            return output
 
-        output.append(self._info('Scan status: {status}\n'.format(status=status.status)))
+    def hunt_result(self, result, write=True):
+        output = []
+        output.append(self._good('Match on rule {name}'.format(name=result.rule_name) +
+                                 (', tags: {result_tags}'.format(
+                                     result_tags=result.tags) if result.tags != '' else '')))
+        output.extend(self.artifact(result.artifact, write=False))
+        if write:
+            self._write_output(output)
+        else:
+            return output
 
-        output.append(self._good('Found {} samples in this hunt.'.format(status.total)))
-
-        self.out.write('\n'.join(output) + '\n')
-
-        for match in result:
-            self.out.write(self._format_hunt_match(match)+'\n')
+    def hunt_list(self, result, write=True):
+        output = []
+        for hunt in result:
+            self.out.write(self._info('Hunt: {:17}, total results: {:5}, created: {}\n'.format(hunt.id, hunt.total,
+                                                                                        hunt.created)))
+        if write:
+            self.out.write('\n'.join(output) + '\n')
+        else:
+            return output
 
     def local_artifact(self, result):
         artifact = result.result
@@ -205,11 +238,6 @@ class TextOutput(base.BaseOutput):
             self.out.write(self._good('Successfully downloaded artifact {} to {}\n'.format(artifact.artifact_name,
                                                                                        artifact.path)))
         self.out.flush()
-
-    def hunt_list(self, result):
-        for hunt in result:
-            self.out.write(self._info('Hunt: {:17}, total results: {:5}, created: {}\n'.format(hunt.id, hunt.total,
-                                                                                        hunt.created)))
 
     def usage_exceeded(self):
         self.out.write(self._bad(const.USAGE_EXCEEDED_MESSAGE)+'\n')
