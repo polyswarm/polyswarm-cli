@@ -95,7 +95,7 @@ class TextOutput(base.BaseOutput):
 
         self.out.write('\n'.join(output) + '\n\n')
 
-    def scan_result(self, result):
+    def submission(self, result):
         output = []
         bounty = result.result
 
@@ -162,7 +162,7 @@ class TextOutput(base.BaseOutput):
         output.append(self._close_group())
         return '\n'.join(output)
 
-    def hunt_submission(self, result):
+    def hunt(self, result):
         if result.failed:
             self.out.write(self._bad(result.failure_reason)+'\n')
             return
@@ -196,7 +196,7 @@ class TextOutput(base.BaseOutput):
         for match in result:
             self.out.write(self._format_hunt_match(match)+'\n')
 
-    def download_result(self, result):
+    def local_artifact(self, result):
         artifact = result.result
 
         if result.failed:

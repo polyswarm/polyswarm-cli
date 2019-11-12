@@ -13,13 +13,13 @@ class BaseOutput(object):
     def hunt_result(self, result):
         raise NotImplementedError
 
-    def scan_result(self, result):
+    def submission(self, result):
         raise NotImplementedError
 
-    def hunt_submission(self, result):
+    def hunt(self, result):
         raise NotImplementedError
 
-    def download_result(self, result):
+    def local_artifact(self, result):
         raise NotImplementedError
 
     @staticmethod

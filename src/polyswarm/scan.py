@@ -34,11 +34,11 @@ def scan(ctx, path, force, recursive):
             logger.warning('Path %s is neither a file nor a directory, ignoring.', path)
 
     for result in api.scan(*files):
-        output.scan_result(result)
+        output.submission(result)
 
     for d in directories:
         for result in api.scan_directory(d, recursive=recursive):
-            output.scan_result(result)
+            output.submission(result)
 
 
 @click.option('-r', '--url-file', help='File of URLs, one per line.', type=click.File('r'))
@@ -62,7 +62,7 @@ def url_scan(ctx, url, url_file, force, timeout):
         urls.extend([u.strip() for u in url_file.readlines()])
 
     for result in api.scan_urls(*urls):
-        output.scan_result(result)
+        output.submission(result)
 
 
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
@@ -82,7 +82,7 @@ def rescan(ctx, hash_file, hash_type, hash):
         raise click.BadParameter('Hash not valid, must be sha256|md5|sha1 in hexadecimal format')
 
     for result in api.rescan(*hashes):
-        output.scan_result(result)
+        output.submission(result)
 
 
 @click.option('-r', '--uuid-file', help='File of UUIDs, one per line.', type=click.File('r'))
@@ -108,4 +108,4 @@ def lookup(ctx, uuid, uuid_file):
                 logger.warning('Invalid uuid %s in file, ignoring.', u)
 
     for result in api.lookup(*uuids):
-        output.scan_result(result)
+        output.submission(result)

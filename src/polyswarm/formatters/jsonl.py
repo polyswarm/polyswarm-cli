@@ -13,13 +13,13 @@ class JSONOutput(base.BaseOutput):
     def artifact_instance(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
-    def scan_result(self, result):
+    def submission(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
     def hunt_result(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
-    def hunt_submission(self, result):
+    def hunt(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
     def hunt_deletion(self, result):
@@ -28,7 +28,7 @@ class JSONOutput(base.BaseOutput):
     def hunt_list(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
-    def download_result(self, result):
+    def local_artifact(self, result):
         artifact = result.result
         self.out.write(json.dumps({'hash': artifact.artifact_name, 'path': artifact.path}, sort_keys=True)+'\n')
 
@@ -49,13 +49,13 @@ class PrettyJSONOutput(base.BaseOutput):
     def artifact_instance(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
-    def scan_result(self, result):
+    def submission(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
     def hunt_result(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
-    def hunt_submission(self, result):
+    def hunt(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
     def hunt_deletion(self, result):
@@ -64,7 +64,7 @@ class PrettyJSONOutput(base.BaseOutput):
     def hunt_list(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
-    def download_result(self, result):
+    def local_artifact(self, result):
         artifact = result.result
         self.out.write(json.dumps({'hash': artifact.artifact_name, 'path': artifact.path}, sort_keys=True)+'\n')
 

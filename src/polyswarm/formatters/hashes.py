@@ -13,7 +13,7 @@ class SHA256Output(base.BaseOutput):
     def artifact_instance(self, instance):
         self.out.write(instance.sha256 + '\n')
     
-    def scan_result(self, result):
+    def submission(self, result):
         """ Only returns sha256s of malicious results """
         if result.status_code == 404:
             return
@@ -27,8 +27,7 @@ class SHA256Output(base.BaseOutput):
             self.out.write('{}\n'.format(artifact.hash.hash))
 
     def hunt_result(self, result):
-        for match in result:
-            self.out.write(match.artifact.sha256.hash+'\n')
+        self.out.write(result.artifact.sha256.hash + '\n')
 
 
 class SHA1Output(base.BaseOutput):
@@ -39,14 +38,14 @@ class SHA1Output(base.BaseOutput):
         return json.dumps(result.json['result'])
 
     def artifact_instance(self, result):
-        self.out.write('\n'.join([artifact.sha1.hash for artifact in result])+'\n')
+        self.out.write('\n'.join([artifact.sha1.hash for artifact in result]) + '\n')
 
-    def scan_result(self, result):
+    def submission(self, result):
         """ Only returns sha1s of malicious results """
-        self.out.write('\n'.join([artifact.sha1.hash for artifact in result if len(artifact.detections) > 0])+'\n')
+        self.out.write('\n'.join([artifact.sha1.hash for artifact in result if len(artifact.detections) > 0]) + '\n')
 
     def hunt_result(self, result):
-        self.out.write('\n'.join([match.artifact.sha1.hash for match in result])+'\n')
+        self.out.write('\n'.join([result.artifact.sha1.hash for match in result]) + '\n')
 
 
 class MD5Output(base.BaseOutput):
@@ -57,11 +56,11 @@ class MD5Output(base.BaseOutput):
         return json.dumps(result.json['result'])
 
     def artifact_instance(self, result):
-        self.out.write('\n'.join([artifact.md5.hash for artifact in result])+'\n')
+        self.out.write('\n'.join([artifact.md5.hash for artifact in result]) + '\n')
 
-    def scan_result(self, result):
+    def submission(self, result):
         """ Only returns md5s of malicious results """
-        self.out.write('\n'.join([artifact.md5.hash for artifact in result if len(artifact.detections) > 0])+'\n')
+        self.out.write('\n'.join([artifact.md5.hash for artifact in result if len(artifact.detections) > 0]) + '\n')
 
     def hunt_result(self, result):
-        self.out.write('\n'.join([match.artifact.md5.hash for match in result])+'\n')
+        self.out.write('\n'.join([match.artifact.md5.hash for match in result]) + '\n')

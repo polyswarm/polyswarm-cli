@@ -21,7 +21,7 @@ def download(ctx, hash_file, hash_type, hash, destination):
         raise click.BadParameter('Hash not valid, must be sha256|md5|sha1 in hexadecimal format')
 
     for result in api.download(destination, *hashes):
-        output.download_result(result)
+        output.local_artifact(result)
 
 
 @click.option('-s', '--since', type=click.IntRange(1, 2880), default=1440,
@@ -34,7 +34,7 @@ def stream(ctx, since, destination):
     out = ctx.obj['output']
 
     for download in api.stream(destination, since=since):
-        out.download_result(download)
+        out.local_artifact(download)
 
 
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5]', default=None)
