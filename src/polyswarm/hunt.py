@@ -41,9 +41,9 @@ def live_list(ctx):
     output.hunt_list(result)
 
 
-@click.option('-i', '--hunt-id', type=int, help='ID of the rule file (defaults to latest)')
 @live.command('results', short_help='Get results from live hunt')
 @click.argument('hunt_id', type=int, required=False)
+@click.option('-i', '--hunt-id', type=int, help='ID of the rule file (defaults to latest)')
 @click.option('-s', '--since', type=click.INT, default=60,
               help='How far back in minutes to request results (default: 60, or all)')
 @click.pass_context
@@ -51,12 +51,12 @@ def live_results(ctx, hunt_id, since):
     api = ctx.obj['api']
     output = ctx.obj['output']
     result = api.live_results(hunt_id, since=since)
-    for live_hunt in result:
-        output.hunt_result(live_hunt)
+    for hunt in result:
+        output.hunt_result(hunt)
 
 
-@click.argument('rule_file', type=click.File('r'))
 @historical.command('start', short_help='Start a new historical hunt')
+@click.argument('rule_file', type=click.File('r'))
 @click.pass_context
 def historical_start(ctx, rule_file):
     api = ctx.obj['api']
@@ -85,18 +85,12 @@ def historical_list(ctx):
     output.hunt_list(result)
 
 
-@click.option('-i', '--hunt-id', type=int, help='ID of the rule file (defaults to latest)')
-@click.option('-m', '--without-metadata', is_flag=True, default=False,
-              help='Don\'t request artifact metadata.')
-@click.option('-b', '--without-bounties', is_flag=True, default=False,
-              help='Don\'t request bounties.')
-@click.option('-s', '--since', type=click.INT, default=0,
-              help='How far back in minutes to request results (default: 0, or all)')
 @historical.command('results', short_help='Get results from historical hunt')
+@click.argument('hunt_id', type=int, required=False)
 @click.pass_context
-def historical_results(ctx, hunt_id, without_metadata, without_bounties, since):
+def historical_results(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.historical_results(hunt_id, with_metadata=not without_metadata, with_instances=not without_bounties,
-                                    since=since)
-    output.hunt_result(result)
+    result = api.historical_results(hunt_id)
+    for hunt in result:
+        output.hunt_result(hunt)
