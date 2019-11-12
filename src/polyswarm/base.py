@@ -32,8 +32,11 @@ class ExceptionHandlingGroup(click.Group):
             if output:
                 output.invalid_rule(e)
             sys.exit(2)
+        except exceptions.NotFoundException as e:
+            click.secho(str(e), fg='red')
+            sys.exit(1)
         except exceptions.PolyswarmAPIException as e:
-            click.echo(e)
+            click.secho(str(e), fg='red')
             sys.exit(1)
 
 
