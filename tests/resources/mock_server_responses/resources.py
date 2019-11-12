@@ -25,3 +25,51 @@ def text_instances():
 """
     )
     return values
+
+
+def live_results():
+    values = []
+    values.append(resources.HuntResult(
+        {'artifact': {'extended_type': 'EICAR virus test files', 'first_seen': '2019-11-01T21:33:53.292099', 'id': '11611818710765483', 'last_seen': '2019-11-12T15:52:00.702928', 'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 's3_file_name': None, 'sha1': '3395856ce81f2b7382dee72602f798b642f14140', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'size': 68}, 'created': '2019-11-07T19:06:22.630556', 'historicalscan_id': None, 'id': '86273842846244087', 'livescan_id': '63433636835291189', 'rule_name': 'eicar_substring_test', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'tags': ''}
+    ))
+    return values
+
+
+def text_live_results():
+    values = []
+    values.append(
+        """[92mMatch on rule eicar_substring_test[0m
+[94mFile 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
+[92mFile type: mimetype: text/plain, extended_info: EICAR virus test files[0m
+[92mSHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
+[92mSHA1: 3395856ce81f2b7382dee72602f798b642f14140[0m
+[92mMD5: 44d88612fea8a8f36de82e1278abb02f[0m
+[92mFirst seen: 2019-11-01 21:33:53.292099[0m
+
+"""
+    )
+    return values
+
+
+def hisotrical_results():
+    values = []
+    values.append(resources.HuntResult(
+        {'artifact': {'extended_type': 'EICAR virus test files', 'first_seen': '2019-11-01T21:33:53.292099', 'id': '11611818710765483', 'last_seen': '2019-11-12T15:52:00.702928', 'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 's3_file_name': None, 'sha1': '3395856ce81f2b7382dee72602f798b642f14140', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'size': 68}, 'created': '2019-11-04T18:40:02.063064', 'historicalscan_id': '47190397989086018', 'id': '36730172447808985', 'livescan_id': None, 'rule_name': 'eicar_substring_test', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'tags': ''}
+    ))
+    return values
+
+
+def text_hisotrical_results():
+    values = []
+    values.append(
+        """[92mMatch on rule eicar_substring_test[0m
+[94mFile 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
+[92mFile type: mimetype: text/plain, extended_info: EICAR virus test files[0m
+[92mSHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
+[92mSHA1: 3395856ce81f2b7382dee72602f798b642f14140[0m
+[92mMD5: 44d88612fea8a8f36de82e1278abb02f[0m
+[92mFirst seen: 2019-11-01 21:33:53.292099[0m
+
+"""
+    )
+    return values
