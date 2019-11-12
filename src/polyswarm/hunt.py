@@ -19,7 +19,7 @@ def live_start(ctx, rule_file):
     output = ctx.obj['output']
     rules = rule_file.read()
     result = api.live_create(rules)
-    output.hunt_submission(result)
+    output.hunt(result)
 
 
 @live.command('delete', short_help='Delete the live hunt associate with the given hunt_id')
@@ -43,19 +43,16 @@ def live_list(ctx):
 
 @click.option('-i', '--hunt-id', type=int, help='ID of the rule file (defaults to latest)')
 @live.command('results', short_help='Get results from live hunt')
-@click.option('-m', '--without-metadata', is_flag=True, default=False,
-              help='Don\'t request artifact metadata.')
-@click.option('-b', '--without-bounties', is_flag=True, default=False,
-              help='Don\'t request bounties.')
-@click.option('-s', '--since', type=click.INT, default=0,
-              help='How far back in minutes to request results (default: 0, or all)')
+@click.argument('hunt_id', type=int, required=False)
+@click.option('-s', '--since', type=click.INT, default=60,
+              help='How far back in minutes to request results (default: 60, or all)')
 @click.pass_context
-def live_results(ctx, hunt_id, without_metadata, without_bounties, since):
+def live_results(ctx, hunt_id, since):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.live_results(hunt_id, with_metadata=not without_metadata, with_instances=not without_bounties,
-                              since=since)
-    output.hunt_result(result)
+    result = api.live_results(hunt_id, since=since)
+    for live_hunt in result:
+        output.hunt_result(live_hunt)
 
 
 @click.argument('rule_file', type=click.File('r'))
@@ -66,7 +63,7 @@ def historical_start(ctx, rule_file):
     output = ctx.obj['output']
     rules = rule_file.read()
     result = api.historical_create(rules)
-    output.hunt_submission(result)
+    output.hunt(result)
 
 
 @historical.command('delete', short_help='Delete the historical hunt associate with the given hunt_id')
