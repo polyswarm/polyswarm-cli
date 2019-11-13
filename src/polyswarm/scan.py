@@ -1,5 +1,4 @@
 import logging
-import os
 
 import click
 
@@ -9,35 +8,20 @@ logger = logging.getLogger(__name__)
 
 
 @click.command('scan', short_help='scan files/directories')
-@click.option('-f', '--force', is_flag=True, default=False,
-              help='Force re-scan even if file has already been analyzed.')
 @click.option('-r', '--recursive', is_flag=True, default=False, help='Scan directories recursively')
 @click.argument('path', nargs=-1, type=click.Path(exists=True))
 @click.pass_context
-def scan(ctx, path, force, recursive):
+def scan(ctx, path, recursive):
     """
     Scan files or directories via PolySwarm
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    paths = path
-
-    directories, files = [], []
-    for path in paths:
-        if os.path.isfile(path):
-            files.append(path)
-        elif os.path.isdir(path):
-            directories.append(path)
-        else:
-            logger.warning('Path %s is neither a file nor a directory, ignoring.', path)
+    files = utils.collect_files(path, recursive=recursive)
 
     for result in api.scan(*files):
         output.submission(result)
-
-    for d in directories:
-        for result in api.scan_directory(d, recursive=recursive):
-            output.submission(result)
 
 
 @click.command('url', short_help='scan url')

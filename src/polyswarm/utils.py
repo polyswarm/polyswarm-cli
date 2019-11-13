@@ -1,4 +1,5 @@
 import logging
+import os
 from uuid import UUID
 
 import click
@@ -17,6 +18,35 @@ def is_valid_uuid(value):
         return True
     except:
         return False
+
+
+####################################################
+# Input parsers
+####################################################
+
+def _yield_files(base_path, files):
+    for file in files:
+        path = os.path.join(base_path, file)
+        if os.path.isfile(path):
+            yield path
+
+
+def collect_files(paths, recursive=False, log_errors=False):
+    all_files = []
+    for path in paths:
+        if os.path.isfile(path):
+            all_files.append(path)
+        elif os.path.isdir(path):
+            if recursive:
+                for sub_path, _, files in os.walk(path):
+                    all_files.extend(_yield_files(sub_path, files))
+            else:
+                all_files.extend(_yield_files(path, os.listdir(path)))
+        elif log_errors:
+            logger.error('Path %s is neither a file nor a directory.', path)
+        else:
+            raise exceptions.InvalidValueException('Path {} is neither a file nor a directory.'.format(path))
+    return all_files
 
 
 def parse_hashes(values, hash_file=None, hash_type=None, log_errors=False):
