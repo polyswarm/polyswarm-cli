@@ -73,3 +73,36 @@ def text_hisotrical_results():
 """
     )
     return values
+
+
+def hunts():
+    values = []
+    values.append(resources.Hunt(
+        {'active': True, 'created': '2019-11-13T16:27:45.013226', 'id': '61210404295535902', 'status': 'SUCCESS'}
+    ))
+    return values
+
+
+def text_hunts():
+    values = []
+    values.append(
+        """[94mHunt Id: 61210404295535902[0m
+[92mActive: True[0m
+[92mCreated at: 2019-11-13 16:27:45.013226[0m
+
+"""
+    )
+    return values
+
+
+def text_detele_hunts():
+    values = []
+    values.append(
+        """[93mSuccessfully deleted Hunt:[0m
+[94mHunt Id: 61210404295535902[0m
+[92mActive: True[0m
+[92mCreated at: 2019-11-13 16:27:45.013226[0m
+
+"""
+    )
+    return values
