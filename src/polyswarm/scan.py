@@ -4,16 +4,16 @@ import os
 import click
 from polyswarm_api.types.resources import Hash
 
-from .utils import validate_uuid, is_valid_uuid, validate_hashes
+from . import utils
 
 logger = logging.getLogger(__name__)
 
 
+@click.command('scan', short_help='scan files/directories')
 @click.option('-f', '--force', is_flag=True, default=False,
               help='Force re-scan even if file has already been analyzed.')
 @click.option('-r', '--recursive', is_flag=True, default=False, help='Scan directories recursively')
 @click.argument('path', nargs=-1, type=click.Path(exists=True))
-@click.command('scan', short_help='scan files/directories')
 @click.pass_context
 def scan(ctx, path, force, recursive):
     """
@@ -41,12 +41,12 @@ def scan(ctx, path, force, recursive):
             output.submission(result)
 
 
+@click.command('url', short_help='scan url')
 @click.option('-r', '--url-file', help='File of URLs, one per line.', type=click.File('r'))
 @click.option('-f', '--force', is_flag=True, default=False,
               help='Force re-scan even if file has already been analyzed.')
 @click.option('-t', '--timeout', type=click.INT, default=-1, help='How long to wait for results (default: forever, -1)')
 @click.argument('url', nargs=-1, type=click.STRING)
-@click.command('url', short_help='scan url')
 @click.pass_context
 def url_scan(ctx, url, url_file, force, timeout):
     """
@@ -65,29 +65,26 @@ def url_scan(ctx, url, url_file, force, timeout):
         output.submission(result)
 
 
+@click.command('rescan', short_help='rescan files(s) by hash')
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5]', default=None)
-@click.argument('hash', nargs=-1, callback=validate_hashes)
-@click.command('rescan', short_help='rescan files(s) by hash')
+@click.argument('hash_value', nargs=-1, callback=utils.validate_hashes)
 @click.pass_context
-def rescan(ctx, hash_file, hash_type, hash):
+def rescan(ctx, hash_file, hash_type, hash_value):
     """
     Rescan files with matched hashes
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-
-    hashes = Hash.from_strings(hash, hash_type, hash_file)
-    if not hashes:
-        raise click.BadParameter('Hash not valid, must be sha256|md5|sha1 in hexadecimal format')
+    hashes = utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)
 
     for result in api.rescan(*hashes):
         output.submission(result)
 
 
-@click.option('-r', '--uuid-file', help='File of UUIDs, one per line.', type=click.File('r'))
-@click.argument('uuid', nargs=-1, callback=validate_uuid)
 @click.command('lookup', short_help='lookup UUID(s)')
+@click.option('-r', '--uuid-file', help='File of UUIDs, one per line.', type=click.File('r'))
+@click.argument('uuid', nargs=-1, callback=utils.validate_uuid)
 @click.pass_context
 def lookup(ctx, uuid, uuid_file):
     """
@@ -102,7 +99,7 @@ def lookup(ctx, uuid, uuid_file):
     if uuid_file:
         for u in uuid_file.readlines():
             u = u.strip()
-            if is_valid_uuid(u):
+            if utils.is_valid_uuid(u):
                 uuids.append(u)
             else:
                 logger.warning('Invalid uuid %s in file, ignoring.', u)

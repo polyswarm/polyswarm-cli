@@ -1,7 +1,11 @@
-import click
-
+import logging
 from uuid import UUID
+
+import click
+from polyswarm_api import exceptions
 from polyswarm_api.types import resources
+
+logger = logging.getLogger(__name__)
 
 
 HASH_VALIDATORS = resources.Hash.SUPPORTED_HASH_TYPES
@@ -13,6 +17,28 @@ def is_valid_uuid(value):
         return True
     except:
         return False
+
+
+def parse_hashes(values, hash_file=None, hash_type=None, log_errors=False):
+    hashes = []
+    if hash_file is not None:
+        values += hash_file.read_lines()
+    for hash_ in values:
+        try:
+            hashes.append(resources.Hash(hash_, hash_type=hash_type))
+        except exceptions.InvalidValueException as e:
+            if log_errors:
+                logger.error(e)
+            else:
+                raise e
+    if not hashes:
+        raise click.BadParameter('Hash not valid, must be sha256|md5|sha1 in hexadecimal format')
+    return hashes
+
+
+####################################################
+# Click parameters validators
+####################################################
 
 
 def validate_uuid(ctx, param, value):
