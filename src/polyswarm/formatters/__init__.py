@@ -1,5 +1,5 @@
 from .text import TextOutput
-from .jsonl import JSONOutput, PrettyJSONOutput
+from .json import JSONOutput, PrettyJSONOutput
 from .hashes import SHA256Output, MD5Output, SHA1Output
 
 formatter_list = [TextOutput, JSONOutput, PrettyJSONOutput, SHA256Output, SHA1Output, MD5Output]
