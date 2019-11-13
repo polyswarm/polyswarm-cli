@@ -20,7 +20,7 @@ def scan(ctx, path, recursive):
 
     files = utils.collect_files(path, recursive=recursive)
 
-    for result in api.scan(*files):
+    for result in api.submit(*files):
         output.submission(result)
 
 
@@ -44,7 +44,7 @@ def url_scan(ctx, url, url_file, force, timeout):
     if url_file:
         urls.extend([u.strip() for u in url_file.readlines()])
 
-    for result in api.scan_urls(*urls):
+    for result in api.submit(*urls, artifact_type='url'):
         output.submission(result)
 
 
