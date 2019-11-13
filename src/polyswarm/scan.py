@@ -2,7 +2,6 @@ import logging
 import os
 
 import click
-from polyswarm_api.types.resources import Hash
 
 from . import utils
 
