@@ -2,6 +2,7 @@ import sys
 from . import base
 from polyswarm_api import const
 
+
 # TODO rewrite some of this to be not terrible
 def is_colored(fn):
     color = {
@@ -37,17 +38,6 @@ class TextOutput(base.BaseOutput):
             return self._warn
         else:
             return self._bad
-
-    def _format_hunt_match(self, match, write=True):
-        output = []
-        output.append(self._good('Match on rule {name}'.format(name=match.rule_name) +
-                                 (', tags: {result_tags}'.format(
-                                     result_tags=match.tags) if match.tags != '' else '')))
-        output.append(self._format_artifact(match.artifact))
-        if write:
-            self.out.write('\n'.join(output))
-        else:
-            return output
 
     def _write_output(self, output):
         self.out.write('\n'.join(output) + '\n\n')
@@ -218,15 +208,14 @@ class TextOutput(base.BaseOutput):
         else:
             return output
 
-    def local_artifact(self, result):
-        artifact = result.result
-
-        if result.failed:
-            self.out.write(self._bad(result.failure_reason)+'\n')
+    def local_artifact(self, artifact, write=True):
+        output = []
+        output.append(self._good('Successfully downloaded artifact {} to {}'
+                                 .format(artifact.artifact_name, artifact.path)))
+        if write:
+            self._write_output(output)
         else:
-            self.out.write(self._good('Successfully downloaded artifact {} to {}\n'.format(artifact.artifact_name,
-                                                                                       artifact.path)))
-        self.out.flush()
+            return output
 
     def usage_exceeded(self):
         self.out.write(self._bad(const.USAGE_EXCEEDED_MESSAGE)+'\n')
