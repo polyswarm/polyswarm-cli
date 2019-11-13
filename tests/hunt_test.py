@@ -11,10 +11,10 @@ except ImportError:
 from tests.resources.mock_server_responses import resources
 
 
-class HuntTest(BaseTestCase):
+class HuntResultsTest(BaseTestCase):
 
     def __init__(self, *args, **kwargs):
-        super(HuntTest, self).__init__(*args, **kwargs)
+        super(HuntResultsTest, self).__init__(*args, **kwargs)
         self.test_runner = CliRunner()
         self.test_api_key = '11111111111111111111111111111111'
 
