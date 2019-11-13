@@ -28,7 +28,7 @@ def live_start(ctx, rule_file):
 def live_delete(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.delete_live_hunt(hunt_id)
+    result = api.live_delete(hunt_id)
     output.hunt_deletion(result)
 
 
@@ -38,7 +38,8 @@ def live_list(ctx):
     api = ctx.obj['api']
     output = ctx.obj['output']
     result = api.live_list()
-    output.hunt_list(result)
+    for hunt in result:
+        output.hunt(hunt)
 
 
 @live.command('results', short_help='Get results from live hunt')
@@ -72,7 +73,7 @@ def historical_start(ctx, rule_file):
 def historical_delete(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.delete_historical_hunt(hunt_id)
+    result = api.historical_delete(hunt_id)
     output.hunt_deletion(result)
 
 
@@ -82,7 +83,8 @@ def historical_list(ctx):
     api = ctx.obj['api']
     output = ctx.obj['output']
     result = api.historical_list()
-    output.hunt_list(result)
+    for hunt in result:
+        output.hunt(hunt)
 
 
 @historical.command('results', short_help='Get results from historical hunt')

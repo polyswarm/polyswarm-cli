@@ -187,24 +187,23 @@ class TextOutput(base.BaseOutput):
 
     def hunt(self, result, write=True):
         output = []
-        if result.failed:
-            self.out.write(self._bad(result.failure_reason)+'\n')
-            return
+        output.append(self._unknown('Hunt Id: {}'.format(result.id)))
+        if result.active is not None:
+            output.append(self._info('Active: {}'.format(result.active)))
+        output.append(self._info('Created at: {}'.format(result.created)))
 
         if write:
-            self.out.write(self._info('Successfully submitted rules, hunt id: {hunt_id}\n'.
-                                      format(hunt_id=result.result.hunt_id)))
+            self._write_output(output)
         else:
             return output
 
     def hunt_deletion(self, result, write=True):
         output = []
-        if result.failed:
-            self.out.write(self._bad(result.failure_reason)+'\n')
-            return
+        output.append(self._warn('Successfully deleted Hunt:'))
+        output.extend(self.hunt(result, write=False))
+
         if write:
-            self.out.write(self._info('Successfully deleted hunt id: {hunt_id}\n'.
-                                      format(hunt_id=result.result)))
+            self._write_output(output)
         else:
             return output
 
@@ -216,16 +215,6 @@ class TextOutput(base.BaseOutput):
         output.extend(self.artifact(result.artifact, write=False))
         if write:
             self._write_output(output)
-        else:
-            return output
-
-    def hunt_list(self, result, write=True):
-        output = []
-        for hunt in result:
-            self.out.write(self._info('Hunt: {:17}, total results: {:5}, created: {}\n'.format(hunt.id, hunt.total,
-                                                                                        hunt.created)))
-        if write:
-            self.out.write('\n'.join(output) + '\n')
         else:
             return output
 

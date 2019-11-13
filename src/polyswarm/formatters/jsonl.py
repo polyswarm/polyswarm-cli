@@ -25,9 +25,6 @@ class JSONOutput(base.BaseOutput):
     def hunt_deletion(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
-    def hunt_list(self, result):
-        self.out.write(self._to_json(result.json) + '\n')
-
     def local_artifact(self, result):
         artifact = result.result
         self.out.write(json.dumps({'hash': artifact.artifact_name, 'path': artifact.path}, sort_keys=True)+'\n')
@@ -59,9 +56,6 @@ class PrettyJSONOutput(base.BaseOutput):
         self.out.write(self._to_json(result.json) + '\n')
 
     def hunt_deletion(self, result):
-        self.out.write(self._to_json(result.json) + '\n')
-
-    def hunt_list(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
     def local_artifact(self, result):
