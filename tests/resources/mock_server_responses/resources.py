@@ -1,3 +1,5 @@
+import os
+
 from polyswarm_api.types import resources
 
 
@@ -106,3 +108,34 @@ def text_detele_hunts():
 """
     )
     return values
+
+
+def local_artifacts(paths):
+    values = []
+    for full_path in paths:
+        path, file_name = os.path.split(full_path)
+        values.append(resources.LocalArtifact(path=path, artifact_name=file_name, analyze=False))
+    return values
+
+
+def text_local_artifacts(path):
+    values = []
+    values.append(
+        """[92mSuccessfully downloaded artifact malicious to {}[0m
+
+""".format(path)
+    )
+    return values
+
+
+def cat_request(data):
+    class Request:
+        def __init__(self, status_code=200, json=None, content=None):
+            self.status_code = status_code
+            self.json = json
+            self.content = content
+
+        def iter_content(self, chunk_size=None):
+            yield self.content
+
+    return Request(content=data)
