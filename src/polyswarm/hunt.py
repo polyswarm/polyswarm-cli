@@ -11,8 +11,8 @@ def historical():
     pass
 
 
-@click.argument('rule_file', type=click.File('r'))
 @live.command('start', short_help='Start a new live hunt')
+@click.argument('rule_file', type=click.File('r'))
 @click.pass_context
 def live_start(ctx, rule_file):
     api = ctx.obj['api']

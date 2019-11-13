@@ -19,10 +19,10 @@ def search():
     pass
 
 
+@search.command('hash', short_help='search for hashes separated by space')
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5]', default=None)
 @click.argument('hash_value', nargs=-1)
-@search.command('hash', short_help='search for hashes separated by space')
 @click.pass_context
 def hashes(ctx, hash_value, hash_file, hash_type):
     """
@@ -40,9 +40,9 @@ def hashes(ctx, hash_value, hash_file, hash_type):
         output.artifact_instance(result)
 
 
+@search.command('metadata', short_help='search metadata of files')
 @click.option('-r', '--query-file', help='Properly formatted JSON search file', type=click.File('r'))
 @click.argument('query_string', nargs=-1)
-@search.command('metadata', short_help='search metadata of files')
 @click.pass_context
 def metadata(ctx, query_string, query_file):
 
