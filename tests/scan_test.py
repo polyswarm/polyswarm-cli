@@ -35,8 +35,7 @@ class SubmissionTest(BaseTestCase):
 
     def test_submission_create_json(self):
         with patch('polyswarm_api.api.PolyswarmAPI.submit', return_value=[resources.submissions(self)[0]]), \
-             patch('polyswarm_api.api.PolyswarmAPI.lookup', return_value=iter([resources.submissions(self)[0]])), \
-             patch('polyswarm_api.api.PolyswarmAPI.score', return_value=iter([resources.scores(self)[0]])):
+             patch('polyswarm_api.api.PolyswarmAPI.lookup', return_value=iter([resources.submissions(self)[0]])):
             result = self._run_cli(['--output-format', 'json', '-c', 'gamma',
                                     'scan', os.path.join(BASE_PATH, 'malicious')])
         self._assert_json_result(
