@@ -3,7 +3,6 @@ import logging
 import sys
 
 from polyswarm_api import exceptions
-from polyswarm_api import const
 from polyswarm_api.api import PolyswarmAPI
 from polyswarm.formatters import formatters
 from polyswarm_api import get_version as get_polyswarm_api_version
@@ -35,7 +34,7 @@ class ExceptionHandlingGroup(click.Group):
         except exceptions.NotFoundException as e:
             click.secho(str(e), fg='red')
             sys.exit(1)
-        except exceptions.PolyswarmAPIException as e:
+        except exceptions.PolyswarmException as e:
             click.secho(str(e), fg='red')
             sys.exit(1)
 
@@ -55,13 +54,11 @@ class ExceptionHandlingGroup(click.Group):
               help='Enable/disable GitHub release version check.')
 @click.option('--validate', default=False, is_flag=True,
               envvar='POLYSWARM_VALIDATE', help='Validate incoming schemas (note: slow).')
-@click.option('-t', '--timeout', type=click.INT, default=const.DEFAULT_SCAN_TIMEOUT,
-              help='How long to wait for results (default: {})'.format(const.DEFAULT_SCAN_TIMEOUT))
 @click.version_option(VERSION, '--version', prog_name='polyswarm-cli')
 @click.version_option(get_polyswarm_api_version(), '--api-version', prog_name='polyswarm-api')
 @click.pass_context
 def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose, community,
-              advanced_disable_version_check, validate, timeout):
+              advanced_disable_version_check, validate):
     """
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
@@ -87,8 +84,7 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
         output_file = click.get_text_stream('stdout')
 
     logging.debug('Creating API instance: api_key: %s, api_uri: %s', api_key, api_uri)
-    ctx.obj['api'] = PolyswarmAPI(api_key, api_uri, community=community,
-                                  validate_schemas=validate, timeout=timeout)
+    ctx.obj['api'] = PolyswarmAPI(api_key, api_uri, community=community, validate_schemas=validate)
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
 
 
