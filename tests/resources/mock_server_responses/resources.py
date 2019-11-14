@@ -14,15 +14,15 @@ def instances():
 def text_instances():
     values = []
     values.append(
-        """[94mFile 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
-[92mFile type: mimetype: text/plain, extended_info: EICAR virus test files[0m
-[92mSHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
-[92mSHA1: 3395856ce81f2b7382dee72602f798b642f14140[0m
-[92mMD5: 44d88612fea8a8f36de82e1278abb02f[0m
-[92mFirst seen: 2019-11-01T21:33:53.292099[0m
-[92mFilename: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
-[92mScan permalink: https://polyswarm.network/scan/results/56944690-6376-44d3-8bff-00c217ccb272[0m
+        """[92mSHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
+SHA1: 3395856ce81f2b7382dee72602f798b642f14140
+MD5: 44d88612fea8a8f36de82e1278abb02f
+File type: mimetype: text/plain, extended_info: EICAR virus test files
+First seen: 2019-11-01T21:33:53.292099
+Filename: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
+Scan permalink: https://polyswarm.network/scan/results/56944690-6376-44d3-8bff-00c217ccb272
 [91mDetections: 1/1 engines reported malicious[0m
+[91meicar: Malicious, metadata: {'malware_family': 'Eicar Test File', 'scanner': {'environment': {'architecture': 'x86_64', 'operating_system': 'Linux'}}}[0m
 
 """
     )
@@ -40,13 +40,12 @@ def live_results():
 def text_live_results():
     values = []
     values.append(
-        """[92mMatch on rule eicar_substring_test[0m
-[94mFile 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
-[92mFile type: mimetype: text/plain, extended_info: EICAR virus test files[0m
+        """Match on rule eicar_substring_test
 [92mSHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
-[92mSHA1: 3395856ce81f2b7382dee72602f798b642f14140[0m
-[92mMD5: 44d88612fea8a8f36de82e1278abb02f[0m
-[92mFirst seen: 2019-11-01 21:33:53.292099[0m
+SHA1: 3395856ce81f2b7382dee72602f798b642f14140
+MD5: 44d88612fea8a8f36de82e1278abb02f
+File type: mimetype: text/plain, extended_info: EICAR virus test files
+First seen: 2019-11-01 21:33:53.292099
 
 """
     )
@@ -64,13 +63,12 @@ def hisotrical_results():
 def text_hisotrical_results():
     values = []
     values.append(
-        """[92mMatch on rule eicar_substring_test[0m
-[94mFile 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
-[92mFile type: mimetype: text/plain, extended_info: EICAR virus test files[0m
+        """Match on rule eicar_substring_test
 [92mSHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
-[92mSHA1: 3395856ce81f2b7382dee72602f798b642f14140[0m
-[92mMD5: 44d88612fea8a8f36de82e1278abb02f[0m
-[92mFirst seen: 2019-11-01 21:33:53.292099[0m
+SHA1: 3395856ce81f2b7382dee72602f798b642f14140
+MD5: 44d88612fea8a8f36de82e1278abb02f
+File type: mimetype: text/plain, extended_info: EICAR virus test files
+First seen: 2019-11-01 21:33:53.292099
 
 """
     )
@@ -89,8 +87,8 @@ def text_hunts():
     values = []
     values.append(
         """[94mHunt Id: 61210404295535902[0m
-[92mActive: True[0m
-[92mCreated at: 2019-11-13 16:27:45.013226[0m
+Active: True
+Created at: 2019-11-13 16:27:45.013226
 
 """
     )
@@ -102,8 +100,8 @@ def text_detele_hunts():
     values.append(
         """[93mSuccessfully deleted Hunt:[0m
 [94mHunt Id: 61210404295535902[0m
-[92mActive: True[0m
-[92mCreated at: 2019-11-13 16:27:45.013226[0m
+Active: True
+Created at: 2019-11-13 16:27:45.013226
 
 """
     )
@@ -121,7 +119,7 @@ def local_artifacts(paths):
 def text_local_artifacts(path):
     values = []
     values.append(
-        """[92mSuccessfully downloaded artifact malicious to {}[0m
+        """Successfully downloaded artifact malicious to {}
 
 """.format(path)
     )
