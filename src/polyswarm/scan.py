@@ -2,6 +2,8 @@ import logging
 
 import click
 
+from polyswarm_api import const
+from polyswarm_api import exceptions
 from . import utils
 
 logger = logging.getLogger(__name__)
@@ -9,9 +11,11 @@ logger = logging.getLogger(__name__)
 
 @click.command('scan', short_help='scan files/directories')
 @click.option('-r', '--recursive', is_flag=True, default=False, help='Scan directories recursively')
+@click.option('-t', '--timeout', type=click.INT, default=const.DEFAULT_SCAN_TIMEOUT,
+              help='How long to wait for results (default: {})'.format(const.DEFAULT_SCAN_TIMEOUT))
 @click.argument('path', nargs=-1, type=click.Path(exists=True))
 @click.pass_context
-def scan(ctx, path, recursive):
+def scan(ctx, recursive, timeout, path):
     """
     Scan files or directories via PolySwarm
     """
@@ -20,15 +24,20 @@ def scan(ctx, path, recursive):
 
     files = utils.collect_files(path, recursive=recursive)
 
-    for result in api.submit(*files):
-        output.submission(result)
+    for submission in api.submit(*files):
+        try:
+            output.submission(api.wait_for(submission.uuid, timeout=timeout))
+        except exceptions.TimeoutException:
+            output.submission(next(api.lookup(submission.uuid)))
 
 
 @click.command('url', short_help='scan url')
 @click.option('-r', '--url-file', help='File of URLs, one per line.', type=click.File('r'))
+@click.option('-t', '--timeout', type=click.INT, default=const.DEFAULT_SCAN_TIMEOUT,
+              help='How long to wait for results (default: {})'.format(const.DEFAULT_SCAN_TIMEOUT))
 @click.argument('url', nargs=-1, type=click.STRING)
 @click.pass_context
-def url_scan(ctx, url, url_file):
+def url_scan(ctx, url_file, timeout, url):
     """
     Scan files or directories via PolySwarm
     """
@@ -36,12 +45,14 @@ def url_scan(ctx, url, url_file):
     output = ctx.obj['output']
 
     urls = list(url)
-
     if url_file:
         urls.extend([u.strip() for u in url_file.readlines()])
 
-    for result in api.submit(*urls, artifact_type='url'):
-        output.submission(result)
+    for submission in api.submit(*urls, artifact_type='url'):
+        try:
+            output.submission(api.wait_for(submission.uuid, timeout=timeout))
+        except exceptions.TimeoutException:
+            output.submission(next(api.lookup(submission.uuid)))
 
 
 @click.command('rescan', short_help='rescan files(s) by hash')
