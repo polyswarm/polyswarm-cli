@@ -87,7 +87,8 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
         output_file = click.get_text_stream('stdout')
 
     logging.debug('Creating API instance: api_key: %s, api_uri: %s', api_key, api_uri)
-    ctx.obj['api'] = PolyswarmAPI(api_key, api_uri, community=community, validate_schemas=validate, timeout=timeout)
+    ctx.obj['api'] = PolyswarmAPI(api_key, api_uri, community=community,
+                                  validate_schemas=validate, timeout=timeout)
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
 
 

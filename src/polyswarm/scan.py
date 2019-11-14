@@ -26,18 +26,14 @@ def scan(ctx, path, recursive):
 
 @click.command('url', short_help='scan url')
 @click.option('-r', '--url-file', help='File of URLs, one per line.', type=click.File('r'))
-@click.option('-f', '--force', is_flag=True, default=False,
-              help='Force re-scan even if file has already been analyzed.')
-@click.option('-t', '--timeout', type=click.INT, default=-1, help='How long to wait for results (default: forever, -1)')
 @click.argument('url', nargs=-1, type=click.STRING)
 @click.pass_context
-def url_scan(ctx, url, url_file, force, timeout):
+def url_scan(ctx, url, url_file):
     """
     Scan files or directories via PolySwarm
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    api.timeout = timeout
 
     urls = list(url)
 
