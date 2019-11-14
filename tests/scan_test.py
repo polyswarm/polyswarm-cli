@@ -22,7 +22,7 @@ class SubmissionTest(BaseTestCase):
         self.test_runner = CliRunner()
         self.test_api_key = '11111111111111111111111111111111'
 
-    def test_submission_create_json(self):
+    def test_submission_lookup_json(self):
         with patch('polyswarm_api.api.PolyswarmAPI.submit', return_value=[resources.submissions(self)[0]]), \
              patch('polyswarm_api.api.PolyswarmAPI.lookup', return_value=iter([resources.submissions(self)[0]])):
             result = self._run_cli(['--output-format', 'json', '-c', 'gamma',
@@ -68,7 +68,7 @@ class SubmissionTest(BaseTestCase):
         )
 
     def test_submission_rescan_json(self):
-        with patch('polyswarm_api.api.PolyswarmAPI.submit', return_value=[resources.submissions(self)[0]]), \
+        with patch('polyswarm_api.api.PolyswarmAPI.rescan', return_value=[resources.submissions(self)[0]]), \
              patch('polyswarm_api.api.PolyswarmAPI.lookup', return_value=iter([resources.submissions(self)[0]])):
             result = self._run_cli(['--output-format', 'json', '-c', 'gamma',
                                     'rescan', '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'])
