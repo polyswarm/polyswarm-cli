@@ -1,25 +1,35 @@
 import sys
+import functools
 from . import base
 from polyswarm_api import const
 
 
 # TODO rewrite some of this to be not terrible
 def is_colored(fn):
-    color = {
-                '_error': '\033[91m',
-                '_warn': '\033[93m',
-                '_info': '\033[92m',
-                '_good': '\033[92m',
-                '_bad': '\033[91m',
-                '_unknown': '\033[94m',
-                '_open_group': '\033[94m',
-    }[fn.__name__]
+    prefix, suffix = {
+                '_red': ('\033[91m', '\033[0m'),
+                '_yellow': ('\033[93m', '\033[0m'),
+                '_green': ('\033[92m', '\033[0m'),
+                '_white': ('', ''),
+                '_blue': ('\033[94m', '\033[0m'),
+                '_open_group': ('\033[94m', '\033[0m'),
+    }.get(fn.__name__, ('', ''))
 
-    return lambda self, text: (color if self.color else '') + fn(self, text) + ('\033[0m' if self.color else '')
+    @functools.wraps(fn)
+    def wrapper(self, text):
+        if self.color:
+            return prefix + fn(self, text) + suffix
+        else:
+            return fn(self, text)
+    return wrapper
 
 
 def is_grouped(fn):
-    return lambda self, text: self._depth*'\t'+fn(self, text)
+    @functools.wraps(fn)
+    def wrapper(self, text):
+        return self._depth*'\t'+fn(self, text)
+
+    return wrapper
 
 
 class TextOutput(base.BaseOutput):
@@ -33,233 +43,154 @@ class TextOutput(base.BaseOutput):
 
     def _get_score_format(self, score):
         if score < 0.15:
-            return self._good
+            return self._white
         elif score < 0.4:
-            return self._warn
+            return self._yellow
         else:
-            return self._bad
+            return self._red
 
-    def _write_output(self, output):
-        self.out.write('\n'.join(output) + '\n\n')
+    def _output(self, output, write):
+        if write:
+            self.out.write('\n'.join(output) + '\n\n')
+        else:
+            return output
 
     def artifact(self, artifact, write=True):
         output = []
-        output.append(self._unknown('File %s' % artifact.sha256))
-        output.append(self._info('File type: mimetype: {mimetype}, extended_info: {extended_type}'.
-                                 format(mimetype=artifact.mimetype, extended_type=artifact.extended_type)))
-        output.append(self._info('SHA256: {hash}'.format(hash=artifact.sha256)))
-        output.append(self._info('SHA1: {hash}'.format(hash=artifact.sha1)))
-        output.append(self._info('MD5: {hash}'.format(hash=artifact.md5)))
+        output.append(self._green('SHA256: {hash}'.format(hash=artifact.sha256)))
+        output.append(self._white('SHA1: {hash}'.format(hash=artifact.sha1)))
+        output.append(self._white('MD5: {hash}'.format(hash=artifact.md5)))
+        output.append(self._white('File type: mimetype: {mimetype}, extended_info: {extended_type}'.
+                                  format(mimetype=artifact.mimetype, extended_type=artifact.extended_type)))
 
         if artifact.metadata:
             if artifact.metadata.hash:
                 h = artifact.metadata.hash
-
                 if 'ssdeep' in h:
-                    output.append(self._info('SSDEEP: {}'.format(h['ssdeep'])))
-
+                    output.append(self._white('SSDEEP: {}'.format(h['ssdeep'])))
                 if 'tlsh' in h:
-                    output.append(self._info('TLSH: {}'.format(h['tlsh'])))
-
+                    output.append(self._white('TLSH: {}'.format(h['tlsh'])))
                 if 'authentihash' in h:
-                    output.append(self._info('Authentihash: {}'.format(h['authentihash'])))
+                    output.append(self._white('Authentihash: {}'.format(h['authentihash'])))
             if artifact.metadata.pefile:
                 p = artifact.metadata.pefile
-
                 if 'imphash' in p:
-                    output.append(self._info('Imphash: {}'.format(p['imphash'])))
-
-        output.append(self._info('First seen: {first_seen}'.format(first_seen=artifact.first_seen)))
-        if write:
-            self._write_output(output)
-        else:
-            return output
+                    output.append(self._white('Imphash: {}'.format(p['imphash'])))
+        output.append(self._white('First seen: {first_seen}'.format(first_seen=artifact.first_seen)))
+        return self._output(output, write)
 
     def artifact_instance(self, instance, write=True):
         output = []
         output.extend(self.artifact(instance, write=False))
-
-        output.append(self._info('Filename: {filename}'.format(filename=instance.filename)))
+        output.append(self._white('Filename: {}'.format(instance.filename)))
         if instance.country:
-            output.append(self._info('Country: {country}'.format(country=instance.country)))
+            output.append(self._white('Country: {}'.format(instance.country)))
 
         # only report information if we have scanned the file before
         if instance.permalink:
-            output.append(self._info('Scan permalink: {}'.format(instance.permalink)))
+            output.append(self._white('Scan permalink: {}'.format(instance.permalink)))
+        detections = 'Detections: {}/{} engines reported malicious'\
+            .format(len(instance.detections), len(instance.valid_assertions))
         if len(instance.detections) > 0:
-            output.append(self._normal(self._bad('Detections: {}/{} engines reported malicious'.format(
-                len(instance.detections), len(instance.valid_assertions)))))
+            output.append(self._red(detections))
         else:
-            output.append(self._info('Detections: {}/{} engines reported malicious'.format(
-                0, len(instance.valid_assertions))))
+            output.append(self._white(detections))
 
         if instance.polyscore is not None:
             formatter = self._get_score_format(instance.polyscore)
-            output.append(self._normal('PolyScore: '+formatter('{}'.format(instance.polyscore))))
+            output.append(formatter('PolyScore: {}'.format(instance.polyscore)))
 
-        if write:
-            self._write_output(output)
-        else:
-            return output
+        for assertion in instance.assertions:
+            if assertion.verdict is False:
+                output.append(self._green('%s: %s' % (assertion.engine_name, 'Clean')))
+            elif assertion.verdict is None or assertion.mask is False:
+                output.append(self._blue('%s: %s' % (assertion.engine_name, 'Engine chose not respond to this bounty.')))
+            else:
+                value = 'Malicious'
+                if assertion.metadata:
+                    value += ', metadata: %s' % assertion.metadata
+                output.append(self._red('%s: %s' % (assertion.engine_name, value)))
 
-    def submission(self, result, write=True):
+        return self._output(output, write)
+
+    def submission(self, submission, write=True):
         output = []
-        bounty = result.result
-
-        if result.failed:
-            self.out.write(self._error(result.failure_reason)+'\n')
-            return
-
-        output.append(self._normal('Scan report for GUID %s\n========================================================='
-                                   % bounty.uuid))
-
-        # if this scan result is associated with a particular artifact, only display that artifact
-        files = bounty.files
-        if result.artifact:
-            f = bounty.get_file_by_hash(result.artifact.hash)
-            if f:
-                files = [f]
-
-        if write:
-            self.out.write("\n".join([self._format_bounty_file(f) for f in files]) + '\n')
-        else:
-            return output
-
-    def _format_bounty_file(self, f, write=True):
-        output = [self._open_group('Report for artifact %s, hash: %s' %
-                                   (f.filename, f.hash))]
-        if not f.ready:
-            output.append(self._warn('Scan is still in progress, check back later. Reference: %s' % f.permalink))
-        elif len(f.assertions) == 0:
-            # TODO are these still necessary?
-            if f.bounty.status == 'Bounty Failed' or f.failed:
-                output.append(self._bad('Bounty failed, please resubmit. Reference: %s' % f.permalink))
-            else:
-                output.append(self._bad('Bounty closed without any engine assertions. Try again later. Reference: %s' % f.permalink))
-        else:
-            detections = f.detections
-            assertions = f.assertions
-
-
-
-            if len(detections) > 0:
-                output.append(self._normal('') + self._bad('{} out of {} engines reported this as malicious'.format(
-                    len(detections), len(assertions)
-                )))
-            else:
-                output.append(self._normal('') + self._good('All {} engines reported this as benign or did not respond'.format(
-                    len(assertions)
-                )))
-
-            for assertion in assertions:
-                if assertion.verdict is False:
-                    output.append('%s: %s' % (self._normal(assertion.engine_name), self._good('Clean')))
-                elif assertion.verdict is None or assertion.mask is False:
-                    output.append('%s: %s' % (self._normal(assertion.engine_name), self._unknown('Engine chose not respond to this bounty.')))
-                else:
-                    output.append('%s: %s' % (self._normal(assertion.engine_name),
-                                              self._bad('Malicious') +
-                                              (self._bad(', metadata: %s' % assertion.metadata)
-                                              if assertion.metadata is not None else '')))
-
-            output.append('%s: %s' % (self._normal('Scan permalink'), self._good(f.permalink)))
-
-            score = f.polyscore
-            if score is not None:
-                formatter = self._get_score_format(score)
-                output.append(self._normal('PolyScore: '+formatter('{}'.format(score))))
-
-        output.append(self._close_group())
-        if write:
-            self.out.write('\n'.join(output))
-        else:
-            return output
+        output.append(self._green('Submission %s' % submission.uuid))
+        output.append(self._white('Reference: %s' % submission.permalink))
+        output.append(self._white('Community: %s' % submission.community))
+        if submission.country:
+            output.append(self._white('Country: %s' % submission.country))
+        for instance in submission.instances:
+            output.append(self._white('============================= Artifact Instance ============================='))
+            self._open_group()
+            output.extend(self.artifact_instance(instance, write=False))
+            output.append('')
+            self._close_group()
+        return self._output(output, write)
 
     def hunt(self, result, write=True):
         output = []
-        output.append(self._unknown('Hunt Id: {}'.format(result.id)))
+        output.append(self._blue('Hunt Id: {}'.format(result.id)))
         if result.active is not None:
-            output.append(self._info('Active: {}'.format(result.active)))
-        output.append(self._info('Created at: {}'.format(result.created)))
+            output.append(self._white('Active: {}'.format(result.active)))
+        output.append(self._white('Created at: {}'.format(result.created)))
 
-        if write:
-            self._write_output(output)
-        else:
-            return output
+        return self._output(output, write)
 
     def hunt_deletion(self, result, write=True):
         output = []
-        output.append(self._warn('Successfully deleted Hunt:'))
+        output.append(self._yellow('Successfully deleted Hunt:'))
         output.extend(self.hunt(result, write=False))
 
-        if write:
-            self._write_output(output)
-        else:
-            return output
+        return self._output(output, write)
 
     def hunt_result(self, result, write=True):
         output = []
-        output.append(self._good('Match on rule {name}'.format(name=result.rule_name) +
+        output.append(self._white('Match on rule {name}'.format(name=result.rule_name) +
                                  (', tags: {result_tags}'.format(
                                      result_tags=result.tags) if result.tags != '' else '')))
         output.extend(self.artifact(result.artifact, write=False))
-        if write:
-            self._write_output(output)
-        else:
-            return output
+        return self._output(output, write)
 
     def local_artifact(self, artifact, write=True):
         output = []
-        output.append(self._good('Successfully downloaded artifact {} to {}'
-                                 .format(artifact.artifact_name, artifact.path)))
-        if write:
-            self._write_output(output)
-        else:
-            return output
+        output.append(self._white('Successfully downloaded artifact {} to {}'
+                                  .format(artifact.artifact_name, artifact.path)))
+        return self._output(output, write)
 
     def usage_exceeded(self):
-        self.out.write(self._bad(const.USAGE_EXCEEDED_MESSAGE)+'\n')
+        self.out.write(self._red(const.USAGE_EXCEEDED_MESSAGE)+'\n')
 
     def invalid_rule(self, e):
-        self.out.write(self._bad('Malformed yara file: {}'.format(e.args[0])+'\n'))
+        self.out.write(self._red('Malformed yara file: {}'.format(e.args[0])+'\n'))
 
-    @is_grouped
     @is_colored
-    def _info(self, text):
-        return '%s' % text
-
     @is_grouped
-    @is_colored
-    def _warn(self, text):
-        return '%s' % text
-
-    @is_grouped
-    @is_colored
-    def _error(self, text):
+    def _white(self, text):
         return '%s' % text
 
     @is_colored
-    def _good(self, text):
-        return text
-
-    @is_colored
-    def _bad(self, text):
-        return text
-
-    @is_colored
-    def _unknown(self, text):
-        return text
-
     @is_grouped
-    def _normal(self, text):
-        return text
+    def _yellow(self, text):
+        return '%s' % text
 
-    @is_grouped
     @is_colored
-    def _open_group(self, title):
+    @is_grouped
+    def _red(self, text):
+        return '%s' % text
+
+    @is_colored
+    @is_grouped
+    def _blue(self, text):
+        return '%s' % text
+
+    @is_colored
+    @is_grouped
+    def _green(self, text):
+        return '%s' % text
+
+    def _open_group(self):
         self._depth += 1
-        return title
 
     def _close_group(self):
         self._depth -= 1
-        return '\n'
