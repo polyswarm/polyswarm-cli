@@ -58,9 +58,11 @@ def url_scan(ctx, url_file, timeout, url):
 @click.command('rescan', short_help='rescan files(s) by hash')
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5]', default=None)
+@click.option('-t', '--timeout', type=click.INT, default=const.DEFAULT_SCAN_TIMEOUT,
+              help='How long to wait for results (default: {})'.format(const.DEFAULT_SCAN_TIMEOUT))
 @click.argument('hash_value', nargs=-1, callback=utils.validate_hashes)
 @click.pass_context
-def rescan(ctx, hash_file, hash_type, hash_value):
+def rescan(ctx, hash_file, hash_type, timeout, hash_value):
     """
     Rescan files with matched hashes
     """
@@ -68,8 +70,11 @@ def rescan(ctx, hash_file, hash_type, hash_value):
     output = ctx.obj['output']
     hashes = utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)
 
-    for result in api.rescan(*hashes):
-        output.submission(result)
+    for submission in api.rescan(*hashes):
+        try:
+            output.submission(api.wait_for(submission.uuid, timeout=timeout))
+        except exceptions.TimeoutException:
+            output.submission(next(api.lookup(submission.uuid)))
 
 
 @click.command('lookup', short_help='lookup UUID(s)')
