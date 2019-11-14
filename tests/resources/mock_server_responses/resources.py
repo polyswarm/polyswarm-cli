@@ -1,12 +1,14 @@
 import os
 
 from polyswarm_api.types import resources
+from polyswarm_api.api import PolyswarmAPI
 
 
-def instances():
+def instances(test):
     values = []
     values.append(resources.ArtifactInstance(
-        {'account_id': '1', 'artifact_id': '11611818710765483', 'assertions': [{'author': '0x05328f171b8c1463eaFDACCA478D9EE6a1d923F8', 'author_name': 'eicar', 'bid': '1000000000000000000', 'engine': {'description': 'eicar', 'name': 'eicar', 'tags': []}, 'mask': True, 'metadata': {'malware_family': 'Eicar Test File', 'scanner': {'environment': {'architecture': 'x86_64', 'operating_system': 'Linux'}}}, 'verdict': True}], 'community': 'gamma', 'country': '', 'created': '2019-11-07T19:18:00.265903', 'extended_type': 'EICAR virus test files', 'failed': False, 'filename': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'first_seen': '2019-11-01T21:33:53.292099', 'id': 49091542211453596, 'last_seen': '2019-11-07T16:18:00.269290', 'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 'result': True, 's3_file_name': 'testing/files/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'sha1': '3395856ce81f2b7382dee72602f798b642f14140', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'size': 68, 'submission_id': 44664431668105478, 'submission_uuid': '56944690-6376-44d3-8bff-00c217ccb272', 'type': 'FILE', 'votes': [{'arbiter': '0xF870491ea0F53F67846Eecb57855284D8270284D', 'vote': True}], 'window_closed': True}
+        {'account_id': '1', 'artifact_id': '11611818710765483', 'assertions': [{'author': '0x05328f171b8c1463eaFDACCA478D9EE6a1d923F8', 'author_name': 'eicar', 'bid': '1000000000000000000', 'engine': {'description': 'eicar', 'name': 'eicar', 'tags': []}, 'mask': True, 'metadata': {'malware_family': 'Eicar Test File', 'scanner': {'environment': {'architecture': 'x86_64', 'operating_system': 'Linux'}}}, 'verdict': True}], 'community': 'gamma', 'country': '', 'created': '2019-11-07T19:18:00.265903', 'extended_type': 'EICAR virus test files', 'failed': False, 'filename': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'first_seen': '2019-11-01T21:33:53.292099', 'id': 49091542211453596, 'last_seen': '2019-11-07T16:18:00.269290', 'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 'result': True, 's3_file_name': 'testing/files/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'sha1': '3395856ce81f2b7382dee72602f798b642f14140', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'size': 68, 'submission_id': 44664431668105478, 'submission_uuid': '56944690-6376-44d3-8bff-00c217ccb272', 'type': 'FILE', 'votes': [{'arbiter': '0xF870491ea0F53F67846Eecb57855284D8270284D', 'vote': True}], 'window_closed': True},
+        polyswarm=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
     ))
     return values
 
@@ -20,6 +22,7 @@ MD5: 44d88612fea8a8f36de82e1278abb02f
 File type: mimetype: text/plain, extended_info: EICAR virus test files
 First seen: 2019-11-01T21:33:53.292099
 Filename: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
+PolyScore: 0.00024050482800527995
 Scan permalink: https://polyswarm.network/scan/results/56944690-6376-44d3-8bff-00c217ccb272
 [91mDetections: 1/1 engines reported malicious[0m
 [91meicar: Malicious, metadata: {'malware_family': 'Eicar Test File', 'scanner': {'environment': {'architecture': 'x86_64', 'operating_system': 'Linux'}}}[0m
@@ -28,10 +31,11 @@ Scan permalink: https://polyswarm.network/scan/results/56944690-6376-44d3-8bff-0
     return values
 
 
-def live_results():
+def live_results(test):
     values = []
     values.append(resources.HuntResult(
-        {'artifact': {'extended_type': 'EICAR virus test files', 'first_seen': '2019-11-01T21:33:53.292099', 'id': '11611818710765483', 'last_seen': '2019-11-12T15:52:00.702928', 'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 's3_file_name': None, 'sha1': '3395856ce81f2b7382dee72602f798b642f14140', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'size': 68}, 'created': '2019-11-07T19:06:22.630556', 'historicalscan_id': None, 'id': '86273842846244087', 'livescan_id': '63433636835291189', 'rule_name': 'eicar_substring_test', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'tags': ''}
+        {'artifact': {'extended_type': 'EICAR virus test files', 'first_seen': '2019-11-01T21:33:53.292099', 'id': '11611818710765483', 'last_seen': '2019-11-12T15:52:00.702928', 'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 's3_file_name': None, 'sha1': '3395856ce81f2b7382dee72602f798b642f14140', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'size': 68}, 'created': '2019-11-07T19:06:22.630556', 'historicalscan_id': None, 'id': '86273842846244087', 'livescan_id': '63433636835291189', 'rule_name': 'eicar_substring_test', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'tags': ''},
+        polyswarm=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
     ))
     return values
 
@@ -50,10 +54,11 @@ First seen: 2019-11-01 21:33:53.292099
     return values
 
 
-def hisotrical_results():
+def hisotrical_results(test):
     values = []
     values.append(resources.HuntResult(
-        {'artifact': {'extended_type': 'EICAR virus test files', 'first_seen': '2019-11-01T21:33:53.292099', 'id': '11611818710765483', 'last_seen': '2019-11-12T15:52:00.702928', 'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 's3_file_name': None, 'sha1': '3395856ce81f2b7382dee72602f798b642f14140', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'size': 68}, 'created': '2019-11-04T18:40:02.063064', 'historicalscan_id': '47190397989086018', 'id': '36730172447808985', 'livescan_id': None, 'rule_name': 'eicar_substring_test', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'tags': ''}
+        {'artifact': {'extended_type': 'EICAR virus test files', 'first_seen': '2019-11-01T21:33:53.292099', 'id': '11611818710765483', 'last_seen': '2019-11-12T15:52:00.702928', 'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 's3_file_name': None, 'sha1': '3395856ce81f2b7382dee72602f798b642f14140', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'size': 68}, 'created': '2019-11-04T18:40:02.063064', 'historicalscan_id': '47190397989086018', 'id': '36730172447808985', 'livescan_id': None, 'rule_name': 'eicar_substring_test', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'tags': ''},
+        polyswarm=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
     ))
     return values
 
@@ -72,10 +77,11 @@ First seen: 2019-11-01 21:33:53.292099
     return values
 
 
-def hunts():
+def hunts(test):
     values = []
     values.append(resources.Hunt(
-        {'active': True, 'created': '2019-11-13T16:27:45.013226', 'id': '61210404295535902', 'status': 'SUCCESS'}
+        {'active': True, 'created': '2019-11-13T16:27:45.013226', 'id': '61210404295535902', 'status': 'SUCCESS'},
+        polyswarm=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
     ))
     return values
 
@@ -133,10 +139,11 @@ def cat_request(data):
     return Request(content=data)
 
 
-def submissions():
+def submissions(test):
     values = []
     values.append(resources.Submission(
-        {'account_id': '1', 'community': 'gamma', 'country': '', 'instances': [{'account_id': '1', 'artifact_id': '11611818710765483', 'assertions': [], 'community': 'gamma', 'country': '', 'created': '2019-11-14T15:31:54.803870', 'extended_type': 'EICAR virus test files', 'failed': False, 'filename': 'malicious', 'first_seen': '2019-11-01T21:33:53.292099', 'id': 75565447441754955, 'last_seen': '2019-11-14T12:31:54.796847', 'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 'result': None, 's3_file_name': 'testing/files/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'sha1': '3395856ce81f2b7382dee72602f798b642f14140', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'size': 68, 'submission_id': 46418793670385651, 'submission_uuid': 'a4b9e37c-73a8-4807-8e93-bf6d96a8d3bc', 'type': 'FILE', 'votes': [], 'window_closed': False}], 'status': 'Bounty Created', 'uuid': 'a4b9e37c-73a8-4807-8e93-bf6d96a8d3bc'}
+        {'account_id': '1', 'community': 'gamma', 'country': '', 'instances': [{'account_id': '1', 'artifact_id': '11611818710765483', 'assertions': [{'author': '0x05328f171b8c1463eaFDACCA478D9EE6a1d923F8', 'author_name': 'eicar', 'bid': '1000000000000000000', 'engine': {'description': 'eicar', 'name': 'eicar', 'tags': []}, 'mask': True, 'metadata': {'malware_family': 'Eicar Test File', 'scanner': {'environment': {'architecture': 'x86_64', 'operating_system': 'Linux'}}}, 'verdict': True}], 'community': 'gamma', 'country': '', 'created': '2019-11-14T16:30:00.888191', 'extended_type': 'EICAR virus test files', 'failed': False, 'filename': 'malicious', 'first_seen': '2019-11-01T21:33:53.292099', 'id': 56977143704899183, 'last_seen': '2019-11-14T13:30:00.882041', 'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 'result': True, 's3_file_name': 'testing/files/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'sha1': '3395856ce81f2b7382dee72602f798b642f14140', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'size': 68, 'submission_id': 4563909428746367, 'submission_uuid': '74ac1097-2477-4566-951a-bf0c2716642e', 'type': 'FILE', 'votes': [{'arbiter': '0xF870491ea0F53F67846Eecb57855284D8270284D', 'vote': True}], 'window_closed': True}], 'status': 'Bounty Settled', 'uuid': '74ac1097-2477-4566-951a-bf0c2716642e'},
+        polyswarm=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
     ))
     return values
 
@@ -144,8 +151,8 @@ def submissions():
 def text_submissions():
     values = []
     values.append(
-        """[92mSubmission a4b9e37c-73a8-4807-8e93-bf6d96a8d3bc[0m
-Reference: https://polyswarm.network/scan/results/a4b9e37c-73a8-4807-8e93-bf6d96a8d3bc
+        """[92mSubmission 74ac1097-2477-4566-951a-bf0c2716642e[0m
+Reference: https://polyswarm.network/scan/results/74ac1097-2477-4566-951a-bf0c2716642e
 Community: gamma
 ============================= Artifact Instance =============================
 [92m	SHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
@@ -154,9 +161,20 @@ Community: gamma
 	File type: mimetype: text/plain, extended_info: EICAR virus test files
 	First seen: 2019-11-01T21:33:53.292099
 	Filename: malicious
-	Scan permalink: https://polyswarm.network/scan/results/a4b9e37c-73a8-4807-8e93-bf6d96a8d3bc
-	Detections: 0/0 engines reported malicious
+	PolyScore: 0.00024050482800527995
+	Scan permalink: https://polyswarm.network/scan/results/74ac1097-2477-4566-951a-bf0c2716642e
+[91m	Detections: 1/1 engines reported malicious[0m
+[91m	eicar: Malicious, metadata: {'malware_family': 'Eicar Test File', 'scanner': {'environment': {'architecture': 'x86_64', 'operating_system': 'Linux'}}}[0m
 
 
 """)
+    return values
+
+
+def scores(test):
+    values = []
+    values.append(resources.PolyScore(
+        {'scores': {'56977143704899183': 0.00024050482800527995, '11611818710765483': 0.00024050482800527995, '49091542211453596': 0.00024050482800527995,}},
+        polyswarm=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
+    ))
     return values
