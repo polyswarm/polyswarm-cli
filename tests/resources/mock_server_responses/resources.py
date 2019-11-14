@@ -24,8 +24,7 @@ Scan permalink: https://polyswarm.network/scan/results/56944690-6376-44d3-8bff-0
 [91mDetections: 1/1 engines reported malicious[0m
 [91meicar: Malicious, metadata: {'malware_family': 'Eicar Test File', 'scanner': {'environment': {'architecture': 'x86_64', 'operating_system': 'Linux'}}}[0m
 
-"""
-    )
+""")
     return values
 
 
@@ -47,8 +46,7 @@ MD5: 44d88612fea8a8f36de82e1278abb02f
 File type: mimetype: text/plain, extended_info: EICAR virus test files
 First seen: 2019-11-01 21:33:53.292099
 
-"""
-    )
+""")
     return values
 
 
@@ -70,8 +68,7 @@ MD5: 44d88612fea8a8f36de82e1278abb02f
 File type: mimetype: text/plain, extended_info: EICAR virus test files
 First seen: 2019-11-01 21:33:53.292099
 
-"""
-    )
+""")
     return values
 
 
@@ -90,8 +87,7 @@ def text_hunts():
 Active: True
 Created at: 2019-11-13 16:27:45.013226
 
-"""
-    )
+""")
     return values
 
 
@@ -103,8 +99,7 @@ def text_detele_hunts():
 Active: True
 Created at: 2019-11-13 16:27:45.013226
 
-"""
-    )
+""")
     return values
 
 
@@ -121,8 +116,7 @@ def text_local_artifacts(path):
     values.append(
         """Successfully downloaded artifact malicious to {}
 
-""".format(path)
-    )
+""".format(path))
     return values
 
 
@@ -137,3 +131,32 @@ def cat_request(data):
             yield self.content
 
     return Request(content=data)
+
+
+def submissions():
+    values = []
+    values.append(resources.Submission(
+        {'account_id': '1', 'community': 'gamma', 'country': '', 'instances': [{'account_id': '1', 'artifact_id': '11611818710765483', 'assertions': [], 'community': 'gamma', 'country': '', 'created': '2019-11-14T15:31:54.803870', 'extended_type': 'EICAR virus test files', 'failed': False, 'filename': 'malicious', 'first_seen': '2019-11-01T21:33:53.292099', 'id': 75565447441754955, 'last_seen': '2019-11-14T12:31:54.796847', 'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 'result': None, 's3_file_name': 'testing/files/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'sha1': '3395856ce81f2b7382dee72602f798b642f14140', 'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'size': 68, 'submission_id': 46418793670385651, 'submission_uuid': 'a4b9e37c-73a8-4807-8e93-bf6d96a8d3bc', 'type': 'FILE', 'votes': [], 'window_closed': False}], 'status': 'Bounty Created', 'uuid': 'a4b9e37c-73a8-4807-8e93-bf6d96a8d3bc'}
+    ))
+    return values
+
+
+def text_submissions():
+    values = []
+    values.append(
+        """[92mSubmission a4b9e37c-73a8-4807-8e93-bf6d96a8d3bc[0m
+Reference: https://polyswarm.network/scan/results/a4b9e37c-73a8-4807-8e93-bf6d96a8d3bc
+Community: gamma
+============================= Artifact Instance =============================
+[92m	SHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
+	SHA1: 3395856ce81f2b7382dee72602f798b642f14140
+	MD5: 44d88612fea8a8f36de82e1278abb02f
+	File type: mimetype: text/plain, extended_info: EICAR virus test files
+	First seen: 2019-11-01T21:33:53.292099
+	Filename: malicious
+	Scan permalink: https://polyswarm.network/scan/results/a4b9e37c-73a8-4807-8e93-bf6d96a8d3bc
+	Detections: 0/0 engines reported malicious
+
+
+""")
+    return values

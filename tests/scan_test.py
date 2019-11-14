@@ -23,21 +23,21 @@ class SubmissionTest(BaseTestCase):
         self.test_api_key = '11111111111111111111111111111111'
 
     def test_submission_create_json(self):
-        # with patch('polyswarm_api.api.PolyswarmAPI.historical_create', return_value=resources.hunts()[0]):
-        result = self._run_cli(['--output-format', 'json', '-c', 'gamma',
-                                'scan', os.path.join(BASE_PATH, 'malicious')])
+        with patch('polyswarm_api.api.PolyswarmAPI.submit', return_value=[resources.submissions()[0]]):
+            result = self._run_cli(['--output-format', 'json', '-c', 'gamma',
+                                    'scan', os.path.join(BASE_PATH, 'malicious')])
         self._assert_json_result(
             result,
-            expected_output=resources.hunts()[0].json,
+            expected_output=resources.submissions()[0].json,
             expected_return_code=0,
         )
 
     def test_submission_create_text(self):
-        # with patch('polyswarm_api.api.PolyswarmAPI.historical_create', return_value=resources.hunts()[0]):
-        result = self._run_cli(['--output-format', 'text', '-c', 'gamma',
-                                'scan', os.path.join(BASE_PATH, 'malicious')])
-        self._assert_json_result(
+        with patch('polyswarm_api.api.PolyswarmAPI.submit', return_value=[resources.submissions()[0]]):
+            result = self._run_cli(['--output-format', 'text', '-c', 'gamma',
+                                    'scan', os.path.join(BASE_PATH, 'malicious')])
+        self._assert_text_result(
             result,
-            expected_output=resources.hunts()[0].json,
+            expected_output=resources.text_submissions()[0],
             expected_return_code=0,
         )
