@@ -21,8 +21,7 @@ setup(
     install_requires=[
         'polyswarm-api~=2.0dev',
         'click==7.0',
-        'pytest==3.9.2',
-        'requests_mock==1.7.0'
+        'future==0.18.2',
     ],
     include_package_data=True,
     packages=find_packages('src'),
