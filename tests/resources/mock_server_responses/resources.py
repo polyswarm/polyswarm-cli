@@ -25,7 +25,7 @@ Filename: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
 PolyScore: 0.00024050482800527995
 Scan permalink: https://polyswarm.network/scan/results/56944690-6376-44d3-8bff-00c217ccb272
 [91mDetections: 1/1 engines reported malicious[0m
-[91meicar: Malicious, metadata: {'malware_family': 'Eicar Test File', 'scanner': {'environment': {'architecture': 'x86_64', 'operating_system': 'Linux'}}}[0m
+[91meicar: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}[0m
 
 """)
     return values
@@ -164,7 +164,7 @@ Community: gamma
 	PolyScore: 0.00024050482800527995
 	Scan permalink: https://polyswarm.network/scan/results/74ac1097-2477-4566-951a-bf0c2716642e
 [91m	Detections: 1/1 engines reported malicious[0m
-[91m	eicar: Malicious, metadata: {'malware_family': 'Eicar Test File', 'scanner': {'environment': {'architecture': 'x86_64', 'operating_system': 'Linux'}}}[0m
+[91m	eicar: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}[0m
 
 
 """)
