@@ -125,6 +125,9 @@ class BaseTestCase(TestCase):
     def _assert_json_result(self, result, expected_output, expected_return_code):
         result_output = self._get_result_output(result)
         output = json.loads(result_output)
+        # TODO: this fixes issues with unicode as when loading we always consider it is a unicode string
+        #  to be removed once we drop support to python 2.7
+        expected_output = json.loads(json.dumps(expected_output, sort_keys=True))
         if expected_output is not None:
             self._assert_json_equal(output, expected_output)
         if expected_return_code is not None:
