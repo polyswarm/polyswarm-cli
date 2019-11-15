@@ -1,5 +1,7 @@
+from __future__ import absolute_import
 import sys
 import functools
+import json
 from . import base
 from polyswarm_api import const
 
@@ -108,7 +110,7 @@ class TextOutput(base.BaseOutput):
             else:
                 value = 'Malicious'
                 if assertion.metadata:
-                    value += ', metadata: %s' % assertion.metadata
+                    value += ', metadata: %s' % json.dumps(assertion.metadata, sort_keys=True)
                 output.append(self._red('%s: %s' % (assertion.engine_name, value)))
 
         return self._output(output, write)
