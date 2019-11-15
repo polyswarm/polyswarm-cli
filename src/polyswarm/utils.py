@@ -51,8 +51,9 @@ def collect_files(paths, recursive=False, log_errors=False):
 
 def parse_hashes(values, hash_file=None, hash_type=None, log_errors=False):
     hashes = []
+    values = list(values)
     if hash_file is not None:
-        values += hash_file.read_lines()
+        values += hash_file.readlines()
     for hash_ in values:
         try:
             hashes.append(resources.Hash(hash_, hash_type=hash_type))
