@@ -88,7 +88,7 @@ class TextOutput(base.BaseOutput):
 
         if instance.polyscore is not None:
             formatter = self._get_score_format(instance.polyscore)
-            output.append(formatter('PolyScore: {}'.format(instance.polyscore)))
+            output.append(formatter('PolyScore: {:.20f}'.format(instance.polyscore)))
 
         # only report information if we have scanned the file before
         if instance.permalink:
