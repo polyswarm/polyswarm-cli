@@ -4,6 +4,7 @@ import functools
 import json
 from . import base
 from polyswarm_api import const
+from polyswarm_api import exceptions
 
 
 # TODO rewrite some of this to be not terrible
@@ -88,9 +89,11 @@ class TextOutput(base.BaseOutput):
         if instance.country:
             output.append(self._white('Country: {}'.format(instance.country)))
 
-        if instance.polyscore is not None:
+        try:
             formatter = self._get_score_format(instance.polyscore)
             output.append(formatter('PolyScore: {:.20f}'.format(instance.polyscore)))
+        except exceptions.RequestFailedException:
+            pass
 
         # only report information if we have scanned the file before
         if instance.permalink:
