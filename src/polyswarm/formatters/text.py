@@ -79,7 +79,8 @@ class TextOutput(base.BaseOutput):
                 p = artifact.metadata.pefile
                 if 'imphash' in p:
                     output.append(self._white('Imphash: {}'.format(p['imphash'])))
-        output.append(self._white('First seen: {first_seen}'.format(first_seen=artifact.first_seen)))
+        output.append(self._white('First seen: {}'.format(artifact.first_seen)))
+        output.append(self._white('Last seen: {}'.format(artifact.last_seen)))
         return self._output(output, write)
 
     def artifact_instance(self, instance, write=True):
