@@ -25,3 +25,4 @@ class BaseOutput(object):
     @staticmethod
     def usage_exceeded():
         print(USAGE_EXCEEDED_MESSAGE)
+

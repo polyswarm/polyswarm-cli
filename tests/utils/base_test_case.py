@@ -6,16 +6,16 @@ import json
 import difflib
 import traceback
 from deepdiff import DeepDiff
-
 from click.testing import CliRunner
 from pkg_resources import resource_string, resource_filename
 
 from polyswarm_api.types import resources
-
 from polyswarm import base
+from polyswarm_api import const as polyswarm_api_const
+from polyswarm_api.endpoint import PolyswarmRequestGenerator
+from polyswarm_api.api import PolyswarmAPI
 
 logger = logging.getLogger(__name__)
-
 
 TestCase.maxDiff = None
 
@@ -30,42 +30,129 @@ class BaseTestCase(TestCase):
         super(BaseTestCase, self).__init__(*args, **kwargs)
         self.test_runner = CliRunner()
         self.test_api_key = '963da5a463b0ab61fe0f96f82846490d'
+        self.request_generator = PolyswarmRequestGenerator(PolyswarmAPI(self.test_api_key),
+                                                           polyswarm_api_const.DEFAULT_GLOBAL_API,
+                                                           polyswarm_api_const.DEFAULT_COMMUNITY)
         self.test_captured_output_file = '/tmp/output.txt'
-        self.api_url = 'http://localhost:9696/v2'
+        self.api_url = 'https://api.polyswarm.network/v1'
+        self.test_api_key = '11111111111111111111111111111111'
+        self.test_hash_value = '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
+        self.test_query = '_exists_:lief.libraries'
+        self.test_submission_uuid = '74ac1097-2477-4566-951a-bf0c2716642e'
+        self.test_hunt_id = '63433636835291189'
+        self.test_since = '2880'
+        self.test_eicar = b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*'
+        self.test_s3_file_url = 'http://minio:9000/'\
+                                'testing/testing/files/27/5a/02/'\
+                                '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f?'\
+                                'response-content-disposition=attachment%3B%20filename%3Dtesting%2F'\
+                                'files%2F27%2F5a%2F02%'\
+                                '2F275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&'\
+                                'response-content-type=application%2Foctet-stream&'\
+                                'AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE'\
+                                '&Signature=VLCdYUh8skB6cRqo7RUfGrycsKo%3D&Expires=1573768889'
 
     def setUp(self):
         self._remove_file(self.test_captured_output_file)
 
-    def _setup_mock_response(self, mock_server, request, response, with_auth=True):
-        self._remove_keys(request, ['params', 'json'])
-        if with_auth:
-            self._add_auth(request)
-        mock_server.request(text=response, **request)
+    def _setup_mock_api_response(self, mock_server, request, response):
+        request_parameters = self.convert_polyswarm_api_request_to_mock_request_parameters(request)
+        mock_server.request(text=response, **request_parameters)
 
-    def _create_search_hash_request(self, file_hash, with_instances=True, with_metadata=True):
-        request = self.request_generator.search_hash(resources.Hash.from_hashable(file_hash), with_instances, with_metadata)
-        self.convert_polyswarm_api_request_to_mock_request(request)
+    @staticmethod
+    def _setup_mock_url_response(mock_server, url, response):
+        request_parameters = {'method': 'GET',
+                              'url': url}
+        mock_server.request(body=response, **request_parameters)
+
+    def _setup_mock_api_download(self, mock_server, request, download_file):
+        request_parameters = self.convert_polyswarm_api_request_to_mock_request_parameters(request)
+        mock_server.request(body=download_file, **request_parameters)
+
+    def _create_search_hash_request(self, hash_value, offset=None, limit=None):
+        request = self.request_generator.search_hash(resources.Hash.from_hashable(hash_value))
+        self._add_pagination_params(request, offset, limit)
         return request
 
-    def _create_search_metadata_request(self, query, with_instances=True, with_metadata=True):
-        request = self.request_generator.search_metadata(resources.MetadataQuery(query), with_instances, with_metadata)
-        self.convert_polyswarm_api_request_to_mock_request(request)
+    def _create_search_metadata_request(self, query, offset=None, limit=None):
+        request = self.request_generator.search_metadata(resources.MetadataQuery(query))
+        self._add_pagination_params(request, offset, limit)
         return request
 
-    def _create_hunt_live_list_request(self):
+    def _create_scan_submission_lookup_request(self, submission_uuid):
+        request = self.request_generator.lookup_uuid(submission_uuid)
+        return request
+
+    def _create_scan_submission_submit_request(self, artifact):
+        request = self.request_generator.submit(resources.LocalArtifact(artifact))
+        return request
+
+    def _create_scan_submission_rescan_request(self, hash_value, hash_type='sha256'):
+        request = self.request_generator.rescan(resources.Hash(hash_value, hash_type))
+        return request
+
+    def _create_hunt_live_results_request(self, hunt_id, since, offset=None, limit=None):
+        request = self.request_generator.live_hunt_results(hunt_id, since)
+        self._add_pagination_params(request, offset, limit)
+        return request
+
+    def _create_hunt_historical_results_request(self, hunt_id, offset=None, limit=None):
+        request = self.request_generator.historical_hunt_results(hunt_id)
+        self._add_pagination_params(request, offset, limit)
+        return request
+
+    def _create_hunt_live_start_request(self, yara_file):
+        request = self.request_generator.create_live_hunt(resources.YaraRuleset(None, path=yara_file))
+        return request
+
+    def _create_hunt_historical_start_request(self, yara_file):
+        request = self.request_generator.create_historical_hunt(resources.YaraRuleset(None, path=yara_file))
+        return request
+
+    def _create_hunt_live_delete_request(self, hunt_id):
+        request = self.request_generator.delete_live_hunt(hunt_id)
+        return request
+
+    def _create_hunt_historical_delete_request(self, hunt_id):
+        request = self.request_generator.delete_historical_hunt(hunt_id)
+        return request
+
+    def _create_hunt_live_list_request(self, offset=None, limit=None):
         request = self.request_generator.live_list()
-        self.convert_polyswarm_api_request_to_mock_request(request)
-        print(request)
+        self._add_pagination_params(request, offset, limit)
         return request
 
-    def convert_polyswarm_api_request_to_mock_request(self, request):
-        self._add_params_to_request_url(request)
-        self._remove_keys(request, ['params', 'json'])
-        self._add_auth(request)
+    def _create_hunt_historical_list_request(self, offset=None, limit=None):
+        request = self.request_generator.historical_list()
+        self._add_pagination_params(request, offset, limit)
+        return request
 
-    def _add_params_to_request_url(self, request):
-        if 'params' in request:
-            request['url'] = '%s?%s' % (request['url'], self._params_to_string(request['params']))
+    def _create_download_request(self, hash_value, path, hash_type='sha256'):
+        request = self.request_generator.download(hash_value, hash_type, output_file=path)
+        return request
+
+    def _create_stream_request(self, since, offset=None, limit=None):
+        request = self.request_generator.stream(since)
+        self._add_pagination_params(request, offset, limit)
+        return request
+
+    @staticmethod
+    def _add_pagination_params(request, offset, limit):
+        if offset is not None and limit is not None:
+            request.request_parameters['params']['offset'] = offset
+            request.request_parameters['params']['limit'] = limit
+
+    def convert_polyswarm_api_request_to_mock_request_parameters(self, request):
+        request_parameters = request.request_parameters
+        self._add_params_to_request_url(request_parameters)
+        self._remove_keys(request_parameters, ['timeout', 'params', 'json', 'data', 'files', 'stream'])
+        self._add_auth(request_parameters)
+        return request_parameters
+
+    def _add_params_to_request_url(self, request_parameters):
+        if 'params' in request_parameters:
+            request_parameters['url'] = '%s?%s' % (request_parameters['url'],
+                                                   self._params_to_string(request_parameters['params']))
 
     @staticmethod
     def _params_to_string(params):
@@ -103,16 +190,16 @@ class BaseTestCase(TestCase):
 
     @staticmethod
     def _get_test_text_resource_content(resource):
-        return resource_string('test.resources', resource).decode('utf-8')
+        return resource_string('tests.resources', resource).decode('utf-8')
 
     def _get_test_json_resource_content(self, resource):
         return json.loads(self._get_test_text_resource_content(resource))
 
     def _run_cli(self, commands):
         commands = [
-            '--api-key', self.test_api_key,
-            '-u', self.api_url,
-        ] + commands
+                       '--api-key', self.test_api_key,
+                       '-u', self.api_url,
+                   ] + commands
         return self.test_runner.invoke(base.polyswarm, commands, catch_exceptions=False)
 
     def _assert_text_result(self, result, expected_output=None, expected_return_code=None):
@@ -173,5 +260,10 @@ class BaseTestCase(TestCase):
 
     @staticmethod
     def _get_test_resource_file_path(filename):
-        return resource_filename('test.resources', filename)
+        return resource_filename('tests.resources', filename)
+
+    @staticmethod
+    def _create_response(results, offset=None, limit=None):
+        return json.dumps({'result': results, 'status': 'OK', 'offset': offset, 'limit': limit})
+
 
