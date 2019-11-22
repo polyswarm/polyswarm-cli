@@ -3,6 +3,7 @@ import logging
 import click
 
 from . import utils
+from . import error_codes
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,10 @@ def download(ctx, hash_file, hash_type, hash_value, destination):
     api = ctx.obj['api']
     output = ctx.obj['output']
     hashes = utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)
+
+    results = api.download(destination, *hashes)
+    utils.validate_results(results, error_codes.NO_RESULTS_ERROR)
+
     for result in api.download(destination, *hashes):
         output.local_artifact(result)
 
@@ -33,7 +38,10 @@ def stream(ctx, since, destination):
     api = ctx.obj['api']
     out = ctx.obj['output']
 
-    for download in api.stream(destination, since=since):
+    results = api.stream(destination, since=since)
+    utils.validate_results(results, error_codes.NO_RESULTS_ERROR)
+
+    for download in results:
         out.local_artifact(download)
 
 

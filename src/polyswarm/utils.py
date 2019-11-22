@@ -100,7 +100,8 @@ def validate_hashes(ctx, param, value):
 
 def validate_key(ctx, param, value):
     if not resources.is_hex(value) or len(value) != 32:
-        raise click.BadParameter('Invalid API key. Make sure you specified your key via -a or environment variable and try again.')
+        raise click.BadParameter(
+            'Invalid API key. Make sure you specified your key via -a or environment variable and try again.')
     return value
 
 ####################################################
@@ -108,7 +109,7 @@ def validate_key(ctx, param, value):
 ####################################################
 
 
-def validate_results(results):
+def validate_results(results, error_code):
     if not results:
         logger.error('No results found')
-        sys.exit(1)
+        sys.exit(error_code)

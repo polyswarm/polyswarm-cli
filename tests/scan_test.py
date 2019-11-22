@@ -6,6 +6,7 @@ except ImportError:
     from mock import patch
 
 from tests.utils import mock_polyswarm_api_results
+from polyswarm import error_codes
 
 
 class SubmissionTest(BaseTestCase):
@@ -90,4 +91,16 @@ class SubmissionTest(BaseTestCase):
             result,
             expected_output=mock_polyswarm_api_results.text_submissions()[0],
             expected_return_code=0,
+        )
+
+    def test_submission_rescan_no_results(self):
+        with patch('polyswarm_api.api.PolyswarmAPI.rescan',
+                   return_value=[]), \
+             patch('polyswarm.utils.logger.error') as mock_logger:
+            result = self._run_cli(['--output-format', 'text', '-c', 'gamma',
+                                    'rescan', '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'])
+        mock_logger.assert_called_with('No results found')
+        self._assert_text_result(
+            result,
+            expected_return_code=error_codes.NO_RESULTS_ERROR,
         )

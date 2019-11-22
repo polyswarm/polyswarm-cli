@@ -1,5 +1,7 @@
 import click
 from . import utils
+from . import error_codes
+
 
 @click.group(short_help='interact with live scans')
 def live():
@@ -39,7 +41,7 @@ def live_list(ctx):
     output = ctx.obj['output']
 
     results = api.live_list()
-    utils.validate_results(results)
+    utils.validate_results(results, error_codes.NO_RESULTS_ERROR)
 
     for hunt in results:
         output.hunt(hunt)
@@ -56,7 +58,7 @@ def live_results(ctx, hunt_id, since):
     output = ctx.obj['output']
 
     results = api.live_results(hunt_id, since=since)
-    utils.validate_results(results)
+    utils.validate_results(results, error_codes.NO_RESULTS_ERROR)
 
     for hunt in results:
         output.hunt_result(hunt)
@@ -90,7 +92,7 @@ def historical_list(ctx):
     output = ctx.obj['output']
 
     results = api.historical_list()
-    utils.validate_results(results)
+    utils.validate_results(results, error_codes.NO_RESULTS_ERROR)
 
     for hunt in results:
         output.hunt(hunt)
@@ -104,7 +106,7 @@ def historical_results(ctx, hunt_id):
     output = ctx.obj['output']
 
     results = api.historical_results(hunt_id)
-    utils.validate_results(results)
+    utils.validate_results(results, error_codes.NO_RESULTS_ERROR)
 
     for hunt in results:
         output.hunt_result(hunt)

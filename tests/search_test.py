@@ -7,6 +7,7 @@ except ImportError:
 
 from tests.utils.base_test_case import BaseTestCase
 from tests.utils import mock_polyswarm_api_results
+from polyswarm import error_codes
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,7 @@ class SearchTest(BaseTestCase):
         mock_logger.assert_called_with('No results found')
         self._assert_text_result(
             result,
-            expected_return_code=1,
+            expected_return_code=error_codes.NO_RESULTS_ERROR,
         )
 
     def test_search_metadata_with_json_output(self):
@@ -101,5 +102,5 @@ class SearchTest(BaseTestCase):
         mock_logger.assert_called_with('No results found')
         self._assert_text_result(
             result,
-            expected_return_code=1,
+            expected_return_code=error_codes.NO_RESULTS_ERROR,
         )

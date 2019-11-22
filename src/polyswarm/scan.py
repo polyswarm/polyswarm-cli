@@ -5,6 +5,7 @@ import click
 from polyswarm_api import const
 from polyswarm_api import exceptions
 from . import utils
+from . import error_codes
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +71,10 @@ def rescan(ctx, hash_file, hash_type, timeout, hash_value):
     output = ctx.obj['output']
     hashes = utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)
 
-    for submission in api.rescan(*hashes):
+    results = api.rescan(*hashes)
+    utils.validate_results(results, error_codes.NO_RESULTS_ERROR)
+
+    for submission in results:
         try:
             output.submission(api.wait_for(submission.uuid, timeout=timeout))
         except exceptions.TimeoutException:

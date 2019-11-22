@@ -5,6 +5,7 @@ import os
 from tests.utils.base_test_case import BaseTestCase
 from tests.utils import mock_polyswarm_api_results
 from tests.utils import file_utils
+from polyswarm import error_codes
 
 try:
     from unittest.mock import patch
@@ -182,7 +183,7 @@ class IntegrationTest(BaseTestCase):
         self._assert_text_result(
             result,
             expected_output='"Malformed yara file: line 1: syntax error, unexpected identifier"',
-            expected_return_code=2,
+            expected_return_code=error_codes.GENERAL_ERROR,
         )
 
     def test_historical_hunt_start(self, mock_server):

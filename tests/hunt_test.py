@@ -8,6 +8,7 @@ except ImportError:
     from mock import patch
 
 from tests.utils import mock_polyswarm_api_results
+from polyswarm import error_codes
 
 
 class HuntResultsTest(BaseTestCase):
@@ -68,7 +69,7 @@ class HuntResultsTest(BaseTestCase):
         mock_logger.assert_called_with('No results found')
         self._assert_text_result(
             result,
-            expected_return_code=1,
+            expected_return_code=error_codes.NO_RESULTS_ERROR,
         )
 
     def test_historical_hunt_results_with_no_results(self):
@@ -80,7 +81,7 @@ class HuntResultsTest(BaseTestCase):
         mock_logger.assert_called_with('No results found')
         self._assert_text_result(
             result,
-            expected_return_code=1,
+            expected_return_code=error_codes.NO_RESULTS_ERROR,
         )
 
 
@@ -165,7 +166,7 @@ class LiveHuntTest(BaseTestCase):
         mock_logger.assert_called_with('No results found')
         self._assert_text_result(
             result,
-            expected_return_code=1,
+            expected_return_code=error_codes.NO_RESULTS_ERROR,
         )
 
 
@@ -250,5 +251,5 @@ class HistoricalHuntTest(BaseTestCase):
         mock_logger.assert_called_with('No results found')
         self._assert_text_result(
             result,
-            expected_return_code=1,
+            expected_return_code=error_codes.NO_RESULTS_ERROR,
         )
