@@ -61,13 +61,13 @@ def metadata(ctx, query_string, query_file):
             queries = [resources.MetadataQuery(json.load(query_file), True, api)]
         else:
             logger.error('No query specified')
-            return 1
+            return 2
     except JSONDecodeError:
         logger.error('Failed to parse JSON')
-        return 1
+        return 2
     except UnicodeDecodeError:
         logger.error('Failed to parse JSON due to Unicode error')
-        return 1
+        return 2
 
     for result in api.search_by_metadata(*queries):
         output.artifact_instance(result)
