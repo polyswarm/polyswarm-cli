@@ -171,6 +171,20 @@ class IntegrationTest(BaseTestCase):
             expected_return_code=0,
         )
 
+    def test_live_hunt_start_with_invalid_yara_file(self, mock_server):
+        broken_yara_file = self._get_test_resource_file_path('broken.yara')
+        self._setup_mock_api_response(mock_server,
+                                      request=self._create_hunt_live_start_request(broken_yara_file),
+                                      response=self.mock_hunt_response)
+
+        result = self._run_cli(['--output-format', 'json', 'live', 'start', broken_yara_file])
+
+        self._assert_text_result(
+            result,
+            expected_output='"Malformed yara file: line 1: syntax error, unexpected identifier"',
+            expected_return_code=2,
+        )
+
     def test_historical_hunt_start(self, mock_server):
         yara_file = self._get_test_resource_file_path('eicar.yara')
         self._setup_mock_api_response(mock_server,

@@ -1,0 +1,1 @@
+NOT A YARA FILE
