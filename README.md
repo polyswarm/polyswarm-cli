@@ -20,6 +20,15 @@ From source:
 
 See the [Polyswarm Customer CLI documentation](https://docs.polyswarm.io/docs/polyswarm-customer-cli) for usage guidance.
 
+## Automated Tests
+
+To run automated tests suit (unit and integration):
+
+    pytest
+
+To check current coverage by tests:
+
+    pytest --cov=polyswarm tests/
 
 ## Questions? Problems?
 

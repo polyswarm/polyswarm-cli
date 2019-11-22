@@ -16,7 +16,6 @@ from .search import search
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 VERSION = '2.0.0.dev1'
 
-
 class ExceptionHandlingGroup(click.Group):
     def invoke(self, ctx):
         try:
