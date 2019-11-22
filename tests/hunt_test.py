@@ -1,5 +1,3 @@
-import os
-
 from tests.utils.base_test_case import BaseTestCase
 
 from click.testing import CliRunner
@@ -10,8 +8,6 @@ except ImportError:
     from mock import patch
 
 from tests.utils import mock_polyswarm_api_results
-
-BASE_PATH = os.path.dirname(__file__)
 
 
 class HuntResultsTest(BaseTestCase):
@@ -60,6 +56,31 @@ class HuntResultsTest(BaseTestCase):
             result,
             expected_output=mock_polyswarm_api_results.text_hisotrical_results()[0],
             expected_return_code=0,
+        )
+
+    def test_live_hunt_results_with_no_results(self):
+        with patch('polyswarm_api.api.PolyswarmAPI.live_results',
+                   return_value=[]), \
+             patch('polyswarm.utils.logger.error') as mock_logger:
+            result = self._run_cli(['--output-format', 'json',
+                                    'live', 'results', '63433636835291189',
+                                    '--since', '9999999'])
+        mock_logger.assert_called_with('No results found')
+        self._assert_text_result(
+            result,
+            expected_return_code=1,
+        )
+
+    def test_historical_hunt_results_with_no_results(self):
+        with patch('polyswarm_api.api.PolyswarmAPI.historical_results',
+                   return_value=[]), \
+             patch('polyswarm.utils.logger.error') as mock_logger:
+            result = self._run_cli(['--output-format', 'text',
+                                    'historical', 'results', '47190397989086018'])
+        mock_logger.assert_called_with('No results found')
+        self._assert_text_result(
+            result,
+            expected_return_code=1,
         )
 
 
@@ -135,6 +156,18 @@ class LiveHuntTest(BaseTestCase):
             expected_return_code=0,
         )
 
+    def test_live_hunt_list_with_no_results(self):
+        with patch('polyswarm_api.api.PolyswarmAPI.live_list',
+                   return_value=[]), \
+             patch('polyswarm.utils.logger.error') as mock_logger:
+            result = self._run_cli(['--output-format', 'text',
+                                    'live', 'list'])
+        mock_logger.assert_called_with('No results found')
+        self._assert_text_result(
+            result,
+            expected_return_code=1,
+        )
+
 
 class HistoricalHuntTest(BaseTestCase):
     def __init__(self, *args, **kwargs):
@@ -206,4 +239,16 @@ class HistoricalHuntTest(BaseTestCase):
             result,
             expected_output=mock_polyswarm_api_results.text_hunts()[0],
             expected_return_code=0,
+        )
+
+    def test_historical_hunt_list_with_no_results(self):
+        with patch('polyswarm_api.api.PolyswarmAPI.historical_list',
+                   return_value=[]), \
+             patch('polyswarm.utils.logger.error') as mock_logger:
+            result = self._run_cli(['--output-format', 'text',
+                                    'historical', 'list'])
+        mock_logger.assert_called_with('No results found')
+        self._assert_text_result(
+            result,
+            expected_return_code=1,
         )

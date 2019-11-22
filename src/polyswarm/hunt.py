@@ -1,5 +1,5 @@
 import click
-
+from . import utils
 
 @click.group(short_help='interact with live scans')
 def live():
@@ -37,8 +37,11 @@ def live_delete(ctx, hunt_id):
 def live_list(ctx):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.live_list()
-    for hunt in result:
+
+    results = api.live_list()
+    utils.validate_results(results)
+
+    for hunt in results:
         output.hunt(hunt)
 
 
@@ -51,8 +54,11 @@ def live_list(ctx):
 def live_results(ctx, hunt_id, since):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.live_results(hunt_id, since=since)
-    for hunt in result:
+
+    results = api.live_results(hunt_id, since=since)
+    utils.validate_results(results)
+
+    for hunt in results:
         output.hunt_result(hunt)
 
 
@@ -82,8 +88,11 @@ def historical_delete(ctx, hunt_id):
 def historical_list(ctx):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.historical_list()
-    for hunt in result:
+
+    results = api.historical_list()
+    utils.validate_results(results)
+
+    for hunt in results:
         output.hunt(hunt)
 
 
@@ -93,6 +102,9 @@ def historical_list(ctx):
 def historical_results(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.historical_results(hunt_id)
-    for hunt in result:
+
+    results = api.historical_results(hunt_id)
+    utils.validate_results(results)
+
+    for hunt in results:
         output.hunt_result(hunt)
