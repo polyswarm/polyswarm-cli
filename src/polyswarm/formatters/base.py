@@ -26,6 +26,3 @@ class BaseOutput(object):
     def usage_exceeded():
         print(USAGE_EXCEEDED_MESSAGE)
 
-    @staticmethod
-    def no_results():
-        print('Not results found.')
