@@ -26,7 +26,7 @@ See the [Polyswarm Customer CLI documentation](https://docs.polyswarm.io/docs/po
 
 ## Automated Tests
 
-To run automated tests suit (unit and integration):
+To run automated tests suite (unit and integration):
 
     pip install -r requirements.txt
     pip install -r requirements-test.txt
