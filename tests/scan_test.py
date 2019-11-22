@@ -2,8 +2,6 @@ import os
 
 from tests.utils.base_test_case import BaseTestCase
 
-from click.testing import CliRunner
-
 try:
     from unittest.mock import patch
 except ImportError:
@@ -15,10 +13,6 @@ BASE_PATH = os.path.dirname(__file__)
 
 
 class SubmissionTest(BaseTestCase):
-    def __init__(self, *args, **kwargs):
-        super(SubmissionTest, self).__init__(*args, **kwargs)
-        self.test_runner = CliRunner()
-        self.test_api_key = '11111111111111111111111111111111'
 
     def test_submission_lookup_json(self):
         with patch('polyswarm_api.api.PolyswarmAPI.submit', return_value=[

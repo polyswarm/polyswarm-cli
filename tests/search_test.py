@@ -12,8 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class SearchTest(BaseTestCase):
-    def __init__(self, *args, **kwargs):
-        super(SearchTest, self).__init__(*args, **kwargs)
 
     def test_search_hash_with_json_output(self):
         with patch('polyswarm_api.api.PolyswarmAPI.search',
@@ -40,7 +38,8 @@ class SearchTest(BaseTestCase):
     def test_search_metadata_with_json_output(self):
         with patch('polyswarm_api.api.PolyswarmAPI.search_by_metadata',
                    return_value=[mock_polyswarm_api_results.json_results(self)[0]]):
-            result = self._run_cli(['--output-format', 'json', 'search', 'metadata', 'hash.sha256:' + self.test_hash_value])
+            result = self._run_cli(['--output-format', 'json', 'search', 'metadata',
+                                    'hash.sha256:' + self.test_hash_value])
         self._assert_json_result(
             result,
             expected_output=mock_polyswarm_api_results.json_results(self)[0].json,
@@ -51,7 +50,8 @@ class SearchTest(BaseTestCase):
                    return_value=[mock_polyswarm_api_results.json_results(self)[0]]), \
              patch('polyswarm_api.api.PolyswarmAPI.score',
                    return_value=iter([mock_polyswarm_api_results.scores(self)[0]])):
-            result = self._run_cli(['--output-format', 'text', 'search', 'metadata', 'hash.sha256:' + self.test_hash_value])
+            result = self._run_cli(['--output-format', 'text', 'search', 'metadata',
+                                    'hash.sha256:' + self.test_hash_value])
         self._assert_text_result(
             result,
             expected_output=mock_polyswarm_api_results.text_results()[0],
