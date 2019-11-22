@@ -41,5 +41,8 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: PyPy',
-    ]
+    ],
+    extras_require={
+        'yara': ['yara-python==3.11.0']
+    }
 )

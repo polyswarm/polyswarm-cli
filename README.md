@@ -15,6 +15,10 @@ From source:
 
     python setup.py install
 
+If you want (optional) yara validation:
+
+    pip install -e .[yara]
+
 ## Usage
 
 
