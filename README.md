@@ -25,7 +25,7 @@ See the [Polyswarm Customer CLI documentation](https://docs.polyswarm.io/docs/po
 To run automated tests suit (unit and integration):
 
     pip install -r requirements.txt
-    pip install -r requirements-test-txt
+    pip install -r requirements-test.txt
     pytest
 
 To check current coverage by tests:
