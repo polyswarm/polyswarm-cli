@@ -1,5 +1,7 @@
 import logging
 import json
+import sys
+
 try:
     from json import JSONDecodeError
 except ImportError:
@@ -9,6 +11,7 @@ import click
 from polyswarm_api.types import resources
 
 from . import utils
+from . import exceptions
 
 
 logger = logging.getLogger(__name__)
@@ -34,6 +37,7 @@ def hashes(ctx, hash_value, hash_file, hash_type):
     hashes_ = utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)
 
     results = api.search(*hashes_)
+    utils.validate_results(results)
 
     # for json, this is effectively jsonlines
     for result in results:
@@ -57,13 +61,13 @@ def metadata(ctx, query_string, query_file):
             queries = [resources.MetadataQuery(json.load(query_file), True, api)]
         else:
             logger.error('No query specified')
-            return 0
+            return 1
     except JSONDecodeError:
         logger.error('Failed to parse JSON')
-        return 0
+        return 1
     except UnicodeDecodeError:
         logger.error('Failed to parse JSON due to Unicode error')
-        return 0
+        return 1
 
     for result in api.search_by_metadata(*queries):
         output.artifact_instance(result)

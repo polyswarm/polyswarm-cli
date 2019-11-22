@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 from uuid import UUID
 
 import click
@@ -101,3 +102,13 @@ def validate_key(ctx, param, value):
     if not resources.is_hex(value) or len(value) != 32:
         raise click.BadParameter('Invalid API key. Make sure you specified your key via -a or environment variable and try again.')
     return value
+
+####################################################
+# Results validator
+####################################################
+
+
+def validate_results(results):
+    if not results:
+        logger.error('No results found')
+        sys.exit(1)

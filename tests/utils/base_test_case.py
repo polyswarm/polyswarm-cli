@@ -28,7 +28,11 @@ except NameError:
 class BaseTestCase(TestCase):
     def __init__(self, *args, **kwargs):
         super(BaseTestCase, self).__init__(*args, **kwargs)
+        self.test_runner = CliRunner()
         self.test_api_key = '963da5a463b0ab61fe0f96f82846490d'
+        self.request_generator = PolyswarmRequestGenerator(PolyswarmAPI(self.test_api_key),
+                                                           polyswarm_api_const.DEFAULT_GLOBAL_API,
+                                                           polyswarm_api_const.DEFAULT_COMMUNITY)
         self.test_captured_output_file = '/tmp/output.txt'
         self.api_url = 'https://api.polyswarm.network/v1'
         self.test_api_key = '11111111111111111111111111111111'
@@ -37,10 +41,6 @@ class BaseTestCase(TestCase):
         self.test_submission_uuid = '74ac1097-2477-4566-951a-bf0c2716642e'
         self.test_hunt_id = '63433636835291189'
         self.test_since = '2880'
-        self.test_runner = CliRunner()
-        self.request_generator = PolyswarmRequestGenerator(PolyswarmAPI(self.test_api_key),
-                                                           polyswarm_api_const.DEFAULT_GLOBAL_API,
-                                                           polyswarm_api_const.DEFAULT_COMMUNITY)
         self.test_eicar = b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*'
         self.test_s3_file_url = 'http://minio:9000/'\
                                 'testing/testing/files/27/5a/02/'\

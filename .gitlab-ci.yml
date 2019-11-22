@@ -15,7 +15,6 @@ test-run27:
   before_script:
     - pip install --upgrade pip
     - pip install -r requirements.txt
-    - pip install -r requirements-test.txt
   script:
     - ./tests/run.sh
 
@@ -27,7 +26,6 @@ test-run35:
   before_script:
     - pip3 install --upgrade pip
     - pip install -r requirements.txt
-    - pip install -r requirements-test.txt
   script:
     - ./tests/run.sh
 
@@ -39,7 +37,6 @@ test-run36:
   before_script:
     - pip3 install --upgrade pip
     - pip install -r requirements.txt
-    - pip install -r requirements-test.txt
   script:
     - ./tests/run.sh
 

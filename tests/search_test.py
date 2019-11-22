@@ -35,6 +35,18 @@ class SearchTest(BaseTestCase):
             expected_return_code=0,
         )
 
+    def test_search_hash_with_no_results(self):
+        with patch('polyswarm_api.api.PolyswarmAPI.search',
+                   return_value=[]), \
+             patch('polyswarm.utils.logger.error') as mock_logger:
+            result = self._run_cli(['--output-format', 'json', 'search', 'hash', self.test_hash_value])
+        mock_logger.assert_called_with('No results found')
+        self._assert_text_result(
+            result,
+            expected_return_code=1,
+        )
+
+
     def test_search_metadata_with_json_output(self):
         with patch('polyswarm_api.api.PolyswarmAPI.search_by_metadata',
                    return_value=[mock_polyswarm_api_results.json_results(self)[0]]):
