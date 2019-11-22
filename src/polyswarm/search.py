@@ -69,5 +69,8 @@ def metadata(ctx, query_string, query_file):
         logger.error('Failed to parse JSON due to Unicode error')
         return 2
 
-    for result in api.search_by_metadata(*queries):
+    results = api.search_by_metadata(*queries)
+    utils.validate_results(results)
+
+    for result in results:
         output.artifact_instance(result)
