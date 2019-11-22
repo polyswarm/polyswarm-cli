@@ -23,7 +23,7 @@ def download(ctx, hash_file, hash_type, hash_value, destination):
     hashes = utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)
 
     results = api.download(destination, *hashes)
-    utils.validate_results(results, error_codes.NO_RESULTS_ERROR)
+    utils.validate_results(results, error_codes.GENERAL_ERROR)
 
     for result in api.download(destination, *hashes):
         output.local_artifact(result)
@@ -39,7 +39,7 @@ def stream(ctx, since, destination):
     out = ctx.obj['output']
 
     results = api.stream(destination, since=since)
-    utils.validate_results(results, error_codes.NO_RESULTS_ERROR)
+    utils.validate_results(results, error_codes.GENERAL_ERROR)
 
     for download in results:
         out.local_artifact(download)

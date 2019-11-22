@@ -38,7 +38,7 @@ class DownloadTest(BaseTestCase):
                 mock_logger.assert_called_with('No results found')
                 self._assert_text_result(
                     result,
-                    expected_return_code=error_codes.NO_RESULTS_ERROR,
+                    expected_return_code=error_codes.GENERAL_ERROR,
                 )
 
     def test_cat(self):
@@ -74,5 +74,5 @@ class DownloadTest(BaseTestCase):
                 mock_logger.assert_called_with('No results found')
                 self._assert_text_result(
                     result,
-                    expected_return_code=error_codes.NO_RESULTS_ERROR,
+                    expected_return_code=error_codes.GENERAL_ERROR,
                 )
