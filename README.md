@@ -15,7 +15,7 @@ From source:
 
     python setup.py install
 
-If you want (optional) yara validation:
+If you want yara validation (optional):
 
     pip install -e .[yara]
 
