@@ -1,6 +1,5 @@
 import logging
 import json
-import sys
 
 try:
     from json import JSONDecodeError
@@ -11,7 +10,6 @@ import click
 from polyswarm_api.types import resources
 
 from . import utils
-from . import exceptions
 
 
 logger = logging.getLogger(__name__)
