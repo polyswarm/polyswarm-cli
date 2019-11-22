@@ -4,6 +4,7 @@ import functools
 import json
 from . import base
 from polyswarm_api import const
+from polyswarm_api import exceptions
 
 
 # TODO rewrite some of this to be not terrible
@@ -78,7 +79,8 @@ class TextOutput(base.BaseOutput):
                 p = artifact.metadata.pefile
                 if 'imphash' in p:
                     output.append(self._white('Imphash: {}'.format(p['imphash'])))
-        output.append(self._white('First seen: {first_seen}'.format(first_seen=artifact.first_seen)))
+        output.append(self._white('First seen: {}'.format(artifact.first_seen)))
+        output.append(self._white('Last seen: {}'.format(artifact.last_seen)))
         return self._output(output, write)
 
     def artifact_instance(self, instance, write=True):
@@ -88,9 +90,11 @@ class TextOutput(base.BaseOutput):
         if instance.country:
             output.append(self._white('Country: {}'.format(instance.country)))
 
-        if instance.polyscore is not None:
+        try:
             formatter = self._get_score_format(instance.polyscore)
             output.append(formatter('PolyScore: {:.20f}'.format(instance.polyscore)))
+        except exceptions.RequestFailedException:
+            pass
 
         # only report information if we have scanned the file before
         if instance.permalink:
