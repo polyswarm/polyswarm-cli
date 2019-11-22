@@ -1,0 +1,4 @@
+pytest==3.9.2
+deepdiff==3.3.0
+requests-mock==1.7.0
+pytest-cov==2.8.1
