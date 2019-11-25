@@ -22,28 +22,28 @@ class IntegrationTest(BaseTestCase):
         super(IntegrationTest, self).__init__(*args, **kwargs)
         self.mock_search_response_page1 = self._create_response([mock_polyswarm_api_results.json_results(self)[0].json],
                                                                 offset=0, limit=1)
-        self.mock_search_response_page2 = self._create_response([])
+        self.mock_search_response_page2 = self._create_response([], offset=1, limit=1)
 
         self.mock_submission_response = \
             self._create_response(mock_polyswarm_api_results.submissions(self)[0].json)
 
         self.mock_hunt_live_results_response_page1 = \
             self._create_response([mock_polyswarm_api_results.live_results(self)[0].json], offset=0, limit=1)
-        self.mock_hunt_live_results_response_page2 = self._create_response([])
+        self.mock_hunt_live_results_response_page2 = self._create_response([], offset=1, limit=1)
 
         self.mock_hunt_historical_results_response_page1 = \
             self._create_response([mock_polyswarm_api_results.historical_results(self)[0].json], offset=0, limit=1)
-        self.mock_hunt_historical_results_response_page2 = self._create_response([])
+        self.mock_hunt_historical_results_response_page2 = self._create_response([], offset=1, limit=1)
 
         self.mock_hunt_response = self._create_response(mock_polyswarm_api_results.hunts(self)[0].json)
         self.mock_hunt_response_page1 = self._create_response([mock_polyswarm_api_results.hunts(self)[0].json],
                                                               offset=0, limit=1)
-        self.mock_hunt_response_page2 = self._create_response([])
+        self.mock_hunt_response_page2 = self._create_response([], offset=1, limit=1)
 
         self.mock_stream_response_page1 = self._create_response(
             [mock_polyswarm_api_results.stream_results(self.test_s3_file_url)[0]],
             offset=0, limit=1)
-        self.mock_stream_response_page2 = self._create_response([])
+        self.mock_stream_response_page2 = self._create_response([], offset=1, limit=1)
 
     def test_search_hash(self, mock_server):
         self._setup_mock_api_response(mock_server,
