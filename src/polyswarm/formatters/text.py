@@ -91,8 +91,9 @@ class TextOutput(base.BaseOutput):
             output.append(self._white('Country: {}'.format(instance.country)))
 
         try:
-            formatter = self._get_score_format(instance.polyscore)
-            output.append(formatter('PolyScore: {:.20f}'.format(instance.polyscore)))
+            if instance.polyscore is not None:
+                formatter = self._get_score_format(instance.polyscore)
+                output.append(formatter('PolyScore: {:.20f}'.format(instance.polyscore)))
         except exceptions.RequestFailedException:
             pass
 
