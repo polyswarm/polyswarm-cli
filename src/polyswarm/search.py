@@ -37,7 +37,7 @@ def hashes(ctx, hash_value, hash_file, hash_type):
     results = api.search(*hashes_)
     utils.validate_results(results)
 
-    # for json, this is effectively jsonlines
+    # for json, this is effectively json lines
     for result in results:
         output.artifact_instance(result)
 
