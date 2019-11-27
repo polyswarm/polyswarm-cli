@@ -1,9 +1,13 @@
 import logging
 import os
-import sys
-import itertools
 from uuid import UUID
 from concurrent.futures import ThreadPoolExecutor
+
+# TODO: Change this to import itertools once we drop support for python 2.7
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest
 
 import click
 from polyswarm_api import exceptions
@@ -26,7 +30,7 @@ def is_valid_uuid(value):
 def parallelize(function, args_list=(), kwargs_list=(), parallel=None):
     futures = []
     with ThreadPoolExecutor(parallel) as pool:
-        for args, kwargs in itertools.zip_longest(args_list, kwargs_list, fillvalue=None):
+        for args, kwargs in zip_longest(args_list, kwargs_list, fillvalue=None):
             args = args or []
             kwargs = kwargs or {}
             futures.append(pool.submit(function, *args, **kwargs))
