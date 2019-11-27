@@ -140,6 +140,15 @@ Created at: 2019-11-13 16:27:45.013226
     return values
 
 
+def artifact_archives(test):
+    values = []
+    values.append(resources.ArtifactArchive(
+        {'id': '1', 'community': 'gamma', 'created': '2019-11-14T16:30:00.888191', 's3_path': 's3/malicious'},
+        polyswarm=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
+    ))
+    return values
+
+
 def local_artifacts(hash_value, path):
     values = []
     full_path = os.path.join(path, hash_value)

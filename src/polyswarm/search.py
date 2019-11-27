@@ -9,7 +9,8 @@ except ImportError:
 import click
 from polyswarm_api.types import resources
 
-from . import utils
+from polyswarm import utils
+from polyswarm import exceptions
 
 
 logger = logging.getLogger(__name__)
@@ -32,14 +33,16 @@ def hashes(ctx, hash_value, hash_file, hash_type):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    hashes_ = utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)
+    args = [(h,) for h in utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)]
 
-    results = api.search(*hashes_)
-    utils.validate_results(results)
+    found = False
+    for future in utils.parallelize(api.search, args_list=args):
+        for instance in future.result():
+            found = True
+            output.artifact_instance(instance)
 
-    # for json, this is effectively json lines
-    for result in results:
-        output.artifact_instance(result)
+    if not found:
+        raise exceptions.NoResultsException('No results found for the provided hash(es).')
 
 
 @search.command('metadata', short_help='search metadata of files')
@@ -51,24 +54,16 @@ def metadata(ctx, query_string, query_file):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    try:
-        if len(query_string) >= 1:
-            queries = [resources.MetadataQuery(q, False, api) for q in query_string]
-        elif query_file:
-            # TODO: support multiple queries in a file?
-            queries = [resources.MetadataQuery(json.load(query_file), True, api)]
-        else:
-            logger.error('No query specified')
-            return 2
-    except JSONDecodeError:
-        logger.error('Failed to parse JSON')
-        return 2
-    except UnicodeDecodeError:
-        logger.error('Failed to parse JSON due to Unicode error')
-        return 2
+    queries = [resources.MetadataQuery(q, False, api) for q in query_string]
+    if query_file:
+        queries.append(resources.MetadataQuery(json.load(query_file), True, api))
+    args = [(q,) for q in queries]
 
-    results = api.search_by_metadata(*queries)
-    utils.validate_results(results)
+    found = False
+    for future in utils.parallelize(api.search_by_metadata, args_list=args):
+        for instance in future.result():
+            found = True
+            output.artifact_instance(instance)
 
-    for result in results:
-        output.artifact_instance(result)
+    if not found:
+        raise exceptions.NoResultsException('No results found for the provided query(ies).')

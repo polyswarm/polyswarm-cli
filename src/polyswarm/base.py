@@ -2,12 +2,18 @@ import click
 import logging
 import sys
 
-from polyswarm_api import exceptions
+try:
+    from json import JSONDecodeError
+except ImportError:
+    JSONDecodeError = ValueError
+
+from polyswarm_api import exceptions as api_exceptions
 from polyswarm_api.api import PolyswarmAPI
 from polyswarm.formatters import formatters
 from polyswarm_api import get_version as get_polyswarm_api_version
-from .utils import validate_key
 
+from polyswarm import exceptions
+from .utils import validate_key
 from .hunt import live, historical
 from .scan import scan, url_scan, rescan, lookup
 from .download import download, cat, stream
@@ -16,26 +22,34 @@ from .search import search
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 VERSION = '2.0.0.dev2'
 
+
 class ExceptionHandlingGroup(click.Group):
     def invoke(self, ctx):
         try:
             return super(ExceptionHandlingGroup, self).invoke(ctx)
-        except exceptions.UsageLimitsExceededException as e:
-            output = ctx.obj.get('output')
-            if output:
-                output.usage_exceeded()
-            sys.exit(2)
-        except exceptions.InvalidYaraRulesException as e:
+        except exceptions.NoResultsException as e:
+            click.secho(str(e), fg='red')
+            sys.exit(1)
+        except api_exceptions.NotFoundException as e:
+            click.secho(str(e), fg='red')
+            sys.exit(1)
+        except api_exceptions.InvalidYaraRulesException as e:
             output = ctx.obj.get('output')
             if output:
                 output.invalid_rule(e)
             sys.exit(2)
-        except exceptions.NotFoundException as e:
+        except api_exceptions.UsageLimitsExceededException as e:
+            output = ctx.obj.get('output')
+            if output:
+                output.usage_exceeded()
+            sys.exit(2)
+        except api_exceptions.PolyswarmException as e:
             click.secho(str(e), fg='red')
-            sys.exit(1)
-        except exceptions.PolyswarmException as e:
-            click.secho(str(e), fg='red')
-            sys.exit(1)
+            sys.exit(2)
+        except JSONDecodeError:
+            sys.exit(2)
+        except UnicodeDecodeError:
+            sys.exit(2)
 
 
 @click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS)
@@ -53,11 +67,12 @@ class ExceptionHandlingGroup(click.Group):
               help='Enable/disable GitHub release version check.')
 @click.option('--validate', default=False, is_flag=True,
               envvar='POLYSWARM_VALIDATE', help='Validate incoming schemas (note: slow).')
+@click.option('--parallel', default=8, help='Number of threads to be used in parallel http requests.')
 @click.version_option(VERSION, '--version', prog_name='polyswarm-cli')
 @click.version_option(get_polyswarm_api_version(), '--api-version', prog_name='polyswarm-api')
 @click.pass_context
 def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose, community,
-              advanced_disable_version_check, validate):
+              advanced_disable_version_check, validate, parallel):
     """
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
@@ -85,6 +100,7 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     logging.debug('Creating API instance: api_key: %s, api_uri: %s', api_key, api_uri)
     ctx.obj['api'] = PolyswarmAPI(api_key, api_uri, community=community, validate_schemas=validate)
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
+    ctx.obj['parallel'] = parallel
 
 
 commands = [scan, url_scan, rescan, lookup, search, live, historical, download, cat, stream]

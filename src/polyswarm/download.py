@@ -1,5 +1,10 @@
 import logging
 
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
+
 import click
 
 from . import utils
@@ -20,8 +25,9 @@ def download(ctx, hash_file, hash_type, hash_value, destination):
     api = ctx.obj['api']
     output = ctx.obj['output']
     hashes = utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)
-    for result in api.download(destination, *hashes):
-        output.local_artifact(result)
+
+    for future in utils.parallelize(api.download, args_list=[(destination, h) for h in hashes]):
+        output.local_artifact(future.result())
 
 
 @click.command('stream', short_help='access the polyswarm file stream')
@@ -33,8 +39,9 @@ def stream(ctx, since, destination):
     api = ctx.obj['api']
     out = ctx.obj['output']
 
-    for download in api.stream(destination, since=since):
-        out.local_artifact(download)
+    args = [(destination, artifact_archive.s3_path) for artifact_archive in api.stream(since=since)]
+    for future in utils.parallelize(api.download_archive, args_list=args):
+        out.local_artifact(future.result())
 
 
 @click.command('cat', short_help='cat artifact to stdout')

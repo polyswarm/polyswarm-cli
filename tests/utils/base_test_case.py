@@ -207,7 +207,7 @@ class BaseTestCase(TestCase):
         if expected_output is not None:
             self._assert_text_equal(result_output, expected_output)
         if expected_return_code is not None:
-            self.assertEqual(result.exit_code, expected_return_code, msg=traceback.format_tb(result.exc_info[2]))
+            self.assertEqual(expected_return_code, result.exit_code, msg=traceback.format_tb(result.exc_info[2]))
 
     def _assert_json_result(self, result, expected_output, expected_return_code):
         result_output = self._get_result_output(result)
@@ -218,7 +218,7 @@ class BaseTestCase(TestCase):
         if expected_output is not None:
             self._assert_json_equal(output, expected_output)
         if expected_return_code is not None:
-            self.assertEqual(result.exit_code, expected_return_code, msg=traceback.format_tb(result.exc_info[2]))
+            self.assertEqual(expected_return_code, result.exit_code, msg=traceback.format_tb(result.exc_info[2]))
 
     def _get_result_output(self, result):
         output = ''

@@ -1,7 +1,9 @@
 import logging
 import os
 import sys
+import itertools
 from uuid import UUID
+from concurrent.futures import ThreadPoolExecutor
 
 import click
 from polyswarm_api import exceptions
@@ -19,6 +21,17 @@ def is_valid_uuid(value):
         return True
     except:
         return False
+
+
+def parallelize(function, args_list=(), kwargs_list=(), parallel=None):
+    futures = []
+    with ThreadPoolExecutor(parallel) as pool:
+        for args, kwargs in itertools.zip_longest(args_list, kwargs_list, fillvalue=None):
+            args = args or []
+            kwargs = kwargs or {}
+            futures.append(pool.submit(function, *args, **kwargs))
+    for future in futures:
+        yield future
 
 
 ####################################################
@@ -102,13 +115,3 @@ def validate_key(ctx, param, value):
     if not resources.is_hex(value) or len(value) != 32:
         raise click.BadParameter('Invalid API key. Make sure you specified your key via -a or environment variable and try again.')
     return value
-
-####################################################
-# Results validator
-####################################################
-
-
-def validate_results(results):
-    if not results:
-        logger.error('No results found')
-        sys.exit(1)

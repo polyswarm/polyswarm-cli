@@ -22,9 +22,10 @@ def scan(ctx, recursive, timeout, path):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    files = utils.collect_files(path, recursive=recursive)
+    args = [(file,) for file in utils.collect_files(path, recursive=recursive)]
 
-    for submission in api.submit(*files):
+    for future in utils.parallelize(api.submit, args_list=args):
+        submission = future.result()
         try:
             output.submission(api.wait_for(submission.uuid, timeout=timeout))
         except exceptions.TimeoutException:
@@ -47,8 +48,11 @@ def url_scan(ctx, url_file, timeout, url):
     urls = list(url)
     if url_file:
         urls.extend([u.strip() for u in url_file.readlines()])
+    args = [(url,) for url in urls]
+    kwargs = [dict(artifact_type='url') for _ in urls]
 
-    for submission in api.submit(*urls, artifact_type='url'):
+    for future in utils.parallelize(api.submit, args_list=args, kwargs_list=kwargs):
+        submission = future.result()
         try:
             output.submission(api.wait_for(submission.uuid, timeout=timeout))
         except exceptions.TimeoutException:
@@ -68,9 +72,10 @@ def rescan(ctx, hash_file, hash_type, timeout, hash_value):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    hashes = utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)
+    args = [(h,) for h in utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)]
 
-    for submission in api.rescan(*hashes):
+    for future in utils.parallelize(api.rescan, args_list=args):
+        submission = future.result()
         try:
             output.submission(api.wait_for(submission.uuid, timeout=timeout))
         except exceptions.TimeoutException:
@@ -99,5 +104,5 @@ def lookup(ctx, uuid, uuid_file):
             else:
                 logger.warning('Invalid uuid %s in file, ignoring.', u)
 
-    for result in api.lookup(*uuids):
-        output.submission(result)
+    for future in utils.parallelize(api.lookup, args_list=[(u,) for u in uuids]):
+        output.submission(future.result())

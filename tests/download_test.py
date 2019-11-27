@@ -18,7 +18,7 @@ class DownloadTest(BaseTestCase):
     def test_download(self):
         with file_utils.temp_dir(dict(malicious=self.test_eicar)) as (path, files):
             with patch('polyswarm_api.api.PolyswarmAPI.download',
-                       return_value=[mock_polyswarm_api_results.local_artifacts(self.test_hash_value, path)[0]]):
+                       return_value=mock_polyswarm_api_results.local_artifacts(self.test_hash_value, path)[0]):
                 result = self._run_cli(['download', self.test_hash_value, path])
                 self._assert_text_result(
                     result,
@@ -41,7 +41,9 @@ class DownloadTest(BaseTestCase):
     def test_stream(self):
         with file_utils.temp_dir(dict(malicious=self.test_eicar)) as (path, files):
             with patch('polyswarm_api.api.PolyswarmAPI.stream',
-                       return_value=[mock_polyswarm_api_results.local_artifacts(self.test_hash_value, path)[0]]):
+                       return_value=[mock_polyswarm_api_results.artifact_archives(self)[0]]),\
+                 patch('polyswarm_api.api.PolyswarmAPI.download_archive',
+                       return_value=mock_polyswarm_api_results.local_artifacts(self.test_hash_value, path)[0]):
                 result = self._run_cli(['stream', path])
 
                 self._assert_text_result(
