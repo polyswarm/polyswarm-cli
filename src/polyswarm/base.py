@@ -20,7 +20,7 @@ from .download import download, cat, stream
 from .search import search
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-VERSION = '2.0.0.dev2'
+VERSION = '2.0.0.dev3'
 
 
 class ExceptionHandlingGroup(click.Group):
