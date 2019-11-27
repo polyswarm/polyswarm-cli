@@ -14,11 +14,21 @@ From PyPI:
 From source:
 
     python setup.py install
+    
+With Docker:
+
+    docker build -t polyswarm/cli -f docker/Dockerfile .
 
 ## Usage
 
 
 See the [Polyswarm Customer CLI documentation](https://docs.polyswarm.io/docs/polyswarm-customer-cli) for usage guidance.
+
+## Running with Docker
+
+Scan a folder of malware samples. Example has samples in directory `/home/user/malware`
+
+    docker run -e POLYSWARM_API_KEY=<api key here> -v /home/user/malware:malware polyswarm/cli scan /malware
 
 
 ## Questions? Problems?
