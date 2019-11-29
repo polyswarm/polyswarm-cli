@@ -25,11 +25,11 @@ def scan(ctx, recursive, timeout, path):
     args = [(file,) for file in utils.collect_files(path, recursive=recursive)]
 
     for future in utils.parallelize(api.submit, args_list=args):
-        submission = future.result()
+        instance = future.result()
         try:
-            output.submission(api.wait_for(submission.uuid, timeout=timeout))
+            output.artifact_instance(api.wait_for(instance.id, timeout=timeout))
         except exceptions.TimeoutException:
-            output.submission(next(api.lookup(submission.uuid)))
+            output.artifact_instance(next(api.lookup(instance.id)))
 
 
 @click.command('url', short_help='scan url')
@@ -52,11 +52,11 @@ def url_scan(ctx, url_file, timeout, url):
     kwargs = [dict(artifact_type='url') for _ in urls]
 
     for future in utils.parallelize(api.submit, args_list=args, kwargs_list=kwargs):
-        submission = future.result()
+        instance = future.result()
         try:
-            output.submission(api.wait_for(submission.uuid, timeout=timeout))
+            output.artifact_instance(api.wait_for(instance.id, timeout=timeout))
         except exceptions.TimeoutException:
-            output.submission(next(api.lookup(submission.uuid)))
+            output.artifact_instance(next(api.lookup(instance.id)))
 
 
 @click.command('rescan', short_help='rescan files(s) by hash')
@@ -75,34 +75,34 @@ def rescan(ctx, hash_file, hash_type, timeout, hash_value):
     args = [(h,) for h in utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)]
 
     for future in utils.parallelize(api.rescan, args_list=args):
-        submission = future.result()
+        instance = future.result()
         try:
-            output.submission(api.wait_for(submission.uuid, timeout=timeout))
+            output.artifact_instance(api.wait_for(instance.id, timeout=timeout))
         except exceptions.TimeoutException:
-            output.submission(next(api.lookup(submission.uuid)))
+            output.artifact_instance(next(api.lookup(instance.id)))
 
 
-@click.command('lookup', short_help='lookup UUID(s)')
-@click.option('-r', '--uuid-file', help='File of UUIDs, one per line.', type=click.File('r'))
-@click.argument('uuid', nargs=-1, callback=utils.validate_uuid)
+@click.command('lookup', short_help='lookup Submission id(s)')
+@click.option('-r', '--submission-id-file', help='File of Submission ids, one per line.', type=click.File('r'))
+@click.argument('submission_id', nargs=-1, callback=utils.validate_id)
 @click.pass_context
-def lookup(ctx, uuid, uuid_file):
+def lookup(ctx, submission_id, submission_id_file):
     """
-    Lookup a PolySwarm scan by UUID for current status.
+    Lookup a PolySwarm scan by Submission id for current status.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    uuids = list(uuid)
+    submission_ids = list(submission_id)
 
     # TODO dedupe
-    if uuid_file:
-        for u in uuid_file.readlines():
+    if submission_id_file:
+        for u in submission_id_file.readlines():
             u = u.strip()
-            if utils.is_valid_uuid(u):
-                uuids.append(u)
+            if utils.is_valid_id(u):
+                submission_ids.append(u)
             else:
-                logger.warning('Invalid uuid %s in file, ignoring.', u)
+                logger.warning('Invalid Submission id %s in file, ignoring.', u)
 
-    for future in utils.parallelize(api.lookup, args_list=[(u,) for u in uuids]):
-        output.submission(future.result())
+    for future in utils.parallelize(api.lookup, args_list=[(u,) for u in submission_ids]):
+        output.artifact_instance(future.result())

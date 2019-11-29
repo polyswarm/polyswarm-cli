@@ -85,21 +85,20 @@ class TextOutput(base.BaseOutput):
 
     def artifact_instance(self, instance, write=True):
         output = []
+        output.append(self._white('============================= Artifact Instance ============================='))
+        output.append(self._blue('Submission id: {}'.format(instance.id)))
         output.extend(self.artifact(instance, write=False))
         output.append(self._white('Filename: {}'.format(instance.filename)))
-        if instance.country:
-            output.append(self._white('Country: {}'.format(instance.country)))
+        output.append(self._white('Community: {}'.format(instance.community)))
+        output.append(self._white('Country: {}'.format(instance.country)))
 
-        try:
-            if instance.polyscore is not None:
-                formatter = self._get_score_format(instance.polyscore)
-                output.append(formatter('PolyScore: {:.20f}'.format(instance.polyscore)))
-        except exceptions.RequestFailedException:
-            pass
+        if instance.polyscore is not None:
+            formatter = self._get_score_format(instance.polyscore)
+            output.append(formatter('PolyScore: {:.20f}'.format(instance.polyscore)))
 
         # only report information if we have scanned the file before
-        if instance.permalink:
-            output.append(self._white('Scan permalink: {}'.format(instance.permalink)))
+        output.append(self._white('Scan permalink: {}'.format(instance.permalink)))
+
         detections = 'Detections: {}/{} engines reported malicious'\
             .format(len(instance.detections), len(instance.valid_assertions))
         if len(instance.detections) > 0:
@@ -117,22 +116,6 @@ class TextOutput(base.BaseOutput):
                 if assertion.metadata:
                     value += ', metadata: %s' % json.dumps(assertion.metadata, sort_keys=True)
                 output.append(self._red('%s: %s' % (assertion.engine_name, value)))
-
-        return self._output(output, write)
-
-    def submission(self, submission, write=True):
-        output = []
-        output.append(self._green('Submission %s' % submission.uuid))
-        output.append(self._white('Reference: %s' % submission.permalink))
-        output.append(self._white('Community: %s' % submission.community))
-        if submission.country:
-            output.append(self._white('Country: %s' % submission.country))
-        for instance in submission.instances:
-            output.append(self._white('============================= Artifact Instance ============================='))
-            self._open_group()
-            output.extend(self.artifact_instance(instance, write=False))
-            output.append('')
-            self._close_group()
         return self._output(output, write)
 
     def hunt(self, result, write=True):

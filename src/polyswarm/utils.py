@@ -19,9 +19,9 @@ logger = logging.getLogger(__name__)
 HASH_VALIDATORS = resources.Hash.SUPPORTED_HASH_TYPES
 
 
-def is_valid_uuid(value):
+def is_valid_id(value):
     try:
-        val = UUID(value, version=4)
+        int(value)
         return True
     except:
         return False
@@ -90,10 +90,10 @@ def parse_hashes(values, hash_file=None, hash_type=None, log_errors=False):
 ####################################################
 
 
-def validate_uuid(ctx, param, value):
-    for uuid in value:
-        if not is_valid_uuid(uuid):
-            raise click.BadParameter('UUID {} not valid, please check and try again.'.format(uuid))
+def validate_id(ctx, param, value):
+    for id_ in value:
+        if not is_valid_id(id_):
+            raise click.BadParameter('Id {} not valid, please check and try again.'.format(id_))
     return value
 
 
