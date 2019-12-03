@@ -20,12 +20,12 @@ class IntegrationTest(BaseTestCase):
 
     def __init__(self, *args, **kwargs):
         super(IntegrationTest, self).__init__(*args, **kwargs)
-        self.mock_search_response_page1 = self._create_response([mock_polyswarm_api_results.json_results(self)[0].json],
+        self.mock_search_response_page1 = self._create_response([mock_polyswarm_api_results.instances(self)[0].json],
                                                                 offset=0, limit=1)
         self.mock_search_response_page2 = self._create_response([], offset=1, limit=1)
 
         self.mock_submission_response = \
-            self._create_response(mock_polyswarm_api_results.submissions(self)[0].json)
+            self._create_response(mock_polyswarm_api_results.instances(self)[0].json)
 
         self.mock_hunt_live_results_response_page1 = \
             self._create_response([mock_polyswarm_api_results.live_results(self)[0].json], offset=0, limit=1)
@@ -57,7 +57,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.json_results(self)[0].json,
+            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0)
 
     def test_search_metadata(self, mock_server):
@@ -72,7 +72,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.json_results(self)[0].json,
+            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0)
 
     def test_scan_submission_lookup(self, mock_server):
@@ -84,7 +84,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.submissions(self)[0].json,
+            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0,
         )
 
@@ -102,7 +102,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.submissions(self)[0].json,
+            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0,
         )
 
@@ -118,7 +118,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.submissions(self)[0].json,
+            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0,
         )
 

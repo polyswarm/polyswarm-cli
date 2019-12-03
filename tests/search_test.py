@@ -15,23 +15,23 @@ class SearchTest(BaseTestCase):
 
     def test_search_hash_with_json_output(self):
         with patch('polyswarm_api.api.PolyswarmAPI.search',
-                   return_value=[mock_polyswarm_api_results.json_results(self)[0]]):
+                   return_value=[mock_polyswarm_api_results.instances(self)[0]]):
             result = self._run_cli(['--output-format', 'json', 'search', 'hash', self.test_hash_value])
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.json_results(self)[0].json,
+            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0,
         )
 
     def test_search_hash_with_text_output(self):
         with patch('polyswarm_api.api.PolyswarmAPI.search',
-                   return_value=[mock_polyswarm_api_results.json_results(self)[0]]), \
+                   return_value=[mock_polyswarm_api_results.instances(self)[0]]), \
              patch('polyswarm_api.api.PolyswarmAPI.score',
                    return_value=mock_polyswarm_api_results.scores(self)[0]):
             result = self._run_cli(['--output-format', 'text', 'search', 'hash', self.test_hash_value])
         self._assert_text_result(
             result,
-            expected_output=mock_polyswarm_api_results.text_results()[0],
+            expected_output=mock_polyswarm_api_results.text_instances()[0],
             expected_return_code=0,
         )
 
@@ -45,38 +45,38 @@ class SearchTest(BaseTestCase):
 
     def test_search_metadata_with_json_output(self):
         with patch('polyswarm_api.api.PolyswarmAPI.search_by_metadata',
-                   return_value=[mock_polyswarm_api_results.json_results(self)[0]]):
+                   return_value=[mock_polyswarm_api_results.instances(self)[0]]):
             result = self._run_cli(['--output-format', 'json', 'search', 'metadata',
                                     'hash.sha256:' + self.test_hash_value])
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.json_results(self)[0].json,
+            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0)
 
     def test_search_metadata_with_text_output(self):
         with patch('polyswarm_api.api.PolyswarmAPI.search_by_metadata',
-                   return_value=[mock_polyswarm_api_results.json_results(self)[0]]), \
+                   return_value=[mock_polyswarm_api_results.instances(self)[0]]), \
              patch('polyswarm_api.api.PolyswarmAPI.score',
                    return_value=mock_polyswarm_api_results.scores(self)[0]):
             result = self._run_cli(['--output-format', 'text', 'search', 'metadata',
                                     'hash.sha256:' + self.test_hash_value])
         self._assert_text_result(
             result,
-            expected_output=mock_polyswarm_api_results.text_results()[0],
+            expected_output=mock_polyswarm_api_results.text_instances()[0],
             expected_return_code=0,
         )
 
     def test_search_metadata_with_query_file(self):
         query_file = self._get_test_resource_file_path('inputs/search_metadata_elastic_query.json')
         with patch('polyswarm_api.api.PolyswarmAPI.search_by_metadata',
-                   return_value=[mock_polyswarm_api_results.json_results(self)[0]]), \
+                   return_value=[mock_polyswarm_api_results.instances(self)[0]]), \
              patch('polyswarm_api.api.PolyswarmAPI.score',
                    return_value=mock_polyswarm_api_results.scores(self)[0]):
             result = self._run_cli(['--output-format', 'text', 'search', 'metadata',
                                     '--query-file', query_file])
         self._assert_text_result(
             result,
-            expected_output=mock_polyswarm_api_results.text_results()[0],
+            expected_output=mock_polyswarm_api_results.text_instances()[0],
             expected_return_code=0)
 
     def test_search_metadata_with_query_file_and_invalid_json(self):

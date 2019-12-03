@@ -29,16 +29,13 @@ class BaseTestCase(TestCase):
     def __init__(self, *args, **kwargs):
         super(BaseTestCase, self).__init__(*args, **kwargs)
         self.test_runner = CliRunner()
-        self.test_api_key = '963da5a463b0ab61fe0f96f82846490d'
-        self.request_generator = PolyswarmRequestGenerator(PolyswarmAPI(self.test_api_key),
-                                                           polyswarm_api_const.DEFAULT_GLOBAL_API,
-                                                           polyswarm_api_const.DEFAULT_COMMUNITY)
         self.test_captured_output_file = '/tmp/output.txt'
-        self.api_url = 'https://api.polyswarm.network/v1'
+        self.api_url = 'https://api.polyswarm.network/v2'
         self.test_api_key = '11111111111111111111111111111111'
+        self.request_generator = PolyswarmAPI(self.test_api_key).generator
         self.test_hash_value = '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
         self.test_query = '_exists_:lief.libraries'
-        self.test_submission_uuid = '74ac1097-2477-4566-951a-bf0c2716642e'
+        self.test_submission_uuid = '49091542211453596'
         self.test_hunt_id = '63433636835291189'
         self.test_since = '2880'
         self.test_eicar = b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*'
