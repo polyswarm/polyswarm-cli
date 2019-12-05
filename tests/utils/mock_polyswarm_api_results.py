@@ -31,15 +31,16 @@ def text_instances():
     values.append(
         """============================= Artifact Instance =============================
 [94mSubmission id: 49091542211453596[0m
+[92mStatus: Assertion window closed[0m
+Filename: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
+Community: gamma
+Country: 
 [92mSHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
 SHA1: 3395856ce81f2b7382dee72602f798b642f14140
 MD5: 44d88612fea8a8f36de82e1278abb02f
 File type: mimetype: text/plain, extended_info: EICAR virus test files
 First seen: 2019-11-01 21:33:53.292099
 Last seen: 2019-11-07 16:18:00.269290
-Filename: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
-Community: gamma
-Country: 
 Scan permalink: https://polyswarm.network/scan/results/49091542211453596
 [91mDetections: 1/1 engines reported malicious[0m
 [91meicar: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}[0m
