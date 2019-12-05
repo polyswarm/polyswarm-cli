@@ -29,7 +29,7 @@ def scan(ctx, recursive, timeout, path):
         try:
             output.artifact_instance(api.wait_for(instance.id, timeout=timeout))
         except exceptions.TimeoutException:
-            output.artifact_instance(next(api.lookup(instance.id)))
+            output.artifact_instance(api.lookup(instance.id), timeout=True)
 
 
 @click.command('url', short_help='scan url')
@@ -56,7 +56,7 @@ def url_scan(ctx, url_file, timeout, url):
         try:
             output.artifact_instance(api.wait_for(instance.id, timeout=timeout))
         except exceptions.TimeoutException:
-            output.artifact_instance(next(api.lookup(instance.id)))
+            output.artifact_instance(api.lookup(instance.id), timeout=True)
 
 
 @click.command('rescan', short_help='rescan files(s) by hash')
@@ -79,7 +79,7 @@ def rescan(ctx, hash_file, hash_type, timeout, hash_value):
         try:
             output.artifact_instance(api.wait_for(instance.id, timeout=timeout))
         except exceptions.TimeoutException:
-            output.artifact_instance(next(api.lookup(instance.id)))
+            output.artifact_instance(api.lookup(instance.id), timeout=True)
 
 
 @click.command('lookup', short_help='lookup Submission id(s)')
