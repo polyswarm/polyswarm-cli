@@ -83,14 +83,22 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('Last seen: {}'.format(artifact.last_seen)))
         return self._output(output, write)
 
-    def artifact_instance(self, instance, write=True):
+    def artifact_instance(self, instance, write=True, timeout=False):
         output = []
         output.append(self._white('============================= Artifact Instance ============================='))
         output.append(self._blue('Submission id: {}'.format(instance.id)))
-        output.extend(self.artifact(instance, write=False))
+        if instance.failed:
+            output.append(self._red('Status: Failed'))
+        elif instance.window_closed:
+            output.append(self._green('Status: Assertion window closed'))
+        elif timeout:
+            output.append(self._yellow('Status: Lookup timed-out, please retry'))
+        else:
+            output.append(self._white('Status: Running'))
         output.append(self._white('Filename: {}'.format(instance.filename)))
         output.append(self._white('Community: {}'.format(instance.community)))
         output.append(self._white('Country: {}'.format(instance.country)))
+        output.extend(self.artifact(instance, write=False))
 
         if instance.polyscore is not None:
             formatter = self._get_score_format(instance.polyscore)

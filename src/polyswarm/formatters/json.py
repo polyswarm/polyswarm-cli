@@ -11,10 +11,7 @@ class JSONOutput(base.BaseOutput):
     def _to_json(json_data):
         return json.dumps(json_data, sort_keys=True)
 
-    def artifact_instance(self, result):
-        self.out.write(self._to_json(result.json) + '\n')
-
-    def submission(self, result):
+    def artifact_instance(self, result, timeout=False):
         self.out.write(self._to_json(result.json) + '\n')
 
     def hunt_result(self, result):
@@ -43,10 +40,7 @@ class PrettyJSONOutput(base.BaseOutput):
     def _to_json(json_data):
         return json.dumps(json_data, indent=4, sort_keys=True)
 
-    def artifact_instance(self, result):
-        self.out.write(self._to_json(result.json) + '\n')
-
-    def submission(self, result):
+    def artifact_instance(self, result, timeout=False):
         self.out.write(self._to_json(result.json) + '\n')
 
     def hunt_result(self, result):

@@ -7,13 +7,10 @@ class BaseOutput(object):
     def __init__(self, output, **kwargs):
         self.out = output
 
-    def artifact_instance(self, result):
+    def artifact_instance(self, result, timeout=False):
         raise NotImplementedError
 
     def hunt_result(self, result):
-        raise NotImplementedError
-
-    def submission(self, result):
         raise NotImplementedError
 
     def hunt(self, result):
