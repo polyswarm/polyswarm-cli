@@ -26,8 +26,8 @@ def download(ctx, hash_file, hash_type, hash_value, destination):
     output = ctx.obj['output']
     hashes = utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)
 
-    for future in utils.parallelize(api.download, args_list=[(destination, h) for h in hashes]):
-        output.local_artifact(future.result())
+    for result in utils.parallel_executor(api.download, args_list=[(destination, h) for h in hashes]):
+        output.local_artifact(result)
 
 
 @click.command('stream', short_help='access the polyswarm file stream')
@@ -40,8 +40,8 @@ def stream(ctx, since, destination):
     out = ctx.obj['output']
 
     args = [(destination, artifact_archive.s3_path) for artifact_archive in api.stream(since=since)]
-    for future in utils.parallelize(api.download_archive, args_list=args):
-        out.local_artifact(future.result())
+    for result in utils.parallel_executor(api.download_archive, args_list=args):
+        out.local_artifact(result)
 
 
 @click.command('cat', short_help='cat artifact to stdout')

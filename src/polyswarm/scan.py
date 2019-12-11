@@ -3,7 +3,7 @@ import logging
 import click
 
 from polyswarm_api import const
-from polyswarm_api import exceptions
+from polyswarm_api import exceptions as api_exceptions
 from . import utils
 
 logger = logging.getLogger(__name__)
@@ -24,11 +24,10 @@ def scan(ctx, recursive, timeout, path):
 
     args = [(file,) for file in utils.collect_files(path, recursive=recursive)]
 
-    for future in utils.parallelize(api.submit, args_list=args):
-        instance = future.result()
+    for instance in utils.parallel_executor(api.submit, args_list=args):
         try:
             output.artifact_instance(api.wait_for(instance.id, timeout=timeout))
-        except exceptions.TimeoutException:
+        except api_exceptions.TimeoutException:
             output.artifact_instance(api.lookup(instance.id), timeout=True)
 
 
@@ -51,11 +50,10 @@ def url_scan(ctx, url_file, timeout, url):
     args = [(url,) for url in urls]
     kwargs = [dict(artifact_type='url') for _ in urls]
 
-    for future in utils.parallelize(api.submit, args_list=args, kwargs_list=kwargs):
-        instance = future.result()
+    for instance in utils.parallel_executor(api.submit, args_list=args, kwargs_list=kwargs):
         try:
             output.artifact_instance(api.wait_for(instance.id, timeout=timeout))
-        except exceptions.TimeoutException:
+        except api_exceptions.TimeoutException:
             output.artifact_instance(api.lookup(instance.id), timeout=True)
 
 
@@ -74,11 +72,10 @@ def rescan(ctx, hash_file, hash_type, timeout, hash_value):
     output = ctx.obj['output']
     args = [(h,) for h in utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)]
 
-    for future in utils.parallelize(api.rescan, args_list=args):
-        instance = future.result()
+    for instance in utils.parallel_executor(api.rescan, args_list=args):
         try:
             output.artifact_instance(api.wait_for(instance.id, timeout=timeout))
-        except exceptions.TimeoutException:
+        except api_exceptions.TimeoutException:
             output.artifact_instance(api.lookup(instance.id), timeout=True)
 
 
@@ -104,5 +101,5 @@ def lookup(ctx, submission_id, submission_id_file):
             else:
                 logger.warning('Invalid Submission id %s in file, ignoring.', u)
 
-    for future in utils.parallelize(api.lookup, args_list=[(u,) for u in submission_ids]):
-        output.artifact_instance(future.result())
+    for result in utils.parallel_executor(api.lookup, args_list=[(u,) for u in submission_ids]):
+        output.artifact_instance(result)

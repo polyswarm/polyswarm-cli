@@ -16,9 +16,29 @@ from polyswarm import exceptions
 logger = logging.getLogger(__name__)
 
 
-@click.group(short_help='interact with PolySwarm search api')
+@click.group(short_help='Interact with PolySwarm search api')
 def search():
     pass
+
+
+def process_search(ctx, search_method, args_list=(), kwargs_list=()):
+    output = ctx.obj['output']
+    results_found = False
+    partial_results = False
+    for results in utils.parallel_executor(search_method, args_list=args_list, kwargs_list=kwargs_list):
+        empty_result = True
+        for result in results:
+            results_found = True
+            empty_result = False
+            output.artifact_instance(result)
+        partial_results = partial_results or empty_result
+
+    if not results_found:
+        raise exceptions.NoResultsException('One or more items did not return any results. '
+                                            'Please check the logs.')
+    if partial_results:
+        raise exceptions.PartialResultsException('One or more items did not return any results. '
+                                                 'Please check the logs.')
 
 
 @search.command('hash', short_help='search for hashes separated by space')
@@ -31,18 +51,8 @@ def hashes(ctx, hash_value, hash_file, hash_type):
     Search PolySwarm for files matching hashes
     """
     api = ctx.obj['api']
-    output = ctx.obj['output']
-
     args = [(h,) for h in utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)]
-
-    found = False
-    for future in utils.parallelize(api.search, args_list=args):
-        for instance in future.result():
-            found = True
-            output.artifact_instance(instance)
-
-    if not found:
-        raise exceptions.NoResultsException('No results found for the provided hash(es).')
+    process_search(ctx, api.search, args_list=args)
 
 
 @search.command('metadata', short_help='search metadata of files')
@@ -52,18 +62,9 @@ def hashes(ctx, hash_value, hash_file, hash_type):
 def metadata(ctx, query_string, query_file):
 
     api = ctx.obj['api']
-    output = ctx.obj['output']
 
     queries = [resources.MetadataQuery(q, False, api) for q in query_string]
     if query_file:
         queries.append(resources.MetadataQuery(json.load(query_file), True, api))
     args = [(q,) for q in queries]
-
-    found = False
-    for future in utils.parallelize(api.search_by_metadata, args_list=args):
-        for instance in future.result():
-            found = True
-            output.artifact_instance(instance)
-
-    if not found:
-        raise exceptions.NoResultsException('No results found for the provided query(ies).')
+    process_search(ctx, api.search_by_metadata, args_list=args)
