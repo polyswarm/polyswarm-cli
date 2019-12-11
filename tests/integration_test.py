@@ -181,7 +181,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_text_result(
             result,
-            expected_output='"Malformed yara file: line 1: syntax error, unexpected identifier"',
+            expected_output='error: Malformed yara file: line 1: syntax error, unexpected identifier',
             expected_return_code=2,
         )
 
