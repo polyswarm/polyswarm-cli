@@ -1,7 +1,6 @@
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
-
 # TODO: Change this to import itertools once we drop support for python 2.7
 try:
     from itertools import zip_longest
@@ -9,8 +8,10 @@ except ImportError:
     from itertools import izip_longest as zip_longest
 
 import click
-from polyswarm_api import exceptions
+from polyswarm_api import exceptions as api_exceptions
 from polyswarm_api.types import resources
+
+from polyswarm import exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -26,15 +27,35 @@ def is_valid_id(value):
         return False
 
 
-def parallelize(function, args_list=(), kwargs_list=(), parallel=None):
+def parallelize(function, args_list=(), kwargs_list=(), **kwargs):
     futures = []
-    with ThreadPoolExecutor(parallel) as pool:
+    with ThreadPoolExecutor(**kwargs) as pool:
         for args, kwargs in zip_longest(args_list, kwargs_list, fillvalue=None):
             args = args or []
             kwargs = kwargs or {}
             futures.append(pool.submit(function, *args, **kwargs))
     for future in futures:
         yield future
+
+
+def parallel_executor(function, args_list=(), kwargs_list=(), **kwargs):
+    hard_failure = False
+    soft_failure = False
+    for future in parallelize(function, args_list=args_list, kwargs_list=kwargs_list, **kwargs):
+        try:
+            yield future.result()
+        except api_exceptions.NotFoundException as e:
+            logger.error(e)
+            soft_failure = True
+        except api_exceptions.PolyswarmAPIException as e:
+            logger.error(e)
+            hard_failure = True
+    if hard_failure:
+        raise exceptions.InternalFailureException('One or more requests encountered unrecoverable errors. '
+                                                  'Please check the logs.')
+    if soft_failure:
+        raise exceptions.InternalFailureException('One or more requests did not find the requested resources. '
+                                                  'Please check the logs.')
 
 
 ####################################################
@@ -62,7 +83,7 @@ def collect_files(paths, recursive=False, log_errors=False):
         elif log_errors:
             logger.error('Path %s is neither a file nor a directory.', path)
         else:
-            raise exceptions.InvalidValueException('Path {} is neither a file nor a directory.'.format(path))
+            raise api_exceptions.InvalidValueException('Path {} is neither a file nor a directory.'.format(path))
     return all_files
 
 
@@ -74,7 +95,7 @@ def parse_hashes(values, hash_file=None, hash_type=None, log_errors=False):
     for hash_ in values:
         try:
             hashes.append(resources.Hash(hash_, hash_type=hash_type))
-        except exceptions.InvalidValueException as e:
+        except api_exceptions.InvalidValueException as e:
             if log_errors:
                 logger.error(e)
             else:
