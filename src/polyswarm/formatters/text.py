@@ -4,7 +4,6 @@ import functools
 import json
 from . import base
 from polyswarm_api import const
-from polyswarm_api import exceptions
 
 
 # TODO rewrite some of this to be not terrible
@@ -158,9 +157,6 @@ class TextOutput(base.BaseOutput):
 
     def usage_exceeded(self):
         self.out.write(self._red(const.USAGE_EXCEEDED_MESSAGE)+'\n')
-
-    def invalid_rule(self, e):
-        self.out.write(self._red('Malformed yara file: {}'.format(e.args[0])+'\n'))
 
     @is_colored
     @is_grouped

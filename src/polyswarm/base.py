@@ -29,28 +29,25 @@ class ExceptionHandlingGroup(click.Group):
     def invoke(self, ctx):
         try:
             return super(ExceptionHandlingGroup, self).invoke(ctx)
-        except exceptions.NoResultsException as e:
-            click.secho(str(e), fg='red')
+        except (
+                exceptions.NoResultsException,
+                exceptions.NotFoundException,
+        ) as e:
+            logger.error(e)
             sys.exit(1)
-        except api_exceptions.NotFoundException as e:
-            click.secho(str(e), fg='red')
-            sys.exit(1)
-        except api_exceptions.InvalidYaraRulesException as e:
-            output = ctx.obj.get('output')
-            if output:
-                output.invalid_rule(e)
-            sys.exit(2)
-        except api_exceptions.UsageLimitsExceededException as e:
-            output = ctx.obj.get('output')
-            if output:
-                output.usage_exceeded()
-            sys.exit(2)
-        except api_exceptions.PolyswarmException as e:
-            click.secho(str(e), fg='red')
-            sys.exit(2)
-        except JSONDecodeError:
-            sys.exit(2)
-        except UnicodeDecodeError:
+        except (
+                exceptions.PartialResultsException,
+        ) as e:
+            logger.error(e)
+            sys.exit(3)
+        except (
+                api_exceptions.PolyswarmException,
+                exceptions.InternalFailureException,
+                exceptions.PolyswarmException,
+                JSONDecodeError,
+                UnicodeDecodeError,
+        ) as e:
+            logger.error(e)
             sys.exit(2)
 
 
