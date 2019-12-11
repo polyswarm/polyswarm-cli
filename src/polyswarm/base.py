@@ -1,12 +1,12 @@
-import click
 import logging
 import sys
-
 try:
     from json import JSONDecodeError
 except ImportError:
     JSONDecodeError = ValueError
 
+import click
+import click_log
 from polyswarm_api import exceptions as api_exceptions
 from polyswarm_api.api import PolyswarmAPI
 from polyswarm.formatters import formatters
@@ -18,6 +18,8 @@ from .hunt import live, historical
 from .scan import scan, url_scan, rescan, lookup
 from .download import download, cat, stream
 from .search import search
+
+logger = logging.getLogger(__name__)
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 VERSION = '2.0.0.dev4'
@@ -77,19 +79,21 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
     """
-    ctx.obj = {}
-
-    if ctx.invoked_subcommand is None:
-        return
-
-    if verbose > 2:
+    if verbose >= 2:
         log_level = logging.DEBUG
     elif verbose == 1:
         log_level = logging.INFO
     else:
-        log_level = logging.WARN
+        log_level = logging.WARNING
+    click_log.basic_config('polyswarm').setLevel(log_level)
+    click_log.basic_config('polyswarm_api').setLevel(log_level)
 
-    logging.basicConfig(level=log_level)
+    logger.info('Running polyswarm-cli version %s with polyswarm-api version %s', VERSION, get_polyswarm_api_version())
+
+    ctx.obj = {}
+
+    if ctx.invoked_subcommand is None:
+        return
 
     # only allow color for stdout
     if output_file is not None:
@@ -97,7 +101,6 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     else:
         output_file = click.get_text_stream('stdout')
 
-    logging.debug('Creating API instance: api_key: %s, api_uri: %s', api_key, api_uri)
     ctx.obj['api'] = PolyswarmAPI(api_key, api_uri, community=community, validate_schemas=validate)
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
     ctx.obj['parallel'] = parallel

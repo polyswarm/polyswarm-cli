@@ -1,6 +1,5 @@
 import logging
 import os
-from uuid import UUID
 from concurrent.futures import ThreadPoolExecutor
 
 # TODO: Change this to import itertools once we drop support for python 2.7
