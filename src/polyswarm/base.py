@@ -49,6 +49,10 @@ class ExceptionHandlingGroup(click.Group):
         ) as e:
             logger.error(e)
             sys.exit(2)
+        except Exception as e:
+            logger.exception(e)
+            logger.error('Unhandled exception happened. Please contact support.')
+            sys.exit(2)
 
 
 @click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS)
