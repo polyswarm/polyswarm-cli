@@ -40,7 +40,7 @@ class SearchTest(BaseTestCase):
             result = self._run_cli(['--output-format', 'json', 'search', 'hash', self.test_hash_value])
         self._assert_text_result(
             result,
-            expected_return_code=1,
+            expected_return_code=2,
         )
 
     def test_search_metadata_with_json_output(self):
@@ -93,5 +93,5 @@ class SearchTest(BaseTestCase):
                                     'hash.sha256:' + self.test_hash_value])
         self._assert_text_result(
             result,
-            expected_return_code=1,
+            expected_return_code=2,
         )
