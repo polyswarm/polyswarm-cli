@@ -47,16 +47,39 @@ def parallel_executor(function, args_list=(), kwargs_list=(), **kwargs):
         except api_exceptions.NotFoundException as e:
             logger.error(e)
             soft_failure = True
-        except api_exceptions.PolyswarmAPIException as e:
+        except api_exceptions.PolyswarmException as e:
             logger.error(e)
             hard_failure = True
+
     if hard_failure:
         raise exceptions.InternalFailureException('One or more requests encountered unrecoverable errors. '
                                                   'Please check the logs.')
     if soft_failure:
-        raise exceptions.InternalFailureException('One or more requests did not find the requested resources. '
-                                                  'Please check the logs.')
+        raise exceptions.NotFoundException('One or more requests did not find the requested resources. '
+                                           'Please check the logs.')
 
+
+def parallel_executor_iterable_results(search_method, args_list=(), kwargs_list=(), **kwargs):
+    results_found = False
+    partial_results = False
+    for i, results in enumerate(parallel_executor(search_method, args_list=args_list,
+                                                  kwargs_list=kwargs_list, **kwargs)):
+        empty_result = True
+        for result in results:
+            results_found = True
+            empty_result = False
+            yield result
+        if empty_result:
+            logger.error('Polyswarm API call to {}() with params {} did not return any results'
+                         .format(search_method.__name__, ', '.join(args_list[i])))
+        partial_results = partial_results or empty_result
+
+    if not results_found:
+        raise exceptions.NoResultsException('One or more items did not return any results. '
+                                            'Please check the logs.')
+    if partial_results:
+        raise exceptions.PartialResultsException('One or more items did not return any results. '
+                                                 'Please check the logs.')
 
 ####################################################
 # Input parsers
@@ -87,21 +110,10 @@ def collect_files(paths, recursive=False, log_errors=False):
     return all_files
 
 
-def parse_hashes(values, hash_file=None, hash_type=None, log_errors=False):
-    hashes = []
-    values = list(values)
+def parse_hashes(values, hash_file=None):
+    hashes = list(values)
     if hash_file is not None:
-        values += hash_file.readlines()
-    for hash_ in values:
-        try:
-            hashes.append(resources.Hash(hash_, hash_type=hash_type))
-        except api_exceptions.InvalidValueException as e:
-            if log_errors:
-                logger.error(e)
-            else:
-                raise e
-    if not hashes:
-        raise click.BadParameter('Hash not valid, must be sha256|md5|sha1 in hexadecimal format')
+        hashes += hash_file.readlines()
     return hashes
 
 
