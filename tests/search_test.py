@@ -5,6 +5,8 @@ try:
 except ImportError:
     from mock import patch
 
+from polyswarm_api import exceptions as api_exceptions
+
 from tests.utils.base_test_case import BaseTestCase
 from tests.utils import mock_polyswarm_api_results
 
@@ -36,7 +38,7 @@ class SearchTest(BaseTestCase):
         )
 
     def test_search_hash_with_no_results(self):
-        with patch('polyswarm_api.api.PolyswarmAPI.search', return_value=[]):
+        with patch('polyswarm_api.api.PolyswarmAPI.search', side_effect=api_exceptions.NoResultsException(None)):
             result = self._run_cli(['--output-format', 'json', 'search', 'hash', self.test_hash_value])
         self._assert_text_result(
             result,
@@ -88,7 +90,8 @@ class SearchTest(BaseTestCase):
             expected_return_code=2)
 
     def test_search_metadata_with_no_results(self):
-        with patch('polyswarm_api.api.PolyswarmAPI.search_by_metadata', return_value=[]):
+        with patch('polyswarm_api.api.PolyswarmAPI.search_by_metadata',
+                   side_effect=api_exceptions.NoResultsException(None)):
             result = self._run_cli(['--output-format', 'text', 'search', 'metadata',
                                     'hash.sha256:' + self.test_hash_value])
         self._assert_text_result(
