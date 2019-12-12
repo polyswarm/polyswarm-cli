@@ -98,7 +98,7 @@ class IntegrationTest(BaseTestCase):
                                       request=self._create_scan_submission_submit_request(malicious_file),
                                       response=self.mock_submission_response)
 
-        result = self._run_cli(['--output-format', 'json', '-c', 'lima', 'scan', malicious_file])
+        result = self._run_cli(['--output-format', 'json', '-c', 'lima', 'scan', 'file', malicious_file])
 
         self._assert_json_result(
             result,
@@ -114,7 +114,7 @@ class IntegrationTest(BaseTestCase):
                                       request=self._create_scan_submission_lookup_request(self.test_submission_uuid),
                                       response=self.mock_submission_response)
 
-        result = self._run_cli(['--output-format', 'json', '-c', 'lima', 'rescan', self.test_hash_value])
+        result = self._run_cli(['--output-format', 'json', '-c', 'lima', 'scan', 'hash', self.test_hash_value])
 
         self._assert_json_result(
             result,
@@ -163,7 +163,7 @@ class IntegrationTest(BaseTestCase):
                                       request=self._create_hunt_live_start_request(yara_file),
                                       response=self.mock_hunt_response)
 
-        result = self._run_cli(['--output-format', 'json', 'live', 'start', yara_file])
+        result = self._run_cli(['--output-format', 'json', 'live', 'create', yara_file])
 
         self._assert_json_result(
             result,
@@ -177,7 +177,7 @@ class IntegrationTest(BaseTestCase):
                                       request=self._create_hunt_live_start_request(broken_yara_file),
                                       response=self.mock_hunt_response)
 
-        result = self._run_cli(['--output-format', 'json', 'live', 'start', broken_yara_file])
+        result = self._run_cli(['--output-format', 'json', 'live', 'create', broken_yara_file])
 
         self._assert_text_result(
             result,

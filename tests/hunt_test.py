@@ -73,7 +73,7 @@ class LiveHuntTest(BaseTestCase):
         with patch('polyswarm_api.api.PolyswarmAPI.live_create',
                    return_value=mock_polyswarm_api_results.hunts(self)[0]):
             result = self._run_cli(['--output-format', 'json',
-                                    'live', 'start', self._get_test_resource_file_path('eicar.yara')])
+                                    'live', 'create', self._get_test_resource_file_path('eicar.yara')])
         self._assert_json_result(
             result,
             expected_output=mock_polyswarm_api_results.hunts(self)[0].json,
@@ -84,7 +84,7 @@ class LiveHuntTest(BaseTestCase):
         with patch('polyswarm_api.api.PolyswarmAPI.live_create',
                    return_value=mock_polyswarm_api_results.hunts(self)[0]):
             result = self._run_cli(['--output-format', 'text',
-                                    'live', 'start', self._get_test_resource_file_path('eicar.yara')])
+                                    'live', 'create', self._get_test_resource_file_path('eicar.yara')])
         self._assert_text_result(
             result,
             expected_output=mock_polyswarm_api_results.text_hunts()[0],
