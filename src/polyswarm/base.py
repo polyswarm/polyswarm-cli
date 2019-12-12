@@ -41,8 +41,8 @@ class ExceptionHandlingGroup(click.Group):
             logger.error(e)
             sys.exit(3)
         except (
-                api_exceptions.PolyswarmException,
                 exceptions.InternalFailureException,
+                api_exceptions.PolyswarmException,
                 exceptions.PolyswarmException,
                 JSONDecodeError,
                 UnicodeDecodeError,
