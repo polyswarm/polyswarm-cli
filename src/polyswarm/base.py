@@ -23,7 +23,7 @@ from .search import search
 logger = logging.getLogger(__name__)
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-VERSION = '2.0.0.dev4'
+VERSION = '2.0.0.dev5'
 
 
 class ExceptionHandlingGroup(click.Group):
