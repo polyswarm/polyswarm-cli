@@ -7,6 +7,7 @@ except ImportError:
 
 import click
 import click_log
+from click.exceptions import Exit
 from polyswarm_api import exceptions as api_exceptions
 from polyswarm_api.api import PolyswarmAPI
 from polyswarm.formatters import formatters
@@ -34,12 +35,12 @@ class ExceptionHandlingGroup(click.Group):
                 exceptions.NotFoundException,
         ) as e:
             logger.error(e)
-            sys.exit(1)
+            raise Exit(1)
         except (
                 exceptions.PartialResultsException,
         ) as e:
             logger.error(e)
-            sys.exit(3)
+            raise Exit(3)
         except (
                 exceptions.InternalFailureException,
                 api_exceptions.PolyswarmException,
@@ -48,11 +49,13 @@ class ExceptionHandlingGroup(click.Group):
                 UnicodeDecodeError,
         ) as e:
             logger.error(e)
-            sys.exit(2)
+            raise Exit(2)
+        except Exit:
+            raise
         except Exception as e:
             logger.exception(e)
             logger.error('Unhandled exception happened. Please contact support.')
-            sys.exit(2)
+            raise Exit(2)
 
 
 @click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS)
