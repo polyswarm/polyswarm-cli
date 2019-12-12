@@ -24,9 +24,10 @@ def download(ctx, hash_file, hash_type, hash_value, destination):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    hashes = utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)
+    args = [(destination, h) for h in utils.parse_hashes(hash_value, hash_file=hash_file)]
 
-    for result in utils.parallel_executor(api.download, args_list=[(destination, h) for h in hashes]):
+    for result in utils.parallel_executor(api.download, args_list=args,
+                                          kwargs_list=[{'hash_type': hash_type}]*len(args)):
         output.local_artifact(result)
 
 
@@ -51,5 +52,4 @@ def stream(ctx, since, destination):
 def cat(ctx, hash_type, hash_value):
     api = ctx.obj['api']
     out = click.get_binary_stream('stdout')
-    hashes = utils.parse_hashes([hash_value], hash_type=hash_type, log_errors=True)
-    api.download_to_filehandle(hashes[0], out)
+    api.download_to_filehandle(hash_value, out, hash_type=hash_type)

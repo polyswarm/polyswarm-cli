@@ -70,9 +70,10 @@ def rescan(ctx, hash_file, hash_type, timeout, hash_value):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    args = [(h,) for h in utils.parse_hashes(hash_value, hash_file=hash_file, hash_type=hash_type, log_errors=True)]
+    args = [(h,) for h in utils.parse_hashes(hash_value, hash_file=hash_file)]
 
-    for instance in utils.parallel_executor(api.rescan, args_list=args):
+    for instance in utils.parallel_executor(api.rescan, args_list=args,
+                                            kwargs_list=[{'hash_type': hash_type}]*len(args)):
         try:
             output.artifact_instance(api.wait_for(instance.id, timeout=timeout))
         except api_exceptions.TimeoutException:
