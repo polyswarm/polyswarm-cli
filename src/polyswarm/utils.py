@@ -46,9 +46,16 @@ def parallelize(function, args_list=(), kwargs_list=(), **kwargs):
 def parallel_executor(function, args_list=(), kwargs_list=(), **kwargs):
     hard_failure = False
     soft_failure = False
-    for future in parallelize(function, args_list=args_list, kwargs_list=kwargs_list, **kwargs):
+    empty_results = False
+    no_results = True
+    for i, future in enumerate(parallelize(function, args_list=args_list, kwargs_list=kwargs_list, **kwargs)):
         try:
             yield future.result()
+            no_results = False
+        except api_exceptions.NoResultsException as e:
+            logger.error('Polyswarm API call to {}() with params {} did not return any results'
+                         .format(function.__name__, ', '.join(args_list[i])))
+            empty_results = True
         except api_exceptions.NotFoundException as e:
             logger.error(e)
             soft_failure = True
@@ -62,29 +69,17 @@ def parallel_executor(function, args_list=(), kwargs_list=(), **kwargs):
     if soft_failure:
         raise exceptions.NotFoundException('One or more requests did not find the requested resources. '
                                            'Please check the logs.')
+    if no_results:
+        raise exceptions.NoResultsException('No results returned. Please check the logs.')
+    if empty_results:
+        raise exceptions.NotFoundException('One or more items did not return any results. '
+                                           'Please check the logs.')
 
 
 def parallel_executor_iterable_results(search_method, args_list=(), kwargs_list=(), **kwargs):
-    results_found = False
-    partial_results = False
-    for i, results in enumerate(parallel_executor(search_method, args_list=args_list,
-                                                  kwargs_list=kwargs_list, **kwargs)):
-        empty_result = True
+    for results in parallel_executor(search_method, args_list=args_list, kwargs_list=kwargs_list, **kwargs):
         for result in results:
-            results_found = True
-            empty_result = False
             yield result
-        if empty_result:
-            logger.error('Polyswarm API call to {}() with params {} did not return any results'
-                         .format(search_method.__name__, ', '.join(args_list[i])))
-        partial_results = partial_results or empty_result
-
-    if not results_found:
-        raise exceptions.NoResultsException('One or more items did not return any results. '
-                                            'Please check the logs.')
-    if partial_results:
-        raise exceptions.PartialResultsException('One or more items did not return any results. '
-                                                 'Please check the logs.')
 
 
 ####################################################
