@@ -47,9 +47,10 @@ def stream(ctx, since, destination):
 
 @click.command('cat', short_help='cat artifact to stdout')
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5]', default=None)
-@click.argument('hash_value', callback=utils.validate_hash)
+@click.argument('hash_value', nargs=-1, callback=utils.validate_hashes)
 @click.pass_context
 def cat(ctx, hash_type, hash_value):
     api = ctx.obj['api']
     out = click.get_binary_stream('stdout')
-    api.download_to_filehandle(hash_value, out, hash_type=hash_type)
+    for h in hash_value:
+        api.download_to_filehandle(h, out, hash_type=hash_type)
