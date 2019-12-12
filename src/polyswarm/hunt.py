@@ -74,17 +74,17 @@ def live_list(ctx):
 
 
 @live.command('results', short_help='Get results from live hunt')
-@click.argument('hunt_id', type=int, required=False)
-@click.option('-i', '--hunt-id', type=int, help='ID of the rule file (defaults to latest)')
+@click.argument('hunt_id', nargs=-1, type=int)
 @click.option('-s', '--since', type=click.INT, default=60,
               help='How far back in minutes to request results (default: 60, or all)')
 @click.pass_context
 def live_results(ctx, hunt_id, since):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.live_results(hunt_id, since=since)
-    for hunt in result:
-        output.hunt_result(hunt)
+    args = [(h,) for h in hunt_id]
+    kwargs = [dict(since=since)]*len(args)
+    for result in utils.parallel_executor_iterable_results(api.live_results, args_list=args, kwargs_list=kwargs):
+        output.hunt_result(result)
 
 
 @historical.command('start', short_help='Start a new historical hunt')
@@ -99,13 +99,14 @@ def historical_start(ctx, rule_file):
 
 
 @historical.command('delete', short_help='Delete the historical hunt associate with the given hunt_id')
-@click.argument('hunt_id', type=int)
+@click.argument('hunt_id', nargs=-1, type=int)
 @click.pass_context
 def historical_delete(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.historical_delete(hunt_id)
-    output.hunt_deletion(result)
+    kwargs = [dict(hunt_id=h) for h in hunt_id]
+    for result in utils.parallel_executor(api.historical_delete, kwargs_list=kwargs):
+        output.hunt_deletion(result)
 
 
 @historical.command('list', short_help='List all historical hunts performed')
@@ -119,11 +120,11 @@ def historical_list(ctx):
 
 
 @historical.command('results', short_help='Get results from historical hunt')
-@click.argument('hunt_id', type=int, required=False)
+@click.argument('hunt_id', nargs=-1, type=int)
 @click.pass_context
 def historical_results(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.historical_results(hunt_id)
-    for hunt in result:
-        output.hunt_result(hunt)
+    args = [(h,) for h in hunt_id]
+    for result in utils.parallel_executor_iterable_results(api.historical_results, args_list=args):
+        output.hunt_result(result)
