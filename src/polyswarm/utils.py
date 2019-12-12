@@ -27,6 +27,11 @@ def is_valid_id(value):
         return False
 
 
+####################################################
+# Parallelization and error handling executors
+####################################################
+
+
 def parallelize(function, args_list=(), kwargs_list=(), **kwargs):
     futures = []
     with ThreadPoolExecutor(**kwargs) as pool:
@@ -80,6 +85,7 @@ def parallel_executor_iterable_results(search_method, args_list=(), kwargs_list=
     if partial_results:
         raise exceptions.PartialResultsException('One or more items did not return any results. '
                                                  'Please check the logs.')
+
 
 ####################################################
 # Input parsers
