@@ -18,13 +18,18 @@ def rescan_and_wait(api, timeout, *args, **kwargs):
     return api.wait_for(instance.id, timeout=timeout)
 
 
-@click.command('scan', short_help='scan files/directories')
+@click.group(short_help='Interact with Submissions sent to Polyswarm')
+def scan():
+    pass
+
+
+@scan.command('file', short_help='scan files/directories')
 @click.option('-r', '--recursive', is_flag=True, default=False, help='Scan directories recursively')
 @click.option('-t', '--timeout', type=click.INT, default=const.DEFAULT_SCAN_TIMEOUT,
               help='How long to wait for results (default: {})'.format(const.DEFAULT_SCAN_TIMEOUT))
 @click.argument('path', nargs=-1, type=click.Path(exists=True))
 @click.pass_context
-def scan(ctx, recursive, timeout, path):
+def file(ctx, recursive, timeout, path):
     """
     Scan files or directories via PolySwarm
     """
@@ -37,13 +42,13 @@ def scan(ctx, recursive, timeout, path):
         output.artifact_instance(instance)
 
 
-@click.command('url', short_help='scan url')
+@scan.command('url', short_help='scan url')
 @click.option('-r', '--url-file', help='File of URLs, one per line.', type=click.File('r'))
 @click.option('-t', '--timeout', type=click.INT, default=const.DEFAULT_SCAN_TIMEOUT,
               help='How long to wait for results (default: {})'.format(const.DEFAULT_SCAN_TIMEOUT))
 @click.argument('url', nargs=-1, type=click.STRING)
 @click.pass_context
-def url_scan(ctx, url_file, timeout, url):
+def url_(ctx, url_file, timeout, url):
     """
     Scan files or directories via PolySwarm
     """
@@ -60,14 +65,14 @@ def url_scan(ctx, url_file, timeout, url):
         output.artifact_instance(instance)
 
 
-@click.command('rescan', short_help='rescan files(s) by hash')
+@scan.command('hash', short_help='rescan files(s) by hash')
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5]', default=None)
 @click.option('-t', '--timeout', type=click.INT, default=const.DEFAULT_SCAN_TIMEOUT,
               help='How long to wait for results (default: {})'.format(const.DEFAULT_SCAN_TIMEOUT))
 @click.argument('hash_value', nargs=-1, callback=utils.validate_hashes)
 @click.pass_context
-def rescan(ctx, hash_file, hash_type, timeout, hash_value):
+def hash_(ctx, hash_file, hash_type, timeout, hash_value):
     """
     Rescan files with matched hashes
     """
@@ -80,7 +85,7 @@ def rescan(ctx, hash_file, hash_type, timeout, hash_value):
         output.artifact_instance(instance)
 
 
-@click.command('lookup', short_help='lookup Submission id(s)')
+@scan.command('lookup', short_help='Lookup a Submission id(s)')
 @click.option('-r', '--submission-id-file', help='File of Submission ids, one per line.', type=click.File('r'))
 @click.argument('submission_id', nargs=-1, callback=utils.validate_id)
 @click.pass_context
@@ -104,3 +109,22 @@ def lookup(ctx, submission_id, submission_id_file):
 
     for result in utils.parallel_executor(api.lookup, args_list=[(u,) for u in submission_ids]):
         output.artifact_instance(result)
+
+
+@scan.command('wait', short_help='Wait for a  Submission to finish')
+@click.option('-t', '--timeout', type=click.INT, default=const.DEFAULT_SCAN_TIMEOUT,
+              help='How long to wait for results (default: {})'.format(const.DEFAULT_SCAN_TIMEOUT))
+@click.argument('submission_id', nargs=-1, callback=utils.validate_id)
+@click.pass_context
+def wait(ctx, submission_id, timeout):
+    """
+    Lookup a PolySwarm scan by Submission id for current status.
+    """
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    args = [(s,) for s in submission_id]
+    kwargs = [dict(timeout=timeout)]*len(args)
+
+    for result in utils.parallel_executor(api.wait_for, args_list=args, kwargs_list=kwargs):
+        output.artifact_instance(result)
+
