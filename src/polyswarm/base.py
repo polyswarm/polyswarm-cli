@@ -7,7 +7,7 @@ except ImportError:
 
 import click
 import click_log
-from click.exceptions import Exit
+from click.exceptions import Exit, ClickException
 from polyswarm_api import exceptions as api_exceptions
 from polyswarm_api.api import PolyswarmAPI
 from polyswarm.formatters import formatters
@@ -16,7 +16,7 @@ from polyswarm_api import get_version as get_polyswarm_api_version
 from polyswarm import exceptions
 from .utils import validate_key
 from .hunt import live, historical
-from .scan import scan, url_scan, rescan, lookup
+from .scan import scan, lookup, wait
 from .download import download, cat, stream
 from .search import search
 
@@ -50,7 +50,7 @@ class ExceptionHandlingGroup(click.Group):
         ) as e:
             logger.error(e)
             raise Exit(2)
-        except Exit:
+        except (Exit, ClickException):
             raise
         except Exception as e:
             logger.exception(e)
@@ -110,7 +110,7 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     ctx.obj['parallel'] = parallel
 
 
-commands = [scan, url_scan, rescan, lookup, search, live, historical, download, cat, stream]
+commands = [scan, wait, lookup, search, live, historical, download, cat, stream]
 
 for command in commands:
     polyswarm.add_command(command)
