@@ -3,10 +3,19 @@ import logging
 import click
 
 from polyswarm_api import const
-from polyswarm_api import exceptions as api_exceptions
 from . import utils
 
 logger = logging.getLogger(__name__)
+
+
+def submit_and_wait(api, timeout, *args, **kwargs):
+    instance = api.submit(*args, **kwargs)
+    return api.wait_for(instance.id, timeout=timeout)
+
+
+def rescan_and_wait(api, timeout, *args, **kwargs):
+    instance = api.rescan(*args, **kwargs)
+    return api.wait_for(instance.id, timeout=timeout)
 
 
 @click.command('scan', short_help='scan files/directories')
@@ -22,13 +31,10 @@ def scan(ctx, recursive, timeout, path):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    args = [(file,) for file in utils.collect_files(path, recursive=recursive)]
+    args = [(api, timeout, file) for file in utils.collect_files(path, recursive=recursive)]
 
-    for instance in utils.parallel_executor(api.submit, args_list=args):
-        try:
-            output.artifact_instance(api.wait_for(instance.id, timeout=timeout))
-        except api_exceptions.TimeoutException:
-            output.artifact_instance(api.lookup(instance.id), timeout=True)
+    for instance in utils.parallel_executor(submit_and_wait, args_list=args):
+        output.artifact_instance(instance)
 
 
 @click.command('url', short_help='scan url')
@@ -47,14 +53,11 @@ def url_scan(ctx, url_file, timeout, url):
     urls = list(url)
     if url_file:
         urls.extend([u.strip() for u in url_file.readlines()])
-    args = [(url,) for url in urls]
+    args = [(api, timeout, url) for url in urls]
     kwargs = [dict(artifact_type='url') for _ in urls]
 
-    for instance in utils.parallel_executor(api.submit, args_list=args, kwargs_list=kwargs):
-        try:
-            output.artifact_instance(api.wait_for(instance.id, timeout=timeout))
-        except api_exceptions.TimeoutException:
-            output.artifact_instance(api.lookup(instance.id), timeout=True)
+    for instance in utils.parallel_executor(submit_and_wait, args_list=args, kwargs_list=kwargs):
+        output.artifact_instance(instance)
 
 
 @click.command('rescan', short_help='rescan files(s) by hash')
@@ -70,14 +73,11 @@ def rescan(ctx, hash_file, hash_type, timeout, hash_value):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    args = [(h,) for h in utils.parse_hashes(hash_value, hash_file=hash_file)]
+    args = [(api, timeout, h) for h in utils.parse_hashes(hash_value, hash_file=hash_file)]
 
-    for instance in utils.parallel_executor(api.rescan, args_list=args,
+    for instance in utils.parallel_executor(rescan_and_wait, args_list=args,
                                             kwargs_list=[{'hash_type': hash_type}]*len(args)):
-        try:
-            output.artifact_instance(api.wait_for(instance.id, timeout=timeout))
-        except api_exceptions.TimeoutException:
-            output.artifact_instance(api.lookup(instance.id), timeout=True)
+        output.artifact_instance(instance)
 
 
 @click.command('lookup', short_help='lookup Submission id(s)')
