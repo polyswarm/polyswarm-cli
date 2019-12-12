@@ -11,10 +11,10 @@ def historical():
     pass
 
 
-@live.command('start', short_help='Start a new live hunt')
+@live.command('create', short_help='Create a live hunt')
 @click.argument('rule_file', type=click.File('r'))
 @click.pass_context
-def live_start(ctx, rule_file):
+def live_create(ctx, rule_file):
     api = ctx.obj['api']
     output = ctx.obj['output']
     rules = rule_file.read()
@@ -22,8 +22,28 @@ def live_start(ctx, rule_file):
     output.hunt(result)
 
 
-@live.command('delete', short_help='Delete the live hunt associate with the given hunt_id')
-@click.argument('hunt_id', type=int)
+@live.command('start', short_help='Start an existing live hunt')
+@click.argument('hunt_id', type=int, required=False)
+@click.pass_context
+def live_start(ctx, hunt_id):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    result = api.live_update(True, hunt_id=hunt_id)
+    output.hunt(result)
+
+
+@live.command('stop', short_help='Start an existing live hunt')
+@click.argument('hunt_id', type=int, required=False)
+@click.pass_context
+def live_stop(ctx, hunt_id):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    result = api.live_update(False, hunt_id=hunt_id)
+    output.hunt(result)
+
+
+@live.command('delete', short_help='Delete the live hunt associated with the given hunt_id')
+@click.argument('hunt_id', type=int, required=False)
 @click.pass_context
 def live_delete(ctx, hunt_id):
     api = ctx.obj['api']
