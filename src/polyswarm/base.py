@@ -26,38 +26,6 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 VERSION = '2.0.0.dev6'
 
 
-class ExceptionHandlingGroup(click.Group):
-    def invoke(self, ctx):
-        try:
-            return super(ExceptionHandlingGroup, self).invoke(ctx)
-        except (
-                exceptions.NoResultsException,
-                exceptions.NotFoundException,
-        ) as e:
-            logger.error(e)
-            raise Exit(1)
-        except (
-                exceptions.PartialResultsException,
-        ) as e:
-            logger.error(e)
-            raise Exit(3)
-        except (
-                exceptions.InternalFailureException,
-                api_exceptions.PolyswarmException,
-                exceptions.PolyswarmException,
-                JSONDecodeError,
-                UnicodeDecodeError,
-        ) as e:
-            logger.error(e)
-            raise Exit(2)
-        except (Exit, ClickException):
-            raise
-        except Exception as e:
-            logger.exception(e)
-            logger.error('Unhandled exception happened. Please contact support.')
-            raise Exit(2)
-
-
 def setup_logging(verbosity):
     # explicitly set to stderr just in case
     # this is the new default for click_log it seems
@@ -92,6 +60,38 @@ def setup_logging(verbosity):
         log_level = logging.WARNING
     click_log.basic_config('polyswarm').setLevel(log_level)
     click_log.basic_config('polyswarm_api').setLevel(log_level)
+
+
+class ExceptionHandlingGroup(click.Group):
+    def invoke(self, ctx):
+        try:
+            return super(ExceptionHandlingGroup, self).invoke(ctx)
+        except (
+                exceptions.NoResultsException,
+                exceptions.NotFoundException,
+        ) as e:
+            logger.error(e)
+            raise Exit(1)
+        except (
+                exceptions.PartialResultsException,
+        ) as e:
+            logger.error(e)
+            raise Exit(3)
+        except (
+                exceptions.InternalFailureException,
+                api_exceptions.PolyswarmException,
+                exceptions.PolyswarmException,
+                JSONDecodeError,
+                UnicodeDecodeError,
+        ) as e:
+            logger.error(e)
+            raise Exit(2)
+        except (Exit, ClickException):
+            raise
+        except Exception as e:
+            logger.exception(e)
+            logger.error('Unhandled exception happened. Please contact support.')
+            raise Exit(2)
 
 
 @click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS)
