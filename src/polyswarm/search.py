@@ -1,5 +1,4 @@
 import logging
-import json
 
 try:
     from json import JSONDecodeError
@@ -7,7 +6,6 @@ except ImportError:
     JSONDecodeError = ValueError
 
 import click
-from polyswarm_api.types import resources
 
 from polyswarm import utils
 
