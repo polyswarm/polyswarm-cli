@@ -33,7 +33,7 @@ def setup_logging(verbosity):
     # adding color to INFO log messages as well
     core.ColorFormatter.colors['info'] = dict(fg='green')
 
-    class ModuleColorFormatter(core.ColorFormatter):
+    class NamedColorFormatter(core.ColorFormatter):
         def format(self, record):
             if not record.exc_info:
                 level = record.levelname.lower()
@@ -46,7 +46,7 @@ def setup_logging(verbosity):
             return logging.Formatter.format(self, record)
 
     # replace the formatter with our formatter so that it prints the logger name
-    core._default_handler.formatter = ModuleColorFormatter()
+    core._default_handler.formatter = NamedColorFormatter()
 
     if verbosity >= 3:
         log_level = logging.DEBUG
