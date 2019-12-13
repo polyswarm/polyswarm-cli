@@ -1,5 +1,4 @@
 import logging
-import sys
 try:
     from json import JSONDecodeError
 except ImportError:
@@ -7,6 +6,7 @@ except ImportError:
 
 import click
 import click_log
+from click_log import core
 from click.exceptions import Exit, ClickException
 from polyswarm_api import exceptions as api_exceptions
 from polyswarm_api.api import PolyswarmAPI
@@ -58,6 +58,42 @@ class ExceptionHandlingGroup(click.Group):
             raise Exit(2)
 
 
+def setup_logging(verbosity):
+    # explicitly set to stderr just in case
+    # this is the new default for click_log it seems
+    core.ClickHandler._use_stderr = True
+    # adding color to INFO log messages as well
+    core.ColorFormatter.colors['info'] = dict(fg='green')
+
+    class ModuleColorFormatter(core.ColorFormatter):
+        def format(self, record):
+            if not record.exc_info:
+                level = record.levelname.lower()
+                msg = record.getMessage()
+                if level in self.colors:
+                    prefix = click.style('{} [{}]: '.format(level, record.name),
+                                         **self.colors[level])
+                    msg = '\n'.join(prefix + x for x in msg.splitlines())
+                return msg
+            return logging.Formatter.format(self, record)
+
+    # replace the formatter with our formatter so that it prints the logger name
+    core._default_handler.formatter = ModuleColorFormatter()
+
+    if verbosity >= 3:
+        log_level = logging.DEBUG
+        # set the root logger and any other internal loggers to debug as well if -vvv is provided
+        click_log.basic_config().setLevel(log_level)
+    elif verbosity == 2:
+        log_level = logging.DEBUG
+    elif verbosity == 1:
+        log_level = logging.INFO
+    else:
+        log_level = logging.WARNING
+    click_log.basic_config('polyswarm').setLevel(log_level)
+    click_log.basic_config('polyswarm_api').setLevel(log_level)
+
+
 @click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS)
 @click.option('-a', '--api-key', help='Your API key for polyswarm.network (required)',
               default='', callback=validate_key, envvar='POLYSWARM_API_KEY')
@@ -83,15 +119,7 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
     """
-    if verbose >= 2:
-        log_level = logging.DEBUG
-    elif verbose == 1:
-        log_level = logging.INFO
-    else:
-        log_level = logging.WARNING
-    click_log.basic_config('polyswarm').setLevel(log_level)
-    click_log.basic_config('polyswarm_api').setLevel(log_level)
-
+    setup_logging(verbose)
     logger.info('Running polyswarm-cli version %s with polyswarm-api version %s', VERSION, get_polyswarm_api_version())
 
     ctx.obj = {}
