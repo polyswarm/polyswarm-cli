@@ -38,16 +38,12 @@ def hashes(ctx, hash_value, hash_file, hash_type):
 
 
 @search.command('metadata', short_help='search metadata of files')
-@click.option('-r', '--query-file', help='Properly formatted JSON search file', type=click.File('r'))
 @click.argument('query_string', nargs=-1)
 @click.pass_context
-def metadata(ctx, query_string, query_file):
+def metadata(ctx, query_string):
 
     api = ctx.obj['api']
     output = ctx.obj['output']
-    queries = [resources.MetadataQuery(q, False, api) for q in query_string]
-    if query_file:
-        queries.append(resources.MetadataQuery(json.load(query_file), True, api))
-    args = [(q,) for q in queries]
+    args = [(q,) for q in query_string]
     for instance in utils.parallel_executor_iterable_results(api.search_by_metadata, args_list=args):
         output.artifact_instance(instance)
