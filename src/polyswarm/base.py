@@ -16,7 +16,7 @@ from polyswarm_api import get_version as get_polyswarm_api_version
 from polyswarm import exceptions
 from .utils import validate_key
 from .hunt import live, historical
-from .scan import scan, lookup, wait
+from .scan import scan, lookup, wait, rescan, rescanid
 from .download import download, cat, stream
 from .search import search
 
@@ -138,7 +138,7 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     ctx.obj['parallel'] = parallel
 
 
-commands = [scan, wait, lookup, search, live, historical, download, cat, stream]
+commands = [scan, wait, lookup, search, live, historical, download, cat, stream, rescan, rescanid]
 
 for command in commands:
     polyswarm.add_command(command)
