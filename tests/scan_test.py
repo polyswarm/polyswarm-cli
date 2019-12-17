@@ -63,7 +63,7 @@ class SubmissionTest(BaseTestCase):
         with patch('polyswarm_api.api.PolyswarmAPI.rescan', return_value=mock_polyswarm_api_results.instances(self)[0]), \
              patch('polyswarm_api.api.PolyswarmAPI.lookup', return_value=mock_polyswarm_api_results.instances(self)[0]):
             result = self._run_cli(['--output-format', 'json', '-c', 'gamma',
-                                    'scan', 'hash', '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'])
+                                    'rescan', '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'])
         self._assert_json_result(
             result,
             expected_output=mock_polyswarm_api_results.instances(self)[0].json,
@@ -75,7 +75,7 @@ class SubmissionTest(BaseTestCase):
              patch('polyswarm_api.api.PolyswarmAPI.lookup', return_value=mock_polyswarm_api_results.instances(self)[0]), \
              patch('polyswarm_api.api.PolyswarmAPI.score', return_value=mock_polyswarm_api_results.scores(self)[0]):
             result = self._run_cli(['--output-format', 'text', '-c', 'gamma',
-                                    'scan', 'hash', '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'])
+                                    'rescan', '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'])
         self._assert_text_result(
             result,
             expected_output=mock_polyswarm_api_results.text_instances()[0],

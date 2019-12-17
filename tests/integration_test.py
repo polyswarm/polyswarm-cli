@@ -114,7 +114,7 @@ class IntegrationTest(BaseTestCase):
                                       request=self._create_scan_submission_lookup_request(self.test_submission_uuid),
                                       response=self.mock_submission_response)
 
-        result = self._run_cli(['--output-format', 'json', '-c', 'lima', 'scan', 'hash', self.test_hash_value])
+        result = self._run_cli(['--output-format', 'json', '-c', 'lima', 'rescan', self.test_hash_value])
 
         self._assert_json_result(
             result,
