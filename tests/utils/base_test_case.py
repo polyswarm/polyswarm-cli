@@ -72,7 +72,7 @@ class BaseTestCase(TestCase):
         return request
 
     def _create_search_metadata_request(self, query, offset=None, limit=None):
-        request = self.request_generator.search_metadata(resources.MetadataQuery(query))
+        request = self.request_generator.search_metadata(query)
         self._add_pagination_params(request, offset, limit)
         return request
 
