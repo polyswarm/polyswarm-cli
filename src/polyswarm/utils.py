@@ -53,8 +53,8 @@ def parallel_executor(function, args_list=(), kwargs_list=(), **kwargs):
             yield future.result()
             no_results = False
         except api_exceptions.NoResultsException:
-            logger.error('Polyswarm API call to {}() with params {} did not return any results'
-                         .format(function.__name__, ', '.join(args_list[i])))
+            logger.error('Polyswarm API call to {}({}) did not return any results'
+                         .format(function.__name__, ', '.join(str(arg) for arg in args_list[i])))
             empty_results = True
         except api_exceptions.NotFoundException as e:
             logger.error(e)
