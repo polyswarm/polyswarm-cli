@@ -81,7 +81,7 @@ def live_list(ctx):
 def live_results(ctx, hunt_id, since):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    args = [(h,) for h in hunt_id]
+    args = [(h,) for h in hunt_id] if hunt_id else [(None,)]
     kwargs = [dict(since=since)]*len(args)
     for result in utils.parallel_executor_iterable_results(api.live_results, args_list=args, kwargs_list=kwargs):
         output.hunt_result(result)
@@ -125,6 +125,6 @@ def historical_list(ctx):
 def historical_results(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    args = [(h,) for h in hunt_id]
+    args = [(h,) for h in hunt_id] if hunt_id else [(None,)]
     for result in utils.parallel_executor_iterable_results(api.historical_results, args_list=args):
         output.hunt_result(result)
