@@ -99,11 +99,11 @@ class BaseTestCase(TestCase):
         return request
 
     def _create_hunt_live_start_request(self, yara_file):
-        request = self.request_generator.create_live_hunt(resources.YaraRuleset(None, path=yara_file))
+        request = self.request_generator.create_live_hunt(resources.YaraRuleset(dict(yara=open(yara_file).read())))
         return request
 
     def _create_hunt_historical_start_request(self, yara_file):
-        request = self.request_generator.create_historical_hunt(resources.YaraRuleset(None, path=yara_file))
+        request = self.request_generator.create_historical_hunt(resources.YaraRuleset(dict(yara=open(yara_file).read())))
         return request
 
     def _create_hunt_live_delete_request(self, hunt_id):
