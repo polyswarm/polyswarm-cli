@@ -19,7 +19,7 @@ class BaseOutput(object):
     def local_artifact(self, result):
         raise NotImplementedError
 
-    def rule_set(self, result):
+    def rule_set(self, result, contents=False):
         raise NotImplementedError
 
     @staticmethod

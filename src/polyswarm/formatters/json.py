@@ -17,7 +17,7 @@ class JSONOutput(base.BaseOutput):
     def hunt_result(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
-    def rule_set(self, result):
+    def rule_set(self, result, contents=False):
         self.out.write(self._to_json(result.json) + '\n')
 
     def hunt(self, result):
@@ -49,7 +49,7 @@ class PrettyJSONOutput(base.BaseOutput):
     def hunt_result(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
-    def rule_set(self, result):
+    def rule_set(self, result, contents=False):
         self.out.write(self._to_json(result.json) + '\n')
 
     def hunt(self, result):
