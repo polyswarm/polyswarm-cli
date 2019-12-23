@@ -19,6 +19,9 @@ class BaseOutput(object):
     def local_artifact(self, result):
         raise NotImplementedError
 
+    def rule_set(self, result):
+        raise NotImplementedError
+
     @staticmethod
     def usage_exceeded():
         print(USAGE_EXCEEDED_MESSAGE)

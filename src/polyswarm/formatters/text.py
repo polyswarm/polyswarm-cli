@@ -149,6 +149,17 @@ class TextOutput(base.BaseOutput):
         output.extend(self.artifact(result.artifact, write=False))
         return self._output(output, write)
 
+    def rule_set(self, result, write=True):
+        output = []
+        output.append(self._white('Ruleset Id: {}'.format(result.id)))
+        output.append(self._white('Account Id: {}'.format(result.account_id)))
+        output.append(self._white('Name: {}'.format(result.name)))
+        output.append(self._white('Description: {}'.format(result.description)))
+        output.append(self._white('Created at: {}'.format(result.created)))
+        output.append(self._white('Modified  at: {}'.format(result.modified)))
+        output.append(self._white('Contents:\n{}'.format(result.yara)))
+        return self._output(output, write)
+
     def local_artifact(self, artifact, write=True):
         output = []
         output.append(self._white('Successfully downloaded artifact {} to {}'
