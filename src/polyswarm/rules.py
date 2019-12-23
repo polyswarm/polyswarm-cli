@@ -21,26 +21,43 @@ def create(ctx, rule_name, rule_file, description):
 @click.argument('rule_id', type=int)
 @click.pass_context
 def delete(ctx, rule_id):
-    raise NotImplementedError()
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    output.rule_set(api.rule_set_delete(rule_id))
 
 
 @rules.command('list', short_help='List all rulesets')
 @click.pass_context
-def list(ctx):
-    raise NotImplementedError()
+def list_rules(ctx):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    for rule_set in api.rule_set_list():
+        output.rule_set(rule_set)
 
 
 @rules.command('update', short_help='Update a ruleset')
+@click.argument('rule_id', type=int)
 @click.option('-n', '--name', type=str, help='Name of the ruleset')
 @click.option('-f', '--file', type=click.File('r'), help='File containing the Yara rules')
+@click.option('-d', '--description', type=str, help='Description of the ruleset')
 @click.pass_context
-def update(ctx, name, file):
-    raise NotImplementedError()
+def update(ctx, rule_id, name, file, description):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    output.rule_set(api.rule_set_update(
+        rule_id,
+        name=name if name else None,
+        rules=file.read() if file else None,
+        description=description if description else None,
+    ))
 
 
 @rules.command('view', short_help='View a ruleset')
 @click.argument('rule_id', type=int)
 @click.pass_context
 def view(ctx, rule_id):
-    raise NotImplementedError()
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    output.rule_set(api.rule_set_get(rule_id), contents=True)
+
 
