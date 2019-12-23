@@ -9,9 +9,12 @@ def rules():
 @rules.command('create', short_help='Create a ruleset')
 @click.argument('rule_name', type=str)
 @click.argument('rule_file', type=click.File('r'))
+@click.option('-d', '--description', type=str, help='Description of the ruleset')
 @click.pass_context
-def create(ctx, rule_name, rule_file):
-    raise NotImplementedError()
+def create(ctx, rule_name, rule_file, description):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    output.rule_set(api.rule_set_create(rule_name, rule_file.read(), description=description))
 
 
 @rules.command('delete', short_help='Delete a ruleset')
