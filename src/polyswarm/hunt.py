@@ -83,14 +83,16 @@ def live_list(ctx, since, all_):
 
 @live.command('results', short_help='Get results from live hunt')
 @click.argument('hunt_id', nargs=-1, type=int)
-@click.option('-s', '--since', type=click.INT, default=60,
-              help='How far back in minutes to request results (default: 60, or all)')
+@click.option('-s', '--since', type=click.INT, default=1440,
+              help='How far back in seconds to request results (default: 1440)')
+@click.option('-t', '--tag', help='Filter results on this tag')
+@click.option('-r', '--rule-name', help='Filter results on this tag')
 @click.pass_context
-def live_results(ctx, hunt_id, since):
+def live_results(ctx, hunt_id, since, tag, rule_name):
     api = ctx.obj['api']
     output = ctx.obj['output']
     args = [(h,) for h in hunt_id] if hunt_id else [(None,)]
-    kwargs = [dict(since=since)]*len(args)
+    kwargs = [dict(since=since, tag=tag, rule_name=rule_name)]*len(args)
     for result in utils.parallel_executor_iterable_results(api.live_results, args_list=args, kwargs_list=kwargs):
         output.hunt_result(result)
 
@@ -133,10 +135,13 @@ def historical_list(ctx, since):
 
 @historical.command('results', short_help='Get results from historical hunt')
 @click.argument('hunt_id', nargs=-1, type=int)
+@click.option('-t', '--tag', help='Filter results on this tag')
+@click.option('-r', '--rule-name', help='Filter results on this tag')
 @click.pass_context
-def historical_results(ctx, hunt_id):
+def historical_results(ctx, hunt_id, tag, rule_name):
     api = ctx.obj['api']
     output = ctx.obj['output']
     args = [(h,) for h in hunt_id] if hunt_id else [(None,)]
-    for result in utils.parallel_executor_iterable_results(api.historical_results, args_list=args):
+    kwargs = [dict(tag=tag, rule_name=rule_name)] * len(args)
+    for result in utils.parallel_executor_iterable_results(api.historical_results, args_list=args, kwargs_list=kwargs):
         output.hunt_result(result)
