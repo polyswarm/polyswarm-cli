@@ -19,12 +19,13 @@ def historical():
 
 @live.command('create', short_help='Create a live hunt')
 @click.argument('rule_file', type=click.File('r'))
+@click.option('-d', '--disabled', is_flag=True, help='If provided, create the live hunt with active=False')
 @click.pass_context
-def live_create(ctx, rule_file):
+def live_create(ctx, rule_file, disabled):
     api = ctx.obj['api']
     output = ctx.obj['output']
     rules = rule_file.read()
-    result = api.live_create(rules)
+    result = api.live_create(rules, active=not disabled)
     output.hunt(result)
 
 
