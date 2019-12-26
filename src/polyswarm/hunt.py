@@ -65,11 +65,18 @@ def live_delete(ctx, hunt_id):
 
 
 @live.command('list', short_help='List all live hunts performed')
+@click.option('-s', '--since', type=click.INT, help='How far back in seconds to request results')
+@click.option('-a', '--all', 'all_', is_flag=True, help='Request all live hunts ever created')
 @click.pass_context
-def live_list(ctx):
+def live_list(ctx, since, all_):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.live_list()
+    kwargs = {}
+    if since is not None:
+        kwargs['since'] = since
+    if all_ is not None:
+        kwargs['all_'] = all_
+    result = api.live_list(**kwargs)
     for hunt in result:
         output.hunt(hunt)
 
@@ -111,11 +118,15 @@ def historical_delete(ctx, hunt_id):
 
 
 @historical.command('list', short_help='List all historical hunts performed')
+@click.option('-s', '--since', type=click.INT, help='How far back in seconds to request results')
 @click.pass_context
-def historical_list(ctx):
+def historical_list(ctx, since):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.historical_list()
+    kwargs = {}
+    if since is not None:
+        kwargs['since'] = since
+    result = api.historical_list(**kwargs)
     for hunt in result:
         output.hunt(hunt)
 
