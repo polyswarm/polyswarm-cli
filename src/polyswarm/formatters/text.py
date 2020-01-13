@@ -112,17 +112,18 @@ class TextOutput(base.BaseOutput):
             output.append(self._red(detections))
         else:
             output.append(self._white(detections))
-
+        self._open_group()
         for assertion in instance.assertions:
             if assertion.verdict is False:
-                output.append(self._green('%s: %s' % (assertion.engine_name, 'Clean')))
+                output.append('%s: %s' % (self._green(assertion.engine_name), 'Clean'))
             elif assertion.verdict is None or assertion.mask is False:
-                output.append(self._blue('%s: %s' % (assertion.engine_name, 'Engine chose not respond to this bounty.')))
+                output.append('%s: %s' % (self._blue(assertion.engine_name), 'Engine chose not respond to this bounty.'))
             else:
                 value = 'Malicious'
                 if assertion.metadata:
                     value += ', metadata: %s' % json.dumps(assertion.metadata, sort_keys=True)
-                output.append(self._red('%s: %s' % (assertion.engine_name, value)))
+                output.append('%s: %s' % (self._red(assertion.engine_name), value))
+        self._close_group()
         return self._output(output, write)
 
     def hunt(self, result, write=True):
