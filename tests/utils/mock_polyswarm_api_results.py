@@ -43,7 +43,7 @@ First seen: 2019-11-01 21:33:53.292099
 Last seen: 2019-11-07 16:18:00.269290
 Scan permalink: https://polyswarm.network/scan/results/49091542211453596
 [91mDetections: 1/1 engines reported malicious[0m
-[91meicar: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}[0m
+[91m	eicar[0m: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}
 
 """)
     return values
