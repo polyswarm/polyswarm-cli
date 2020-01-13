@@ -47,7 +47,7 @@ def live_start(ctx, hunt_id):
 def live_stop(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    kwargs = [dict(hunt_id=h) for h in hunt_id]
+    kwargs = [dict(hunt_id=h) for h in hunt_id] if hunt_id else [dict(hunt_id=None)]
     args = [(False,)] * len(kwargs)
     for result in utils.parallel_executor(api.live_update, args_list=args, kwargs_list=kwargs):
         output.hunt(result)
