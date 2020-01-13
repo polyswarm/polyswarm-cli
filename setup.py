@@ -23,6 +23,7 @@ setup(
         'click==7.0',
         'future==0.18.2',
         'click-log==0.3.2',
+        'pygments==2.5.2',
     ],
     include_package_data=True,
     packages=find_packages('src'),

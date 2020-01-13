@@ -1,5 +1,9 @@
 from __future__ import absolute_import
 import json
+from pygments import highlight
+from pygments.lexers import JsonLexer
+from pygments.formatters import TerminalTrueColorFormatter
+
 
 from . import base
 from polyswarm_api.const import USAGE_EXCEEDED_MESSAGE
@@ -41,7 +45,8 @@ class PrettyJSONOutput(base.BaseOutput):
     name = 'pretty-json'
     @staticmethod
     def _to_json(json_data):
-        return json.dumps(json_data, indent=4, sort_keys=True)
+        formatted_json = json.dumps(json_data, indent=4, sort_keys=True)
+        return highlight(formatted_json, JsonLexer(), TerminalTrueColorFormatter(style='monokai'))
 
     def artifact_instance(self, result, timeout=False):
         self.out.write(self._to_json(result.json) + '\n')
