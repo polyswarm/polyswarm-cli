@@ -59,7 +59,7 @@ class TextOutput(base.BaseOutput):
 
     def artifact(self, artifact, write=True):
         output = []
-        output.append(self._green('SHA256: {hash}'.format(hash=artifact.sha256)))
+        output.append(self._blue('SHA256: {hash}'.format(hash=artifact.sha256)))
         output.append(self._white('SHA1: {hash}'.format(hash=artifact.sha1)))
         output.append(self._white('MD5: {hash}'.format(hash=artifact.md5)))
         output.append(self._white('File type: mimetype: {mimetype}, extended_info: {extended_type}'.
@@ -85,27 +85,7 @@ class TextOutput(base.BaseOutput):
     def artifact_instance(self, instance, write=True, timeout=False):
         output = []
         output.append(self._white('============================= Artifact Instance ============================='))
-        output.append(self._blue('Submission id: {}'.format(instance.id)))
-        if instance.failed:
-            output.append(self._red('Status: Failed'))
-        elif instance.window_closed:
-            output.append(self._green('Status: Assertion window closed'))
-        elif timeout:
-            output.append(self._yellow('Status: Lookup timed-out, please retry'))
-        else:
-            output.append(self._white('Status: Running'))
-        output.append(self._white('Filename: {}'.format(instance.filename)))
-        output.append(self._white('Community: {}'.format(instance.community)))
-        output.append(self._white('Country: {}'.format(instance.country)))
-        output.extend(self.artifact(instance, write=False))
-
-        if instance.polyscore is not None:
-            formatter = self._get_score_format(instance.polyscore)
-            output.append(formatter('PolyScore: {:.20f}'.format(instance.polyscore)))
-
-        # only report information if we have scanned the file before
         output.append(self._white('Scan permalink: {}'.format(instance.permalink)))
-
         detections = 'Detections: {}/{} engines reported malicious'\
             .format(len(instance.detections), len(instance.valid_assertions))
         if len(instance.detections) > 0:
@@ -124,6 +104,24 @@ class TextOutput(base.BaseOutput):
                     value += ', metadata: %s' % json.dumps(assertion.metadata, sort_keys=True)
                 output.append('%s: %s' % (self._red(assertion.engine_name), value))
         self._close_group()
+        output.append(self._blue('Submission id: {}'.format(instance.id)))
+        output.extend(self.artifact(instance, write=False))
+        if instance.failed:
+            output.append(self._red('Status: Failed'))
+        elif instance.window_closed:
+            output.append(self._white('Status: Assertion window closed'))
+        elif timeout:
+            output.append(self._yellow('Status: Lookup timed-out, please retry'))
+        else:
+            output.append(self._white('Status: Running'))
+        output.append(self._white('Filename: {}'.format(instance.filename)))
+        output.append(self._white('Community: {}'.format(instance.community)))
+        output.append(self._white('Country: {}'.format(instance.country)))
+
+        if instance.polyscore is not None:
+            formatter = self._get_score_format(instance.polyscore)
+            output.append(formatter('PolyScore: {:.20f}'.format(instance.polyscore)))
+
         return self._output(output, write)
 
     def hunt(self, result, write=True):
@@ -147,7 +145,7 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('Match on rule {name}'.format(name=result.rule_name) +
                                  (', tags: {result_tags}'.format(
                                      result_tags=result.tags) if result.tags != '' else '')))
-        output.extend(self.artifact(result.artifact, write=False))
+        output.extend(self.artifact_instance(result.artifact, write=False))
         return self._output(output, write)
 
     def rule_set(self, result, write=True, contents=False):
