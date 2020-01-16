@@ -96,10 +96,10 @@ class ExceptionHandlingGroup(click.Group):
 
 
 @click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS)
-@click.option('-a', '--api-key', help='Your API key for polyswarm.network (required)',
+@click.option('-a', '--api-key', help='Your API key for polyswarm.network (required).',
               default='', callback=validate_key, envvar='POLYSWARM_API_KEY')
 @click.option('-u', '--api-uri', default='https://api.polyswarm.network/v2',
-              envvar='POLYSWARM_API_URI', help='The API endpoint (ADVANCED)')
+              envvar='POLYSWARM_API_URI', help='The API endpoint (ADVANCED).')
 @click.option('-o', '--output-file', type=click.File('w'), help='Path to output file.')
 @click.option('--output-format', '--fmt', default='text', type=click.Choice(formatters.keys()),
               help='Output format. Human-readable text or JSON.')

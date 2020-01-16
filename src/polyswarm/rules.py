@@ -1,15 +1,15 @@
 import click
 
 
-@click.group(short_help='Interact with Yara Rules stored in Polyswarm')
+@click.group(short_help='Interact with Yara Rules stored in Polyswarm.')
 def rules():
     pass
 
 
-@rules.command('create', short_help='Create a ruleset')
+@rules.command('create', short_help='Create a ruleset.')
 @click.argument('rule_name', type=str)
 @click.argument('rule_file', type=click.File('r'))
-@click.option('-d', '--description', type=str, help='Description of the ruleset')
+@click.option('-d', '--description', type=str, help='Description of the ruleset.')
 @click.pass_context
 def create(ctx, rule_name, rule_file, description):
     api = ctx.obj['api']
@@ -17,7 +17,7 @@ def create(ctx, rule_name, rule_file, description):
     output.rule_set(api.rule_set_create(rule_name, rule_file.read(), description=description))
 
 
-@rules.command('delete', short_help='Delete a ruleset')
+@rules.command('delete', short_help='Delete a ruleset.')
 @click.argument('rule_id', type=int)
 @click.pass_context
 def delete(ctx, rule_id):
@@ -26,7 +26,7 @@ def delete(ctx, rule_id):
     output.rule_set(api.rule_set_delete(rule_id))
 
 
-@rules.command('list', short_help='List all rulesets')
+@rules.command('list', short_help='List all rulesets.')
 @click.pass_context
 def list_rules(ctx):
     api = ctx.obj['api']
@@ -35,11 +35,11 @@ def list_rules(ctx):
         output.rule_set(rule_set)
 
 
-@rules.command('update', short_help='Update a ruleset')
+@rules.command('update', short_help='Update a ruleset.')
 @click.argument('rule_id', type=int)
-@click.option('-n', '--name', type=str, help='Name of the ruleset')
-@click.option('-f', '--file', type=click.File('r'), help='File containing the Yara rules')
-@click.option('-d', '--description', type=str, help='Description of the ruleset')
+@click.option('-n', '--name', type=str, help='Name of the ruleset.')
+@click.option('-f', '--file', type=click.File('r'), help='File containing the Yara rules.')
+@click.option('-d', '--description', type=str, help='Description of the ruleset.')
 @click.pass_context
 def update(ctx, rule_id, name, file, description):
     api = ctx.obj['api']
@@ -52,7 +52,7 @@ def update(ctx, rule_id, name, file, description):
     ))
 
 
-@rules.command('view', short_help='View a ruleset')
+@rules.command('view', short_help='View a ruleset.')
 @click.argument('rule_id', type=int)
 @click.pass_context
 def view(ctx, rule_id):

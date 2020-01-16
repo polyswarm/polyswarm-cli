@@ -104,7 +104,7 @@ class TextOutput(base.BaseOutput):
                     value += ', metadata: %s' % json.dumps(assertion.metadata, sort_keys=True)
                 output.append('%s: %s' % (self._red(assertion.engine_name), value))
         self._close_group()
-        output.append(self._blue('Submission id: {}'.format(instance.id)))
+        output.append(self._blue('Scan id: {}'.format(instance.id)))
         output.extend(self.artifact(instance, write=False))
         if instance.failed:
             output.append(self._red('Status: Failed'))

@@ -33,7 +33,7 @@ def text_instances():
 Scan permalink: https://polyswarm.network/scan/results/49091542211453596
 [91mDetections: 1/1 engines reported malicious[0m
 [91m	eicar[0m: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}
-[94mSubmission id: 49091542211453596[0m
+[94mScan id: 49091542211453596[0m
 [94mSHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
 SHA1: 3395856ce81f2b7382dee72602f798b642f14140
 MD5: 44d88612fea8a8f36de82e1278abb02f
@@ -82,7 +82,7 @@ def text_live_results():
 Scan permalink: https://polyswarm.network/scan/results/49091542211453596
 [91mDetections: 1/1 engines reported malicious[0m
 [91m	eicar[0m: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}
-[94mSubmission id: 49091542211453596[0m
+[94mScan id: 49091542211453596[0m
 [94mSHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
 SHA1: 3395856ce81f2b7382dee72602f798b642f14140
 MD5: 44d88612fea8a8f36de82e1278abb02f
@@ -131,7 +131,7 @@ def text_hisotrical_results():
 Scan permalink: https://polyswarm.network/scan/results/49091542211453596
 [91mDetections: 1/1 engines reported malicious[0m
 [91m	eicar[0m: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}
-[94mSubmission id: 49091542211453596[0m
+[94mScan id: 49091542211453596[0m
 [94mSHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
 SHA1: 3395856ce81f2b7382dee72602f798b642f14140
 MD5: 44d88612fea8a8f36de82e1278abb02f
