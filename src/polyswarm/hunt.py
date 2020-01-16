@@ -1,4 +1,5 @@
 import logging
+from os import path
 
 import click
 
@@ -25,7 +26,8 @@ def live_create(ctx, rule_file, disabled):
     api = ctx.obj['api']
     output = ctx.obj['output']
     rules = rule_file.read()
-    result = api.live_create(rules, active=not disabled)
+    file_name = path.basename(rule_file.name)
+    result = api.live_create(rules, active=not disabled, ruleset_name=file_name)
     output.hunt(result)
 
 
@@ -104,7 +106,8 @@ def historical_start(ctx, rule_file):
     api = ctx.obj['api']
     output = ctx.obj['output']
     rules = rule_file.read()
-    result = api.historical_create(rules)
+    file_name = path.basename(rule_file.name)
+    result = api.historical_create(rules, ruleset_name=file_name)
     output.hunt(result)
 
 
