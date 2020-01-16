@@ -129,6 +129,8 @@ class TextOutput(base.BaseOutput):
         output.append(self._blue('Hunt Id: {}'.format(result.id)))
         if result.active is not None:
             output.append(self._white('Active: {}'.format(result.active)))
+        if result.ruleset_name is not None:
+            output.append(self._white('Ruleset Name: {}'.format(result.ruleset_name)))
         output.append(self._white('Created at: {}'.format(result.created)))
 
         return self._output(output, write)
