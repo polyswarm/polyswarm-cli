@@ -18,7 +18,7 @@ def create(ctx, rule_name, rule_file, description):
 
 
 @rules.command('delete', short_help='Delete a ruleset.')
-@click.argument('rule_id', type=int)
+@click.argument('rule_id', type=click.INT)
 @click.pass_context
 def delete(ctx, rule_id):
     api = ctx.obj['api']
@@ -36,7 +36,7 @@ def list_rules(ctx):
 
 
 @rules.command('update', short_help='Update a ruleset.')
-@click.argument('rule_id', type=int)
+@click.argument('rule_id', type=click.INT)
 @click.option('-n', '--name', type=str, help='Name of the ruleset.')
 @click.option('-f', '--file', type=click.File('r'), help='File containing the Yara rules.')
 @click.option('-d', '--description', type=str, help='Description of the ruleset.')
@@ -53,7 +53,7 @@ def update(ctx, rule_id, name, file, description):
 
 
 @rules.command('view', short_help='View a ruleset.')
-@click.argument('rule_id', type=int)
+@click.argument('rule_id', type=click.INT)
 @click.pass_context
 def view(ctx, rule_id):
     api = ctx.obj['api']

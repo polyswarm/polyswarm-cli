@@ -20,7 +20,7 @@ def historical():
 
 @live.command('create', short_help='Create a live hunt.')
 @click.argument('rule_file', type=click.File('r'), required=False)
-@click.option('-r', '--rule-id', type=int, help='If provided, create the live hunt from the existing ruleset.')
+@click.option('-r', '--rule-id', type=click.INT, help='If provided, create the live hunt from the existing ruleset.')
 @click.option('-d', '--disabled', is_flag=True, help='If provided, create the live hunt with active=False.')
 @click.pass_context
 def live_create(ctx, rule_file, rule_id, disabled):
@@ -40,7 +40,7 @@ def live_create(ctx, rule_file, rule_id, disabled):
 
 
 @live.command('start', short_help='Start an existing live hunt.')
-@click.argument('hunt_id', nargs=-1, type=int)
+@click.argument('hunt_id', nargs=-1, type=click.INT)
 @click.pass_context
 def live_start(ctx, hunt_id):
     api = ctx.obj['api']
@@ -52,7 +52,7 @@ def live_start(ctx, hunt_id):
 
 
 @live.command('stop', short_help='Start an existing live hunt.')
-@click.argument('hunt_id', nargs=-1, type=int)
+@click.argument('hunt_id', nargs=-1, type=click.INT)
 @click.pass_context
 def live_stop(ctx, hunt_id):
     api = ctx.obj['api']
@@ -64,7 +64,7 @@ def live_stop(ctx, hunt_id):
 
 
 @live.command('delete', short_help='Delete the live hunt associated with the given hunt_id.')
-@click.argument('hunt_id', nargs=-1, type=int)
+@click.argument('hunt_id', nargs=-1, type=click.INT)
 @click.pass_context
 def live_delete(ctx, hunt_id):
     api = ctx.obj['api']
@@ -92,7 +92,7 @@ def live_list(ctx, since, all_):
 
 
 @live.command('results', short_help='Get results from live hunt.')
-@click.argument('hunt_id', nargs=-1, type=int)
+@click.argument('hunt_id', nargs=-1, type=click.INT)
 @click.option('-s', '--since', type=click.INT, default=1440,
               help='How far back in seconds to request results (default: 1440).')
 @click.option('-t', '--tag', help='Filter results on this tag.')
@@ -109,7 +109,7 @@ def live_results(ctx, hunt_id, since, tag, rule_name):
 
 @historical.command('start', short_help='Start a new historical hunt.')
 @click.argument('rule_file', type=click.File('r'), required=False)
-@click.option('-r', '--rule-id', type=int, help='If provided, create the historical hunt from the existing ruleset.')
+@click.option('-r', '--rule-id', type=click.INT, help='If provided, create the historical hunt from the existing ruleset.')
 @click.pass_context
 def historical_start(ctx, rule_file, rule_id):
     api = ctx.obj['api']
@@ -127,7 +127,7 @@ def historical_start(ctx, rule_file, rule_id):
 
 
 @historical.command('delete', short_help='Delete the historical hunt associated with the given hunt_id.')
-@click.argument('hunt_id', nargs=-1, type=int)
+@click.argument('hunt_id', nargs=-1, type=click.INT)
 @click.pass_context
 def historical_delete(ctx, hunt_id):
     api = ctx.obj['api']
@@ -152,7 +152,7 @@ def historical_list(ctx, since):
 
 
 @historical.command('results', short_help='Get results from historical hunt.')
-@click.argument('hunt_id', nargs=-1, type=int)
+@click.argument('hunt_id', nargs=-1, type=click.INT)
 @click.option('-t', '--tag', help='Filter results on this tag.')
 @click.option('-r', '--rule-name', help='Filter results on this rule name.')
 @click.pass_context
