@@ -19,15 +19,23 @@ def historical():
 
 
 @live.command('create', short_help='Create a live hunt.')
-@click.argument('rule_file', type=click.File('r'))
+@click.argument('rule_file', type=click.File('r'), required=False)
+@click.option('-r', '--rule-id', type=int, help='If provided, create the live hunt from the existing ruleset.')
 @click.option('-d', '--disabled', is_flag=True, help='If provided, create the live hunt with active=False.')
 @click.pass_context
-def live_create(ctx, rule_file, disabled):
+def live_create(ctx, rule_file, rule_id, disabled):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    rules = rule_file.read()
-    file_name = path.basename(rule_file.name)
-    result = api.live_create(rules, active=not disabled, ruleset_name=file_name)
+    params = {}
+    if rule_file:
+        params['rule'] = rule_file.read()
+        params['ruleset_name'] = path.basename(rule_file.name)
+    elif rule_id:
+        params['rule_id'] = rule_id
+    else:
+        raise click.exceptions.BadArgumentUsage('One of rule_file argument or --rule-id option should be provided.')
+    params['active'] = not disabled
+    result = api.live_create(**params)
     output.hunt(result)
 
 
@@ -100,14 +108,21 @@ def live_results(ctx, hunt_id, since, tag, rule_name):
 
 
 @historical.command('start', short_help='Start a new historical hunt.')
-@click.argument('rule_file', type=click.File('r'))
+@click.argument('rule_file', type=click.File('r'), required=False)
+@click.option('-r', '--rule-id', type=int, help='If provided, create the historical hunt from the existing ruleset.')
 @click.pass_context
-def historical_start(ctx, rule_file):
+def historical_start(ctx, rule_file, rule_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    rules = rule_file.read()
-    file_name = path.basename(rule_file.name)
-    result = api.historical_create(rules, ruleset_name=file_name)
+    params = {}
+    if rule_file:
+        params['rule'] = rule_file.read()
+        params['ruleset_name'] = path.basename(rule_file.name)
+    elif rule_id:
+        params['rule_id'] = rule_id
+    else:
+        raise click.exceptions.BadArgumentUsage('One of rule_file argument or --rule-id option should be provided.')
+    result = api.historical_create(**params)
     output.hunt(result)
 
 
