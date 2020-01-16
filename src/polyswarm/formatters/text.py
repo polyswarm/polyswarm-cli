@@ -153,7 +153,6 @@ class TextOutput(base.BaseOutput):
     def rule_set(self, result, write=True, contents=False):
         output = []
         output.append(self._white('Ruleset Id: {}'.format(result.id)))
-        output.append(self._white('Account Id: {}'.format(result.account_id)))
         output.append(self._white('Name: {}'.format(result.name)))
         output.append(self._white('Description: {}'.format(result.description)))
         output.append(self._white('Created at: {}'.format(result.created)))
