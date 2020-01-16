@@ -22,8 +22,9 @@ def historical():
 @click.argument('rule_file', type=click.File('r'), required=False)
 @click.option('-r', '--rule-id', type=click.INT, help='If provided, create the live hunt from the existing ruleset.')
 @click.option('-d', '--disabled', is_flag=True, help='If provided, create the live hunt with active=False.')
+@click.option('-n', '--name', help='Explicitly set the ruleset name for this hunt.')
 @click.pass_context
-def live_create(ctx, rule_file, rule_id, disabled):
+def live_create(ctx, rule_file, rule_id, disabled, name):
     api = ctx.obj['api']
     output = ctx.obj['output']
     params = {}
@@ -34,6 +35,8 @@ def live_create(ctx, rule_file, rule_id, disabled):
         params['rule_id'] = rule_id
     else:
         raise click.exceptions.BadArgumentUsage('One of rule_file argument or --rule-id option should be provided.')
+    if name:
+        params['ruleset_name'] = name
     params['active'] = not disabled
     result = api.live_create(**params)
     output.hunt(result)
@@ -110,8 +113,9 @@ def live_results(ctx, hunt_id, since, tag, rule_name):
 @historical.command('start', short_help='Start a new historical hunt.')
 @click.argument('rule_file', type=click.File('r'), required=False)
 @click.option('-r', '--rule-id', type=click.INT, help='If provided, create the historical hunt from the existing ruleset.')
+@click.option('-n', '--name', help='Explicitly set the ruleset name for this hunt.')
 @click.pass_context
-def historical_start(ctx, rule_file, rule_id):
+def historical_start(ctx, rule_file, rule_id, name):
     api = ctx.obj['api']
     output = ctx.obj['output']
     params = {}
@@ -122,6 +126,8 @@ def historical_start(ctx, rule_file, rule_id):
         params['rule_id'] = rule_id
     else:
         raise click.exceptions.BadArgumentUsage('One of rule_file argument or --rule-id option should be provided.')
+    if name:
+        params['ruleset_name'] = name
     result = api.historical_create(**params)
     output.hunt(result)
 
