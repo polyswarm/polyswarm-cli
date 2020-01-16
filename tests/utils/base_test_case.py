@@ -11,8 +11,6 @@ from pkg_resources import resource_string, resource_filename
 
 from polyswarm_api.types import resources
 from polyswarm import base
-from polyswarm_api import const as polyswarm_api_const
-from polyswarm_api.endpoint import PolyswarmRequestGenerator
 from polyswarm_api.api import PolyswarmAPI
 
 logger = logging.getLogger(__name__)
