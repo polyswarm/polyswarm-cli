@@ -22,6 +22,9 @@ class BaseOutput(object):
     def rule_set(self, result, contents=False):
         raise NotImplementedError
 
+    def metadata(self, result):
+        raise NotImplementedError
+
     @staticmethod
     def usage_exceeded():
         print(USAGE_EXCEEDED_MESSAGE)
