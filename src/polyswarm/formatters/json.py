@@ -36,6 +36,9 @@ class JSONOutput(base.BaseOutput):
     def invalid_rule(self, e):
         self.out.write(json.dumps('Malformed yara file: {}'.format(e.args[0])))
 
+    def metadata(self, result):
+        self.out.write(self._to_json(result.json) + '\n')
+
     @staticmethod
     def usage_exceeded():
         return json.dumps(USAGE_EXCEEDED_MESSAGE)
@@ -68,6 +71,9 @@ class PrettyJSONOutput(base.BaseOutput):
 
     def invalid_rule(self, e):
         self.out.write(json.dumps('Malformed yara file: {}'.format(e.args[0])))
+
+    def metadata(self, result):
+        self.out.write(self._to_json(result.json) + '\n')
 
     @staticmethod
     def usage_exceeded():
