@@ -57,14 +57,12 @@ class SearchTest(BaseTestCase):
 
     def test_search_metadata_with_text_output(self):
         with patch('polyswarm_api.api.PolyswarmAPI.search_by_metadata',
-                   return_value=[mock_polyswarm_api_results.instances(self)[0]]), \
-             patch('polyswarm_api.api.PolyswarmAPI.score',
-                   return_value=mock_polyswarm_api_results.scores(self)[0]):
+                   return_value=[mock_polyswarm_api_results.metadata(self)[0]]):
             result = self._run_cli(['--output-format', 'text', 'search', 'metadata',
                                     'hash.sha256:' + self.test_hash_value])
         self._assert_text_result(
             result,
-            expected_output=mock_polyswarm_api_results.text_instances()[0],
+            expected_output=mock_polyswarm_api_results.text_metadata()[0],
             expected_return_code=0,
         )
 

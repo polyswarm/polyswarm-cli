@@ -21,37 +21,32 @@ class IntegrationTest(BaseTestCase):
     def __init__(self, *args, **kwargs):
         super(IntegrationTest, self).__init__(*args, **kwargs)
         self.mock_search_response_page1 = self._create_response([mock_polyswarm_api_results.instances(self)[0].json],
-                                                                offset=0, limit=1)
-        self.mock_search_response_page2 = self._create_response([], offset=1, limit=1)
+                                                                offset=1, limit=1, has_more=False)
+
+        self.mock_metadata_search_response = self._create_response([mock_polyswarm_api_results.metadata(self)[0].json],
+                                                                   offset=1, limit=1, has_more=False)
 
         self.mock_submission_response = \
             self._create_response(mock_polyswarm_api_results.instances(self)[0].json)
 
         self.mock_hunt_live_results_response_page1 = \
-            self._create_response([mock_polyswarm_api_results.live_results(self)[0].json], offset=0, limit=1)
-        self.mock_hunt_live_results_response_page2 = self._create_response([], offset=1, limit=1)
+            self._create_response([mock_polyswarm_api_results.live_results(self)[0].json], offset=1, limit=1, has_more=False)
 
         self.mock_hunt_historical_results_response_page1 = \
-            self._create_response([mock_polyswarm_api_results.historical_results(self)[0].json], offset=0, limit=1)
-        self.mock_hunt_historical_results_response_page2 = self._create_response([], offset=1, limit=1)
+            self._create_response([mock_polyswarm_api_results.historical_results(self)[0].json], offset=1, limit=1, has_more=False)
 
         self.mock_hunt_response = self._create_response(mock_polyswarm_api_results.hunts(self)[0].json)
         self.mock_hunt_response_page1 = self._create_response([mock_polyswarm_api_results.hunts(self)[0].json],
-                                                              offset=0, limit=1)
-        self.mock_hunt_response_page2 = self._create_response([], offset=1, limit=1)
+                                                              offset=1, limit=1, has_more=False)
 
         self.mock_stream_response_page1 = self._create_response(
             [mock_polyswarm_api_results.stream_results(self.test_s3_file_url)[0]],
-            offset=0, limit=1)
-        self.mock_stream_response_page2 = self._create_response([], offset=1, limit=1)
+            offset=1, limit=1, has_more=False)
 
     def test_search_hash(self, mock_server):
         self._setup_mock_api_response(mock_server,
                                       request=self._create_search_hash_request(self.test_hash_value),
                                       response=self.mock_search_response_page1)
-        self._setup_mock_api_response(mock_server,
-                                      request=self._create_search_hash_request(self.test_hash_value, offset=1, limit=1),
-                                      response=self.mock_search_response_page2)
 
         result = self._run_cli(['--output-format', 'json', 'search', 'hash', self.test_hash_value])
 
@@ -63,16 +58,13 @@ class IntegrationTest(BaseTestCase):
     def test_search_metadata(self, mock_server):
         self._setup_mock_api_response(mock_server,
                                       request=self._create_search_metadata_request(self.test_query),
-                                      response=self.mock_search_response_page1)
-        self._setup_mock_api_response(mock_server,
-                                      request=self._create_search_metadata_request(self.test_query, offset=1, limit=1),
-                                      response=self.mock_search_response_page2)
+                                      response=self.mock_metadata_search_response)
 
         result = self._run_cli(['--output-format', 'json', 'search', 'metadata', self.test_query])
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
+            expected_output=mock_polyswarm_api_results.metadata(self)[0].json,
             expected_return_code=0)
 
     def test_scan_submission_lookup(self, mock_server):
@@ -127,10 +119,6 @@ class IntegrationTest(BaseTestCase):
                                       request=self._create_hunt_live_results_request(self.test_hunt_id,
                                                                                      self.test_since),
                                       response=self.mock_hunt_live_results_response_page1)
-        self._setup_mock_api_response(mock_server,
-                                      request=self._create_hunt_live_results_request(self.test_hunt_id, self.test_since,
-                                                                                     offset=1, limit=1),
-                                      response=self.mock_hunt_live_results_response_page2)
 
         result = self._run_cli(['--output-format', 'json', 'live', 'results', self.test_hunt_id,
                                 '--since', self.test_since])
@@ -144,10 +132,6 @@ class IntegrationTest(BaseTestCase):
         self._setup_mock_api_response(mock_server,
                                       request=self._create_hunt_historical_results_request(self.test_hunt_id),
                                       response=self.mock_hunt_historical_results_response_page1)
-        self._setup_mock_api_response(mock_server,
-                                      request=self._create_hunt_historical_results_request(self.test_hunt_id,
-                                                                                           offset=1, limit=1),
-                                      response=self.mock_hunt_historical_results_response_page2)
 
         result = self._run_cli(['--output-format', 'json', 'historical', 'results', self.test_hunt_id])
 
@@ -229,9 +213,6 @@ class IntegrationTest(BaseTestCase):
         self._setup_mock_api_response(mock_server,
                                       request=self._create_hunt_live_list_request(),
                                       response=self.mock_hunt_response_page1)
-        self._setup_mock_api_response(mock_server,
-                                      request=self._create_hunt_live_list_request(offset=1, limit=1),
-                                      response=self.mock_hunt_response_page2)
 
         result = self._run_cli(['--output-format', 'json', 'live', 'list'])
 
@@ -245,9 +226,6 @@ class IntegrationTest(BaseTestCase):
         self._setup_mock_api_response(mock_server,
                                       request=self._create_hunt_historical_list_request(),
                                       response=self.mock_hunt_response_page1)
-        self._setup_mock_api_response(mock_server,
-                                      request=self._create_hunt_historical_list_request(offset=1, limit=1),
-                                      response=self.mock_hunt_response_page2)
 
         result = self._run_cli(['--output-format', 'json', 'historical', 'list'])
 
@@ -281,9 +259,6 @@ class IntegrationTest(BaseTestCase):
             self._setup_mock_url_response(mock_server,
                                           url=self.test_s3_file_url,
                                           response=io.BytesIO(self.test_eicar))
-            self._setup_mock_api_response(mock_server,
-                                          request=self._create_stream_request(self.test_since, offset=1, limit=1),
-                                          response=self.mock_stream_response_page2)
 
             result = self._run_cli(['stream', '--since', self.test_since, path])
 
