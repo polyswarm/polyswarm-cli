@@ -24,7 +24,7 @@ from .rules import rules
 logger = logging.getLogger(__name__)
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-VERSION = '2.0.0.dev7'
+VERSION = '2.0.0.dev8'
 
 
 def setup_logging(verbosity):
