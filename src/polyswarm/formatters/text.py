@@ -170,6 +170,60 @@ class TextOutput(base.BaseOutput):
     def usage_exceeded(self):
         self.out.write(self._red(const.USAGE_EXCEEDED_MESSAGE)+'\n')
 
+    def metadata(self, instance, write=True):
+        output = []
+        output.append(self._white('============================= Metadata ============================='))
+        output.append(self._blue('Artifact id: {}'.format(instance.id)))
+        output.append(self._white('Created: {}'.format(instance.created)))
+
+        if instance.sha256:
+            output.append(self._white('SHA256: {}'.format(instance.sha256)))
+        if instance.sha1:
+            output.append(self._white('SHA1: {}'.format(instance.sha1)))
+        if instance.md5:
+            output.append(self._white('MD5: {}'.format(instance.md5)))
+        if instance.ssdeep:
+            output.append(self._white('SSDEEP: {}'.format(instance.ssdeep)))
+        if instance.tlsh:
+            output.append(self._white('TLSH: {}'.format(instance.tlsh)))
+
+        if instance.first_seen:
+            output.append(self._white('First seen: {}'.format(instance.first_seen)))
+        if instance.last_seen:
+            output.append(self._white('Last seen: {}'.format(instance.last_seen)))
+        if instance.mimetype:
+            output.append(self._white('Mimetype: {}'.format(instance.mimetype)))
+        if instance.extended_mimetype:
+            output.append(self._white('Extended mimetype: {}'.format(instance.tlsh)))
+        if instance.detections:
+            output.append(self._white('Detections: {}'.format(instance.detections)))
+        if instance.total_detections:
+            output.append(self._white('Total detections: {}'.format(instance.total_detections)))
+
+        if instance.domains:
+            output.append(self._white('Domains:'))
+            self._open_group()
+            output.append(self._white('{}'.format(', '.join(instance.domains))))
+            self._close_group()
+        if instance.ipv4:
+            output.append(self._white('Ipv4:'))
+            self._open_group()
+            output.append(self._white('{}'.format(', '.join(instance.ipv4))))
+            self._close_group()
+        if instance.ipv6:
+            output.append(self._white('Ipv6:'))
+            self._open_group()
+            output.append(self._white('{}'.format(', '.join(instance.ipv6))))
+            self._close_group()
+        if instance.urls:
+            output.append(self._white('Urls:'))
+            self._open_group()
+            output.append(self._white('{}'.format(', '.join(instance.urls))))
+            self._close_group()
+
+        return self._output(output, write)
+
+
     @is_colored
     @is_grouped
     def _white(self, text):
