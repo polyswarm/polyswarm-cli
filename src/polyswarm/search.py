@@ -44,4 +44,4 @@ def metadata(ctx, query_string):
     output = ctx.obj['output']
     args = [(q,) for q in query_string]
     for instance in utils.parallel_executor_iterable_results(api.search_by_metadata, args_list=args):
-        output.artifact_instance(instance)
+        output.metadata(instance)
