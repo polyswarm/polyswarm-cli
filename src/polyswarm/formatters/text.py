@@ -161,6 +161,15 @@ class TextOutput(base.BaseOutput):
             output.append(self._white('Contents:\n{}'.format(result.yara)))
         return self._output(output, write)
 
+    def tag(self, result, write=True):
+        output = []
+        output.append(self._blue('Ruleset Id: {}'.format(result.id)))
+        output.append(self._white('Created at: {}'.format(result.created)))
+        output.append(self._white('Updated at: {}'.format(result.updated)))
+        output.append(self._white('Tag type:: {}'.format(result.tag_type)))
+        output.append(self._white('Tag value: {}'.format(result.tag_value)))
+        return self._output(output, write)
+
     def local_artifact(self, artifact, write=True):
         output = []
         output.append(self._white('Successfully downloaded artifact {} to {}'
