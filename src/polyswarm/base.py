@@ -27,7 +27,7 @@ VERSION = '1.1.0'
               help='Output format. Human-readable text or JSON.')
 @click.option('--color/--no-color', default=True, help='Use colored output in text mode.')
 @click.option('-v', '--verbose', default=0, count=True)
-@click.option('-c', '--community', default='lima', envvar='POLYSWARM_COMMUNITY', help='Community to use.')
+@click.option('-c', '--community', default='default', envvar='POLYSWARM_COMMUNITY', help='Community to use.')
 @click.option('--advanced-disable-version-check/--advanced-enable-version-check', default=False,
               help='Enable/disable GitHub release version check.')
 @click.option('--validate', default=False, is_flag=True,
