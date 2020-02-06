@@ -8,22 +8,22 @@ def tags():
 
 @tags.command('create', short_help='Create a tag.')
 @click.argument('sha256', type=click.STRING)
-@click.argument('tag_type', type=click.STRING)
-@click.argument('tag_value', type=click.STRING)
+@click.option('-t', '--tag', type=click.STRING, multiple=True)
+@click.option('-f', '--family', type=click.STRING, multiple=True)
 @click.pass_context
-def create(ctx, sha256, tag_type, tag_value):
+def create(ctx, sha256, tag, family):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    output.tag(api.tag_create(sha256, tag_type, tag_value))
+    output.tag(api.tag_create(sha256, tags=tag, families=family))
 
 
 @tags.command('delete', short_help='Delete a tag.')
-@click.argument('tag_id', type=click.INT)
+@click.argument('sha256', type=click.STRING)
 @click.pass_context
-def delete(ctx, tag_id):
+def delete(ctx, sha256):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    output.tag(api.tag_delete(tag_id))
+    output.tag(api.tag_delete(sha256))
 
 
 @tags.command('list', short_help='List all tags.')
@@ -37,24 +37,26 @@ def list_rules(ctx, sha256):
 
 
 @tags.command('update', short_help='Update a tag.')
-@click.argument('tag_id', type=click.INT)
-@click.option('--tag-type', type=click.STRING, help='Type of the tag.')
-@click.option('--tag-value', type=click.STRING, help='Value of the tag.')
+@click.argument('sha256', type=click.STRING)
+@click.option('-t', '--tag', type=click.STRING, multiple=True)
+@click.option('-f', '--family', type=click.STRING, multiple=True)
+@click.option('-r', '--remove', type=click.BOOL, is_flag=True)
 @click.pass_context
-def update(ctx, tag_id, tag_type, tag_value):
+def update(ctx, sha256, tag, family, remove):
     api = ctx.obj['api']
     output = ctx.obj['output']
     output.tag(api.tag_update(
-        tag_id,
-        tag_type=tag_type if tag_type else None,
-        tag_value=tag_value if tag_value else None,
+        sha256,
+        tags=tag,
+        families=family,
+        remove=remove,
     ))
 
 
 @tags.command('view', short_help='View a tag.')
-@click.argument('tag_id', type=click.INT)
+@click.argument('sha256', type=click.STRING)
 @click.pass_context
-def view(ctx, tag_id):
+def view(ctx, sha256):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    output.tag(api.tag_get(tag_id))
+    output.tag(api.tag_get(sha256))
