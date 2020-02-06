@@ -145,8 +145,8 @@ class TextOutput(base.BaseOutput):
     def hunt_result(self, result, write=True):
         output = []
         output.append(self._white('Match on rule {name}'.format(name=result.rule_name) +
-                                 (', tags: {result_tags}'.format(
-                                     result_tags=result.tags) if result.tags != '' else '')))
+                                  (', tags: {result_tags}'.format(
+                                     result_tags=result.tag) if result.tag != '' else '')))
         output.extend(self.artifact_instance(result.artifact, write=False))
         return self._output(output, write)
 
@@ -169,6 +169,13 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('Updated at: {}'.format(result.updated)))
         output.append(self._white('Tags:: {}'.format(result.tags)))
         output.append(self._white('Families: {}'.format(result.families)))
+        return self._output(output, write)
+
+    def family(self, result, write=True):
+        output = []
+        output.append(self._blue('Family Id: {}'.format(result.id)))
+        output.append(self._blue('Name: {}'.format(result.name)))
+        output.append(self._white('Emerging: {}'.format(result.emerging)))
         return self._output(output, write)
 
     def local_artifact(self, artifact, write=True):
