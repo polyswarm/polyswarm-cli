@@ -21,22 +21,25 @@ class JSONOutput(base.BaseOutput):
     def hunt_result(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
-    def rule_set(self, result, contents=False):
+    def hunt_deletion(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
     def hunt(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
-    def hunt_deletion(self, result):
-        self.out.write(self._to_json(result.json) + '\n')
-
     def local_artifact(self, artifact):
         self.out.write(json.dumps({'hash': artifact.artifact_name, 'path': artifact.path}, sort_keys=True)+'\n')
 
-    def invalid_rule(self, e):
-        self.out.write(json.dumps('Malformed yara file: {}'.format(e.args[0])))
+    def rule_set(self, result, contents=False):
+        self.out.write(self._to_json(result.json) + '\n')
 
     def metadata(self, result):
+        self.out.write(self._to_json(result.json) + '\n')
+
+    def tag(self, result):
+        self.out.write(self._to_json(result.json) + '\n')
+
+    def family(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
     @staticmethod
@@ -44,37 +47,9 @@ class JSONOutput(base.BaseOutput):
         return json.dumps(USAGE_EXCEEDED_MESSAGE)
 
 
-class PrettyJSONOutput(base.BaseOutput):
+class PrettyJSONOutput(JSONOutput):
     name = 'pretty-json'
     @staticmethod
     def _to_json(json_data):
         formatted_json = json.dumps(json_data, indent=4, sort_keys=True)
         return highlight(formatted_json, JsonLexer(), TerminalTrueColorFormatter(style='monokai'))
-
-    def artifact_instance(self, result, timeout=False):
-        self.out.write(self._to_json(result.json) + '\n')
-
-    def hunt_result(self, result):
-        self.out.write(self._to_json(result.json) + '\n')
-
-    def rule_set(self, result, contents=False):
-        self.out.write(self._to_json(result.json) + '\n')
-
-    def hunt(self, result):
-        self.out.write(self._to_json(result.json) + '\n')
-
-    def hunt_deletion(self, result):
-        self.out.write(self._to_json(result.json) + '\n')
-
-    def local_artifact(self, artifact):
-        self.out.write(json.dumps({'hash': artifact.artifact_name, 'path': artifact.path}, sort_keys=True)+'\n')
-
-    def invalid_rule(self, e):
-        self.out.write(json.dumps('Malformed yara file: {}'.format(e.args[0])))
-
-    def metadata(self, result):
-        self.out.write(self._to_json(result.json) + '\n')
-
-    @staticmethod
-    def usage_exceeded():
-        return json.dumps(USAGE_EXCEEDED_MESSAGE)

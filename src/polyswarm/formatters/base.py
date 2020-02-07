@@ -13,6 +13,9 @@ class BaseOutput(object):
     def hunt_result(self, result):
         raise NotImplementedError
 
+    def hunt_deletion(self, result):
+        raise NotImplementedError
+
     def hunt(self, result):
         raise NotImplementedError
 
@@ -23,6 +26,12 @@ class BaseOutput(object):
         raise NotImplementedError
 
     def metadata(self, result):
+        raise NotImplementedError
+
+    def tag(self, result):
+        raise NotImplementedError
+
+    def family(self, result):
         raise NotImplementedError
 
     @staticmethod
