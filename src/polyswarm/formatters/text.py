@@ -146,7 +146,7 @@ class TextOutput(base.BaseOutput):
         output = []
         output.append(self._white('Match on rule {name}'.format(name=result.rule_name) +
                                   (', tags: {result_tags}'.format(
-                                     result_tags=result.tag) if result.tag != '' else '')))
+                                     result_tags=result.tags) if result.tags != '' else '')))
         output.extend(self.artifact_instance(result.artifact, write=False))
         return self._output(output, write)
 
