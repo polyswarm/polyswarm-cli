@@ -21,7 +21,7 @@ class RulesetTest(BaseTestCase):
         self.test_api_key = '11111111111111111111111111111111'
 
     def test_ruleset_create_json(self):
-        with patch('polyswarm_api.api.PolyswarmAPI.rule_set_create',
+        with patch('polyswarm_api.api.PolyswarmAPI.ruleset_create',
                    return_value=mock_polyswarm_api_results.ruleset(self)[0]):
             result = self._run_cli(['--output-format', 'json',
                                     'rules', 'create', 'test', self._get_test_resource_file_path('eicar.yara')])
@@ -32,7 +32,7 @@ class RulesetTest(BaseTestCase):
         )
 
     def test_ruleset_get_json(self):
-        with patch('polyswarm_api.api.PolyswarmAPI.rule_set_get',
+        with patch('polyswarm_api.api.PolyswarmAPI.ruleset_get',
                    return_value=mock_polyswarm_api_results.ruleset(self)[0]):
             result = self._run_cli(['--output-format', 'json',
                                     'rules', 'view', '67713199207380968'])
@@ -43,7 +43,7 @@ class RulesetTest(BaseTestCase):
         )
 
     def test_ruleset_update_json(self):
-        with patch('polyswarm_api.api.PolyswarmAPI.rule_set_update',
+        with patch('polyswarm_api.api.PolyswarmAPI.ruleset_update',
                    return_value=mock_polyswarm_api_results.ruleset(self, name='test2')[0]):
             result = self._run_cli(['--output-format', 'json',
                                     'rules', 'update', '67713199207380968', '--name', 'test2'])
@@ -54,7 +54,7 @@ class RulesetTest(BaseTestCase):
         )
 
     def test_ruleset_delete_json(self):
-        with patch('polyswarm_api.api.PolyswarmAPI.rule_set_delete',
+        with patch('polyswarm_api.api.PolyswarmAPI.ruleset_delete',
                    return_value=mock_polyswarm_api_results.ruleset(self)[0]):
             result = self._run_cli(['--output-format', 'json',
                                     'rules', 'delete', '67713199207380968'])
@@ -65,7 +65,7 @@ class RulesetTest(BaseTestCase):
         )
 
     def test_ruleset_list_json(self):
-        with patch('polyswarm_api.api.PolyswarmAPI.rule_set_list',
+        with patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
                    return_value=[mock_polyswarm_api_results.ruleset(self)[0]]):
             result = self._run_cli(['--output-format', 'json',
                                     'rules', 'list'])

@@ -150,7 +150,7 @@ class TextOutput(base.BaseOutput):
         output.extend(self.artifact_instance(result.artifact, write=False))
         return self._output(output, write)
 
-    def rule_set(self, result, write=True, contents=False):
+    def ruleset(self, result, write=True, contents=False):
         output = []
         output.append(self._blue('Ruleset Id: {}'.format(result.id)))
         output.append(self._white('Name: {}'.format(result.name)))

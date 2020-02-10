@@ -22,7 +22,7 @@ class BaseOutput(object):
     def local_artifact(self, result):
         raise NotImplementedError
 
-    def rule_set(self, result, contents=False):
+    def ruleset(self, result, contents=False):
         raise NotImplementedError
 
     def metadata(self, result):

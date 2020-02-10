@@ -14,7 +14,7 @@ def rules():
 def create(ctx, rule_name, rule_file, description):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    output.rule_set(api.rule_set_create(rule_name, rule_file.read(), description=description))
+    output.ruleset(api.ruleset_create(rule_name, rule_file.read(), description=description))
 
 
 @rules.command('delete', short_help='Delete a ruleset.')
@@ -23,7 +23,7 @@ def create(ctx, rule_name, rule_file, description):
 def delete(ctx, rule_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    output.rule_set(api.rule_set_delete(rule_id))
+    output.ruleset(api.ruleset_delete(rule_id))
 
 
 @rules.command('list', short_help='List all rulesets.')
@@ -31,8 +31,8 @@ def delete(ctx, rule_id):
 def list_rules(ctx):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    for rule_set in api.rule_set_list():
-        output.rule_set(rule_set)
+    for ruleset in api.ruleset_list():
+        output.ruleset(ruleset)
 
 
 @rules.command('update', short_help='Update a ruleset.')
@@ -44,7 +44,7 @@ def list_rules(ctx):
 def update(ctx, rule_id, name, file, description):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    output.rule_set(api.rule_set_update(
+    output.ruleset(api.ruleset_update(
         rule_id,
         name=name if name else None,
         rules=file.read() if file else None,
@@ -58,6 +58,6 @@ def update(ctx, rule_id, name, file, description):
 def view(ctx, rule_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    output.rule_set(api.rule_set_get(rule_id), contents=True)
+    output.ruleset(api.ruleset_get(rule_id), contents=True)
 
 

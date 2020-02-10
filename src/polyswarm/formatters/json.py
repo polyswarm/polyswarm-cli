@@ -30,7 +30,7 @@ class JSONOutput(base.BaseOutput):
     def local_artifact(self, artifact):
         self.out.write(json.dumps({'hash': artifact.artifact_name, 'path': artifact.path}, sort_keys=True)+'\n')
 
-    def rule_set(self, result, contents=False):
+    def ruleset(self, result, contents=False):
         self.out.write(self._to_json(result.json) + '\n')
 
     def metadata(self, result):

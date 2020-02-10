@@ -29,16 +29,16 @@ def live_create(ctx, rule_file, rule_id, disabled, name):
     output = ctx.obj['output']
     params = {}
     if rule_file:
-        params['rule'] = rule_file.read()
+        rule = rule_file.read()
         params['ruleset_name'] = path.basename(rule_file.name)
     elif rule_id:
-        params['rule_id'] = rule_id
+        rule = rule_id
     else:
         raise click.exceptions.BadArgumentUsage('One of rule_file argument or --rule-id option should be provided.')
     if name:
         params['ruleset_name'] = name
     params['active'] = not disabled
-    result = api.live_create(**params)
+    result = api.live_create(rule, **params)
     output.hunt(result)
 
 
@@ -48,7 +48,7 @@ def live_create(ctx, rule_file, rule_id, disabled, name):
 def live_start(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    kwargs = [dict(hunt_id=h) for h in hunt_id]
+    kwargs = [dict(hunt=h) for h in hunt_id]
     args = [(True,)]*len(kwargs)
     for result in utils.parallel_executor(api.live_update, args_list=args, kwargs_list=kwargs):
         output.hunt(result)
@@ -60,7 +60,7 @@ def live_start(ctx, hunt_id):
 def live_stop(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    kwargs = [dict(hunt_id=h) for h in hunt_id] if hunt_id else [dict(hunt_id=None)]
+    kwargs = [dict(hunt=h) for h in hunt_id] if hunt_id else [dict(hunt_id=None)]
     args = [(False,)] * len(kwargs)
     for result in utils.parallel_executor(api.live_update, args_list=args, kwargs_list=kwargs):
         output.hunt(result)
@@ -72,7 +72,7 @@ def live_stop(ctx, hunt_id):
 def live_delete(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    kwargs = [dict(hunt_id=h) for h in hunt_id]
+    kwargs = [dict(hunt=h) for h in hunt_id]
     for result in utils.parallel_executor(api.live_delete, kwargs_list=kwargs):
         output.hunt_deletion(result)
 
@@ -120,15 +120,15 @@ def historical_start(ctx, rule_file, rule_id, name):
     output = ctx.obj['output']
     params = {}
     if rule_file:
-        params['rule'] = rule_file.read()
+        rule = rule_file.read()
         params['ruleset_name'] = path.basename(rule_file.name)
     elif rule_id:
-        params['rule_id'] = rule_id
+        rule = rule_id
     else:
         raise click.exceptions.BadArgumentUsage('One of rule_file argument or --rule-id option should be provided.')
     if name:
         params['ruleset_name'] = name
-    result = api.historical_create(**params)
+    result = api.historical_create(rule, **params)
     output.hunt(result)
 
 
@@ -138,7 +138,7 @@ def historical_start(ctx, rule_file, rule_id, name):
 def historical_delete(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    kwargs = [dict(hunt_id=h) for h in hunt_id]
+    kwargs = [dict(hunt=h) for h in hunt_id]
     for result in utils.parallel_executor(api.historical_delete, kwargs_list=kwargs):
         output.hunt_deletion(result)
 
