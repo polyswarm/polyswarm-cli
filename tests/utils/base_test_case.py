@@ -30,7 +30,8 @@ class BaseTestCase(TestCase):
         self.test_captured_output_file = '/tmp/output.txt'
         self.api_url = 'https://api.polyswarm.network/v2'
         self.test_api_key = '11111111111111111111111111111111'
-        self.request_generator = PolyswarmAPI(self.test_api_key).generator
+        self.community = 'lima'
+        self.request_generator = PolyswarmAPI(self.test_api_key, community=self.community).generator
         self.test_hash_value = '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
         self.test_query = '_exists_:lief.libraries'
         self.test_submission_uuid = '49091542211453596'

@@ -72,7 +72,7 @@ class IntegrationTest(BaseTestCase):
                                       request=self._create_scan_submission_lookup_request(self.test_submission_uuid),
                                       response=self.mock_submission_response)
 
-        result = self._run_cli(['--output-format', 'json', '-c', 'lima', 'lookup', self.test_submission_uuid])
+        result = self._run_cli(['--output-format', 'json', '-c', self.community, 'lookup', self.test_submission_uuid])
 
         self._assert_json_result(
             result,
@@ -90,7 +90,7 @@ class IntegrationTest(BaseTestCase):
                                       request=self._create_scan_submission_submit_request(malicious_file),
                                       response=self.mock_submission_response)
 
-        result = self._run_cli(['--output-format', 'json', '-c', 'lima', 'scan', 'file', malicious_file])
+        result = self._run_cli(['--output-format', 'json', '-c', self.community, 'scan', 'file', malicious_file])
 
         self._assert_json_result(
             result,
@@ -106,7 +106,7 @@ class IntegrationTest(BaseTestCase):
                                       request=self._create_scan_submission_lookup_request(self.test_submission_uuid),
                                       response=self.mock_submission_response)
 
-        result = self._run_cli(['--output-format', 'json', '-c', 'lima', 'rescan', self.test_hash_value])
+        result = self._run_cli(['--output-format', 'json', '-c', self.community, 'rescan', self.test_hash_value])
 
         self._assert_json_result(
             result,
