@@ -26,10 +26,7 @@ class SearchTest(BaseTestCase):
         )
 
     def test_search_hash_with_text_output(self):
-        with patch('polyswarm_api.api.PolyswarmAPI.search',
-                   return_value=[mock_polyswarm_api_results.instances(self)[0]]), \
-             patch('polyswarm_api.api.PolyswarmAPI.score',
-                   return_value=mock_polyswarm_api_results.scores(self)[0]):
+        with patch('polyswarm_api.api.PolyswarmAPI.search', return_value=[mock_polyswarm_api_results.instances(self)[0]]):
             result = self._run_cli(['--output-format', 'text', 'search', 'hash', self.test_hash_value])
         self._assert_text_result(
             result,

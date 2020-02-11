@@ -13,7 +13,7 @@ def instances(test):
              'mask': True, 'metadata': {'malware_family': 'Eicar Test File', 'scanner': {
                 'environment': {'architecture': 'x86_64', 'operating_system': 'Linux'}}}, 'verdict': True}],
          'community': 'gamma', 'country': '', 'created': '2019-11-07T19:18:00.265903',
-         'extended_type': 'EICAR virus test files', 'failed': False,
+         'extended_type': 'EICAR virus test files', 'polyscore': 0.5, 'failed': False,
          'filename': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f',
          'first_seen': '2019-11-01T21:33:53.292099', 'id': 49091542211453596, 'last_seen': '2019-11-07T16:18:00.269290',
          'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 'result': True,
@@ -44,6 +44,7 @@ Status: Assertion window closed
 Filename: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
 Community: gamma
 Country: 
+[91mPolyScore: 0.50000000000000000000[0m
 
 """)
     return values
@@ -145,7 +146,7 @@ def live_results(test):
              'mask': True, 'metadata': {'malware_family': 'Eicar Test File', 'scanner': {
                 'environment': {'architecture': 'x86_64', 'operating_system': 'Linux'}}}, 'verdict': True}],
                       'community': 'gamma', 'country': '', 'created': '2019-11-07T19:18:00.265903',
-                      'extended_type': 'EICAR virus test files', 'failed': False,
+                      'extended_type': 'EICAR virus test files', 'polyscore': 0.5, 'failed': False,
                       'filename': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f',
                       'first_seen': '2019-11-01T21:33:53.292099', 'id': 49091542211453596, 'last_seen': '2019-11-07T16:18:00.269290',
                       'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 'result': True,
@@ -180,6 +181,7 @@ Status: Assertion window closed
 Filename: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
 Community: gamma
 Country: 
+[91mPolyScore: 0.50000000000000000000[0m
 
 """)
     return values
@@ -194,7 +196,7 @@ def historical_results(test):
              'mask': True, 'metadata': {'malware_family': 'Eicar Test File', 'scanner': {
                 'environment': {'architecture': 'x86_64', 'operating_system': 'Linux'}}}, 'verdict': True}],
                       'community': 'gamma', 'country': '', 'created': '2019-11-07T19:18:00.265903',
-                      'extended_type': 'EICAR virus test files', 'failed': False,
+                      'extended_type': 'EICAR virus test files', 'polyscore': 0.5, 'failed': False,
                       'filename': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f',
                       'first_seen': '2019-11-01T21:33:53.292099', 'id': 49091542211453596, 'last_seen': '2019-11-07T16:18:00.269290',
                       'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 'result': True,
@@ -229,6 +231,7 @@ Status: Assertion window closed
 Filename: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
 Community: gamma
 Country: 
+[91mPolyScore: 0.50000000000000000000[0m
 
 """)
     return values
@@ -311,16 +314,6 @@ def cat_request(data):
             yield self.content
 
     return Request(content=data)
-
-
-def scores(test):
-    values = []
-    values.append(resources.PolyScore(
-        {'scores': {'56977143704899183': 0.00024050482800527995, '11611818710765483': 0.00024050482800527995,
-                    '49091542211453596': 0.00024050482800527995, }},
-        polyswarm=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
-    ))
-    return values
 
 
 def stream_results(s3_file_url):

@@ -26,8 +26,7 @@ class SubmissionTest(BaseTestCase):
         )
 
     def test_submission_lookup_text(self):
-        with patch('polyswarm_api.api.PolyswarmAPI.lookup', return_value=mock_polyswarm_api_results.instances(self)[0]), \
-             patch('polyswarm_api.api.PolyswarmAPI.score', return_value=mock_polyswarm_api_results.scores(self)[0]):
+        with patch('polyswarm_api.api.PolyswarmAPI.lookup', return_value=mock_polyswarm_api_results.instances(self)[0]):
             result = self._run_cli(['--output-format', 'text', '-c', 'gamma',
                                     'lookup', '49091542211453596'])
         self._assert_text_result(
@@ -49,8 +48,7 @@ class SubmissionTest(BaseTestCase):
 
     def test_submission_create_text(self):
         with patch('polyswarm_api.api.PolyswarmAPI.submit', return_value=mock_polyswarm_api_results.instances(self)[0]), \
-             patch('polyswarm_api.api.PolyswarmAPI.lookup', return_value=mock_polyswarm_api_results.instances(self)[0]), \
-             patch('polyswarm_api.api.PolyswarmAPI.score', return_value=mock_polyswarm_api_results.scores(self)[0]):
+             patch('polyswarm_api.api.PolyswarmAPI.lookup', return_value=mock_polyswarm_api_results.instances(self)[0]):
             result = self._run_cli(['--output-format', 'text', '-c', 'gamma',
                                     'scan', 'file', self._get_test_resource_file_path('malicious')])
         self._assert_text_result(
@@ -72,8 +70,7 @@ class SubmissionTest(BaseTestCase):
 
     def test_submission_rescan_text(self):
         with patch('polyswarm_api.api.PolyswarmAPI.rescan', return_value=mock_polyswarm_api_results.instances(self)[0]), \
-             patch('polyswarm_api.api.PolyswarmAPI.lookup', return_value=mock_polyswarm_api_results.instances(self)[0]), \
-             patch('polyswarm_api.api.PolyswarmAPI.score', return_value=mock_polyswarm_api_results.scores(self)[0]):
+             patch('polyswarm_api.api.PolyswarmAPI.lookup', return_value=mock_polyswarm_api_results.instances(self)[0]):
             result = self._run_cli(['--output-format', 'text', '-c', 'gamma',
                                     'rescan', '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'])
         self._assert_text_result(
@@ -95,8 +92,7 @@ class SubmissionTest(BaseTestCase):
 
     def test_submission_rescanid_text(self):
         with patch('polyswarm_api.api.PolyswarmAPI.rescanid', return_value=mock_polyswarm_api_results.instances(self)[0]), \
-             patch('polyswarm_api.api.PolyswarmAPI.lookup', return_value=mock_polyswarm_api_results.instances(self)[0]), \
-             patch('polyswarm_api.api.PolyswarmAPI.score', return_value=mock_polyswarm_api_results.scores(self)[0]):
+             patch('polyswarm_api.api.PolyswarmAPI.lookup', return_value=mock_polyswarm_api_results.instances(self)[0]):
             result = self._run_cli(['--output-format', 'text', '-c', 'gamma',
                                     'rescanid', '11611818710765483'])
         self._assert_text_result(
