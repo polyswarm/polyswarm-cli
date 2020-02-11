@@ -80,7 +80,7 @@ class BaseTestCase(TestCase):
         return request
 
     def _create_scan_submission_submit_request(self, artifact):
-        request = self.request_generator.submit(resources.LocalArtifact(artifact))
+        request = self.request_generator.submit(resources.LocalArtifact.from_path(self.request_generator, artifact))
         return request
 
     def _create_scan_submission_rescan_request(self, hash_value, hash_type='sha256'):
@@ -123,8 +123,8 @@ class BaseTestCase(TestCase):
         self._add_pagination_params(request, offset, limit)
         return request
 
-    def _create_download_request(self, hash_value, path, hash_type='sha256'):
-        request = self.request_generator.download(hash_value, hash_type, output_file=path)
+    def _create_download_request(self, hash_value, hash_type='sha256'):
+        request = self.request_generator.download(hash_value, hash_type)
         return request
 
     def _create_stream_request(self, since, offset=None, limit=None):

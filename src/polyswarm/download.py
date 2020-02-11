@@ -53,4 +53,4 @@ def cat(ctx, hash_type, hash_value):
     api = ctx.obj['api']
     out = click.get_binary_stream('stdout')
     for h in hash_value:
-        api.download_to_filehandle(h, out, hash_type=hash_type)
+        api.download_to_handle(h, out, hash_type=hash_type)

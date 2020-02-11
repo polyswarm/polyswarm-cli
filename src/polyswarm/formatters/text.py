@@ -181,7 +181,7 @@ class TextOutput(base.BaseOutput):
     def local_artifact(self, artifact, write=True):
         output = []
         output.append(self._white('Successfully downloaded artifact {} to {}'
-                                  .format(artifact.artifact_name, artifact.path)))
+                                  .format(artifact.artifact_name, artifact.name)))
         return self._output(output, write)
 
     def usage_exceeded(self):

@@ -236,9 +236,9 @@ class IntegrationTest(BaseTestCase):
         )
 
     def test_download(self, mock_server):
-        with file_utils.temp_dir(dict(malicious=self.test_eicar)) as (path, files):
+        with file_utils.temp_dir({self.test_hash_value: self.test_eicar}) as (path, files):
             self._setup_mock_api_download(mock_server,
-                                          request=self._create_download_request(self.test_hash_value, files[0]),
+                                          request=self._create_download_request(self.test_hash_value),
                                           download_file=io.BytesIO(self.test_eicar))
 
             result = self._run_cli(['download', self.test_hash_value, path])
@@ -252,7 +252,7 @@ class IntegrationTest(BaseTestCase):
             )
 
     def test_download_stream(self, mock_server):
-        with file_utils.temp_dir(dict(malicious=self.test_eicar)) as (path, files):
+        with file_utils.temp_dir({self.test_hash_value: self.test_eicar}) as (path, files):
             self._setup_mock_api_response(mock_server,
                                           request=self._create_stream_request(self.test_since),
                                           response=self.mock_stream_response_page1)
@@ -271,9 +271,9 @@ class IntegrationTest(BaseTestCase):
             )
 
     def test_download_cat(self, mock_server):
-        with file_utils.temp_dir(dict(malicious=self.test_eicar)) as (path, files):
+        with file_utils.temp_dir({self.test_hash_value: self.test_eicar}) as (path, files):
             self._setup_mock_api_download(mock_server,
-                                          request=self._create_download_request(self.test_hash_value, files[0]),
+                                          request=self._create_download_request(self.test_hash_value),
                                           download_file=io.BytesIO(self.test_eicar))
 
             result = self._run_cli(['cat', self.test_hash_value])

@@ -287,10 +287,10 @@ def artifact_archives(test):
     return values
 
 
-def local_artifacts(hash_value, path):
-    values = []
-    full_path = os.path.join(path, hash_value)
-    values.append(resources.LocalArtifact(path=full_path, artifact_name=hash_value, analyze=False))
+def local_artifacts(test, path, files):
+    file_paths = [os.path.join(path, file_name) for file_name in files]
+    api = PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma')
+    values = [resources.LocalArtifact.from_path(api, full_path) for full_path in file_paths]
     return values
 
 
