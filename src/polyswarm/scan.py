@@ -22,8 +22,8 @@ def rescan_and_wait(api, timeout, nowait, *args, **kwargs):
     return api.wait_for(instance.id, timeout=timeout)
 
 
-def rescanid_and_wait(api, timeout, nowait, *args, **kwargs):
-    instance = api.rescanid(*args, **kwargs)
+def rescan_id_and_wait(api, timeout, nowait, *args, **kwargs):
+    instance = api.rescan_id(*args, **kwargs)
     if nowait:
         return instance
     return api.wait_for(instance.id, timeout=timeout)
@@ -102,14 +102,14 @@ def rescan(ctx, hash_file, hash_type, timeout, nowait, hash_value):
         output.artifact_instance(instance)
 
 
-@click.command('rescanid', short_help='Rescan by scan id.')
+@click.command('rescan-id', short_help='Rescan by scan id.')
 @click.option('-t', '--timeout', type=click.INT, default=const.DEFAULT_SCAN_TIMEOUT,
               help='How long to wait for results (default: {}).'.format(const.DEFAULT_SCAN_TIMEOUT))
 @click.option('-n', '--nowait', is_flag=True,
               help='Does not wait for the scan window to close, just create it and return right away.')
 @click.argument('scan_id', nargs=-1, callback=utils.validate_id)
 @click.pass_context
-def rescanid(ctx, timeout, nowait, scan_id):
+def rescan_id(ctx, timeout, nowait, scan_id):
     """
     Rescan based on the id of a previous scan
     """
@@ -117,7 +117,7 @@ def rescanid(ctx, timeout, nowait, scan_id):
     output = ctx.obj['output']
     args = [(api, timeout, nowait, s) for s in scan_id]
 
-    for instance in utils.parallel_executor(rescanid_and_wait, args_list=args):
+    for instance in utils.parallel_executor(rescan_id_and_wait, args_list=args):
         output.artifact_instance(instance)
 
 

@@ -79,22 +79,22 @@ class SubmissionTest(BaseTestCase):
             expected_return_code=0,
         )
 
-    def test_submission_rescanid_json(self):
-        with patch('polyswarm_api.api.PolyswarmAPI.rescanid', return_value=mock_polyswarm_api_results.instances(self)[0]), \
+    def test_submission_rescan_id_json(self):
+        with patch('polyswarm_api.api.PolyswarmAPI.rescan_id', return_value=mock_polyswarm_api_results.instances(self)[0]), \
              patch('polyswarm_api.api.PolyswarmAPI.lookup', return_value=mock_polyswarm_api_results.instances(self)[0]):
             result = self._run_cli(['--output-format', 'json', '-c', 'gamma',
-                                    'rescanid', '11611818710765483'])
+                                    'rescan-id', '11611818710765483'])
         self._assert_json_result(
             result,
             expected_output=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0,
         )
 
-    def test_submission_rescanid_text(self):
-        with patch('polyswarm_api.api.PolyswarmAPI.rescanid', return_value=mock_polyswarm_api_results.instances(self)[0]), \
+    def test_submission_rescan_id_text(self):
+        with patch('polyswarm_api.api.PolyswarmAPI.rescan_id', return_value=mock_polyswarm_api_results.instances(self)[0]), \
              patch('polyswarm_api.api.PolyswarmAPI.lookup', return_value=mock_polyswarm_api_results.instances(self)[0]):
             result = self._run_cli(['--output-format', 'text', '-c', 'gamma',
-                                    'rescanid', '11611818710765483'])
+                                    'rescan-id', '11611818710765483'])
         self._assert_text_result(
             result,
             expected_output=mock_polyswarm_api_results.text_instances()[0],
