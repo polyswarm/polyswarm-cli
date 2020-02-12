@@ -40,7 +40,7 @@ def stream(ctx, since, destination):
     api = ctx.obj['api']
     out = ctx.obj['output']
 
-    args = [(destination, artifact_archive.s3_path) for artifact_archive in api.stream(since=since)]
+    args = [(destination, artifact_archive.uri) for artifact_archive in api.stream(since=since)]
     for result in utils.parallel_executor(api.download_archive, args_list=args):
         out.local_artifact(result)
 

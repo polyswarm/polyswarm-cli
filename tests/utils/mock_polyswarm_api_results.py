@@ -281,7 +281,7 @@ def ruleset(test, name='test'):
 def artifact_archives(test):
     values = []
     values.append(resources.ArtifactArchive(
-        {'id': '1', 'community': 'gamma', 'created': '2019-11-14T16:30:00.888191', 's3_path': 's3/malicious'},
+        {'id': '1', 'community': 'gamma', 'created': '2019-11-14T16:30:00.888191', 'uri': 's3/malicious'},
         polyswarm=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
     ))
     return values
@@ -321,5 +321,5 @@ def stream_results(s3_file_url):
     values.append(
         {'community': 'gamma', 'created': '2019-11-28T18:04:38.923000',
          'id': '67497956521144077',
-         's3_path': s3_file_url})
+         'uri': s3_file_url})
     return values
