@@ -13,8 +13,7 @@ from .download import download, cat, stream
 from .search import search
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-
-VERSION = '1.1.0'
+VERSION = '1.1.1'
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
@@ -41,8 +40,6 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
     """
-
-    # TODO shouldn't need to do this here
     ctx.obj = {}
 
     if ctx.invoked_subcommand is None:
@@ -61,9 +58,8 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     if output_file != sys.stdout:
         color = False
 
-    logging.debug('Creating API instance: api_key:%s, api_uri:%s', api_key, api_uri)
+    logging.debug('Creating API instance: api_key: %s, api_uri: %s', api_key, api_uri)
     ctx.obj['api'] = PolyswarmAPI(api_key, api_uri, community=community, validate_schemas=validate)
-
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
 
 

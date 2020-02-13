@@ -1,0 +1,68 @@
+{
+  "result": [
+    {
+      "artifact_metadata": {
+        "strings": {
+          "some": "stuff"
+        },
+        "exiftool": {
+          "some": "stuff"
+        },
+        "lief": {
+          "some": "stuff"
+        }
+      },
+      "extended_type": null,
+      "first_seen": "Wed, 21 Oct 2015 19:20:00 GMT",
+      "id": 111,
+      "md5": "00000000000000000000000000000000",
+      "mimetype": null,
+      "s3_file_name": null,
+      "sha1": "0000000000000000000000000000000000000000",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "artifact_metadata": {
+        "strings": {
+          "some": "stuff"
+        },
+        "exiftool": {
+          "some": "stuff"
+        },
+        "lief": {
+          "some": "stuff"
+        }
+      },
+      "extended_type": null,
+      "first_seen": "Wed, 21 Oct 2015 19:20:00 GMT",
+      "id": 222,
+      "md5": "00000000000000000000000000000000",
+      "mimetype": null,
+      "s3_file_name": null,
+      "sha1": "0000000000000000000000000000000000000000",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "artifact_metadata": {
+        "strings": {
+          "some": "stuff"
+        },
+        "exiftool": {
+          "some": "stuff"
+        },
+        "lief": {
+          "some": "stuff"
+        }
+      },
+      "extended_type": null,
+      "first_seen": "Wed, 21 Oct 2015 19:20:00 GMT",
+      "id": 333,
+      "md5": "00000000000000000000000000000000",
+      "mimetype": null,
+      "s3_file_name": null,
+      "sha1": "0000000000000000000000000000000000000000",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "status": "OK"
+}
