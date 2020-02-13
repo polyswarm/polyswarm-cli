@@ -1,4 +1,4 @@
-polyswarm-api>=1.0.1
+polyswarm-api>=1.1.2
 click==7.0
 pytest==3.9.2
 deepdiff==3.3.0
