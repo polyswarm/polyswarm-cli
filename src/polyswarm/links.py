@@ -6,27 +6,7 @@ def link():
     pass
 
 
-@link.command('create', short_help='Create a tag.')
-@click.argument('sha256', type=click.STRING)
-@click.option('-t', '--tag', type=click.STRING, multiple=True)
-@click.option('-f', '--family', type=click.STRING, multiple=True)
-@click.pass_context
-def create(ctx, sha256, tag, family):
-    api = ctx.obj['api']
-    output = ctx.obj['output']
-    output.tag_link(api.tag_link_create(sha256, tags=tag, families=family))
-
-
-@link.command('delete', short_help='Delete a tag.')
-@click.argument('sha256', type=click.STRING)
-@click.pass_context
-def delete(ctx, sha256):
-    api = ctx.obj['api']
-    output = ctx.obj['output']
-    output.tag_link(api.tag_link_delete(sha256))
-
-
-@link.command('update', short_help='Update a tag.')
+@link.command('set', short_help='Update a tag.')
 @click.argument('sha256', type=click.STRING)
 @click.option('-t', '--tag', type=click.STRING, multiple=True)
 @click.option('-f', '--family', type=click.STRING, multiple=True)
