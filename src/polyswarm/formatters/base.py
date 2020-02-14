@@ -28,10 +28,13 @@ class BaseOutput(object):
     def metadata(self, result):
         raise NotImplementedError
 
-    def tag(self, result):
+    def tag_link(self, result):
         raise NotImplementedError
 
     def family(self, result):
+        raise NotImplementedError
+
+    def tag(self, result):
         raise NotImplementedError
 
     @staticmethod
