@@ -45,3 +45,16 @@ def metadata(ctx, query_string):
     args = [(q,) for q in query_string]
     for instance in utils.parallel_executor_iterable_results(api.search_by_metadata, args_list=args):
         output.metadata(instance)
+
+
+@search.command('scans', short_help='Search for all scans or a particular artifact.')
+@click.argument('hash_value')
+@click.pass_context
+def scans(ctx, hash_value):
+    """
+    Search PolySwarm for scans of a particular artifact
+    """
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    for instance in api.search_scans(hash_value):
+        output.artifact_instance(instance)
