@@ -36,10 +36,13 @@ class JSONOutput(base.BaseOutput):
     def metadata(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
-    def tag(self, result):
+    def tag_link(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
     def family(self, result):
+        self.out.write(self._to_json(result.json) + '\n')
+
+    def tag(self, result):
         self.out.write(self._to_json(result.json) + '\n')
 
     @staticmethod

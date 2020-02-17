@@ -20,7 +20,9 @@ from .scan import scan, lookup, wait, rescan, rescan_id
 from .download import download, cat, stream
 from .search import search
 from .rules import rules
+from .links import link
 from .tags import tag
+from .families import family
 
 logger = logging.getLogger(__name__)
 
@@ -140,7 +142,11 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     ctx.obj['parallel'] = parallel
 
 
-commands = [scan, wait, lookup, search, live, historical, download, cat, stream, rescan, rescan_id, rules, tag]
+commands = [
+    scan, wait, lookup, search, live, historical,
+    download, cat, stream, rescan, rescan_id,
+    rules, link, tag, family,
+]
 
 for command in commands:
     polyswarm.add_command(command)
