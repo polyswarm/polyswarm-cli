@@ -41,3 +41,12 @@ def view(ctx, name):
     api = ctx.obj['api']
     output = ctx.obj['output']
     output.family(api.family_get(name))
+
+
+@family.command('list', short_help='List all families.')
+@click.pass_context
+def list_rules(ctx):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    for family in api.family_list():
+        output.family(family)

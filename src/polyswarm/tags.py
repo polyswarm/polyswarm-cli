@@ -31,3 +31,12 @@ def view(ctx, name):
     api = ctx.obj['api']
     output = ctx.obj['output']
     output.tag(api.tag_get(name))
+
+
+@tag.command('list', short_help='List all tags.')
+@click.pass_context
+def list_rules(ctx):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    for tag in api.tag_list():
+        output.tag(tag)
