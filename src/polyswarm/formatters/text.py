@@ -65,19 +65,18 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('File type: mimetype: {mimetype}, extended_info: {extended_type}'.
                                   format(mimetype=artifact.mimetype, extended_type=artifact.extended_type)))
 
-        if artifact.metadata:
-            if artifact.metadata.hash:
-                h = artifact.metadata.hash
-                if 'ssdeep' in h:
-                    output.append(self._white('SSDEEP: {}'.format(h['ssdeep'])))
-                if 'tlsh' in h:
-                    output.append(self._white('TLSH: {}'.format(h['tlsh'])))
-                if 'authentihash' in h:
-                    output.append(self._white('Authentihash: {}'.format(h['authentihash'])))
-            if artifact.metadata.pefile:
-                p = artifact.metadata.pefile
-                if 'imphash' in p:
-                    output.append(self._white('Imphash: {}'.format(p['imphash'])))
+        if artifact.hash_metadata:
+            h = artifact.hash_metadata
+            if 'ssdeep' in h.tool_metadata:
+                output.append(self._white('SSDEEP: {}'.format(h.ssdeep)))
+            if 'tlsh' in h.tool_metadata:
+                output.append(self._white('TLSH: {}'.format(h.tlsh)))
+            if 'authentihash' in h.tool_metadata:
+                output.append(self._white('Authentihash: {}'.format(h.authentihash)))
+        if artifact.pefile:
+            p = artifact.pefile
+            if 'imphash' in p.tool_metadata:
+                output.append(self._white('Imphash: {}'.format(p.imphash)))
         output.append(self._white('First seen: {}'.format(artifact.first_seen)))
         output.append(self._white('Last seen: {}'.format(artifact.last_seen)))
         return self._output(output, write)
