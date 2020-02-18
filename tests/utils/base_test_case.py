@@ -66,7 +66,8 @@ class BaseTestCase(TestCase):
         mock_server.request(body=download_file, **request_parameters)
 
     def _create_search_hash_request(self, hash_value, offset=None, limit=None):
-        request = self.request_generator.search_hash(resources.Hash.from_hashable(hash_value))
+        h = resources.Hash.from_hashable(hash_value)
+        request = self.request_generator.search_hash(h.hash, h.hash_type)
         self._add_pagination_params(request, offset, limit)
         return request
 
@@ -80,11 +81,13 @@ class BaseTestCase(TestCase):
         return request
 
     def _create_scan_submission_submit_request(self, artifact):
-        request = self.request_generator.submit(resources.LocalArtifact.from_path(self.request_generator, artifact))
+        a = resources.LocalArtifact.from_path(self.request_generator, artifact)
+        request = self.request_generator.submit(a, a.artifact_name, a.artifact_type.name)
         return request
 
     def _create_scan_submission_rescan_request(self, hash_value, hash_type='sha256'):
-        request = self.request_generator.rescan(resources.Hash(hash_value, hash_type))
+        h = resources.Hash(hash_value, hash_type)
+        request = self.request_generator.rescan(h.hash, h.hash_type)
         return request
 
     def _create_hunt_live_results_request(self, hunt_id, since, offset=None, limit=None):
@@ -98,7 +101,8 @@ class BaseTestCase(TestCase):
         return request
 
     def _create_hunt_live_start_request(self, yara_file):
-        request = self.request_generator.create_live_hunt(resources.YaraRuleset(dict(yara=open(yara_file).read())))
+        y = resources.YaraRuleset(dict(yara=open(yara_file).read()))
+        request = self.request_generator.create_live_hunt(rule=y.yara)
         return request
 
     def _create_hunt_historical_start_request(self, yara_file):
