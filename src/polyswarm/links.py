@@ -6,7 +6,7 @@ def link():
     pass
 
 
-@link.command('set', short_help='Update a tag.')
+@link.command('set', short_help='Link and unlink tags/families with an artifact.')
 @click.argument('sha256', type=click.STRING)
 @click.option('-t', '--tag', type=click.STRING, multiple=True)
 @click.option('-f', '--family', type=click.STRING, multiple=True)
@@ -23,7 +23,7 @@ def update(ctx, sha256, tag, family, remove):
     ))
 
 
-@link.command('view', short_help='View a tag.')
+@link.command('view', short_help='View the tags/families linked with an artifact.')
 @click.argument('sha256', type=click.STRING)
 @click.pass_context
 def view(ctx, sha256):
