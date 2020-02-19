@@ -30,7 +30,7 @@ def text_instances():
     values = []
     values.append(
         """============================= Artifact Instance =============================
-Scan permalink: https://polyswarm.network/scan/results/49091542211453596
+Scan permalink: https://polyswarm.network/scan/results/file/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
 [91mDetections: 1/1 engines reported malicious[0m
 [91m	eicar[0m: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}
 [94mScan id: 49091542211453596[0m
@@ -167,7 +167,7 @@ def text_live_results():
     values.append(
         """Match on rule eicar_substring_test
 ============================= Artifact Instance =============================
-Scan permalink: https://polyswarm.network/scan/results/49091542211453596
+Scan permalink: https://polyswarm.network/scan/results/file/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
 [91mDetections: 1/1 engines reported malicious[0m
 [91m	eicar[0m: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}
 [94mScan id: 49091542211453596[0m
@@ -217,7 +217,7 @@ def text_hisotrical_results():
     values.append(
         """Match on rule eicar_substring_test
 ============================= Artifact Instance =============================
-Scan permalink: https://polyswarm.network/scan/results/49091542211453596
+Scan permalink: https://polyswarm.network/scan/results/file/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
 [91mDetections: 1/1 engines reported malicious[0m
 [91m	eicar[0m: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}
 [94mScan id: 49091542211453596[0m
