@@ -119,7 +119,7 @@ def text_metadata():
     values.append(
         """============================= Metadata =============================
 [94mArtifact id: 19021969312842541[0m
-Created: 2020-01-14T17:48:55.854940+00:00
+Created: 2020-01-14 17:48:55.854940+00:00
 SHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
 SHA1: 3395856ce81f2b7382dee72602f798b642f14140
 MD5: 44d88612fea8a8f36de82e1278abb02f
