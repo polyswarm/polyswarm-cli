@@ -1,3 +1,0 @@
-Usage: polyswarm search hash [OPTIONS] [HASHES]...
-
-Error: Invalid value: Hash not valid, must be sha256|md5|sha1 in hexadecimal format
