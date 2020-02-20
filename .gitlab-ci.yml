@@ -16,7 +16,7 @@ test-run27:
     - pip install --upgrade pip
     - pip install -r requirements.txt
   script:
-    - ./test/run.sh
+    - ./tests/run.sh
 
 test-run35:
   tags:
@@ -27,7 +27,7 @@ test-run35:
     - pip3 install --upgrade pip
     - pip install -r requirements.txt
   script:
-    - ./test/run.sh
+    - ./tests/run.sh
 
 test-run36:
   tags:
@@ -38,7 +38,7 @@ test-run36:
     - pip3 install --upgrade pip
     - pip install -r requirements.txt
   script:
-    - ./test/run.sh
+    - ./tests/run.sh
 
 
 push-to-pypi:
