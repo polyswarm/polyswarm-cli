@@ -27,7 +27,7 @@ from .families import family
 logger = logging.getLogger(__name__)
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-VERSION = '2.0.0'
+VERSION = '2.0.1'
 
 
 def setup_logging(verbosity):
