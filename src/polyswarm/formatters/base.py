@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 from polyswarm_api.const import USAGE_EXCEEDED_MESSAGE
 
 
