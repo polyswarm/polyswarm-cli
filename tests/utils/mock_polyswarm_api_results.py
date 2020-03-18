@@ -76,7 +76,7 @@ def metadata(test):
                                      '110:2', '111:0', '112:2', '113:0', '114:0', '115:0', '116:0', '117:3', '118:3',
                                      '119:2', '120:3', '121:0', '122:0', '123:2', '124:0', '125:2', '126:2', '127:0'],
                   'tlsh_quartiles_minimum_match': 32},
-         'scan': {'countries': [], 'detections': {'malicious': 102, 'total': 102},
+         'scan': {'countries': [], 'detections': {'malicious': 100, 'benign': 2, 'total': 102},
                   'filename': ['malicious', 'malicious', 'malicious', 'malicious', 'malicious', 'malicious',
                                'malicious', 'malicious', 'malicious', 'malicious', 'malicious', 'malicious',
                                'malicious', 'malicious', 'malicious', 'malicious', 'malicious', 'malicious',
@@ -129,7 +129,8 @@ First seen: 2020-01-14 17:48:55.854940+00:00
 Last seen: 2020-01-16 20:41:30.953689+00:00
 Mimetype: text/plain
 Extended mimetype: 41a022003b0eee2ba20b00200032e8b00808020e2ce00a3820a020b8c83308803ec228
-Detections: 102
+Malicious: 100
+Benign: 2
 Total detections: 102
 
 """
