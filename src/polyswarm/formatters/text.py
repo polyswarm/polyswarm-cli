@@ -164,6 +164,7 @@ class TextOutput(base.BaseOutput):
         output.append(self._green('Sha256: {}'.format(result.sha256)))
         output.append(self._white('Created at: {}'.format(result.created)))
         output.append(self._white('Updated at: {}'.format(result.updated)))
+        output.append(self._white('First seen: {}'.format(result.first_seen)))
         output.append(self._white('Tags:: {}'.format(result.tags)))
         output.append(self._white('Families: {}'.format(result.families)))
         return self._output(output, write)
