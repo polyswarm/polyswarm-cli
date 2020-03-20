@@ -160,7 +160,7 @@ class TextOutput(base.BaseOutput):
 
     def tag_link(self, result, write=True):
         output = []
-        output.append(self._blue('Sha256: {}'.format(result.sha256)))
+        output.append(self._blue('SHA256: {}'.format(result.sha256)))
         output.append(self._white('First seen: {}'.format(result.first_seen)))
         output.append(self._white('Tags:: {}'.format(result.tags)))
         output.append(self._white('Families: {}'.format(result.families)))
