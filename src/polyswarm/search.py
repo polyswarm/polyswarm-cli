@@ -40,7 +40,7 @@ def hashes(ctx, hash_value, hash_file, hash_type):
 @click.pass_context
 def urls(ctx, url):
     """
-    Search PolySwarm for files matching hashes
+    Search PolySwarm for a scan matching the url
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
