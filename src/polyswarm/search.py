@@ -36,18 +36,16 @@ def hashes(ctx, hash_value, hash_file, hash_type):
 
 
 @search.command('url', short_help='Search for urls separated by space.')
-@click.option('-h', '--hash-type', help='Hash type to encode the url [default:sha256, sha256|sha1|md5].', default=None)
 @click.argument('url', nargs=-1, required=True)
 @click.pass_context
-def urls(ctx, hash_type, url):
+def urls(ctx, url):
     """
     Search PolySwarm for a scan matching the url
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
     args = [(u,) for u in url]
-    for instance in utils.parallel_executor_iterable_results(api.search_url, args_list=args,
-                                                             kwargs_list=[{'hash_type': hash_type}]*len(args)):
+    for instance in utils.parallel_executor_iterable_results(api.search_url, args_list=args):
         output.artifact_instance(instance)
 
 
