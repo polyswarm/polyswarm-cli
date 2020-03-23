@@ -111,7 +111,10 @@ class TextOutput(base.BaseOutput):
             output.append(self._yellow('Status: Lookup timed-out, please retry'))
         else:
             output.append(self._white('Status: Running'))
-        output.append(self._white('Filename: {}'.format(instance.filename)))
+        if instance.type == 'URL':
+            output.append(self._white('URL: {}'.format(instance.filename)))
+        else:
+            output.append(self._white('Filename: {}'.format(instance.filename)))
         output.append(self._white('Community: {}'.format(instance.community)))
         output.append(self._white('Country: {}'.format(instance.country)))
 
