@@ -160,25 +160,21 @@ class TextOutput(base.BaseOutput):
 
     def tag_link(self, result, write=True):
         output = []
-        output.append(self._blue('Ruleset Id: {}'.format(result.id)))
-        output.append(self._green('Sha256: {}'.format(result.sha256)))
-        output.append(self._white('Created at: {}'.format(result.created)))
-        output.append(self._white('Updated at: {}'.format(result.updated)))
+        output.append(self._blue('SHA256: {}'.format(result.sha256)))
+        output.append(self._white('First seen: {}'.format(result.first_seen)))
         output.append(self._white('Tags:: {}'.format(result.tags)))
         output.append(self._white('Families: {}'.format(result.families)))
         return self._output(output, write)
 
     def family(self, result, write=True):
         output = []
-        output.append(self._blue('Family Id: {}'.format(result.id)))
-        output.append(self._blue('Name: {}'.format(result.name)))
+        output.append(self._blue('Family: {}'.format(result.name)))
         output.append(self._white('Emerging: {}'.format(result.emerging)))
         return self._output(output, write)
 
     def tag(self, result, write=True):
         output = []
-        output.append(self._blue('Tag Id: {}'.format(result.id)))
-        output.append(self._blue('Name: {}'.format(result.name)))
+        output.append(self._blue('Tag: {}'.format(result.name)))
         return self._output(output, write)
 
     def local_artifact(self, artifact, write=True):
