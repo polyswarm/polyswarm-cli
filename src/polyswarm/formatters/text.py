@@ -84,16 +84,21 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('============================= Artifact Instance ============================='))
         output.append(self._white('Scan permalink: {}'.format(instance.permalink)))
 
-        malicious = 'Malicious: {}/{} engines reported malicious'\
-            .format(len(instance.malicious_assertions), len(instance.valid_assertions))
-        if len(instance.malicious_assertions) > 0:
-            output.append(self._red(malicious))
+        if instance.community == 'stream':
+            output.append(self._white('Detections: This artifact has not been scanned. You can trigger a scan now.'))
+        elif len(instance.valid_assertions) == 0 and instance.window_closed and not instance.failed:
+            output.append(self._white('Detections: No engines responded to this scan. You can trigger a rescan now.'))
+        elif len(instance.valid_assertions) > 0 and instance.window_closed and not instance.failed:
+            malicious = 'Detections: {}/{} engines reported malicious'\
+                .format(len(instance.malicious_assertions), len(instance.valid_assertions))
+            if len(instance.malicious_assertions) > 0:
+                output.append(self._red(malicious))
+            else:
+                output.append(self._white(malicious))
+        elif not instance.window_closed and not instance.failed:
+            output.append(self._white('Detections: This scan has not finished running yet.'))
         else:
-            output.append(self._white(malicious))
-
-        benign = 'Benign: {}/{} engines reported benign'\
-            .format(len(instance.benign_assertions), len(instance.valid_assertions))
-        output.append(self._white(benign))
+            output.append(self._white('Detections: This scan has failed. Please try again.'))
 
         self._open_group()
         for assertion in instance.assertions:
