@@ -55,9 +55,9 @@ def urls(ctx, url):
 def metadata(ctx, query_string):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    args = [(q,) for q in query_string]
-    for instance in utils.parallel_executor_iterable_results(api.search_by_metadata, args_list=args):
-        output.metadata(instance)
+    query_string = ' '.join(query_string)
+    for metadata_result in api.search_by_metadata(query_string):
+        output.metadata(metadata_result)
 
 
 @search.command('scans', short_help='Search for all scans or a particular artifact.')
