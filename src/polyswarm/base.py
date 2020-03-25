@@ -23,6 +23,7 @@ from .rules import rules
 from .links import link
 from .tags import tag
 from .families import family
+from .metadata import metadata
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +146,7 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
 commands = [
     scan, wait, lookup, search, live, historical,
     download, cat, stream, rescan, rescan_id,
-    rules, link, tag, family,
+    rules, link, tag, family, metadata,
 ]
 
 for command in commands:
