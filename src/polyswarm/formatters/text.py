@@ -83,12 +83,18 @@ class TextOutput(base.BaseOutput):
         output = []
         output.append(self._white('============================= Artifact Instance ============================='))
         output.append(self._white('Scan permalink: {}'.format(instance.permalink)))
-        detections = 'Detections: {}/{} engines reported malicious'\
-            .format(len(instance.detections), len(instance.valid_assertions))
-        if len(instance.detections) > 0:
-            output.append(self._red(detections))
+
+        malicious = 'Malicious: {}/{} engines reported malicious'\
+            .format(len(instance.malicious), len(instance.valid_assertions))
+        if len(instance.malicious) > 0:
+            output.append(self._red(malicious))
         else:
-            output.append(self._white(detections))
+            output.append(self._white(malicious))
+
+        benign = 'Benign: {}/{} engines reported benign'\
+            .format(len(instance.benign), len(instance.valid_assertions))
+        output.append(self._white(benign))
+
         self._open_group()
         for assertion in instance.assertions:
             if assertion.verdict is False:
