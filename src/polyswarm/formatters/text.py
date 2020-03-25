@@ -85,14 +85,14 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('Scan permalink: {}'.format(instance.permalink)))
 
         malicious = 'Malicious: {}/{} engines reported malicious'\
-            .format(len(instance.malicious), len(instance.valid_assertions))
-        if len(instance.malicious) > 0:
+            .format(len(instance.malicious_assertions), len(instance.valid_assertions))
+        if len(instance.malicious_assertions) > 0:
             output.append(self._red(malicious))
         else:
             output.append(self._white(malicious))
 
         benign = 'Benign: {}/{} engines reported benign'\
-            .format(len(instance.benign), len(instance.valid_assertions))
+            .format(len(instance.benign_assertions), len(instance.valid_assertions))
         output.append(self._white(benign))
 
         self._open_group()
