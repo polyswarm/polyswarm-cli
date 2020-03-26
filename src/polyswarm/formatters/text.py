@@ -83,12 +83,23 @@ class TextOutput(base.BaseOutput):
         output = []
         output.append(self._white('============================= Artifact Instance ============================='))
         output.append(self._white('Scan permalink: {}'.format(instance.permalink)))
-        detections = 'Detections: {}/{} engines reported malicious'\
-            .format(len(instance.detections), len(instance.valid_assertions))
-        if len(instance.detections) > 0:
-            output.append(self._red(detections))
+
+        if instance.community == 'stream':
+            output.append(self._white('Detections: This artifact has not been scanned. You can trigger a scan now.'))
+        elif len(instance.valid_assertions) == 0 and instance.window_closed and not instance.failed:
+            output.append(self._white('Detections: No engines responded to this scan. You can trigger a rescan now.'))
+        elif len(instance.valid_assertions) > 0 and instance.window_closed and not instance.failed:
+            malicious = 'Detections: {}/{} engines reported malicious'\
+                .format(len(instance.malicious_assertions), len(instance.valid_assertions))
+            if len(instance.malicious_assertions) > 0:
+                output.append(self._red(malicious))
+            else:
+                output.append(self._white(malicious))
+        elif not instance.window_closed and not instance.failed:
+            output.append(self._white('Detections: This scan has not finished running yet.'))
         else:
-            output.append(self._white(detections))
+            output.append(self._white('Detections: This scan has failed. Please try again.'))
+
         self._open_group()
         for assertion in instance.assertions:
             if assertion.verdict is False:
@@ -111,7 +122,10 @@ class TextOutput(base.BaseOutput):
             output.append(self._yellow('Status: Lookup timed-out, please retry'))
         else:
             output.append(self._white('Status: Running'))
-        output.append(self._white('Filename: {}'.format(instance.filename)))
+        if instance.type == 'URL':
+            output.append(self._white('URL: {}'.format(instance.filename)))
+        else:
+            output.append(self._white('Filename: {}'.format(instance.filename)))
         output.append(self._white('Community: {}'.format(instance.community)))
         output.append(self._white('Country: {}'.format(instance.country)))
 
@@ -160,25 +174,21 @@ class TextOutput(base.BaseOutput):
 
     def tag_link(self, result, write=True):
         output = []
-        output.append(self._blue('Ruleset Id: {}'.format(result.id)))
-        output.append(self._green('Sha256: {}'.format(result.sha256)))
-        output.append(self._white('Created at: {}'.format(result.created)))
-        output.append(self._white('Updated at: {}'.format(result.updated)))
+        output.append(self._blue('SHA256: {}'.format(result.sha256)))
+        output.append(self._white('First seen: {}'.format(result.first_seen)))
         output.append(self._white('Tags:: {}'.format(result.tags)))
         output.append(self._white('Families: {}'.format(result.families)))
         return self._output(output, write)
 
     def family(self, result, write=True):
         output = []
-        output.append(self._blue('Family Id: {}'.format(result.id)))
-        output.append(self._blue('Name: {}'.format(result.name)))
+        output.append(self._blue('Family: {}'.format(result.name)))
         output.append(self._white('Emerging: {}'.format(result.emerging)))
         return self._output(output, write)
 
     def tag(self, result, write=True):
         output = []
-        output.append(self._blue('Tag Id: {}'.format(result.id)))
-        output.append(self._blue('Name: {}'.format(result.name)))
+        output.append(self._blue('Tag: {}'.format(result.name)))
         return self._output(output, write)
 
     def local_artifact(self, artifact, write=True):
@@ -215,8 +225,10 @@ class TextOutput(base.BaseOutput):
             output.append(self._white('Mimetype: {}'.format(instance.mimetype)))
         if instance.extended_mimetype:
             output.append(self._white('Extended mimetype: {}'.format(instance.tlsh)))
-        if instance.detections:
-            output.append(self._white('Detections: {}'.format(instance.detections)))
+        if instance.malicious:
+            output.append(self._white('Malicious: {}'.format(instance.malicious)))
+        if instance.benign:
+            output.append(self._white('Benign: {}'.format(instance.benign)))
         if instance.total_detections:
             output.append(self._white('Total detections: {}'.format(instance.total_detections)))
 

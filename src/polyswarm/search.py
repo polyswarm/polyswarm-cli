@@ -21,7 +21,7 @@ def search():
 @search.command('hash', short_help='Search for hashes separated by space.')
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5].', default=None)
-@click.argument('hash_value', nargs=-1)
+@click.argument('hash_value', nargs=-1, required=True)
 @click.pass_context
 def hashes(ctx, hash_value, hash_file, hash_type):
     """
@@ -35,20 +35,33 @@ def hashes(ctx, hash_value, hash_file, hash_type):
         output.artifact_instance(instance)
 
 
-@search.command('metadata', short_help='Search metadata of files.')
-@click.argument('query_string', nargs=-1)
+@search.command('url', short_help='Search for urls separated by space.')
+@click.argument('url', nargs=-1, required=True)
 @click.pass_context
-def metadata(ctx, query_string):
-
+def urls(ctx, url):
+    """
+    Search PolySwarm for a scan matching the url
+    """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    args = [(q,) for q in query_string]
-    for instance in utils.parallel_executor_iterable_results(api.search_by_metadata, args_list=args):
-        output.metadata(instance)
+    args = [(u,) for u in url]
+    for instance in utils.parallel_executor_iterable_results(api.search_url, args_list=args):
+        output.artifact_instance(instance)
+
+
+@search.command('metadata', short_help='Search metadata of files.')
+@click.argument('query_string', nargs=-1, required=True)
+@click.pass_context
+def metadata(ctx, query_string):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    query_string = ' '.join(query_string)
+    for metadata_result in api.search_by_metadata(query_string):
+        output.metadata(metadata_result)
 
 
 @search.command('scans', short_help='Search for all scans or a particular artifact.')
-@click.argument('hash_value')
+@click.argument('hash_value', required=True)
 @click.pass_context
 def scans(ctx, hash_value):
     """
