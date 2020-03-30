@@ -21,7 +21,7 @@ def search():
 @search.command('hash', short_help='Search for hashes separated by space.')
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5].', default=None)
-@click.argument('hash_value', nargs=-1, required=True)
+@click.argument('hash_value', nargs=-1)
 @click.pass_context
 def hashes(ctx, hash_value, hash_file, hash_type):
     """
@@ -29,6 +29,8 @@ def hashes(ctx, hash_value, hash_file, hash_type):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
+    if not (hash_file or hash_value):
+        raise click.exceptions.BadArgumentUsage('One of HASH_VALUE or --hash-file should be provided.')
     args = [(h,) for h in utils.parse_hashes(hash_value, hash_file=hash_file)]
     for instance in utils.parallel_executor_iterable_results(api.search, args_list=args,
                                                              kwargs_list=[{'hash_type': hash_type}]*len(args)):
