@@ -70,6 +70,9 @@ def url_(ctx, url_file, timeout, nowait, url):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
+    if not (url_file or url):
+        raise click.exceptions.BadArgumentUsage('One of URL or --url-file should be provided.')
+
     urls = list(url)
     if url_file:
         urls.extend([u.strip() for u in url_file.readlines()])
@@ -95,6 +98,10 @@ def rescan(ctx, hash_file, hash_type, timeout, nowait, hash_value):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
+
+    if not (hash_file or hash_value):
+        raise click.exceptions.BadArgumentUsage('One of HASH_VALUE or --hash-file should be provided.')
+
     args = [(api, timeout, nowait, h) for h in utils.parse_hashes(hash_value, hash_file=hash_file)]
 
     for instance in utils.parallel_executor(rescan_and_wait, args_list=args,
@@ -131,6 +138,9 @@ def lookup(ctx, scan_id, scan_id_file):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
+
+    if not (scan_id_file or scan_id):
+        raise click.exceptions.BadArgumentUsage('One of SCAN_ID or --scan-id-file should be provided.')
 
     scan_ids = list(scan_id)
 
