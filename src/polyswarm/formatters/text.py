@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 import sys
 import functools
 import json
+import hashlib
 from . import base
 from polyswarm_api import const
 
@@ -208,6 +209,15 @@ class TextOutput(base.BaseOutput):
 
         if instance.sha256:
             output.append(self._white('SHA256: {}'.format(instance.sha256)))
+        # we're a url scan
+        if instance.sha256 is None:
+            url_l = instance.json.get('scan', {}).get('url', [])
+            if url_l:
+                url = url_l[0]
+                url_h = hashlib.sha256(url.encode('utf-8')).hexdigest()
+                output.append(self._white('SHA256: {}'.format(url_h)))
+                output.append(self._white('URL: {}'.format(url)))
+
         if instance.sha1:
             output.append(self._white('SHA1: {}'.format(instance.sha1)))
         if instance.md5:
