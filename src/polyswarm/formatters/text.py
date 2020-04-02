@@ -197,9 +197,6 @@ class TextOutput(base.BaseOutput):
                                   .format(artifact.artifact_name, artifact.name)))
         return self._output(output, write)
 
-    def usage_exceeded(self):
-        self.out.write(self._red(const.USAGE_EXCEEDED_MESSAGE)+'\n')
-
     def metadata(self, instance, write=True):
         output = []
         output.append(self._white('============================= Metadata ============================='))

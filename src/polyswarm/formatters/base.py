@@ -1,5 +1,4 @@
 from __future__ import absolute_import, unicode_literals
-from polyswarm_api.const import USAGE_EXCEEDED_MESSAGE
 
 
 class BaseOutput(object):
@@ -37,8 +36,3 @@ class BaseOutput(object):
 
     def tag(self, result):
         raise NotImplementedError
-
-    @staticmethod
-    def usage_exceeded():
-        print(USAGE_EXCEEDED_MESSAGE)
-

@@ -6,7 +6,6 @@ from pygments.formatters import TerminalTrueColorFormatter
 
 
 from . import base
-from polyswarm_api.const import USAGE_EXCEEDED_MESSAGE
 
 
 class JSONOutput(base.BaseOutput):
@@ -44,10 +43,6 @@ class JSONOutput(base.BaseOutput):
 
     def tag(self, result):
         self.out.write(self._to_json(result.json) + '\n')
-
-    @staticmethod
-    def usage_exceeded():
-        return json.dumps(USAGE_EXCEEDED_MESSAGE)
 
 
 class PrettyJSONOutput(JSONOutput):
