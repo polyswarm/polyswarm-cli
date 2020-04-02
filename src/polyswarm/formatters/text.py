@@ -3,7 +3,6 @@ import sys
 import functools
 import json
 from . import base
-from polyswarm_api import const
 
 
 # TODO rewrite some of this to be not terrible
@@ -248,6 +247,12 @@ class TextOutput(base.BaseOutput):
             output.append(self._white('Urls:'))
             self._open_group()
             output.append(self._white('{}'.format(', '.join(instance.urls))))
+            self._close_group()
+
+        if instance.filenames:
+            output.append(self._white('Filenames:'))
+            self._open_group()
+            output.append(self._white('{}'.format(', '.join(instance.filenames))))
             self._close_group()
 
         return self._output(output, write)
