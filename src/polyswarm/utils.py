@@ -1,6 +1,8 @@
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
+from threading import BoundedSemaphore
+
 # TODO: Change this to import itertools once we drop support for python 2.7
 try:
     from itertools import zip_longest
@@ -31,16 +33,39 @@ def is_valid_id(value):
 # Parallelization and error handling executors
 ####################################################
 
+class BoundedExecutor(ThreadPoolExecutor):
+    """BoundedExecutor behaves as a ThreadPoolExecutor which will block on
+    calls to submit() once the limit given as "bound" work items are queued for
+    execution. Taken roughly from https://www.bettercodebytes.com/theadpoolexecutor-with-a-bounded-queue-in-python/
+    :param bound: Integer - the maximum number of items in the work queue
+    :param max_workers: Integer - the size of the thread pool
+    """
+    def __init__(self, bound=50, *args, **kwargs):
+        # note: if a machine has a large number of cores and max_workers is not specified
+        # this could set an upper limit for outstanding tasks poorly. This is unlikely, however.
+        max_workers = kwargs.get('max_workers', 4)
+        self.semaphore = BoundedSemaphore(bound * max_workers)
+        super(BoundedExecutor, self).__init__(*args, **kwargs)
+
+    """See concurrent.futures.Executor#submit"""
+    def submit(self, fn, *args, **kwargs):
+        self.semaphore.acquire()
+        try:
+            future = super(BoundedExecutor, self).submit(fn, *args, **kwargs)
+        except Exception as e:
+            self.semaphore.release()
+            raise e
+        else:
+            future.add_done_callback(lambda x: self.semaphore.release())
+            return future
+
 
 def parallelize(function, args_list=(), kwargs_list=(), **kwargs):
-    futures = []
     with ThreadPoolExecutor(**kwargs) as pool:
         for args, kwargs in zip_longest(args_list, kwargs_list, fillvalue=None):
             args = args or []
             kwargs = kwargs or {}
-            futures.append(pool.submit(function, *args, **kwargs))
-    for future in futures:
-        yield future
+            yield pool.submit(function, *args, **kwargs)
 
 
 def parallel_executor(function, args_list=(), kwargs_list=(), **kwargs):
