@@ -19,6 +19,11 @@ If you want yara validation (optional):
 
     pip install -e .[yara]
 
+> If you get an error about a missing package named `wheel`, that means your version of pip or setuptools is too old.
+> You need pip >= 19.0 and setuptools >= 40.8.0. 
+> To update pip, run `pip install -U pip`.
+> To update setuptools, run `pip install -U setuptools`
+
 ## Usage
 
 
