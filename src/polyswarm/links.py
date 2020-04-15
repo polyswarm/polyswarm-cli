@@ -32,7 +32,7 @@ def view(ctx, sha256):
     output.tag_link(api.tag_link_get(sha256))
 
 
-@link.command('list', short_help='List all links with the given tags.')
+@link.command('list', short_help='List all links with the given tags/families.')
 @click.option('-t', '--tag', type=click.STRING, multiple=True,
               help='A tag that must be associated with the artifact.')
 @click.option('-f', '--family', type=click.STRING, multiple=True,
