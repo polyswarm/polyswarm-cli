@@ -224,7 +224,7 @@ class TextOutput(base.BaseOutput):
         if instance.mimetype:
             output.append(self._white('Mimetype: {}'.format(instance.mimetype)))
         if instance.extended_mimetype:
-            output.append(self._white('Extended mimetype: {}'.format(instance.tlsh)))
+            output.append(self._white('Extended mimetype: {}'.format(instance.extended_mimetype)))
         if instance.malicious:
             output.append(self._white('Malicious: {}'.format(instance.malicious)))
         if instance.benign:

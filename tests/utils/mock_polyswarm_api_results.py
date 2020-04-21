@@ -128,7 +128,7 @@ TLSH: 41a022003b0eee2ba20b00200032e8b00808020e2ce00a3820a020b8c83308803ec228
 First seen: 2020-01-14 17:48:55.854940+00:00
 Last seen: 2020-01-16 20:41:30.953689+00:00
 Mimetype: text/plain
-Extended mimetype: 41a022003b0eee2ba20b00200032e8b00808020e2ce00a3820a020b8c83308803ec228
+Extended mimetype: EICAR virus test files
 Malicious: 100
 Benign: 2
 Total detections: 102
