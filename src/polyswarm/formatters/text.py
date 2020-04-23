@@ -215,8 +215,8 @@ class TextOutput(base.BaseOutput):
 
         if instance.first_seen:
             output.append(self._white('First seen: {}'.format(instance.first_seen)))
-        if instance.last_seen:
-            output.append(self._white('Last seen: {}'.format(instance.last_seen)))
+        if instance.last_scanned:
+            output.append(self._white('Last scanned: {}'.format(instance.last_scanned)))
         if instance.mimetype:
             output.append(self._white('Mimetype: {}'.format(instance.mimetype)))
         if instance.extended_mimetype:
