@@ -53,10 +53,10 @@ Country:
 def metadata(test):
     values = []
     values.append(resources.Metadata(
-        {'artifact': {'created': '2020-01-14T17:48:55.854940+00:00', 'id': 19021969312842541},
-         'hash': {'md5': '44d88612fea8a8f36de82e1278abb02f', 'sha1': '3395856ce81f2b7382dee72602f798b642f14140',
-                  'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f',
-                  'sha3_256': '8b4c4e204a8a039198e292d2291f4c451d80e4c38bf0cc04ad3841fea8755bd8',
+        {'artifact': {'created': '2020-01-14T17:48:55.854940+00:00', 'id': 19021969312842541,
+                      'md5': '44d88612fea8a8f36de82e1278abb02f', 'sha1': '3395856ce81f2b7382dee72602f798b642f14140',
+                      'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f',},
+         'hash': {'sha3_256': '8b4c4e204a8a039198e292d2291f4c451d80e4c38bf0cc04ad3841fea8755bd8',
                   'sha3_512': 'a20290c6ebf01dc5182bb57718250f61ab11b418466714632a7d1474a02849641f7b78e4093e19ad12fdbedbe02f3bec4ca3ec3235557e82ab5ac02d061e7007',
                   'sha512': 'cc805d5fab1fd71a4ab352a9c533e65fb2d5b885518f4e565e68847223b8e6b85cb48f3afad842726d99239c9e36505c64b0dc9a061d9e507d833277ada336ab',
                   'ssdeep': '3:a+JraNvsgzsVqSwHq9:tJuOgzsko', 'ssdeep_chunk': 'a+JraNvsgzsVqSwHq9',
@@ -128,10 +128,12 @@ TLSH: 41a022003b0eee2ba20b00200032e8b00808020e2ce00a3820a020b8c83308803ec228
 First seen: 2020-01-14 17:48:55.854940+00:00
 Last seen: 2020-01-16 20:41:30.953689+00:00
 Mimetype: text/plain
-Extended mimetype: 41a022003b0eee2ba20b00200032e8b00808020e2ce00a3820a020b8c83308803ec228
+Extended mimetype: EICAR virus test files
 Malicious: 100
 Benign: 2
 Total detections: 102
+Filenames:
+	malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious, malicious
 
 """
     )

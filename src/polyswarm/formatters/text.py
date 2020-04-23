@@ -3,7 +3,6 @@ import sys
 import functools
 import json
 from . import base
-from polyswarm_api import const
 
 
 # TODO rewrite some of this to be not terrible
@@ -197,9 +196,6 @@ class TextOutput(base.BaseOutput):
                                   .format(artifact.artifact_name, artifact.name)))
         return self._output(output, write)
 
-    def usage_exceeded(self):
-        self.out.write(self._red(const.USAGE_EXCEEDED_MESSAGE)+'\n')
-
     def metadata(self, instance, write=True):
         output = []
         output.append(self._white('============================= Metadata ============================='))
@@ -224,7 +220,7 @@ class TextOutput(base.BaseOutput):
         if instance.mimetype:
             output.append(self._white('Mimetype: {}'.format(instance.mimetype)))
         if instance.extended_mimetype:
-            output.append(self._white('Extended mimetype: {}'.format(instance.tlsh)))
+            output.append(self._white('Extended mimetype: {}'.format(instance.extended_mimetype)))
         if instance.malicious:
             output.append(self._white('Malicious: {}'.format(instance.malicious)))
         if instance.benign:
@@ -251,6 +247,12 @@ class TextOutput(base.BaseOutput):
             output.append(self._white('Urls:'))
             self._open_group()
             output.append(self._white('{}'.format(', '.join(instance.urls))))
+            self._close_group()
+
+        if instance.filenames:
+            output.append(self._white('Filenames:'))
+            self._open_group()
+            output.append(self._white('{}'.format(', '.join(instance.filenames))))
             self._close_group()
 
         return self._output(output, write)
