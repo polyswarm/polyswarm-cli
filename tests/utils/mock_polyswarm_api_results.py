@@ -16,6 +16,7 @@ def instances(test):
          'extended_type': 'EICAR virus test files', 'polyscore': 0.5, 'failed': False,
          'filename': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f',
          'first_seen': '2019-11-01T21:33:53.292099', 'id': 49091542211453596, 'last_seen': '2019-11-07T16:18:00.269290',
+         'last_scanned': '2019-11-07T16:18:00.269290',
          'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 'result': True,
          's3_file_name': 'testing/files/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f',
          'sha1': '3395856ce81f2b7382dee72602f798b642f14140',
@@ -39,6 +40,7 @@ SHA1: 3395856ce81f2b7382dee72602f798b642f14140
 MD5: 44d88612fea8a8f36de82e1278abb02f
 File type: mimetype: text/plain, extended_info: EICAR virus test files
 First seen: 2019-11-01 21:33:53.292099
+Last scanned: 2019-11-07 16:18:00.269290
 Last seen: 2019-11-07 16:18:00.269290
 Status: Assertion window closed
 Filename: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
@@ -94,14 +96,17 @@ def metadata(test):
                                'malicious', 'malicious', 'malicious', 'malicious', 'malicious', 'malicious',
                                'malicious', 'malicious', 'malicious', 'malicious', 'malicious', 'malicious',
                                'malicious', 'malicious', 'malicious', 'malicious', 'malicious', 'malicious'],
-                  'first_scan': {'artifact_instance_id': 67493245269173378, 'eicar': {'assertion': 'malicious',
+                  'first_scan': {'created': '2020-01-14T17:48:55.854940+00:00',
+                                 'artifact_instance_id': 67493245269173378, 'eicar': {'assertion': 'malicious',
                                                                                       'metadata': {
                                                                                           'malware_family': 'Eicar Test File',
                                                                                           'scanner': {'environment': {
                                                                                               'architecture': 'x86_64',
                                                                                               'operating_system': 'Linux'}}}}},
-                  'first_seen': '2020-01-14T17:48:55.854940+00:00', 'last_seen': '2020-01-16T20:41:30.953689+00:00',
-                  'latest_scan': {'artifact_instance_id': 67608711919932715, 'eicar': {'assertion': 'malicious',
+                  'first_seen': '2020-01-14T17:48:55.854940+00:00',
+                  'last_seen': '2020-01-16T20:41:30.953689+00:00',
+                  'latest_scan': {'created': '2020-01-16T20:41:30.953689+00:00',
+                                  'artifact_instance_id': 67608711919932715, 'eicar': {'assertion': 'malicious',
                                                                                        'metadata': {
                                                                                            'malware_family': 'Eicar Test File',
                                                                                            'scanner': {'environment': {
@@ -126,6 +131,7 @@ MD5: 44d88612fea8a8f36de82e1278abb02f
 SSDEEP: 3:a+JraNvsgzsVqSwHq9:tJuOgzsko
 TLSH: 41a022003b0eee2ba20b00200032e8b00808020e2ce00a3820a020b8c83308803ec228
 First seen: 2020-01-14 17:48:55.854940+00:00
+Last scanned: 2020-01-16 20:41:30.953689+00:00
 Last seen: 2020-01-16 20:41:30.953689+00:00
 Mimetype: text/plain
 Extended mimetype: EICAR virus test files
@@ -152,6 +158,7 @@ def live_results(test):
                       'extended_type': 'EICAR virus test files', 'polyscore': 0.5, 'failed': False,
                       'filename': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f',
                       'first_seen': '2019-11-01T21:33:53.292099', 'id': 49091542211453596, 'last_seen': '2019-11-07T16:18:00.269290',
+                      'last_scanned': '2019-11-07T16:18:00.269290',
                       'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 'result': True,
                       's3_file_name': 'testing/files/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f',
                       'sha1': '3395856ce81f2b7382dee72602f798b642f14140',
@@ -179,6 +186,7 @@ SHA1: 3395856ce81f2b7382dee72602f798b642f14140
 MD5: 44d88612fea8a8f36de82e1278abb02f
 File type: mimetype: text/plain, extended_info: EICAR virus test files
 First seen: 2019-11-01 21:33:53.292099
+Last scanned: 2019-11-07 16:18:00.269290
 Last seen: 2019-11-07 16:18:00.269290
 Status: Assertion window closed
 Filename: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
@@ -202,6 +210,7 @@ def historical_results(test):
                       'extended_type': 'EICAR virus test files', 'polyscore': 0.5, 'failed': False,
                       'filename': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f',
                       'first_seen': '2019-11-01T21:33:53.292099', 'id': 49091542211453596, 'last_seen': '2019-11-07T16:18:00.269290',
+                      'last_scanned': '2019-11-07T16:18:00.269290',
                       'md5': '44d88612fea8a8f36de82e1278abb02f', 'metadata': None, 'mimetype': 'text/plain', 'result': True,
                       's3_file_name': 'testing/files/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f',
                       'sha1': '3395856ce81f2b7382dee72602f798b642f14140',
@@ -229,6 +238,7 @@ SHA1: 3395856ce81f2b7382dee72602f798b642f14140
 MD5: 44d88612fea8a8f36de82e1278abb02f
 File type: mimetype: text/plain, extended_info: EICAR virus test files
 First seen: 2019-11-01 21:33:53.292099
+Last scanned: 2019-11-07 16:18:00.269290
 Last seen: 2019-11-07 16:18:00.269290
 Status: Assertion window closed
 Filename: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
