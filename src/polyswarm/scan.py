@@ -65,7 +65,7 @@ def file(ctx, recursive, timeout, nowait, path, scan_config):
               help='How long to wait for results (default: {}).'.format(const.DEFAULT_SCAN_TIMEOUT))
 @click.option('-n', '--nowait', is_flag=True,
               help='Does not wait for the scan window to close, just create it and return right away.')
-@click.option('-s', '--scan-config', type=click.STRING, default=None,
+@click.option('-s', '--scan-config', type=click.STRING, default='more-time',
               help='Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".')
 @click.argument('url', nargs=-1, type=click.STRING)
 @click.pass_context
