@@ -40,9 +40,11 @@ def scan():
               help='How long to wait for results (default: {}).'.format(const.DEFAULT_SCAN_TIMEOUT))
 @click.option('-n', '--nowait', is_flag=True,
               help='Does not wait for the scan window to close, just create it and return right away.')
+@click.option('-s', '--scan-config', type=click.STRING, default=None,
+              help='Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".')
 @click.argument('path', nargs=-1, type=click.Path(exists=True))
 @click.pass_context
-def file(ctx, recursive, timeout, nowait, path):
+def file(ctx, recursive, timeout, nowait, path, scan_config):
     """
     Scan files or directories via PolySwarm
     """
@@ -51,7 +53,9 @@ def file(ctx, recursive, timeout, nowait, path):
 
     args = [(api, timeout, nowait, file) for file in utils.collect_files(path, recursive=recursive)]
 
-    for instance in utils.parallel_executor(submit_and_wait, args_list=args):
+    for instance in utils.parallel_executor(submit_and_wait,
+                                            args_list=args,
+                                            kwargs_list=[{'scan_config': scan_config}]*len(args)):
         output.artifact_instance(instance)
 
 
@@ -61,9 +65,11 @@ def file(ctx, recursive, timeout, nowait, path):
               help='How long to wait for results (default: {}).'.format(const.DEFAULT_SCAN_TIMEOUT))
 @click.option('-n', '--nowait', is_flag=True,
               help='Does not wait for the scan window to close, just create it and return right away.')
+@click.option('-s', '--scan-config', type=click.STRING, default='more-time',
+              help='Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".')
 @click.argument('url', nargs=-1, type=click.STRING)
 @click.pass_context
-def url_(ctx, url_file, timeout, nowait, url):
+def url_(ctx, url_file, timeout, nowait, url, scan_config):
     """
     Scan files or directories via PolySwarm
     """
@@ -77,7 +83,7 @@ def url_(ctx, url_file, timeout, nowait, url):
     if url_file:
         urls.extend([u.strip() for u in url_file.readlines()])
     args = [(api, timeout, nowait, url) for url in urls]
-    kwargs = [dict(artifact_type='url') for _ in urls]
+    kwargs = [dict(artifact_type='url', scan_config=scan_config) for _ in urls]
 
     for instance in utils.parallel_executor(submit_and_wait, args_list=args, kwargs_list=kwargs):
         output.artifact_instance(instance)
@@ -90,9 +96,11 @@ def url_(ctx, url_file, timeout, nowait, url):
               help='How long to wait for results (default: {}).'.format(const.DEFAULT_SCAN_TIMEOUT))
 @click.option('-n', '--nowait', is_flag=True,
               help='Does not wait for the scan window to close, just create it and return right away.')
+@click.option('-s', '--scan-config', type=click.STRING, default=None,
+              help='Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".')
 @click.argument('hash_value', nargs=-1, callback=utils.validate_hashes)
 @click.pass_context
-def rescan(ctx, hash_file, hash_type, timeout, nowait, hash_value):
+def rescan(ctx, hash_file, hash_type, timeout, nowait, hash_value, scan_config):
     """
     Rescan files with matched hashes
     """
@@ -104,8 +112,10 @@ def rescan(ctx, hash_file, hash_type, timeout, nowait, hash_value):
 
     args = [(api, timeout, nowait, h) for h in utils.parse_hashes(hash_value, hash_file=hash_file)]
 
-    for instance in utils.parallel_executor(rescan_and_wait, args_list=args,
-                                            kwargs_list=[{'hash_type': hash_type}]*len(args)):
+    for instance in utils.parallel_executor(rescan_and_wait,
+                                            args_list=args,
+                                            kwargs_list=[{'hash_type': hash_type,
+                                                          'scan_config': scan_config}]*len(args)):
         output.artifact_instance(instance)
 
 
@@ -114,17 +124,20 @@ def rescan(ctx, hash_file, hash_type, timeout, nowait, hash_value):
               help='How long to wait for results (default: {}).'.format(const.DEFAULT_SCAN_TIMEOUT))
 @click.option('-n', '--nowait', is_flag=True,
               help='Does not wait for the scan window to close, just create it and return right away.')
+@click.option('-s', '--scan-config', type=click.STRING, default=None,
+              help='Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".')
 @click.argument('scan_id', nargs=-1, callback=utils.validate_id)
 @click.pass_context
-def rescan_id(ctx, timeout, nowait, scan_id):
+def rescan_id(ctx, timeout, nowait, scan_id, scan_config):
     """
     Rescan based on the id of a previous scan
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
     args = [(api, timeout, nowait, s) for s in scan_id]
+    kwargs = [dict(scan_config=scan_config) for _ in scan_id]
 
-    for instance in utils.parallel_executor(rescan_id_and_wait, args_list=args):
+    for instance in utils.parallel_executor(rescan_id_and_wait, args_list=args, kwargs_list=kwargs):
         output.artifact_instance(instance)
 
 
