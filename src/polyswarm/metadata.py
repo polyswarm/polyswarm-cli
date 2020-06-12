@@ -16,7 +16,8 @@ def metadata():
               help='Skip the upload to ES when evaluating the new metadata value.')
 @click.argument('hashes', nargs=-1)
 @click.pass_context
-def create(ctx, hash_file, analysis, skip_es, hashes):
+@utils.any_provided('hashes', 'hash_file')
+def rerun(ctx, hash_file, analysis, skip_es, hashes):
     api = ctx.obj['api']
     output = ctx.obj['output']
     if not (hash_file or hashes):
