@@ -1,5 +1,6 @@
 import logging
 import os
+import functools
 from concurrent.futures import ThreadPoolExecutor
 # TODO: Change this to import itertools once we drop support for python 2.7
 try:
@@ -152,3 +153,25 @@ def validate_key(ctx, param, value):
     if not resources.is_hex(value) or len(value) != 32:
         raise click.BadParameter('Invalid API key. Make sure you specified your key via -a or environment variable and try again.')
     return value
+
+
+def any_provided(*required):
+    if not required:
+        raise exceptions.PolyswarmException('At least one required click argument must be provided.')
+
+    def wrap(f):
+        @functools.wraps(f)
+        def any_validator(ctx, **kwargs):
+            if not any(kwargs[r] for r in required):
+                required_commands = {c.name: c for c in ctx.command.params[::-1] if c.name in required}
+                if len(required) > 1:
+                    human_names = [c.human_readable_name for c in required_commands.values()]
+                    raise click.exceptions.BadArgumentUsage(
+                        f'At least one of [{"|".join(human_names)}] should be provided.')
+                else:
+                    raise click.exceptions.MissingParameter(ctx=ctx, param=required_commands[required[0]])
+            return f(ctx, **kwargs)
+
+        return any_validator
+
+    return wrap
