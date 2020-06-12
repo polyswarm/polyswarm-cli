@@ -42,7 +42,7 @@ def scan():
               help='Does not wait for the scan window to close, just create it and return right away.')
 @click.option('-s', '--scan-config', type=click.STRING, default=None,
               help='Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".')
-@click.argument('path', nargs=-1, type=click.Path(exists=True))
+@click.argument('path', nargs=-1, type=click.Path(exists=True), required=True)
 @click.pass_context
 def file(ctx, recursive, timeout, nowait, path, scan_config):
     """
@@ -69,15 +69,13 @@ def file(ctx, recursive, timeout, nowait, path, scan_config):
               help='Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".')
 @click.argument('url', nargs=-1, type=click.STRING)
 @click.pass_context
+@utils.any_provided('url', 'url_file')
 def url_(ctx, url_file, timeout, nowait, url, scan_config):
     """
     Scan files or directories via PolySwarm
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-
-    if not (url_file or url):
-        raise click.exceptions.BadArgumentUsage('One of URL or --url-file should be provided.')
 
     urls = list(url)
     if url_file:
@@ -100,15 +98,13 @@ def url_(ctx, url_file, timeout, nowait, url, scan_config):
               help='Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".')
 @click.argument('hash_value', nargs=-1, callback=utils.validate_hashes)
 @click.pass_context
+@utils.any_provided('hash_value', 'hash_file')
 def rescan(ctx, hash_file, hash_type, timeout, nowait, hash_value, scan_config):
     """
     Rescan files with matched hashes
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-
-    if not (hash_file or hash_value):
-        raise click.exceptions.BadArgumentUsage('One of HASH_VALUE or --hash-file should be provided.')
 
     args = [(api, timeout, nowait, h) for h in utils.parse_hashes(hash_value, hash_file=hash_file)]
 
@@ -126,7 +122,7 @@ def rescan(ctx, hash_file, hash_type, timeout, nowait, hash_value, scan_config):
               help='Does not wait for the scan window to close, just create it and return right away.')
 @click.option('-s', '--scan-config', type=click.STRING, default=None,
               help='Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".')
-@click.argument('scan_id', nargs=-1, callback=utils.validate_id)
+@click.argument('scan_id', nargs=-1, callback=utils.validate_id, required=True)
 @click.pass_context
 def rescan_id(ctx, timeout, nowait, scan_id, scan_config):
     """
@@ -145,15 +141,13 @@ def rescan_id(ctx, timeout, nowait, scan_id, scan_config):
 @click.option('-r', '--scan-id-file', help='File of scan ids, one per line.', type=click.File('r'))
 @click.argument('scan_id', nargs=-1, callback=utils.validate_id)
 @click.pass_context
+@utils.any_provided('scan_id', 'scan_id_file')
 def lookup(ctx, scan_id, scan_id_file):
     """
     Lookup a PolySwarm scan by Scan id for current status.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-
-    if not (scan_id_file or scan_id):
-        raise click.exceptions.BadArgumentUsage('One of SCAN_ID or --scan-id-file should be provided.')
 
     scan_ids = list(scan_id)
 
@@ -173,7 +167,7 @@ def lookup(ctx, scan_id, scan_id_file):
 @click.command('wait', short_help='Wait for a  scan to finish.')
 @click.option('-t', '--timeout', type=click.INT, default=const.DEFAULT_SCAN_TIMEOUT,
               help='How long to wait for results (default: {}).'.format(const.DEFAULT_SCAN_TIMEOUT))
-@click.argument('scan_id', nargs=-1, callback=utils.validate_id)
+@click.argument('scan_id', nargs=-1, callback=utils.validate_id, required=True)
 @click.pass_context
 def wait(ctx, scan_id, timeout):
     """
