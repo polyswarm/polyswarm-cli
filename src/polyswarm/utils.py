@@ -166,8 +166,8 @@ def any_provided(*required):
                 required_commands = {c.name: c for c in ctx.command.params[::-1] if c.name in required}
                 if len(required) > 1:
                     human_names = [c.human_readable_name for c in required_commands.values()]
-                    raise click.exceptions.BadArgumentUsage(
-                        f'At least one of [{"|".join(human_names)}] should be provided.')
+                    names = "|".join(human_names)
+                    raise click.exceptions.BadArgumentUsage('At least one of [{}] should be provided.'.format(names))
                 else:
                     raise click.exceptions.MissingParameter(ctx=ctx, param=required_commands[required[0]])
             return f(ctx, **kwargs)
