@@ -14,7 +14,7 @@ from polyswarm_api import get_version as get_polyswarm_api_version
 from polyswarm import exceptions
 from polyswarm.polyswarm import Polyswarm
 from polyswarm.formatters import formatters
-from polyswarm.utils import validate_key
+from .utils import validate_key
 from .hunt import live, historical
 from .scan import scan, lookup, wait, rescan, rescan_id
 from .download import download, cat, stream
@@ -138,8 +138,8 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     else:
         output_file = click.get_text_stream('stdout')
 
-    ctx.obj['polyswarm'] = Polyswarm(api_key, uri=api_uri, community=community,
-                                     validate_schemas=validate, parallel=parallel)
+    ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community,
+                               validate_schemas=validate, parallel=parallel)
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
 
 

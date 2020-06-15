@@ -3,7 +3,7 @@ from os import path
 
 import click
 
-from polyswarm import utils
+from polyswarm.client import utils
 
 logger = logging.getLogger(__name__)
 
@@ -47,9 +47,7 @@ def live_create(ctx, rule_file, rule_id, disabled, name):
 def live_start(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    kwargs = [dict(hunt=h) for h in hunt_id]
-    args = [(True,)]*len(kwargs)
-    for result in utils.parallel_executor(api.live_update, args_list=args, kwargs_list=kwargs):
+    for result in api.live_start(hunt_id):
         output.hunt(result)
 
 
@@ -59,9 +57,7 @@ def live_start(ctx, hunt_id):
 def live_stop(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    kwargs = [dict(hunt=h) for h in hunt_id] if hunt_id else [dict(hunt_id=None)]
-    args = [(False,)] * len(kwargs)
-    for result in utils.parallel_executor(api.live_update, args_list=args, kwargs_list=kwargs):
+    for result in api.live_stop(hunt_id):
         output.hunt(result)
 
 
@@ -71,8 +67,7 @@ def live_stop(ctx, hunt_id):
 def live_delete(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    kwargs = [dict(hunt=h) for h in hunt_id]
-    for result in utils.parallel_executor(api.live_delete, kwargs_list=kwargs):
+    for result in api.live_delete_multiple(hunt_id):
         output.hunt_deletion(result)
 
 
@@ -103,9 +98,7 @@ def live_list(ctx, since, all_):
 def live_results(ctx, hunt_id, since, tag, rule_name):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    args = [(h,) for h in hunt_id] if hunt_id else [(None,)]
-    kwargs = [dict(since=since, tag=tag, rule_name=rule_name)]*len(args)
-    for result in utils.parallel_executor_iterable_results(api.live_results, args_list=args, kwargs_list=kwargs):
+    for result in api.live_results_multiple(hunt_id, since, tag, rule_name):
         output.hunt_result(result)
 
 
@@ -136,8 +129,7 @@ def historical_start(ctx, rule_file, rule_id, name):
 def historical_delete(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    kwargs = [dict(hunt=h) for h in hunt_id]
-    for result in utils.parallel_executor(api.historical_delete, kwargs_list=kwargs):
+    for result in api.historical_delete_multiple(hunt_id):
         output.hunt_deletion(result)
 
 
@@ -163,7 +155,5 @@ def historical_list(ctx, since):
 def historical_results(ctx, hunt_id, tag, rule_name):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    args = [(h,) for h in hunt_id] if hunt_id else [(None,)]
-    kwargs = [dict(tag=tag, rule_name=rule_name)] * len(args)
-    for result in utils.parallel_executor_iterable_results(api.historical_results, args_list=args, kwargs_list=kwargs):
+    for result in api.historical_results_multiple(hunt_id, tag, rule_name):
         output.hunt_result(result)

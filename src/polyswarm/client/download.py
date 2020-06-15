@@ -1,5 +1,7 @@
 import logging
 
+import polyswarm.client.utils
+
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -7,29 +9,25 @@ except ImportError:
 
 import click
 
-from polyswarm import utils
-
 logger = logging.getLogger(__name__)
 
 
 @click.command('download', short_help='Download file(s).')
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5].', default=None)
-@click.argument('hash_value', nargs=-1, callback=utils.validate_hashes)
+@click.argument('hash_value', nargs=-1, callback=polyswarm.client.utils.validate_hashes)
 @click.argument('destination', nargs=1, type=click.Path(file_okay=False))
 @click.pass_context
-@utils.any_provided('hash_file', 'hash_value')
+@polyswarm.client.utils.any_provided('hash_file', 'hash_value')
 def download(ctx, hash_file, hash_type, hash_value, destination):
     """
     Download files from matching hashes
     """
     api = ctx.obj['api']
-    output = ctx.obj['output']
-    args = [(destination, h) for h in utils.parse_hashes(hash_value, hash_file=hash_file)]
-
-    for result in utils.parallel_executor(api.download, args_list=args,
-                                          kwargs_list=[{'hash_type': hash_type}]*len(args)):
-        output.local_artifact(result)
+    out = ctx.obj['output']
+    values = polyswarm.client.utils.parse_hashes(hash_value, hash_file=hash_file)
+    for result in api.download_multiple(values, hash_type, destination):
+        out.local_artifact(result)
 
 
 @click.command('stream', short_help='Access the polyswarm file stream.')
@@ -41,14 +39,13 @@ def stream(ctx, since, destination):
     api = ctx.obj['api']
     out = ctx.obj['output']
 
-    args = [(destination, artifact_archive.uri) for artifact_archive in api.stream(since=since)]
-    for result in utils.parallel_executor(api.download_archive, args_list=args):
+    for result in api.download_stream(since, destination):
         out.local_artifact(result)
 
 
 @click.command('cat', short_help='Output artifact contents to stdout.')
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5].', default=None)
-@click.argument('hash_value', nargs=-1, callback=utils.validate_hashes, required=True)
+@click.argument('hash_value', nargs=-1, callback=polyswarm.client.utils.validate_hashes, required=True)
 @click.pass_context
 def cat(ctx, hash_type, hash_value):
     api = ctx.obj['api']
