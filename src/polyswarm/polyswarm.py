@@ -30,7 +30,9 @@ def rescan_id_and_wait(api, timeout, nowait, *args, **kwargs):
 
 
 class Polyswarm(PolyswarmAPI):
-    def __init__(self, *args, parallel=None, **kwargs):
+    def __init__(self, *args, **kwargs):
+        # signature should be __init__(self, *args, parallel=None, **kwargs), but python 2 does not like it
+        parallel = kwargs.pop('parallel', None)
         super().__init__(*args, **kwargs)
         self.parallel = parallel
 
