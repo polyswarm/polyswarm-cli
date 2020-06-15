@@ -32,7 +32,7 @@ def file(ctx, recursive, timeout, nowait, path, scan_config):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    for instance in api.scan_file(recursive, timeout, nowait, path, scan_config):
+    for instance in api.scan_file(path, recursive, timeout, nowait, scan_config):
         output.artifact_instance(instance)
 
 
@@ -53,8 +53,10 @@ def url_(ctx, url_file, timeout, nowait, url, scan_config):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-
-    for instance in api.scan_url(url_file, timeout, nowait, url, scan_config):
+    urls = list(url)
+    if url_file:
+        urls.extend([u.strip() for u in url_file.readlines()])
+    for instance in api.scan_url(urls, timeout, nowait, scan_config):
         output.artifact_instance(instance)
 
 
@@ -97,7 +99,7 @@ def rescan_id(ctx, timeout, nowait, scan_id, scan_config):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    for instance in api.scan_rescan_id(timeout, nowait, scan_id, scan_config):
+    for instance in api.scan_rescan_id(scan_id, timeout, nowait, scan_config):
         output.artifact_instance(instance)
 
 
@@ -112,8 +114,16 @@ def lookup(ctx, scan_id, scan_id_file):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-
-    for instance in api.scan_lookup(scan_id, scan_id_file):
+    scan_ids = list(scan_id)
+    # TODO dedupe
+    if scan_id_file:
+        for u in scan_id_file.readlines():
+            u = u.strip()
+            if utils.is_valid_id(u):
+                scan_ids.append(u)
+            else:
+                logger.warning('Invalid scan id %s in file, ignoring.', u)
+    for instance in api.scan_lookup(scan_ids):
         output.artifact_instance(instance)
 
 
@@ -129,5 +139,5 @@ def wait(ctx, scan_id, timeout):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    for instance in api.scan_lookup(scan_id, timeout):
+    for instance in api.scan_wait(scan_id, timeout):
         output.artifact_instance(instance)
