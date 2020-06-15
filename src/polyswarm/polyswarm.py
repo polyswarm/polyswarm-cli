@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import logging
 
 from polyswarm_api.api import PolyswarmAPI
@@ -33,7 +34,7 @@ class Polyswarm(PolyswarmAPI):
     def __init__(self, *args, **kwargs):
         # signature should be __init__(self, *args, parallel=None, **kwargs), but python 2 does not like it
         parallel = kwargs.pop('parallel', None)
-        super().__init__(*args, **kwargs)
+        super(Polyswarm, self).__init__(*args, **kwargs)
         self.parallel = parallel
 
     def scan_file(self, recursive, timeout, nowait, path, scan_config):
