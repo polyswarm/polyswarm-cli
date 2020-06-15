@@ -7,7 +7,7 @@ except ImportError:
 
 import click
 
-from . import utils
+from polyswarm import utils
 
 logger = logging.getLogger(__name__)
 
