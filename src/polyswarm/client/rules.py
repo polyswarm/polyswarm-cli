@@ -1,7 +1,6 @@
 import click
 
-import polyswarm.client.utils
-from polyswarm import utils
+from polyswarm.client import utils
 
 
 @click.group(short_help='Interact with Yara Rules stored in Polyswarm.')
@@ -44,7 +43,7 @@ def list_rules(ctx):
 @click.option('-f', '--file', type=click.File('r'), help='File containing the Yara rules.')
 @click.option('-d', '--description', type=str, help='Description of the ruleset.')
 @click.pass_context
-@polyswarm.client.utils.any_provided('name', 'file', 'description')
+@utils.any_provided('name', 'file', 'description')
 def update(ctx, rule_id, name, file, description):
     api = ctx.obj['api']
     output = ctx.obj['output']

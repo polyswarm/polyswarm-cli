@@ -1,7 +1,6 @@
 import click
 
-import polyswarm.client.utils
-from polyswarm import utils
+from polyswarm.client import utils
 
 
 @click.group(short_help='Interact with Tag links in Polyswarm.')
@@ -15,7 +14,7 @@ def link():
 @click.option('-f', '--family', type=click.STRING, multiple=True)
 @click.option('-r', '--remove', type=click.BOOL, is_flag=True)
 @click.pass_context
-@polyswarm.client.utils.any_provided('tag', 'family')
+@utils.any_provided('tag', 'family')
 def update(ctx, sha256, tag, family, remove):
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -46,7 +45,7 @@ def view(ctx, sha256):
 @click.option('-y', '--or-family', type=click.STRING, multiple=True,
               help='At least one of the provided or-families must be associated with the artifact.')
 @click.pass_context
-@polyswarm.client.utils.any_provided('tag', 'family', 'or_tag', 'or_family')
+@utils.any_provided('tag', 'family', 'or_tag', 'or_family')
 def list_links(ctx, tag, family, or_tag, or_family):
     api = ctx.obj['api']
     output = ctx.obj['output']
