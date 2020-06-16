@@ -71,18 +71,18 @@ class Polyswarm(PolyswarmAPI):
         for instance in utils.parallel_executor(submit_and_wait, args_list=args, kwargs_list=kwargs):
             yield instance
 
-    def scan_rescan(self, values, hash_type=None, timeout=const.DEFAULT_SCAN_TIMEOUT, nowait=False, scan_config=None):
+    def scan_rescan(self, hashes, hash_type=None, timeout=const.DEFAULT_SCAN_TIMEOUT, nowait=False, scan_config=None):
         """
         Rescan files with matched hashes.
 
-        :param values: A list of hashes to rescan.
+        :param hashes: A list of hashes to rescan.
         :param hash_type: Hash type to search [default:autodetect, sha256|sha1|md5].
         :param timeout: How long to wait for results.
         :param nowait: Does not wait for the scan window to close, just create it and return right away.
         :param scan_config: Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".
         :return: An iterator of artifact instances.
         """
-        args = [(self, timeout, nowait, h) for h in values]
+        args = [(self, timeout, nowait, h) for h in hashes]
 
         for instance in utils.parallel_executor(rescan_and_wait,
                                                 args_list=args,
@@ -130,15 +130,15 @@ class Polyswarm(PolyswarmAPI):
         for result in utils.parallel_executor(self.wait_for, args_list=args, kwargs_list=kwargs):
             yield result
 
-    def search_hashes(self, values, hash_type=None):
+    def search_hashes(self, hashes, hash_type=None):
         """
         Search PolySwarm for files matching hashes.
 
-        :param values: List of hashes to search.
+        :param hashes: List of hashes to search.
         :param hash_type: Hash type to search.
         :return: An iterator of artifact instances.
         """
-        args = [(h,) for h in values]
+        args = [(h,) for h in hashes]
         for instance in utils.parallel_executor_iterable_results(self.search, args_list=args,
                                                                  kwargs_list=[{'hash_type': hash_type}]*len(args)):
             yield instance
@@ -154,16 +154,16 @@ class Polyswarm(PolyswarmAPI):
         for instance in utils.parallel_executor_iterable_results(self.search_url, args_list=args):
             yield instance
 
-    def download_multiple(self, values, destination, hash_type=None):
+    def download_multiple(self, hashes, destination, hash_type=None):
         """
         Download files from matching hashes.
 
-        :param values: A list of hashes to download.
+        :param hashes: A list of hashes to download.
         :param destination: Folder where to download the files to.
         :param hash_type: Hash type to search.
         :return: An iterator of local artifacts.
         """
-        args = [(destination, h) for h in values]
+        args = [(destination, h) for h in hashes]
 
         for result in utils.parallel_executor(self.download, args_list=args,
                                               kwargs_list=[{'hash_type': hash_type}]*len(args)):
