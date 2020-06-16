@@ -113,14 +113,12 @@ class ExceptionHandlingGroup(click.Group):
 @click.option('-c', '--community', default='default', envvar='POLYSWARM_COMMUNITY', help='Community to use.')
 @click.option('--advanced-disable-version-check/--advanced-enable-version-check', default=False,
               help='Enable/disable GitHub release version check.')
-@click.option('--validate', default=False, is_flag=True,
-              envvar='POLYSWARM_VALIDATE', help='Validate incoming schemas (note: slow).')
 @click.option('--parallel', default=8, help='Number of threads to be used in parallel http requests.')
 @click.version_option(VERSION, '--version', prog_name='polyswarm-cli')
 @click.version_option(get_polyswarm_api_version(), '--api-version', prog_name='polyswarm-api')
 @click.pass_context
 def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose, community,
-              advanced_disable_version_check, validate, parallel):
+              advanced_disable_version_check, parallel):
     """
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
@@ -139,8 +137,7 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     else:
         output_file = click.get_text_stream('stdout')
 
-    ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community,
-                               validate_schemas=validate, parallel=parallel)
+    ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community, parallel=parallel)
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
 
 
