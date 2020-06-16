@@ -7,7 +7,7 @@ from polyswarm.client.polyswarm import polyswarm
 
 def main():
     # fixing the name of the entrypoint when the module is executed as
-    # python -m s3conf
+    # python -m polyswarm
     # https://docs.python.org/3/library/__main__.html
     entrypoint_name = os.path.basename(sys.argv[0])
     if entrypoint_name == '__main__.py':
