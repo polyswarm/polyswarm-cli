@@ -134,7 +134,7 @@ def lookup(ctx, scan_id, scan_id_file):
 @click.pass_context
 def wait(ctx, scan_id, timeout):
     """
-    Lookup a PolySwarm scan by Scan id for current status.
+    Lookup a PolySwarm scan by Scan id for current status and wait for it to finish if not done.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']

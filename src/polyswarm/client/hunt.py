@@ -52,7 +52,7 @@ def live_start(ctx, hunt_id):
         output.hunt(result)
 
 
-@live.command('stop', short_help='Start an existing live hunt.')
+@live.command('stop', short_help='Stop an existing live hunt.')
 @click.argument('hunt_id', nargs=-1, type=click.INT)
 @click.pass_context
 def live_stop(ctx, hunt_id):
