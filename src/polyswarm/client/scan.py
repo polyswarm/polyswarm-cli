@@ -78,8 +78,8 @@ def rescan(ctx, hash_file, hash_type, timeout, nowait, hash_value, scan_config):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    values = utils.parse_hashes(hash_value, hash_file=hash_file)
-    for instance in api.scan_rescan(values, hash_type, timeout, nowait, scan_config):
+    hashes = utils.parse_hashes(hash_value, hash_file=hash_file)
+    for instance in api.scan_rescan(hashes, hash_type, timeout, nowait, scan_config):
         output.artifact_instance(instance)
 
 

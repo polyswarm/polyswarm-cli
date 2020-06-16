@@ -26,8 +26,8 @@ def download(ctx, hash_file, hash_type, hash_value, destination):
     """
     api = ctx.obj['api']
     out = ctx.obj['output']
-    values = utils.parse_hashes(hash_value, hash_file=hash_file)
-    for result in api.download_multiple(values, destination, hash_type):
+    hashes = utils.parse_hashes(hash_value, hash_file=hash_file)
+    for result in api.download_multiple(hashes, destination, hash_type):
         out.local_artifact(result)
 
 

@@ -16,8 +16,8 @@ HASH_VALIDATORS = resources.Hash.SUPPORTED_HASH_TYPES
 ####################################################
 
 
-def parse_hashes(values, hash_file=None):
-    hashes = list(values)
+def parse_hashes(hashes, hash_file=None):
+    hashes = list(hashes)
     if hash_file is not None:
         hashes += hash_file.readlines()
     return hashes

@@ -31,8 +31,8 @@ def hashes(ctx, hash_value, hash_file, hash_type):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    values = utils.parse_hashes(hash_value, hash_file=hash_file)
-    for instance in api.search_hashes(values, hash_type):
+    hashes = utils.parse_hashes(hash_value, hash_file=hash_file)
+    for instance in api.search_hashes(hashes, hash_type):
         output.artifact_instance(instance)
 
 
