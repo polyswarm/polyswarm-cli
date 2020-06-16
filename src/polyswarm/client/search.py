@@ -1,4 +1,7 @@
+from __future__ import absolute_import
 import logging
+
+from polyswarm.client import utils
 
 try:
     from json import JSONDecodeError
@@ -6,8 +9,6 @@ except ImportError:
     JSONDecodeError = ValueError
 
 import click
-
-from polyswarm import utils
 
 
 logger = logging.getLogger(__name__)
@@ -30,10 +31,8 @@ def hashes(ctx, hash_value, hash_file, hash_type):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-
-    args = [(h,) for h in utils.parse_hashes(hash_value, hash_file=hash_file)]
-    for instance in utils.parallel_executor_iterable_results(api.search, args_list=args,
-                                                             kwargs_list=[{'hash_type': hash_type}]*len(args)):
+    hashes = utils.parse_hashes(hash_value, hash_file=hash_file)
+    for instance in api.search_hashes(hashes, hash_type):
         output.artifact_instance(instance)
 
 
@@ -46,8 +45,8 @@ def urls(ctx, url):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    args = [(u,) for u in url]
-    for instance in utils.parallel_executor_iterable_results(api.search_url, args_list=args):
+
+    for instance in api.search_urls(url):
         output.artifact_instance(instance)
 
 
@@ -73,3 +72,4 @@ def scans(ctx, hash_value):
     output = ctx.obj['output']
     for instance in api.search_scans(hash_value):
         output.artifact_instance(instance)
+

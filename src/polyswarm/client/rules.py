@@ -1,6 +1,7 @@
+from __future__ import absolute_import
 import click
 
-from polyswarm import utils
+from polyswarm.client import utils
 
 
 @click.group(short_help='Interact with Yara Rules stored in Polyswarm.')

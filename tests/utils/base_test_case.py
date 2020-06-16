@@ -10,7 +10,7 @@ from click.testing import CliRunner
 from pkg_resources import resource_string, resource_filename
 
 from polyswarm_api.types import resources
-from polyswarm import base
+from polyswarm.client import polyswarm as client
 from polyswarm_api.api import PolyswarmAPI
 
 logger = logging.getLogger(__name__)
@@ -200,7 +200,7 @@ class BaseTestCase(TestCase):
                        '--api-key', self.test_api_key,
                        '-u', self.api_url,
                    ] + commands
-        return self.test_runner.invoke(base.polyswarm, commands, catch_exceptions=False)
+        return self.test_runner.invoke(client.polyswarm, commands, catch_exceptions=False)
 
     def _assert_text_result(self, result, expected_output=None, expected_return_code=None):
         result_output = self._get_result_output(result)

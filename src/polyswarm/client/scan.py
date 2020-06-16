@@ -1,32 +1,13 @@
+from __future__ import absolute_import
 import logging
 
 import click
 
 from polyswarm_api import const
-from . import utils
+
+from polyswarm.client import utils
 
 logger = logging.getLogger(__name__)
-
-
-def submit_and_wait(api, timeout, nowait, *args, **kwargs):
-    instance = api.submit(*args, **kwargs)
-    if nowait:
-        return instance
-    return api.wait_for(instance.id, timeout=timeout)
-
-
-def rescan_and_wait(api, timeout, nowait, *args, **kwargs):
-    instance = api.rescan(*args, **kwargs)
-    if nowait:
-        return instance
-    return api.wait_for(instance.id, timeout=timeout)
-
-
-def rescan_id_and_wait(api, timeout, nowait, *args, **kwargs):
-    instance = api.rescan_id(*args, **kwargs)
-    if nowait:
-        return instance
-    return api.wait_for(instance.id, timeout=timeout)
 
 
 @click.group(short_help='Interact with Scans sent to Polyswarm.')
@@ -51,11 +32,7 @@ def file(ctx, recursive, timeout, nowait, path, scan_config):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    args = [(api, timeout, nowait, file) for file in utils.collect_files(path, recursive=recursive)]
-
-    for instance in utils.parallel_executor(submit_and_wait,
-                                            args_list=args,
-                                            kwargs_list=[{'scan_config': scan_config}]*len(args)):
+    for instance in api.scan_file(path, recursive, timeout, nowait, scan_config):
         output.artifact_instance(instance)
 
 
@@ -76,14 +53,10 @@ def url_(ctx, url_file, timeout, nowait, url, scan_config):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-
     urls = list(url)
     if url_file:
         urls.extend([u.strip() for u in url_file.readlines()])
-    args = [(api, timeout, nowait, url) for url in urls]
-    kwargs = [dict(artifact_type='url', scan_config=scan_config) for _ in urls]
-
-    for instance in utils.parallel_executor(submit_and_wait, args_list=args, kwargs_list=kwargs):
+    for instance in api.scan_url(urls, timeout, nowait, scan_config):
         output.artifact_instance(instance)
 
 
@@ -105,13 +78,8 @@ def rescan(ctx, hash_file, hash_type, timeout, nowait, hash_value, scan_config):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-
-    args = [(api, timeout, nowait, h) for h in utils.parse_hashes(hash_value, hash_file=hash_file)]
-
-    for instance in utils.parallel_executor(rescan_and_wait,
-                                            args_list=args,
-                                            kwargs_list=[{'hash_type': hash_type,
-                                                          'scan_config': scan_config}]*len(args)):
+    hashes = utils.parse_hashes(hash_value, hash_file=hash_file)
+    for instance in api.scan_rescan(hashes, hash_type, timeout, nowait, scan_config):
         output.artifact_instance(instance)
 
 
@@ -130,10 +98,8 @@ def rescan_id(ctx, timeout, nowait, scan_id, scan_config):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    args = [(api, timeout, nowait, s) for s in scan_id]
-    kwargs = [dict(scan_config=scan_config) for _ in scan_id]
 
-    for instance in utils.parallel_executor(rescan_id_and_wait, args_list=args, kwargs_list=kwargs):
+    for instance in api.scan_rescan_id(scan_id, timeout, nowait, scan_config):
         output.artifact_instance(instance)
 
 
@@ -148,9 +114,7 @@ def lookup(ctx, scan_id, scan_id_file):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-
     scan_ids = list(scan_id)
-
     # TODO dedupe
     if scan_id_file:
         for u in scan_id_file.readlines():
@@ -159,9 +123,8 @@ def lookup(ctx, scan_id, scan_id_file):
                 scan_ids.append(u)
             else:
                 logger.warning('Invalid scan id %s in file, ignoring.', u)
-
-    for result in utils.parallel_executor(api.lookup, args_list=[(u,) for u in scan_ids]):
-        output.artifact_instance(result)
+    for instance in api.scan_lookup(scan_ids):
+        output.artifact_instance(instance)
 
 
 @click.command('wait', short_help='Wait for a  scan to finish.')
@@ -171,13 +134,10 @@ def lookup(ctx, scan_id, scan_id_file):
 @click.pass_context
 def wait(ctx, scan_id, timeout):
     """
-    Lookup a PolySwarm scan by Scan id for current status.
+    Lookup a PolySwarm scan by Scan id for current status and wait for it to finish if not done.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    args = [(s,) for s in scan_id]
-    kwargs = [dict(timeout=timeout)]*len(args)
 
-    for result in utils.parallel_executor(api.wait_for, args_list=args, kwargs_list=kwargs):
-        output.artifact_instance(result)
-
+    for instance in api.scan_wait(scan_id, timeout):
+        output.artifact_instance(instance)
