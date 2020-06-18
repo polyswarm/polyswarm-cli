@@ -22,7 +22,7 @@ def instances(test):
          'sha1': '3395856ce81f2b7382dee72602f798b642f14140',
          'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'size': 68, 'type': 'FILE',
          'votes': [{'arbiter': '0xF870491ea0F53F67846Eecb57855284D8270284D', 'vote': True}], 'window_closed': True},
-        polyswarm=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
+        api=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
     ))
     return values
 
@@ -114,7 +114,7 @@ def metadata(test):
                                                                                                'operating_system': 'Linux'}}}}},
                   'mimetype': {'extended': 'EICAR virus test files', 'mime': 'text/plain'}},
          'strings': {'domains': [], 'ipv4': [], 'ipv6': [], 'urls': []}},
-        polyswarm=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
+        api=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
     ))
     return values
 
@@ -167,7 +167,7 @@ def live_results(test):
          'created': '2019-11-07T19:06:22.630556', 'historicalscan_id': None, 'id': '86273842846244087',
          'livescan_id': '63433636835291189', 'rule_name': 'eicar_substring_test',
          'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'tags': ''},
-        polyswarm=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
+        api=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
     ))
     return values
 
@@ -219,7 +219,7 @@ def historical_results(test):
          'created': '2019-11-04T18:40:02.063064', 'historicalscan_id': '47190397989086018', 'id': '36730172447808985',
          'livescan_id': None, 'rule_name': 'eicar_substring_test',
          'sha256': '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f', 'tags': ''},
-        polyswarm=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
+        api=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
     ))
     return values
 
@@ -254,7 +254,7 @@ def hunts(test):
     values = []
     values.append(resources.Hunt(
         {'active': True, 'created': '2019-11-13T16:27:45.013226', 'id': '61210404295535902', 'status': 'SUCCESS'},
-        polyswarm=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
+        api=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
     ))
     return values
 
@@ -286,7 +286,7 @@ def ruleset(test, name='test'):
     values = []
     values.append(resources.YaraRuleset(
         {'account_id': '1', 'created': '2019-11-13T16:27:45.013226', 'deleted': False, 'description': None, 'id': '67713199207380968', 'modified': '2019-11-13T16:27:45.013226', 'name': name, 'yara': 'rule eicar_av_test {\n    /*\n       Per standard, match only if entire file is EICAR string plus optional trailing whitespace.\n       The raw EICAR string to be matched is:\n       X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\n    */\n\n    meta:\n        description = "This is a standard AV test, intended to verify that BinaryAlert is working correctly."\n        author = "Austin Byers | Airbnb CSIRT"\n        reference = "http://www.eicar.org/86-0-Intended-use.html"\n\n    strings:\n        $eicar_regex = /^X5O!P%@AP\\[4\\\\PZX54\\(P\\^\\)7CC\\)7\\}\\$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!\\$H\\+H\\*\\s*$/\n\n    condition:\n        all of them\n}\n\nrule eicar_substring_test {\n    /*\n       More generic - match just the embedded EICAR string (e.g. in packed executables, PDFs, etc)\n    */\n\n    meta:\n        description = "Standard AV test, checking for an EICAR substring"\n        author = "Austin Byers | Airbnb CSIRT"\n\n    strings:\n        $eicar_substring = "$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!"\n\n    condition:\n        all of them\n}'},
-        polyswarm=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
+        api=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
     ))
     return values
 
@@ -295,7 +295,7 @@ def artifact_archives(test):
     values = []
     values.append(resources.ArtifactArchive(
         {'id': '1', 'community': 'gamma', 'created': '2019-11-14T16:30:00.888191', 'uri': 's3/malicious'},
-        polyswarm=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
+        api=PolyswarmAPI(test.test_api_key, uri=test.api_url, community='gamma'),
     ))
     return values
 
