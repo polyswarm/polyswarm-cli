@@ -29,7 +29,7 @@ class DownloadTest(BaseTestCase):
                 )
 
     def test_cat(self):
-        with patch('polyswarm_api.requests.PolyswarmSession.request',
+        with patch('polyswarm_api.core.PolyswarmSession.request',
                    return_value=mock_polyswarm_api_results.cat_request(self.test_eicar)):
             result = self._run_cli(['cat', self.test_hash_value])
             self._assert_text_result(
