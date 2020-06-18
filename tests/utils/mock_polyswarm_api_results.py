@@ -1,6 +1,6 @@
 import os
 
-from polyswarm_api.types import resources
+from polyswarm_api import resources
 from polyswarm_api.api import PolyswarmAPI
 
 

@@ -9,7 +9,7 @@ from deepdiff import DeepDiff
 from click.testing import CliRunner
 from pkg_resources import resource_string, resource_filename
 
-from polyswarm_api.types import resources
+from polyswarm_api import resources
 from polyswarm.client import polyswarm as client
 from polyswarm_api.api import PolyswarmAPI
 

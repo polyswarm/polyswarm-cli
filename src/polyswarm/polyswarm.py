@@ -2,7 +2,7 @@ from __future__ import absolute_import
 import logging
 
 from polyswarm_api.api import PolyswarmAPI
-from polyswarm_api import const
+from polyswarm_api import settings
 
 from polyswarm import utils
 
@@ -38,7 +38,7 @@ class Polyswarm(PolyswarmAPI):
         super(Polyswarm, self).__init__(*args, **kwargs)
         self.parallel = parallel
 
-    def scan_file(self, path, recursive=False, timeout=const.DEFAULT_SCAN_TIMEOUT, nowait=False, scan_config=None):
+    def scan_file(self, path, recursive=False, timeout=settings.DEFAULT_SCAN_TIMEOUT, nowait=False, scan_config=None):
         """
         Scan files or directories via PolySwarm.
 
@@ -55,7 +55,7 @@ class Polyswarm(PolyswarmAPI):
                                                 kwargs_list=[{'scan_config': scan_config}]*len(args)):
             yield instance
 
-    def scan_url(self, urls, timeout=const.DEFAULT_SCAN_TIMEOUT, nowait=False, scan_config='more-time'):
+    def scan_url(self, urls, timeout=settings.DEFAULT_SCAN_TIMEOUT, nowait=False, scan_config='more-time'):
         """
         Scan files or directories via PolySwarm
 
@@ -71,7 +71,7 @@ class Polyswarm(PolyswarmAPI):
         for instance in utils.parallel_executor(submit_and_wait, args_list=args, kwargs_list=kwargs):
             yield instance
 
-    def scan_rescan(self, hashes, hash_type=None, timeout=const.DEFAULT_SCAN_TIMEOUT, nowait=False, scan_config=None):
+    def scan_rescan(self, hashes, hash_type=None, timeout=settings.DEFAULT_SCAN_TIMEOUT, nowait=False, scan_config=None):
         """
         Rescan files with matched hashes.
 
@@ -90,7 +90,7 @@ class Polyswarm(PolyswarmAPI):
                                                               'scan_config': scan_config}]*len(args)):
             yield instance
 
-    def scan_rescan_id(self, scan_id, timeout=const.DEFAULT_SCAN_TIMEOUT, nowait=False, scan_config=None):
+    def scan_rescan_id(self, scan_id, timeout=settings.DEFAULT_SCAN_TIMEOUT, nowait=False, scan_config=None):
         """
         Rescan based on the id of a previous scan.
 
@@ -116,7 +116,7 @@ class Polyswarm(PolyswarmAPI):
         for result in utils.parallel_executor(self.lookup, args_list=[(u,) for u in scan_ids]):
             yield result
 
-    def scan_wait(self, scan_id, timeout=const.DEFAULT_SCAN_TIMEOUT):
+    def scan_wait(self, scan_id, timeout=settings.DEFAULT_SCAN_TIMEOUT):
         """
         Lookup a PolySwarm scan by Scan id for current status and wait for it to finish if not done.
 

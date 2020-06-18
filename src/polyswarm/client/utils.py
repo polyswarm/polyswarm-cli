@@ -6,7 +6,7 @@ import click
 
 from polyswarm import exceptions
 from polyswarm.utils import is_valid_id
-from polyswarm_api.types import resources
+from polyswarm_api import resources
 
 logger = logging.getLogger(__name__)
 HASH_VALIDATORS = resources.Hash.SUPPORTED_HASH_TYPES
