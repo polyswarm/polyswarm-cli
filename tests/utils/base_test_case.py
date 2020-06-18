@@ -31,7 +31,7 @@ class BaseTestCase(TestCase):
         self.api_url = 'https://api.polyswarm.network/v2'
         self.test_api_key = '11111111111111111111111111111111'
         self.community = 'lima'
-        self.request_generator = PolyswarmAPI(self.test_api_key, community=self.community).generator
+        self.api = PolyswarmAPI(self.test_api_key, community=self.community)
         self.test_hash_value = '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
         self.test_query = '_exists_:lief.libraries'
         self.test_submission_uuid = '49091542211453596'
@@ -67,72 +67,72 @@ class BaseTestCase(TestCase):
 
     def _create_search_hash_request(self, hash_value, offset=None, limit=None):
         h = resources.Hash.from_hashable(hash_value)
-        request = self.request_generator.search_hash(h.hash, h.hash_type)
+        request = resources.ArtifactInstance.search_hash(self.api, h.hash, h.hash_type)
         self._add_pagination_params(request, offset, limit)
         return request
 
     def _create_search_metadata_request(self, query, offset=None, limit=None):
-        request = self.request_generator.search_metadata(query)
+        request = resources.Metadata.search_metadata(self.api, query)
         self._add_pagination_params(request, offset, limit)
         return request
 
     def _create_scan_submission_lookup_request(self, submission_uuid):
-        request = self.request_generator.lookup_uuid(submission_uuid)
+        request = resources.ArtifactInstance.lookup_uuid(self.api, submission_uuid)
         return request
 
     def _create_scan_submission_submit_request(self, artifact):
-        a = resources.LocalArtifact.from_path(self.request_generator, artifact)
-        request = self.request_generator.submit(a, a.artifact_name, a.artifact_type.name)
+        a = resources.LocalArtifact.from_path(self.api, artifact)
+        request = resources.ArtifactInstance.submit(self.api, a, a.artifact_name, a.artifact_type.name)
         return request
 
     def _create_scan_submission_rescan_request(self, hash_value, hash_type='sha256'):
         h = resources.Hash(hash_value, hash_type)
-        request = self.request_generator.rescan(h.hash, h.hash_type)
+        request = resources.ArtifactInstance.rescan(self.api, h.hash, h.hash_type)
         return request
 
     def _create_hunt_live_results_request(self, hunt_id, since, offset=None, limit=None):
-        request = self.request_generator.live_hunt_results(hunt_id, since)
+        request = resources.HuntResult.live_hunt_results(self.api, hunt_id, since)
         self._add_pagination_params(request, offset, limit)
         return request
 
     def _create_hunt_historical_results_request(self, hunt_id, offset=None, limit=None):
-        request = self.request_generator.historical_hunt_results(hunt_id)
+        request = resources.HuntResult.historical_hunt_results(self.api, hunt_id)
         self._add_pagination_params(request, offset, limit)
         return request
 
     def _create_hunt_live_start_request(self, yara_file):
         y = resources.YaraRuleset(dict(yara=open(yara_file).read()))
-        request = self.request_generator.create_live_hunt(rule=y.yara)
+        request = resources.LiveHunt.create_live_hunt(self.api, rule=y.yara)
         return request
 
     def _create_hunt_historical_start_request(self, yara_file):
-        request = self.request_generator.create_historical_hunt(resources.YaraRuleset(dict(yara=open(yara_file).read())))
+        request = resources.HistoricalHunt.create_historical_hunt(self.api, resources.YaraRuleset(dict(yara=open(yara_file).read())))
         return request
 
     def _create_hunt_live_delete_request(self, hunt_id):
-        request = self.request_generator.delete_live_hunt(hunt_id)
+        request = resources.LiveHunt.delete_live_hunt(self.api, hunt_id)
         return request
 
     def _create_hunt_historical_delete_request(self, hunt_id):
-        request = self.request_generator.delete_historical_hunt(hunt_id)
+        request = resources.HistoricalHunt.delete_historical_hunt(self.api, hunt_id)
         return request
 
     def _create_hunt_live_list_request(self, offset=None, limit=None):
-        request = self.request_generator.live_list()
+        request = resources.LiveHunt.live_list(self.api)
         self._add_pagination_params(request, offset, limit)
         return request
 
     def _create_hunt_historical_list_request(self, offset=None, limit=None):
-        request = self.request_generator.historical_list()
+        request = resources.HistoricalHunt.historical_list(self.api)
         self._add_pagination_params(request, offset, limit)
         return request
 
     def _create_download_request(self, hash_value, hash_type='sha256'):
-        request = self.request_generator.download(hash_value, hash_type)
+        request = resources.LocalHandle.download(self.api, hash_value, hash_type)
         return request
 
     def _create_stream_request(self, since, offset=None, limit=None):
-        request = self.request_generator.stream(since)
+        request = resources.ArtifactArchive.stream(self.api, since)
         self._add_pagination_params(request, offset, limit)
         return request
 
