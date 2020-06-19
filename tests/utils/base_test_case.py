@@ -77,12 +77,12 @@ class BaseTestCase(TestCase):
         return request
 
     def _create_hunt_live_results_request(self, hunt_id, since, offset=None, limit=None):
-        request = resources.HuntResult.live_hunt_results(self.api, hunt_id, since)
+        request = resources.LiveHuntResult.get(self.api, id=hunt_id, since=since)
         self._add_pagination_params(request, offset, limit)
         return request
 
     def _create_hunt_historical_results_request(self, hunt_id, offset=None, limit=None):
-        request = resources.HuntResult.historical_hunt_results(self.api, hunt_id)
+        request = resources.HistoricalHuntResult.get(self.api, id=hunt_id)
         self._add_pagination_params(request, offset, limit)
         return request
 
