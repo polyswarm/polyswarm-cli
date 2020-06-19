@@ -51,20 +51,6 @@ class BaseTestCase(TestCase):
     def setUp(self):
         self._remove_file(self.test_captured_output_file)
 
-    def _setup_mock_api_response(self, mock_server, request, response):
-        request_parameters = self.convert_polyswarm_api_request_to_mock_request_parameters(request)
-        mock_server.request(text=response, **request_parameters)
-
-    @staticmethod
-    def _setup_mock_url_response(mock_server, url, response):
-        request_parameters = {'method': 'GET',
-                              'url': url}
-        mock_server.request(body=response, **request_parameters)
-
-    def _setup_mock_api_download(self, mock_server, request, download_file):
-        request_parameters = self.convert_polyswarm_api_request_to_mock_request_parameters(request)
-        mock_server.request(body=download_file, **request_parameters)
-
     def _create_search_hash_request(self, hash_value, offset=None, limit=None):
         h = resources.Hash.from_hashable(hash_value)
         request = resources.ArtifactInstance.search_hash(self.api, h.hash, h.hash_type)
@@ -72,7 +58,7 @@ class BaseTestCase(TestCase):
         return request
 
     def _create_search_metadata_request(self, query, offset=None, limit=None):
-        request = resources.Metadata.search_metadata(self.api, query)
+        request = resources.Metadata.get(self.api, query=query)
         self._add_pagination_params(request, offset, limit)
         return request
 
@@ -101,29 +87,28 @@ class BaseTestCase(TestCase):
         return request
 
     def _create_hunt_live_start_request(self, yara_file):
-        y = resources.YaraRuleset(dict(yara=open(yara_file).read()))
-        request = resources.LiveHunt.create_live_hunt(self.api, rule=y.yara)
+        request = resources.LiveHunt.create(self.api, yara=open(yara_file).read())
         return request
 
     def _create_hunt_historical_start_request(self, yara_file):
-        request = resources.HistoricalHunt.create_historical_hunt(self.api, resources.YaraRuleset(dict(yara=open(yara_file).read())))
+        request = resources.HistoricalHunt.create(self.api, yara=open(yara_file).read())
         return request
 
     def _create_hunt_live_delete_request(self, hunt_id):
-        request = resources.LiveHunt.delete_live_hunt(self.api, hunt_id)
+        request = resources.LiveHunt.delete(self.api, id=hunt_id)
         return request
 
     def _create_hunt_historical_delete_request(self, hunt_id):
-        request = resources.HistoricalHunt.delete_historical_hunt(self.api, hunt_id)
+        request = resources.HistoricalHunt.delete(self.api, id=hunt_id)
         return request
 
     def _create_hunt_live_list_request(self, offset=None, limit=None):
-        request = resources.LiveHunt.live_list(self.api)
+        request = resources.LiveHunt.list(self.api)
         self._add_pagination_params(request, offset, limit)
         return request
 
     def _create_hunt_historical_list_request(self, offset=None, limit=None):
-        request = resources.HistoricalHunt.historical_list(self.api)
+        request = resources.HistoricalHunt.list(self.api)
         self._add_pagination_params(request, offset, limit)
         return request
 
@@ -141,33 +126,6 @@ class BaseTestCase(TestCase):
         if offset is not None and limit is not None:
             request.request_parameters['params']['offset'] = offset
             request.request_parameters['params']['limit'] = limit
-
-    def convert_polyswarm_api_request_to_mock_request_parameters(self, request):
-        request_parameters = request.request_parameters
-        self._add_params_to_request_url(request_parameters)
-        self._remove_keys(request_parameters, ['timeout', 'params', 'json', 'data', 'files', 'stream'])
-        self._add_auth(request_parameters)
-        return request_parameters
-
-    def _add_params_to_request_url(self, request_parameters):
-        if 'params' in request_parameters:
-            request_parameters['url'] = '%s?%s' % (request_parameters['url'],
-                                                   self._params_to_string(request_parameters['params']))
-
-    @staticmethod
-    def _params_to_string(params):
-        return '&'.join(['%s=%s' % (param, value) for param, value in params.items()])
-
-    @staticmethod
-    def _remove_keys(request, params):
-        for param in params:
-            if param in request:
-                del request[param]
-
-    def _add_auth(self, request):
-        if 'headers' not in request:
-            request['headers'] = {}
-        request['headers']['Authorization'] = self.test_api_key
 
     @staticmethod
     def _remove_file(file_path):
@@ -191,9 +149,6 @@ class BaseTestCase(TestCase):
     @staticmethod
     def _get_test_text_resource_content(resource):
         return resource_string('tests.resources', resource).decode('utf-8')
-
-    def _get_test_json_resource_content(self, resource):
-        return json.loads(self._get_test_text_resource_content(resource))
 
     def _run_cli(self, commands):
         commands = [
