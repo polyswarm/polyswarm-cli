@@ -54,7 +54,7 @@ def validate_hashes(ctx, param, value):
 
 
 def validate_key(ctx, param, value):
-    if not resources.is_hex(value) or len(value) != 32:
+    if not resources.core.is_hex(value) or len(value) != 32:
         raise click.BadParameter('Invalid API key. Make sure you specified your key via -a or environment variable and try again.')
     return value
 
