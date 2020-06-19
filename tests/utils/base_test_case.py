@@ -117,7 +117,7 @@ class BaseTestCase(TestCase):
         return request
 
     def _create_stream_request(self, since, offset=None, limit=None):
-        request = resources.ArtifactArchive.stream(self.api, since)
+        request = resources.ArtifactArchive.get(self.api, since=since)
         self._add_pagination_params(request, offset, limit)
         return request
 
