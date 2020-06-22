@@ -7,9 +7,8 @@ import difflib
 import traceback
 from deepdiff import DeepDiff
 from click.testing import CliRunner
-from pkg_resources import resource_string, resource_filename
+from pkg_resources import resource_filename
 
-from polyswarm_api import resources
 from polyswarm.client import polyswarm as client
 from polyswarm_api.api import PolyswarmAPI
 
@@ -51,82 +50,6 @@ class BaseTestCase(TestCase):
     def setUp(self):
         self._remove_file(self.test_captured_output_file)
 
-    def _create_search_hash_request(self, hash_value, offset=None, limit=None):
-        h = resources.Hash.from_hashable(hash_value)
-        request = resources.ArtifactInstance.search_hash(self.api, h.hash, h.hash_type)
-        self._add_pagination_params(request, offset, limit)
-        return request
-
-    def _create_search_metadata_request(self, query, offset=None, limit=None):
-        request = resources.Metadata.get(self.api, query=query)
-        self._add_pagination_params(request, offset, limit)
-        return request
-
-    def _create_scan_submission_lookup_request(self, submission_uuid):
-        request = resources.ArtifactInstance.lookup_uuid(self.api, submission_uuid)
-        return request
-
-    def _create_scan_submission_submit_request(self, artifact):
-        a = resources.LocalArtifact.from_path(self.api, artifact)
-        request = resources.ArtifactInstance.submit(self.api, a, a.artifact_name, a.artifact_type.name)
-        return request
-
-    def _create_scan_submission_rescan_request(self, hash_value, hash_type='sha256'):
-        h = resources.Hash(hash_value, hash_type)
-        request = resources.ArtifactInstance.rescan(self.api, h.hash, h.hash_type)
-        return request
-
-    def _create_hunt_live_results_request(self, hunt_id, since, offset=None, limit=None):
-        request = resources.LiveHuntResult.get(self.api, id=hunt_id, since=since)
-        self._add_pagination_params(request, offset, limit)
-        return request
-
-    def _create_hunt_historical_results_request(self, hunt_id, offset=None, limit=None):
-        request = resources.HistoricalHuntResult.get(self.api, id=hunt_id)
-        self._add_pagination_params(request, offset, limit)
-        return request
-
-    def _create_hunt_live_start_request(self, yara_file):
-        request = resources.LiveHunt.create(self.api, yara=open(yara_file).read())
-        return request
-
-    def _create_hunt_historical_start_request(self, yara_file):
-        request = resources.HistoricalHunt.create(self.api, yara=open(yara_file).read())
-        return request
-
-    def _create_hunt_live_delete_request(self, hunt_id):
-        request = resources.LiveHunt.delete(self.api, id=hunt_id)
-        return request
-
-    def _create_hunt_historical_delete_request(self, hunt_id):
-        request = resources.HistoricalHunt.delete(self.api, id=hunt_id)
-        return request
-
-    def _create_hunt_live_list_request(self, offset=None, limit=None):
-        request = resources.LiveHunt.list(self.api)
-        self._add_pagination_params(request, offset, limit)
-        return request
-
-    def _create_hunt_historical_list_request(self, offset=None, limit=None):
-        request = resources.HistoricalHunt.list(self.api)
-        self._add_pagination_params(request, offset, limit)
-        return request
-
-    def _create_download_request(self, hash_value, hash_type='sha256'):
-        request = resources.LocalHandle.download(self.api, hash_value, hash_type)
-        return request
-
-    def _create_stream_request(self, since, offset=None, limit=None):
-        request = resources.ArtifactArchive.get(self.api, since=since)
-        self._add_pagination_params(request, offset, limit)
-        return request
-
-    @staticmethod
-    def _add_pagination_params(request, offset, limit):
-        if offset is not None and limit is not None:
-            request.request_parameters['params']['offset'] = offset
-            request.request_parameters['params']['limit'] = limit
-
     @staticmethod
     def _remove_file(file_path):
         if os.path.exists(file_path):
@@ -140,15 +63,6 @@ class BaseTestCase(TestCase):
     def _get_text_file_content(file_path):
         with open(file_path, 'r') as file:
             return file.read()
-
-    @staticmethod
-    def _get_json_file_content(file_path):
-        with open(file_path, 'r') as file:
-            return json.loads(file.read())
-
-    @staticmethod
-    def _get_test_text_resource_content(resource):
-        return resource_string('tests.resources', resource).decode('utf-8')
 
     def _run_cli(self, commands):
         commands = [

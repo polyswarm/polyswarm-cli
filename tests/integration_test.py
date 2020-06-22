@@ -1,7 +1,5 @@
-import io
 import os
 
-import requests
 import responses
 
 from tests.utils.base_test_case import BaseTestCase
@@ -42,8 +40,7 @@ class IntegrationTest(BaseTestCase):
 
     @responses.activate
     def test_search_hash(self):
-        request = self._create_search_hash_request(self.test_hash_value)
-        url = requests.Request(**request.request_parameters).prepare().url
+        url = 'https://api.polyswarm.network/v2/search/hash/sha256?hash=275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
         responses.add(responses.GET, url, body=self.mock_search_response_page1)
         result = self._run_cli(['--output-format', 'json', 'search', 'hash', self.test_hash_value])
 
@@ -54,8 +51,7 @@ class IntegrationTest(BaseTestCase):
 
     @responses.activate
     def test_search_metadata(self):
-        request = self._create_search_metadata_request(self.test_query)
-        url = requests.Request(**request.request_parameters).prepare().url
+        url = 'https://api.polyswarm.network/v2/search/metadata/query?query=_exists_%3Alief.libraries'
         responses.add(responses.GET, url, body=self.mock_metadata_search_response)
         result = self._run_cli(['--output-format', 'json', 'search', 'metadata', self.test_query])
 
@@ -66,8 +62,7 @@ class IntegrationTest(BaseTestCase):
 
     @responses.activate
     def test_scan_submission_lookup(self):
-        request = self._create_scan_submission_lookup_request(self.test_submission_uuid)
-        url = requests.Request(**request.request_parameters).prepare().url
+        url = 'https://api.polyswarm.network/v2/consumer/submission/lima/49091542211453596'
         responses.add(responses.GET, url, body=self.mock_submission_response)
 
         result = self._run_cli(['--output-format', 'json', '-c', self.community, 'lookup', self.test_submission_uuid])
@@ -80,15 +75,12 @@ class IntegrationTest(BaseTestCase):
 
     @responses.activate
     def test_scan_submission_create(self):
-        request = self._create_scan_submission_lookup_request(self.test_submission_uuid)
-        url = requests.Request(**request.request_parameters).prepare().url
+        url = 'https://api.polyswarm.network/v2/consumer/submission/lima/49091542211453596'
         responses.add(responses.GET, url, body=self.mock_submission_response)
-
-        malicious_file = self._get_test_resource_file_path('malicious')
-        request = self._create_scan_submission_submit_request(malicious_file)
-        url = requests.Request(**request.request_parameters).prepare().url
+        url = 'https://api.polyswarm.network/v2/consumer/submission/lima'
         responses.add(responses.POST, url, body=self.mock_submission_response)
 
+        malicious_file = self._get_test_resource_file_path('malicious')
         result = self._run_cli(['--output-format', 'json', '-c', self.community, 'scan', 'file', malicious_file])
 
         self._assert_json_result(
@@ -99,12 +91,9 @@ class IntegrationTest(BaseTestCase):
 
     @responses.activate
     def test_scan_submission_rescan(self):
-        request = self._create_scan_submission_rescan_request(self.test_hash_value)
-        url = requests.Request(**request.request_parameters).prepare().url
+        url = 'https://api.polyswarm.network/v2/consumer/submission/lima/rescan/sha256/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
         responses.add(responses.POST, url, body=self.mock_submission_response)
-
-        request = self._create_scan_submission_lookup_request(self.test_submission_uuid)
-        url = requests.Request(**request.request_parameters).prepare().url
+        url = 'https://api.polyswarm.network/v2/consumer/submission/lima/49091542211453596'
         responses.add(responses.GET, url, body=self.mock_submission_response)
 
         result = self._run_cli(['--output-format', 'json', '-c', self.community, 'rescan', self.test_hash_value])
@@ -117,8 +106,7 @@ class IntegrationTest(BaseTestCase):
 
     @responses.activate
     def test_live_hunt_results(self):
-        request = self._create_hunt_live_results_request(self.test_hunt_id, self.test_since)
-        url = requests.Request(**request.request_parameters).prepare().url
+        url = 'https://api.polyswarm.network/v2/hunt/live/results?id=63433636835291189&since=2880'
         responses.add(responses.GET, url, body=self.mock_hunt_live_results_response_page1)
 
         result = self._run_cli(['--output-format', 'json', 'live', 'results', self.test_hunt_id,
@@ -131,8 +119,7 @@ class IntegrationTest(BaseTestCase):
 
     @responses.activate
     def test_historical_hunt_results(self):
-        request = self._create_hunt_historical_results_request(self.test_hunt_id)
-        url = requests.Request(**request.request_parameters).prepare().url
+        url = 'https://api.polyswarm.network/v2/hunt/historical/results?id=63433636835291189'
         responses.add(responses.GET, url, body=self.mock_hunt_historical_results_response_page1)
 
         result = self._run_cli(['--output-format', 'json', 'historical', 'results', self.test_hunt_id])
@@ -145,11 +132,10 @@ class IntegrationTest(BaseTestCase):
 
     @responses.activate
     def test_live_hunt_start(self):
-        yara_file = self._get_test_resource_file_path('eicar.yara')
-        request = self._create_hunt_live_start_request(yara_file)
-        url = requests.Request(**request.request_parameters).prepare().url
+        url = 'https://api.polyswarm.network/v2/hunt/live'
         responses.add(responses.POST, url, body=self.mock_hunt_response)
 
+        yara_file = self._get_test_resource_file_path('eicar.yara')
         result = self._run_cli(['--output-format', 'json', 'live', 'create', yara_file])
 
         self._assert_json_result(
@@ -160,11 +146,10 @@ class IntegrationTest(BaseTestCase):
 
     @responses.activate
     def test_live_hunt_start_with_invalid_yara_file(self):
-        broken_yara_file = self._get_test_resource_file_path('broken.yara')
-        request = self._create_hunt_live_start_request(broken_yara_file)
-        url = requests.Request(**request.request_parameters).prepare().url
+        url = 'https://api.polyswarm.network/v2/hunt/live'
         responses.add(responses.POST, url, body=self.mock_hunt_response)
 
+        broken_yara_file = self._get_test_resource_file_path('broken.yara')
         result = self._run_cli(['--output-format', 'json', 'live', 'create', broken_yara_file])
 
         self._assert_text_result(
@@ -175,11 +160,10 @@ class IntegrationTest(BaseTestCase):
 
     @responses.activate
     def test_historical_hunt_start(self):
-        yara_file = self._get_test_resource_file_path('eicar.yara')
-        request = self._create_hunt_historical_start_request(yara_file)
-        url = requests.Request(**request.request_parameters).prepare().url
+        url = 'https://api.polyswarm.network/v2/hunt/historical'
         responses.add(responses.POST, url, body=self.mock_hunt_response)
 
+        yara_file = self._get_test_resource_file_path('eicar.yara')
         result = self._run_cli(['--output-format', 'json', 'historical', 'start', yara_file])
 
         self._assert_json_result(
@@ -190,8 +174,7 @@ class IntegrationTest(BaseTestCase):
 
     @responses.activate
     def test_live_hunt_delete(self):
-        request = self._create_hunt_live_delete_request(self.test_hunt_id)
-        url = requests.Request(**request.request_parameters).prepare().url
+        url = 'https://api.polyswarm.network/v2/hunt/live?id=63433636835291189'
         responses.add(responses.DELETE, url, body=self.mock_hunt_response)
 
         result = self._run_cli(['--output-format', 'json', 'live', 'delete', self.test_hunt_id])
@@ -204,8 +187,7 @@ class IntegrationTest(BaseTestCase):
 
     @responses.activate
     def test_historical_hunt_delete(self):
-        request = self._create_hunt_historical_delete_request(self.test_hunt_id)
-        url = requests.Request(**request.request_parameters).prepare().url
+        url = 'https://api.polyswarm.network/v2/hunt/historical?id=63433636835291189'
         responses.add(responses.DELETE, url, body=self.mock_hunt_response)
 
         result = self._run_cli(['--output-format', 'json', 'historical', 'delete', self.test_hunt_id])
@@ -218,8 +200,7 @@ class IntegrationTest(BaseTestCase):
 
     @responses.activate
     def test_live_hunt_list(self):
-        request = self._create_hunt_live_list_request()
-        url = requests.Request(**request.request_parameters).prepare().url
+        url = 'https://api.polyswarm.network/v2/hunt/live/list'
         responses.add(responses.GET, url, body=self.mock_hunt_response)
 
         result = self._run_cli(['--output-format', 'json', 'live', 'list'])
@@ -232,8 +213,7 @@ class IntegrationTest(BaseTestCase):
 
     @responses.activate
     def test_historical_hunt_list(self):
-        request = self._create_hunt_historical_list_request()
-        url = requests.Request(**request.request_parameters).prepare().url
+        url = 'https://api.polyswarm.network/v2/hunt/historical/list'
         responses.add(responses.GET, url, body=self.mock_hunt_response_page1)
 
         result = self._run_cli(['--output-format', 'json', 'historical', 'list'])
@@ -247,9 +227,7 @@ class IntegrationTest(BaseTestCase):
     @responses.activate
     def test_download(self):
         with file_utils.temp_dir({self.test_hash_value: self.test_eicar}) as (path, files):
-            request = self._create_download_request(self.test_hash_value)
-            request.request_parameters.pop('stream')
-            url = requests.Request(**request.request_parameters).prepare().url
+            url = 'https://api.polyswarm.network/v2/download/sha256/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
             responses.add(responses.GET, url, body=self.test_eicar, stream=True)
 
             result = self._run_cli(['download', self.test_hash_value, path])
@@ -265,8 +243,7 @@ class IntegrationTest(BaseTestCase):
     @responses.activate
     def test_download_stream(self):
         with file_utils.temp_dir({self.test_hash_value: self.test_eicar}) as (path, files):
-            request = self._create_stream_request(self.test_since)
-            url = requests.Request(**request.request_parameters).prepare().url
+            url = 'https://api.polyswarm.network/v2/consumer/download/stream?since=2880'
             responses.add(responses.GET, url, body=self.mock_stream_response_page1)
             responses.add(responses.GET, self.test_s3_file_url, body=self.test_eicar, stream=True)
 
@@ -283,9 +260,7 @@ class IntegrationTest(BaseTestCase):
     @responses.activate
     def test_download_cat(self):
         with file_utils.temp_dir({self.test_hash_value: self.test_eicar}) as (path, files):
-            request = self._create_download_request(self.test_hash_value)
-            request.request_parameters.pop('stream')
-            url = requests.Request(**request.request_parameters).prepare().url
+            url = 'https://api.polyswarm.network/v2/download/sha256/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
             responses.add(responses.GET, url, body=self.test_eicar, stream=True)
 
             result = self._run_cli(['cat', self.test_hash_value])
