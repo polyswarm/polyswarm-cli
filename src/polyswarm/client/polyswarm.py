@@ -7,10 +7,10 @@ except ImportError:
 
 import click
 import click_log
+import polyswarm_api
 from click_log import core
 from click.exceptions import Exit, ClickException
 from polyswarm_api import exceptions as api_exceptions
-from polyswarm_api import get_version as get_polyswarm_api_version
 
 from polyswarm import exceptions
 from polyswarm.polyswarm import Polyswarm
@@ -111,20 +111,17 @@ class ExceptionHandlingGroup(click.Group):
 @click.option('--color/--no-color', default=True, help='Use colored output in text mode.')
 @click.option('-v', '--verbose', default=0, count=True)
 @click.option('-c', '--community', default='default', envvar='POLYSWARM_COMMUNITY', help='Community to use.')
-@click.option('--advanced-disable-version-check/--advanced-enable-version-check', default=False,
-              help='Enable/disable GitHub release version check.')
 @click.option('--parallel', default=8, help='Number of threads to be used in parallel http requests.')
 @click.version_option(VERSION, '--version', prog_name='polyswarm-cli')
-@click.version_option(get_polyswarm_api_version(), '--api-version', prog_name='polyswarm-api')
+@click.version_option(lambda: polyswarm_api.__version__, '--api-version', prog_name='polyswarm-api')
 @click.pass_context
-def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose, community,
-              advanced_disable_version_check, parallel):
+def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose, community, parallel):
     """
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
     """
     setup_logging(verbose)
-    logger.info('Running polyswarm-cli version %s with polyswarm-api version %s', VERSION, get_polyswarm_api_version())
+    logger.info('Running polyswarm-cli version %s with polyswarm-api version %s', VERSION, polyswarm_api.__version__)
 
     ctx.obj = {}
 

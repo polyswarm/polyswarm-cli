@@ -4,9 +4,9 @@ bump2version==0.5.11
 future==0.18.2
 pytest==3.9.2
 deepdiff==3.3.0
-requests-mock==1.7.0
 pytest-cov==2.8.1
 yara-python==3.11.0
 click-log==0.3.2
 pygments==2.5.2
 mock==3.0.4
+responses==0.10.6

@@ -6,7 +6,7 @@ import click
 
 from polyswarm import exceptions
 from polyswarm.utils import is_valid_id
-from polyswarm_api.types import resources
+from polyswarm_api import resources
 
 logger = logging.getLogger(__name__)
 HASH_VALIDATORS = resources.Hash.SUPPORTED_HASH_TYPES
@@ -54,7 +54,7 @@ def validate_hashes(ctx, param, value):
 
 
 def validate_key(ctx, param, value):
-    if not resources.is_hex(value) or len(value) != 32:
+    if not resources.core.is_hex(value) or len(value) != 32:
         raise click.BadParameter('Invalid API key. Make sure you specified your key via -a or environment variable and try again.')
     return value
 
