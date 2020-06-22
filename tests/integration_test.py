@@ -201,7 +201,7 @@ class IntegrationTest(BaseTestCase):
     @responses.activate
     def test_live_hunt_list(self):
         url = 'https://api.polyswarm.network/v2/hunt/live/list'
-        responses.add(responses.GET, url, body=self.mock_hunt_response)
+        responses.add(responses.GET, url, body=self.mock_hunt_response_page1)
 
         result = self._run_cli(['--output-format', 'json', 'live', 'list'])
 

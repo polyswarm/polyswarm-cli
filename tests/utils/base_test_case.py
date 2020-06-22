@@ -132,7 +132,12 @@ class BaseTestCase(TestCase):
         return resource_filename('tests.resources', filename)
 
     @staticmethod
-    def _create_response(results, offset=None, limit=None, has_more=True):
-        return json.dumps({'result': results, 'status': 'OK', 'offset': offset, 'limit': limit, 'has_more': has_more})
+    def _create_response(results, **kwargs):
+        response = {'result': results, 'status': 'OK'}
+        if kwargs:
+            response['offset'] = kwargs.get('offset', None)
+            response['limit'] = kwargs.get('limit', None)
+            response['has_more'] = kwargs.get('has_more', True)
+        return json.dumps(response)
 
 
