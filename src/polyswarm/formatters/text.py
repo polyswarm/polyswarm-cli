@@ -2,27 +2,10 @@ from __future__ import absolute_import, unicode_literals
 import sys
 import functools
 import json
-from . import base
 
+import click
 
-# TODO rewrite some of this to be not terrible
-def is_colored(fn):
-    prefix, suffix = {
-                '_red': ('\033[91m', '\033[0m'),
-                '_yellow': ('\033[93m', '\033[0m'),
-                '_green': ('\033[92m', '\033[0m'),
-                '_white': ('', ''),
-                '_blue': ('\033[94m', '\033[0m'),
-                '_open_group': ('\033[94m', '\033[0m'),
-    }.get(fn.__name__, ('', ''))
-
-    @functools.wraps(fn)
-    def wrapper(self, text):
-        if self.color:
-            return prefix + fn(self, text) + suffix
-        else:
-            return fn(self, text)
-    return wrapper
+from polyswarm.formatters import base
 
 
 def is_grouped(fn):
@@ -52,7 +35,7 @@ class TextOutput(base.BaseOutput):
 
     def _output(self, output, write):
         if write:
-            self.out.write('\n'.join(output) + '\n\n')
+            click.echo('\n'.join(output) + '\n', file=self.out)
         else:
             return output
 
@@ -263,30 +246,25 @@ class TextOutput(base.BaseOutput):
         return self._output(output, write)
 
 
-    @is_colored
     @is_grouped
     def _white(self, text):
-        return '%s' % text
+        return click.style(text, fg='white')
 
-    @is_colored
     @is_grouped
     def _yellow(self, text):
-        return '%s' % text
+        return click.style(text, fg='yellow')
 
-    @is_colored
     @is_grouped
     def _red(self, text):
-        return '%s' % text
+        return click.style(text, fg='red')
 
-    @is_colored
     @is_grouped
     def _blue(self, text):
-        return '%s' % text
+        return click.style(text, fg='blue')
 
-    @is_colored
     @is_grouped
     def _green(self, text):
-        return '%s' % text
+        return click.style(text, fg='green')
 
     def _open_group(self):
         self._depth += 1
