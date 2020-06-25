@@ -17,37 +17,37 @@ class JSONOutput(base.BaseOutput):
         return json.dumps(json_data, sort_keys=True)
 
     def artifact_instance(self, result, timeout=False):
-        click.secho(self._to_json(result.json), file=self.out)
+        click.echo(self._to_json(result.json), file=self.out)
 
     def hunt_result(self, result):
-        click.secho(self._to_json(result.json), file=self.out)
+        click.echo(self._to_json(result.json), file=self.out)
 
     def hunt_deletion(self, result):
-        click.secho(self._to_json(result.json), file=self.out)
+        click.echo(self._to_json(result.json), file=self.out)
 
     def hunt(self, result):
-        click.secho(self._to_json(result.json), file=self.out)
+        click.echo(self._to_json(result.json), file=self.out)
 
     def local_artifact(self, artifact):
-        click.secho(
+        click.echo(
             json.dumps({'hash': artifact.artifact_name, 'path': artifact.path}, sort_keys=True),
             file=self.out,
         )
 
     def ruleset(self, result, contents=False):
-        click.secho(self._to_json(result.json), file=self.out)
+        click.echo(self._to_json(result.json), file=self.out)
 
     def metadata(self, result):
-        click.secho(self._to_json(result.json), file=self.out)
+        click.echo(self._to_json(result.json), file=self.out)
 
     def tag_link(self, result):
-        click.secho(self._to_json(result.json), file=self.out)
+        click.echo(self._to_json(result.json), file=self.out)
 
     def family(self, result):
-        click.secho(self._to_json(result.json), file=self.out)
+        click.echo(self._to_json(result.json), file=self.out)
 
     def tag(self, result):
-        click.secho(self._to_json(result.json), file=self.out)
+        click.echo(self._to_json(result.json), file=self.out)
 
 
 class PrettyJSONOutput(JSONOutput):

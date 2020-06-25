@@ -18,14 +18,14 @@ class SHA256Output(base.BaseOutput):
         return json.dumps(result.json['result'])
 
     def artifact_instance(self, instance, timeout=False):
-        click.secho(instance.sha256, file=self.out)
+        click.echo(instance.sha256, file=self.out)
 
     def hunt_result(self, result):
-        click.secho(result.artifact, file=self.out)
+        click.echo(result.artifact, file=self.out)
 
     def metadata(self, result):
         if result.sha256:
-            click.secho(result.sha256, file=self.out)
+            click.echo(result.sha256, file=self.out)
         else:
             logger.warning('Could not render metadata as sha256, value is %s', result.sha256)
 
@@ -38,14 +38,14 @@ class SHA1Output(base.BaseOutput):
         return json.dumps(result.json['result'])
 
     def artifact_instance(self, result, timeout=False):
-        click.secho(result.sha1, file=self.out)
+        click.echo(result.sha1, file=self.out)
 
     def hunt_result(self, result):
-        click.secho(result.artifact, file=self.out)
+        click.echo(result.artifact, file=self.out)
 
     def metadata(self, result):
         if result.sha1:
-            click.secho(result.sha1, file=self.out)
+            click.echo(result.sha1, file=self.out)
         else:
             logger.warning('Could not render metadata as sha1, value is %s', result.sha1)
 
@@ -58,13 +58,13 @@ class MD5Output(base.BaseOutput):
         return json.dumps(result.json['result'])
 
     def artifact_instance(self, result, timeout=False):
-        click.secho(result.md5, file=self.out)
+        click.echo(result.md5, file=self.out)
 
     def hunt_result(self, result):
-        click.secho(result.artifact, file=self.out)
+        click.echo(result.artifact, file=self.out)
 
     def metadata(self, result):
         if result.md5:
-            click.secho(result.md5, file=self.out)
+            click.echo(result.md5, file=self.out)
         else:
             logger.warning('Could not render metadata as md5, value is %s', result.md5)
