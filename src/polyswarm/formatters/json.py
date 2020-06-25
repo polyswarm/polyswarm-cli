@@ -2,28 +2,77 @@ from __future__ import absolute_import, unicode_literals
 import json
 
 import click
+from click import termui
 from pygments import highlight
 from pygments.lexers import JsonLexer
 from pygments.formatters import Terminal256Formatter
+from pygments.formatters.terminal256 import EscapeSequence
+
 
 from polyswarm.formatters import base
 
 
 class ClickFormatter(Terminal256Formatter):
+    name = 'ClickFormatter'
+    aliases = ['click']
+    _reverse_color = {v: k for k, v in termui._ansi_colors.items()}
+
+    def _closest_color(self, r, g, b):
+        distance = 257*257*3  # "infinity" (>distance from #000000 to #ffffff)
+        match = 0
+
+        for i in range(0, 15):
+            values = self.xterm_colors[i]
+
+            rd = r - values[0]
+            gd = g - values[1]
+            bd = b - values[2]
+            d = rd*rd + gd*gd + bd*bd
+
+            if d < distance:
+                match = i
+                distance = d
+        if match < 8:
+            match += 30
+        else:
+            match += 82
+        return self._reverse_color[match]
+
+    def _setup_styles(self):
+        for ttype, ndef in self.style:
+            # set to None instead of False by default, this avoids
+            # adding needless extra codes in click.style()
+            escape = EscapeSequence(bold=None, underline=None)
+            # get foreground from ansicolor if set
+            if ndef['ansicolor']:
+                escape.fg = self._color_index(ndef['ansicolor'])
+            elif ndef['color']:
+                escape.fg = self._color_index(ndef['color'])
+            if ndef['bgansicolor']:
+                escape.bg = self._color_index(ndef['bgansicolor'])
+            elif ndef['bgcolor']:
+                escape.bg = self._color_index(ndef['bgcolor'])
+            if self.usebold and ndef['bold']:
+                escape.bold = True
+            if self.useunderline and ndef['underline']:
+                escape.underline = True
+            self.style_string[str(ttype)] = escape
+
     def format_unencoded(self, tokensource, outfile):
-        # https://github.com/pygments/pygments/blob/35544e2fc6eed0ce4a27ec7285aac71ff0ddc473/pygments/formatters/terminal256.py#L244
         for ttype, value in tokensource:
             not_found = True
             while ttype and not_found:
                 try:
-                    on, off = self.style_string[str(ttype)]
+                    escape = self.style_string[str(ttype)]
                     spl = value.split('\n')
                     for line in spl[:-1]:
                         if line:
-                            click.echo(on + line + off, file=outfile, nl=False)
-                        outfile.write('\n')
+                            click.secho(line, file=outfile, nl=False, fg=escape.fg,
+                                        bg=escape.bg, bold=escape.bold, underline=escape.underline)
+                        click.secho('', file=outfile)
                     if spl[-1]:
-                        click.echo(on + spl[-1] + off, file=outfile, nl=False)
+                        click.secho(spl[-1], file=outfile, nl=False, fg=escape.fg,
+                                    bg=escape.bg, bold=escape.bold, underline=escape.underline)
                     not_found = False
                 except KeyError:
                     ttype = ttype[:-1]
