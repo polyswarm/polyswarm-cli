@@ -102,8 +102,11 @@ class ExceptionHandlingGroup(click.Group):
             raise Exit(2)
 
 
-def support_color(color):
-    if platform.system() == 'Windows' and os.environ.get('TERM') != 'ANSI':
+def support_color(color, output_file):
+    is_a_tty = hasattr(output_file, 'isatty') and output_file.isatty()
+    if not is_a_tty:
+        return False
+    if platform.system() == 'Windows' and 'ANSICON' not in os.environ:
         if color:
             logger.warning('Color is disabled because this Windows terminal does not support it.')
         return False
@@ -138,13 +141,8 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     if ctx.invoked_subcommand is None:
         return
 
-    # only allow color for stdout
-    if output_file is not None:
-        color = False
-    else:
-        output_file = click.get_text_stream('stdout')
-
-    color = support_color(color)
+    output_file = output_file or click.get_text_stream('stdout')
+    color = support_color(color, output_file)
 
     ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community, parallel=parallel)
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
