@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 import logging
-import platform
-import os
 try:
     from json import JSONDecodeError
 except ImportError:
