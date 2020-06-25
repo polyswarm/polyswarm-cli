@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 import logging
+import platform
+import os
 try:
     from json import JSONDecodeError
 except ImportError:
@@ -15,16 +17,16 @@ from polyswarm_api import exceptions as api_exceptions
 from polyswarm import exceptions
 from polyswarm.polyswarm import Polyswarm
 from polyswarm.formatters import formatters
-from .utils import validate_key
-from .hunt import live, historical
-from .scan import scan, lookup, wait, rescan, rescan_id
-from .download import download, cat, stream
-from .search import search
-from .rules import rules
-from .links import link
-from .tags import tag
-from .families import family
-from .metadata import metadata
+from polyswarm.client.utils import validate_key
+from polyswarm.client.hunt import live, historical
+from polyswarm.client.scan import scan, lookup, wait, rescan, rescan_id
+from polyswarm.client.download import download, cat, stream
+from polyswarm.client.search import search
+from polyswarm.client.rules import rules
+from polyswarm.client.links import link
+from polyswarm.client.tags import tag
+from polyswarm.client.families import family
+from polyswarm.client.metadata import metadata
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +102,14 @@ class ExceptionHandlingGroup(click.Group):
             raise Exit(2)
 
 
+def support_color(color):
+    if platform.system() == 'Windows' and os.environ.get('TERM') != 'ANSI':
+        if color:
+            logger.warning('Color is disabled because this Windows terminal does not support it.')
+        return False
+    return color
+
+
 @click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS)
 @click.option('-a', '--api-key', help='Your API key for polyswarm.network (required).',
               default='', callback=validate_key, envvar='POLYSWARM_API_KEY')
@@ -133,6 +143,8 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
         color = False
     else:
         output_file = click.get_text_stream('stdout')
+
+    color = support_color(color)
 
     ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community, parallel=parallel)
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
