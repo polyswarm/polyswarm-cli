@@ -105,7 +105,7 @@ class ExceptionHandlingGroup(click.Group):
               default='', callback=validate_key, envvar='POLYSWARM_API_KEY')
 @click.option('-u', '--api-uri', default='https://api.polyswarm.network/v2',
               envvar='POLYSWARM_API_URI', help='The API endpoint (ADVANCED).')
-@click.option('-o', '--output-file', type=click.File('w'), help='Path to output file.')
+@click.option('-o', '--output-file', type=click.File('w', encoding='utf8'), help='Path to output file.')
 @click.option('--output-format', '--fmt', default='text', type=click.Choice(formatters.keys()),
               help='Output format. Human-readable text or JSON.')
 @click.option('--color/--no-color', default=True, help='Use colored output in text mode.')
