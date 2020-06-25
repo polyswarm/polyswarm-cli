@@ -6,8 +6,29 @@ from pygments import highlight
 from pygments.lexers import JsonLexer
 from pygments.formatters import Terminal256Formatter
 
-
 from polyswarm.formatters import base
+
+
+class ClickFormatter(Terminal256Formatter):
+    def format_unencoded(self, tokensource, outfile):
+        # https://github.com/pygments/pygments/blob/35544e2fc6eed0ce4a27ec7285aac71ff0ddc473/pygments/formatters/terminal256.py#L244
+        for ttype, value in tokensource:
+            not_found = True
+            while ttype and not_found:
+                try:
+                    on, off = self.style_string[str(ttype)]
+                    spl = value.split('\n')
+                    for line in spl[:-1]:
+                        if line:
+                            click.echo(on + line + off, file=outfile, nl=False)
+                        outfile.write('\n')
+                    if spl[-1]:
+                        click.echo(on + spl[-1] + off, file=outfile, nl=False)
+                    not_found = False
+                except KeyError:
+                    ttype = ttype[:-1]
+            if not_found:
+                click.echo(value, file=outfile, nl=False)
 
 
 class JSONOutput(base.BaseOutput):
@@ -61,4 +82,4 @@ class PrettyJSONOutput(JSONOutput):
         formatted_json = json.dumps(json_data, indent=4, sort_keys=True)
         if not self.color:
             return formatted_json
-        return highlight(formatted_json, JsonLexer(), Terminal256Formatter(style='monokai'))
+        return highlight(formatted_json, JsonLexer(), ClickFormatter(style='monokai'), outfile=self.out)
