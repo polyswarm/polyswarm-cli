@@ -32,10 +32,10 @@ def text_instances():
     values.append(
         """============================= Artifact Instance =============================
 Scan permalink: https://polyswarm.network/scan/results/file/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
-[91mDetections: 1/1 engines reported malicious[0m
-[91m	eicar[0m: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}
-[94mScan id: 49091542211453596[0m
-[94mSHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
+Detections: 1/1 engines reported malicious
+	eicar: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}
+Scan id: 49091542211453596
+SHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
 SHA1: 3395856ce81f2b7382dee72602f798b642f14140
 MD5: 44d88612fea8a8f36de82e1278abb02f
 File type: mimetype: text/plain, extended_info: EICAR virus test files
@@ -46,7 +46,7 @@ Status: Assertion window closed
 Filename: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
 Community: gamma
 Country: 
-[91mPolyScore: 0.50000000000000000000[0m
+PolyScore: 0.50000000000000000000
 
 """)
     return values
@@ -123,7 +123,7 @@ def text_metadata():
     values = []
     values.append(
         """============================= Metadata =============================
-[94mArtifact id: 19021969312842541[0m
+Artifact id: 19021969312842541
 Created: 2020-01-14 17:48:55.854940+00:00
 SHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
 SHA1: 3395856ce81f2b7382dee72602f798b642f14140
@@ -178,10 +178,10 @@ def text_live_results():
         """Match on rule eicar_substring_test
 ============================= Artifact Instance =============================
 Scan permalink: https://polyswarm.network/scan/results/file/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
-[91mDetections: 1/1 engines reported malicious[0m
-[91m	eicar[0m: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}
-[94mScan id: 49091542211453596[0m
-[94mSHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
+Detections: 1/1 engines reported malicious
+	eicar: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}
+Scan id: 49091542211453596
+SHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
 SHA1: 3395856ce81f2b7382dee72602f798b642f14140
 MD5: 44d88612fea8a8f36de82e1278abb02f
 File type: mimetype: text/plain, extended_info: EICAR virus test files
@@ -192,7 +192,7 @@ Status: Assertion window closed
 Filename: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
 Community: gamma
 Country: 
-[91mPolyScore: 0.50000000000000000000[0m
+PolyScore: 0.50000000000000000000
 
 """)
     return values
@@ -230,10 +230,10 @@ def text_hisotrical_results():
         """Match on rule eicar_substring_test
 ============================= Artifact Instance =============================
 Scan permalink: https://polyswarm.network/scan/results/file/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
-[91mDetections: 1/1 engines reported malicious[0m
-[91m	eicar[0m: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}
-[94mScan id: 49091542211453596[0m
-[94mSHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f[0m
+Detections: 1/1 engines reported malicious
+	eicar: Malicious, metadata: {"malware_family": "Eicar Test File", "scanner": {"environment": {"architecture": "x86_64", "operating_system": "Linux"}}}
+Scan id: 49091542211453596
+SHA256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
 SHA1: 3395856ce81f2b7382dee72602f798b642f14140
 MD5: 44d88612fea8a8f36de82e1278abb02f
 File type: mimetype: text/plain, extended_info: EICAR virus test files
@@ -244,7 +244,7 @@ Status: Assertion window closed
 Filename: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
 Community: gamma
 Country: 
-[91mPolyScore: 0.50000000000000000000[0m
+PolyScore: 0.50000000000000000000
 
 """)
     return values
@@ -262,7 +262,7 @@ def hunts(test):
 def text_hunts():
     values = []
     values.append(
-        """[94mHunt Id: 61210404295535902[0m
+        """Hunt Id: 61210404295535902
 Active: True
 Created at: 2019-11-13 16:27:45.013226
 
@@ -273,8 +273,8 @@ Created at: 2019-11-13 16:27:45.013226
 def text_detele_hunts():
     values = []
     values.append(
-        """[93mSuccessfully deleted Hunt:[0m
-[94mHunt Id: 61210404295535902[0m
+        """Successfully deleted Hunt:
+Hunt Id: 61210404295535902
 Active: True
 Created at: 2019-11-13 16:27:45.013226
 

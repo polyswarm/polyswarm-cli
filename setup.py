@@ -21,6 +21,7 @@ setup(
     install_requires=[
         'polyswarm-api>=2.1.2<3',
         'click~=7.0',
+        'colorama~=0.4.3',
         'future~=0.18.2',
         'click-log~=0.3.2',
         'pygments~=2.5.2',

@@ -15,16 +15,16 @@ from polyswarm_api import exceptions as api_exceptions
 from polyswarm import exceptions
 from polyswarm.polyswarm import Polyswarm
 from polyswarm.formatters import formatters
-from .utils import validate_key
-from .hunt import live, historical
-from .scan import scan, lookup, wait, rescan, rescan_id
-from .download import download, cat, stream
-from .search import search
-from .rules import rules
-from .links import link
-from .tags import tag
-from .families import family
-from .metadata import metadata
+from polyswarm.client.utils import validate_key
+from polyswarm.client.hunt import live, historical
+from polyswarm.client.scan import scan, lookup, wait, rescan, rescan_id
+from polyswarm.client.download import download, cat, stream
+from polyswarm.client.search import search
+from polyswarm.client.rules import rules
+from polyswarm.client.links import link
+from polyswarm.client.tags import tag
+from polyswarm.client.families import family
+from polyswarm.client.metadata import metadata
 
 logger = logging.getLogger(__name__)
 
@@ -128,11 +128,7 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     if ctx.invoked_subcommand is None:
         return
 
-    # only allow color for stdout
-    if output_file is not None:
-        color = False
-    else:
-        output_file = click.get_text_stream('stdout')
+    output_file = output_file or click.get_text_stream('stdout')
 
     ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community, parallel=parallel)
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
