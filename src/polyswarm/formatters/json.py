@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 import json
 from pygments import highlight
 from pygments.lexers import JsonLexer
-from pygments.formatters import TerminalTrueColorFormatter
+from pygments.formatters import Terminal256Formatter
 
 
 from . import base
@@ -27,7 +27,8 @@ class JSONOutput(base.BaseOutput):
         self.out.write(self._to_json(result.json) + '\n')
 
     def local_artifact(self, artifact):
-        self.out.write(json.dumps({'hash': artifact.artifact_name, 'path': artifact.path}, sort_keys=True)+'\n')
+        self.out.write(json.dumps(
+            {'hash': artifact.artifact_name, 'path': artifact.path}, sort_keys=True)+'\n')
 
     def ruleset(self, result, contents=False):
         self.out.write(self._to_json(result.json) + '\n')
@@ -56,4 +57,4 @@ class PrettyJSONOutput(JSONOutput):
         formatted_json = json.dumps(json_data, indent=4, sort_keys=True)
         if not self.color:
             return formatted_json
-        return highlight(formatted_json, JsonLexer(), TerminalTrueColorFormatter(style='monokai'))
+        return highlight(formatted_json, JsonLexer(), Terminal256Formatter(style='monokai'))
