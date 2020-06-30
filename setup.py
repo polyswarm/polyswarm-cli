@@ -26,6 +26,7 @@ setup(
         'click-log~=0.3.2',
         'pygments~=2.5.2',
     ],
+    extras_require={':python_version < "3.0"': ['futures~=3.3.0']},
     include_package_data=True,
     packages=find_packages('src'),
     package_dir={'': 'src'},
