@@ -115,7 +115,7 @@ class ExceptionHandlingGroup(click.Group):
 @click.version_option(polyswarm.__version__, '--version', prog_name='polyswarm-cli')
 @click.version_option(lambda: polyswarm_api.__version__, '--api-version', prog_name='polyswarm-api')
 @click.pass_context
-def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose, community, parallel):
+def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verbose, community, parallel):
     """
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
@@ -142,4 +142,4 @@ commands = [
 ]
 
 for command in commands:
-    polyswarm.add_command(command)
+    polyswarm_cli.add_command(command)
