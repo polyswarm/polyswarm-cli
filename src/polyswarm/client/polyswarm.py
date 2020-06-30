@@ -12,6 +12,7 @@ from click_log import core
 from click.exceptions import Exit, ClickException
 from polyswarm_api import exceptions as api_exceptions
 
+import polyswarm
 from polyswarm import exceptions
 from polyswarm.polyswarm import Polyswarm
 from polyswarm.formatters import formatters
@@ -29,7 +30,6 @@ from polyswarm.client.metadata import metadata
 logger = logging.getLogger(__name__)
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-VERSION = '2.1.3'
 
 
 def setup_logging(verbosity):
@@ -112,7 +112,7 @@ class ExceptionHandlingGroup(click.Group):
 @click.option('-v', '--verbose', default=0, count=True)
 @click.option('-c', '--community', default='default', envvar='POLYSWARM_COMMUNITY', help='Community to use.')
 @click.option('--parallel', default=8, help='Number of threads to be used in parallel http requests.')
-@click.version_option(VERSION, '--version', prog_name='polyswarm-cli')
+@click.version_option(polyswarm.__version__, '--version', prog_name='polyswarm-cli')
 @click.version_option(lambda: polyswarm_api.__version__, '--api-version', prog_name='polyswarm-api')
 @click.pass_context
 def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose, community, parallel):
@@ -121,7 +121,8 @@ def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose,
     with the PolySwarm network to scan files, search hashes, and more.
     """
     setup_logging(verbose)
-    logger.info('Running polyswarm-cli version %s with polyswarm-api version %s', VERSION, polyswarm_api.__version__)
+    logger.info('Running polyswarm-cli version %s with polyswarm-api version %s',
+                polyswarm.__version__, polyswarm_api.__version__)
 
     ctx.obj = {}
 
