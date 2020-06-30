@@ -11,4 +11,3 @@ pygments==2.5.2
 mock==3.0.4
 responses==0.10.6
 colorama~=0.4.3
-futures~=3.3.0
