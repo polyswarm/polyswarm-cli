@@ -26,7 +26,10 @@ setup(
         'click-log~=0.3.2',
         'pygments~=2.5.2',
     ],
-    extras_require={':python_version < "3.0"': ['futures~=3.3.0']},
+    extras_require={
+        ':python_version < "3.0"': ['futures~=3.3.0'],
+        'yara': ['yara-python==3.11.0'],
+    },
     include_package_data=True,
     packages=find_packages('src'),
     package_dir={'': 'src'},
@@ -46,7 +49,4 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
-    extras_require={
-        'yara': ['yara-python==3.11.0']
-    }
 )
