@@ -53,10 +53,12 @@ test-run35:
   image: python:3.5
   stage: test
   before_script:
-    - pip3 install --upgrade pip
+    - pip install --upgrade pip
   script:
+    - pip install $POLYSWARM_API_ARCHIVE/$CI_COMMIT_BRANCH.zip || pip install $POLYSWARM_API_ARCHIVE/develop.zip
     - pip install -r requirements.txt
-    - ./tests/run.sh
+    - pip install .
+    - pytest -s -v
 
 test-run36:
   tags:
@@ -64,10 +66,12 @@ test-run36:
   image: python:3.6
   stage: test
   before_script:
-    - pip3 install --upgrade pip
+    - pip install --upgrade pip
   script:
+    - pip install $POLYSWARM_API_ARCHIVE/$CI_COMMIT_BRANCH.zip || pip install $POLYSWARM_API_ARCHIVE/develop.zip
     - pip install -r requirements.txt
-    - ./tests/run.sh
+    - pip install .
+    - pytest -s -v
 
 ###############################################################
 # Release Stage
