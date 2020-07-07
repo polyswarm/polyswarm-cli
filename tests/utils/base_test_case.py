@@ -69,7 +69,7 @@ class BaseTestCase(TestCase):
                        '--api-key', self.test_api_key,
                        '-u', self.api_url,
                    ] + commands
-        return self.test_runner.invoke(client.polyswarm, commands, catch_exceptions=False)
+        return self.test_runner.invoke(client.polyswarm_cli, commands, catch_exceptions=False)
 
     def _assert_text_result(self, result, expected_output=None, expected_return_code=None):
         result_output = self._get_result_output(result)

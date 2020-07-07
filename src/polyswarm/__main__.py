@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 import os
 import sys
-from polyswarm.client.polyswarm import polyswarm
+from polyswarm.client.polyswarm import polyswarm_cli
 
 
 def main():
@@ -13,7 +13,7 @@ def main():
     if entrypoint_name == '__main__.py':
         entrypoint_name = 'polyswarm'
 
-    polyswarm(prog_name=entrypoint_name, obj={})
+    polyswarm_cli(prog_name=entrypoint_name, obj={})
 
 
 if __name__ == '__main__':
