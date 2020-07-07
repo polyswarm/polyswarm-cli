@@ -42,8 +42,8 @@ test-run27:
     - pip install --upgrade pip
   script:
     - pip install -r requirements.txt
-    # install the version from the related branch or let the version in requirements.txt be used
-    - pip install $POLYSWARM_API_ARCHIVE/$CI_COMMIT_BRANCH.zip || true
+    # install the version from the related branch or the one in the develop branch
+    - pip install $POLYSWARM_API_ARCHIVE/$CI_COMMIT_BRANCH.zip || pip install $POLYSWARM_API_ARCHIVE/develop.zip
     - pip install .
     - pytest -s -v
 
