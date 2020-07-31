@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import logging
 try:
     from json import JSONDecodeError
@@ -6,29 +7,29 @@ except ImportError:
 
 import click
 import click_log
+import polyswarm_api
 from click_log import core
 from click.exceptions import Exit, ClickException
 from polyswarm_api import exceptions as api_exceptions
-from polyswarm_api.api import PolyswarmAPI
-from polyswarm.formatters import formatters
-from polyswarm_api import get_version as get_polyswarm_api_version
 
+import polyswarm
 from polyswarm import exceptions
-from .utils import validate_key
-from .hunt import live, historical
-from .scan import scan, lookup, wait, rescan, rescan_id
-from .download import download, cat, stream
-from .search import search
-from .rules import rules
-from .links import link
-from .tags import tag
-from .families import family
-from .metadata import metadata
+from polyswarm.polyswarm import Polyswarm
+from polyswarm.formatters import formatters
+from polyswarm.client.utils import validate_key
+from polyswarm.client.hunt import live, historical
+from polyswarm.client.scan import scan, lookup, wait, rescan, rescan_id
+from polyswarm.client.download import download, cat, stream
+from polyswarm.client.search import search
+from polyswarm.client.rules import rules
+from polyswarm.client.links import link
+from polyswarm.client.tags import tag
+from polyswarm.client.families import family
+from polyswarm.client.metadata import metadata
 
 logger = logging.getLogger(__name__)
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-VERSION = '2.1.3'
 
 
 def setup_logging(verbosity):
@@ -104,43 +105,34 @@ class ExceptionHandlingGroup(click.Group):
               default='', callback=validate_key, envvar='POLYSWARM_API_KEY')
 @click.option('-u', '--api-uri', default='https://api.polyswarm.network/v2',
               envvar='POLYSWARM_API_URI', help='The API endpoint (ADVANCED).')
-@click.option('-o', '--output-file', type=click.File('w'), help='Path to output file.')
+@click.option('-o', '--output-file', type=click.File('w', encoding='utf8'), help='Path to output file.')
 @click.option('--output-format', '--fmt', default='text', type=click.Choice(formatters.keys()),
               help='Output format. Human-readable text or JSON.')
 @click.option('--color/--no-color', default=True, help='Use colored output in text mode.')
 @click.option('-v', '--verbose', default=0, count=True)
 @click.option('-c', '--community', default='default', envvar='POLYSWARM_COMMUNITY', help='Community to use.')
-@click.option('--advanced-disable-version-check/--advanced-enable-version-check', default=False,
-              help='Enable/disable GitHub release version check.')
-@click.option('--validate', default=False, is_flag=True,
-              envvar='POLYSWARM_VALIDATE', help='Validate incoming schemas (note: slow).')
 @click.option('--parallel', default=8, help='Number of threads to be used in parallel http requests.')
-@click.version_option(VERSION, '--version', prog_name='polyswarm-cli')
-@click.version_option(get_polyswarm_api_version(), '--api-version', prog_name='polyswarm-api')
+@click.version_option(polyswarm.__version__, '--version', prog_name='polyswarm-cli')
+@click.version_option(lambda: polyswarm_api.__version__, '--api-version', prog_name='polyswarm-api')
 @click.pass_context
-def polyswarm(ctx, api_key, api_uri, output_file, output_format, color, verbose, community,
-              advanced_disable_version_check, validate, parallel):
+def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verbose, community, parallel):
     """
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
     """
     setup_logging(verbose)
-    logger.info('Running polyswarm-cli version %s with polyswarm-api version %s', VERSION, get_polyswarm_api_version())
+    logger.info('Running polyswarm-cli version %s with polyswarm-api version %s',
+                polyswarm.__version__, polyswarm_api.__version__)
 
     ctx.obj = {}
 
     if ctx.invoked_subcommand is None:
         return
 
-    # only allow color for stdout
-    if output_file is not None:
-        color = False
-    else:
-        output_file = click.get_text_stream('stdout')
+    output_file = output_file or click.get_text_stream('stdout')
 
-    ctx.obj['api'] = PolyswarmAPI(api_key, api_uri, community=community, validate_schemas=validate)
+    ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community, parallel=parallel)
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
-    ctx.obj['parallel'] = parallel
 
 
 commands = [
@@ -150,4 +142,4 @@ commands = [
 ]
 
 for command in commands:
-    polyswarm.add_command(command)
+    polyswarm_cli.add_command(command)

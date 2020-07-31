@@ -1,4 +1,7 @@
+from __future__ import absolute_import
 import click
+
+from polyswarm.client import utils
 
 
 @click.group(short_help='Interact with Tag links in Polyswarm.')
@@ -7,11 +10,12 @@ def link():
 
 
 @link.command('set', short_help='Link and unlink tags/families with an artifact.')
-@click.argument('sha256', type=click.STRING)
+@click.argument('sha256', type=click.STRING, required=True)
 @click.option('-t', '--tag', type=click.STRING, multiple=True)
 @click.option('-f', '--family', type=click.STRING, multiple=True)
 @click.option('-r', '--remove', type=click.BOOL, is_flag=True)
 @click.pass_context
+@utils.any_provided('tag', 'family')
 def update(ctx, sha256, tag, family, remove):
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -24,7 +28,7 @@ def update(ctx, sha256, tag, family, remove):
 
 
 @link.command('view', short_help='View the tags/families linked with an artifact.')
-@click.argument('sha256', type=click.STRING)
+@click.argument('sha256', type=click.STRING, required=True)
 @click.pass_context
 def view(ctx, sha256):
     api = ctx.obj['api']
@@ -42,10 +46,9 @@ def view(ctx, sha256):
 @click.option('-y', '--or-family', type=click.STRING, multiple=True,
               help='At least one of the provided or-families must be associated with the artifact.')
 @click.pass_context
+@utils.any_provided('tag', 'family', 'or_tag', 'or_family')
 def list_links(ctx, tag, family, or_tag, or_family):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    if not (tag or family or or_tag or or_family):
-        raise click.exceptions.BadArgumentUsage('Tags or families must be provided.')
     for tag_ in api.tag_link_list(tag, family, or_tag, or_family):
         output.tag_link(tag_)

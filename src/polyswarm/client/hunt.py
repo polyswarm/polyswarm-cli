@@ -1,9 +1,10 @@
+from __future__ import absolute_import
 import logging
 from os import path
 
 import click
 
-from . import utils
+from polyswarm.client import utils
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ def historical():
 @click.option('-d', '--disabled', is_flag=True, help='If provided, create the live hunt with active=False.')
 @click.option('-n', '--name', help='Explicitly set the ruleset name for this hunt.')
 @click.pass_context
+@utils.any_provided('rule_file', 'rule_id')
 def live_create(ctx, rule_file, rule_id, disabled, name):
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -33,8 +35,6 @@ def live_create(ctx, rule_file, rule_id, disabled, name):
         params['ruleset_name'] = path.basename(rule_file.name)
     elif rule_id:
         rule = rule_id
-    else:
-        raise click.exceptions.BadArgumentUsage('One of rule_file argument or --rule-id option should be provided.')
     if name:
         params['ruleset_name'] = name
     params['active'] = not disabled
@@ -43,26 +43,22 @@ def live_create(ctx, rule_file, rule_id, disabled, name):
 
 
 @live.command('start', short_help='Start an existing live hunt.')
-@click.argument('hunt_id', nargs=-1, type=click.INT)
+@click.argument('hunt_id', nargs=-1, type=click.INT, required=True)
 @click.pass_context
 def live_start(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    kwargs = [dict(hunt=h) for h in hunt_id]
-    args = [(True,)]*len(kwargs)
-    for result in utils.parallel_executor(api.live_update, args_list=args, kwargs_list=kwargs):
+    for result in api.live_start(hunt_id):
         output.hunt(result)
 
 
-@live.command('stop', short_help='Start an existing live hunt.')
+@live.command('stop', short_help='Stop an existing live hunt.')
 @click.argument('hunt_id', nargs=-1, type=click.INT)
 @click.pass_context
 def live_stop(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    kwargs = [dict(hunt=h) for h in hunt_id] if hunt_id else [dict(hunt_id=None)]
-    args = [(False,)] * len(kwargs)
-    for result in utils.parallel_executor(api.live_update, args_list=args, kwargs_list=kwargs):
+    for result in api.live_stop(hunt_id):
         output.hunt(result)
 
 
@@ -72,8 +68,7 @@ def live_stop(ctx, hunt_id):
 def live_delete(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    kwargs = [dict(hunt=h) for h in hunt_id]
-    for result in utils.parallel_executor(api.live_delete, kwargs_list=kwargs):
+    for result in api.live_delete_multiple(hunt_id):
         output.hunt_deletion(result)
 
 
@@ -95,7 +90,7 @@ def live_list(ctx, since, all_):
 
 
 @live.command('results', short_help='Get results from live hunt.')
-@click.argument('hunt_id', nargs=-1, type=click.INT)
+@click.argument('hunt_id', nargs=-1, type=click.INT, required=True)
 @click.option('-s', '--since', type=click.INT, default=1440,
               help='How far back in seconds to request results (default: 1440).')
 @click.option('-t', '--tag', help='Filter results on this tag.')
@@ -104,9 +99,7 @@ def live_list(ctx, since, all_):
 def live_results(ctx, hunt_id, since, tag, rule_name):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    args = [(h,) for h in hunt_id] if hunt_id else [(None,)]
-    kwargs = [dict(since=since, tag=tag, rule_name=rule_name)]*len(args)
-    for result in utils.parallel_executor_iterable_results(api.live_results, args_list=args, kwargs_list=kwargs):
+    for result in api.live_results_multiple(hunt_id, since, tag, rule_name):
         output.hunt_result(result)
 
 
@@ -115,6 +108,7 @@ def live_results(ctx, hunt_id, since, tag, rule_name):
 @click.option('-r', '--rule-id', type=click.INT, help='If provided, create the historical hunt from the existing ruleset.')
 @click.option('-n', '--name', help='Explicitly set the ruleset name for this hunt.')
 @click.pass_context
+@utils.any_provided('rule_file', 'rule_id')
 def historical_start(ctx, rule_file, rule_id, name):
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -124,8 +118,6 @@ def historical_start(ctx, rule_file, rule_id, name):
         params['ruleset_name'] = path.basename(rule_file.name)
     elif rule_id:
         rule = rule_id
-    else:
-        raise click.exceptions.BadArgumentUsage('One of rule_file argument or --rule-id option should be provided.')
     if name:
         params['ruleset_name'] = name
     result = api.historical_create(rule, **params)
@@ -133,13 +125,12 @@ def historical_start(ctx, rule_file, rule_id, name):
 
 
 @historical.command('delete', short_help='Delete the historical hunt associated with the given hunt_id.')
-@click.argument('hunt_id', nargs=-1, type=click.INT)
+@click.argument('hunt_id', nargs=-1, type=click.INT, required=True)
 @click.pass_context
 def historical_delete(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    kwargs = [dict(hunt=h) for h in hunt_id]
-    for result in utils.parallel_executor(api.historical_delete, kwargs_list=kwargs):
+    for result in api.historical_delete_multiple(hunt_id):
         output.hunt_deletion(result)
 
 
@@ -158,14 +149,12 @@ def historical_list(ctx, since):
 
 
 @historical.command('results', short_help='Get results from historical hunt.')
-@click.argument('hunt_id', nargs=-1, type=click.INT)
+@click.argument('hunt_id', nargs=-1, type=click.INT, required=True)
 @click.option('-t', '--tag', help='Filter results on this tag.')
 @click.option('-r', '--rule-name', help='Filter results on this rule name.')
 @click.pass_context
 def historical_results(ctx, hunt_id, tag, rule_name):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    args = [(h,) for h in hunt_id] if hunt_id else [(None,)]
-    kwargs = [dict(tag=tag, rule_name=rule_name)] * len(args)
-    for result in utils.parallel_executor_iterable_results(api.historical_results, args_list=args, kwargs_list=kwargs):
+    for result in api.historical_results_multiple(hunt_id, tag, rule_name):
         output.hunt_result(result)

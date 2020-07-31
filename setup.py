@@ -9,7 +9,7 @@ with open('README.md', 'r') as readme:
 
 setup(
     name='polyswarm',
-    version='2.1.3',
+    version='2.2.0',
     description='CLI for using the PolySwarm Customer APIs',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -19,18 +19,23 @@ setup(
     license='MIT',
     python_requires='>=2.7,<4',
     install_requires=[
-        'polyswarm-api>=2.1.2<3',
+        'polyswarm-api~=2.2.0',
         'click~=7.0',
+        'colorama~=0.4.3',
         'future~=0.18.2',
         'click-log~=0.3.2',
         'pygments~=2.5.2',
     ],
+    extras_require={
+        ':python_version < "3.0"': ['futures~=3.3.0'],
+        'yara': ['yara-python==3.11.0'],
+    },
     include_package_data=True,
     packages=find_packages('src'),
     package_dir={'': 'src'},
     entry_points={
         'console_scripts': [
-            'polyswarm=polyswarm.__main__:polyswarm',
+            'polyswarm=polyswarm.__main__:polyswarm_cli',
         ],
     },
     classifiers=[
@@ -44,7 +49,4 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
-    extras_require={
-        'yara': ['yara-python==3.11.0']
-    }
 )

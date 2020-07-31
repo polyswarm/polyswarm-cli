@@ -2,7 +2,9 @@ from __future__ import absolute_import, unicode_literals
 import logging
 import json
 
-from . import base
+import click
+
+from polyswarm.formatters import base
 
 
 logger = logging.getLogger(__name__)
@@ -16,14 +18,14 @@ class SHA256Output(base.BaseOutput):
         return json.dumps(result.json['result'])
 
     def artifact_instance(self, instance, timeout=False):
-        self.out.write(instance.sha256 + '\n')
+        click.echo(instance.sha256, file=self.out)
 
     def hunt_result(self, result):
-        self.out.write(result.artifact.sha256 + '\n')
+        click.echo(result.artifact, file=self.out)
 
     def metadata(self, result):
         if result.sha256:
-            self.out.write(result.sha256 + '\n')
+            click.echo(result.sha256, file=self.out)
         else:
             logger.warning('Could not render metadata as sha256, value is %s', result.sha256)
 
@@ -36,14 +38,14 @@ class SHA1Output(base.BaseOutput):
         return json.dumps(result.json['result'])
 
     def artifact_instance(self, result, timeout=False):
-        self.out.write(result.sha1 + '\n')
+        click.echo(result.sha1, file=self.out)
 
     def hunt_result(self, result):
-        self.out.write(result.artifact.sha1 + '\n')
+        click.echo(result.artifact, file=self.out)
 
     def metadata(self, result):
         if result.sha1:
-            self.out.write(result.sha1 + '\n')
+            click.echo(result.sha1, file=self.out)
         else:
             logger.warning('Could not render metadata as sha1, value is %s', result.sha1)
 
@@ -56,13 +58,13 @@ class MD5Output(base.BaseOutput):
         return json.dumps(result.json['result'])
 
     def artifact_instance(self, result, timeout=False):
-        self.out.write(result.md5 + '\n')
+        click.echo(result.md5, file=self.out)
 
     def hunt_result(self, result):
-        self.out.write(result.artifact.md5 + '\n')
+        click.echo(result.artifact, file=self.out)
 
     def metadata(self, result):
         if result.md5:
-            self.out.write(result.md5 + '\n')
+            click.echo(result.md5, file=self.out)
         else:
             logger.warning('Could not render metadata as md5, value is %s', result.md5)

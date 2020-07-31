@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import click
 
 
@@ -7,7 +8,7 @@ def family():
 
 
 @family.command('update', short_help='Mark a family as emerging.')
-@click.argument('name', type=click.STRING)
+@click.argument('name', type=click.STRING, required=True)
 @click.option('-e', '--emerging', type=click.BOOL)
 @click.pass_context
 def update(ctx, name, emerging):
@@ -17,7 +18,7 @@ def update(ctx, name, emerging):
 
 
 @family.command('create', short_help='Create a family.')
-@click.argument('name', type=click.STRING)
+@click.argument('name', type=click.STRING, required=True)
 @click.pass_context
 def create(ctx, name):
     api = ctx.obj['api']
@@ -26,7 +27,7 @@ def create(ctx, name):
 
 
 @family.command('delete', short_help='Delete a family.')
-@click.argument('name', type=click.STRING)
+@click.argument('name', type=click.STRING, required=True)
 @click.pass_context
 def delete(ctx, name):
     api = ctx.obj['api']
@@ -35,7 +36,7 @@ def delete(ctx, name):
 
 
 @family.command('view', short_help='View a family.')
-@click.argument('name', type=click.STRING)
+@click.argument('name', type=click.STRING, required=True)
 @click.pass_context
 def view(ctx, name):
     api = ctx.obj['api']
