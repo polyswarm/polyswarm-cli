@@ -21,7 +21,7 @@ class SHA256Output(base.BaseOutput):
         click.echo(instance.sha256, file=self.out)
 
     def hunt_result(self, result):
-        click.echo(result.artifact, file=self.out)
+        click.echo(result.artifact.sha256, file=self.out)
 
     def metadata(self, result):
         if result.sha256:
@@ -41,7 +41,7 @@ class SHA1Output(base.BaseOutput):
         click.echo(result.sha1, file=self.out)
 
     def hunt_result(self, result):
-        click.echo(result.artifact, file=self.out)
+        click.echo(result.artifact.sha1, file=self.out)
 
     def metadata(self, result):
         if result.sha1:
@@ -61,7 +61,7 @@ class MD5Output(base.BaseOutput):
         click.echo(result.md5, file=self.out)
 
     def hunt_result(self, result):
-        click.echo(result.artifact, file=self.out)
+        click.echo(result.artifact.md5, file=self.out)
 
     def metadata(self, result):
         if result.md5:
