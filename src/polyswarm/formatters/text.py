@@ -102,6 +102,8 @@ class TextOutput(base.BaseOutput):
             output.append(self._red('Status: Failed'))
         elif instance.window_closed:
             output.append(self._white('Status: Assertion window closed'))
+        elif instance.community == 'stream':
+            output.append(self._white('Status: This artifact has not been scanned. You can trigger a scan now.'))
         elif timeout:
             output.append(self._yellow('Status: Lookup timed-out, please retry'))
         else:
