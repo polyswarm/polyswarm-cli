@@ -61,6 +61,14 @@ def metadata(ctx, query_string):
         output.metadata(metadata_result)
 
 
+@search.command('mapping', short_help='Retrieve the metadata search mapping.')
+@click.pass_context
+def mapping(ctx):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    output.mapping(api.metadata_mapping())
+
+
 @search.command('scans', short_help='Search for all scans or a particular artifact.')
 @click.argument('hash_value', required=True)
 @click.pass_context

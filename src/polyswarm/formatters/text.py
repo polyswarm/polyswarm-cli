@@ -183,6 +183,22 @@ class TextOutput(base.BaseOutput):
                                   .format(artifact.artifact_name, artifact.name)))
         return self._output(output, write)
 
+    def _dfs_mapping_render(self, output, path, tree, depth=0):
+        tree_string = (' | ' * (depth - 1)) + ' +-' if depth > 0 else ''
+        if not tree:
+            output.append(self._white(tree_string + path))
+        else:
+            if path:
+                output.append(self._white(tree_string + path))
+            for k, v in tree.items():
+                self._dfs_mapping_render(output, k, v, depth=depth + 1)
+
+    def mapping(self, mapping, write=True):
+        output = []
+        output.append(self._white('============================= Mapping ============================='))
+        self._dfs_mapping_render(output, '', mapping.json)
+        return self._output(output, write)
+
     def metadata(self, instance, write=True):
         output = []
         output.append(self._white('============================= Metadata ============================='))
@@ -246,7 +262,6 @@ class TextOutput(base.BaseOutput):
             self._close_group()
 
         return self._output(output, write)
-
 
     @is_grouped
     def _white(self, text):
