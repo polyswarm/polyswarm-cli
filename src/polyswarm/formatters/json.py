@@ -119,6 +119,9 @@ class JSONOutput(base.BaseOutput):
     def tag(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 
+    def mapping(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
+
 
 class PrettyJSONOutput(JSONOutput):
     name = 'pretty-json'
