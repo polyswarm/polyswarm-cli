@@ -185,18 +185,19 @@ class TextOutput(base.BaseOutput):
 
     def _dfs_mapping_render(self, output, path, tree, depth=0):
         tree_string = (' | ' * (depth - 1)) + ' +-' if depth > 0 else ''
+        current_path = '.'.join(path)
         if not tree:
-            output.append(self._white(tree_string + path))
+            output.append(self._white(tree_string + current_path))
         else:
             if path:
-                output.append(self._white(tree_string + path))
+                output.append(self._white(tree_string + current_path))
             for k, v in tree.items():
-                self._dfs_mapping_render(output, k, v, depth=depth + 1)
+                self._dfs_mapping_render(output, path + [k], v, depth=depth + 1)
 
     def mapping(self, mapping, write=True):
         output = []
         output.append(self._white('============================= Mapping ============================='))
-        self._dfs_mapping_render(output, '', mapping.json)
+        self._dfs_mapping_render(output, [], mapping.json)
         return self._output(output, write)
 
     def metadata(self, instance, write=True):

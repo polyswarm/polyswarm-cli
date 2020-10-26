@@ -23,6 +23,9 @@ class SHA256Output(base.BaseOutput):
     def hunt_result(self, result):
         click.echo(result.artifact.sha256, file=self.out)
 
+    def tag_link(self, result):
+        click.echo(result.sha256, file=self.out)
+
     def metadata(self, result):
         if result.sha256:
             click.echo(result.sha256, file=self.out)
