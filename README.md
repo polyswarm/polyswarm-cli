@@ -27,7 +27,7 @@ If you want yara validation (optional):
 ## Usage
 
 ### Command line client
-See the [Polyswarm Customer CLI documentation](https://docs.polyswarm.io/docs/polyswarm-customer-cli) for usage guidance.
+See the [Polyswarm Customer CLI documentation](https://docs.polyswarm.io/consumers/polyswarm-customer-cli-v2) for usage guidance.
 
 ### Using as a package
 
