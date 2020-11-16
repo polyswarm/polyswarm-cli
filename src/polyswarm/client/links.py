@@ -13,16 +13,18 @@ def link():
 @click.argument('sha256', type=click.STRING, required=True)
 @click.option('-t', '--tag', type=click.STRING, multiple=True)
 @click.option('-f', '--family', type=click.STRING, multiple=True)
+@click.option('-e', '--emerging', type=click.BOOL)
 @click.option('-r', '--remove', type=click.BOOL, is_flag=True)
 @click.pass_context
-@utils.any_provided('tag', 'family')
-def update(ctx, sha256, tag, family, remove):
+@utils.any_provided('tag', 'family', 'emerging')
+def update(ctx, sha256, tag, family, emerging, remove):
     api = ctx.obj['api']
     output = ctx.obj['output']
     output.tag_link(api.tag_link_update(
         sha256,
         tags=tag,
         families=family,
+        emerging=emerging,
         remove=remove,
     ))
 
