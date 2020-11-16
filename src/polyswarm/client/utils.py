@@ -66,7 +66,7 @@ def any_provided(*required):
     def wrap(f):
         @functools.wraps(f)
         def any_validator(ctx, **kwargs):
-            if not any(kwargs[r] for r in required):
+            if not any(r in kwargs for r in required):
                 required_commands = {c.name: c for c in ctx.command.params[::-1] if c.name in required}
                 if len(required) > 1:
                     human_names = [c.human_readable_name for c in required_commands.values()]
