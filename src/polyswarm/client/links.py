@@ -10,23 +10,27 @@ def link():
 
 
 @link.command('set', short_help='Link and unlink tags/families with an artifact.')
-@click.argument('sha256', type=click.STRING, required=True)
+@click.argument('sha256', type=click.STRING, nargs=-1)
+@click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
 @click.option('-t', '--tag', type=click.STRING, multiple=True)
 @click.option('-f', '--family', type=click.STRING, multiple=True)
 @click.option('-e', '--emerging', type=click.BOOL)
 @click.option('-r', '--remove', type=click.BOOL, is_flag=True)
 @click.pass_context
 @utils.any_provided('tag', 'family', 'emerging')
-def update(ctx, sha256, tag, family, emerging, remove):
+@utils.any_provided('sha256', 'hash_file')
+def update(ctx, sha256, hash_file, tag, family, emerging, remove):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    output.tag_link(api.tag_link_update(
-        sha256,
-        tags=tag,
-        families=family,
-        emerging=emerging,
-        remove=remove,
-    ))
+    hashes = utils.parse_hashes(sha256, hash_file=hash_file)
+    for tag_link in api.tag_link_multiple(
+            hashes,
+            tags=tag,
+            families=family,
+            emerging=emerging,
+            remove=remove,
+    ):
+        output.tag_link(tag_link)
 
 
 @link.command('view', short_help='View the tags/families linked with an artifact.')

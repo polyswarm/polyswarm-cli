@@ -256,3 +256,22 @@ class Polyswarm(PolyswarmAPI):
         for result in utils.parallel_executor_iterable_results(self.historical_results, args_list=args, kwargs_list=kwargs):
             yield result
 
+    def tag_link_multiple(self, hashes, tags=None, families=None, emerging=None, remove=False):
+        """
+        Update a TagLink with the given type or value by its id.
+
+        :param hashes: A list of sha256 of the artifacts.
+        :param tags: A list of tags to be added or removed.
+        :param families: A list of families to be added or removed.
+        :param emerging: A boolean indicating if the artifacts should be flagged as emerging.
+        :param remove: A flag indicating if we should remove the provided tags/families.
+        :return: A TagLink resource
+        """
+        args = [(h,) for h in hashes]
+        kwargs = [dict(tags=tags, families=families, emerging=emerging, remove=remove)] * len(args)
+        for tag_link in utils.parallel_executor(
+                self.tag_link_update,
+                args_list=args,
+                kwargs_list=kwargs,
+        ):
+            yield tag_link
