@@ -19,7 +19,7 @@ class DownloadTest(BaseTestCase):
         with file_utils.temp_dir({self.test_hash_value: self.test_eicar}) as (path, files):
             with patch('polyswarm_api.api.PolyswarmAPI.download',
                        return_value=mock_polyswarm_api_results.local_artifacts(self, path, files)[0]):
-                result = self._run_cli(['download', self.test_hash_value, path])
+                result = self._run_cli(['download', '-d', path, self.test_hash_value])
                 self._assert_text_result(
                     result,
                     expected_output=mock_polyswarm_api_results.text_local_artifacts(
