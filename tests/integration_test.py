@@ -230,7 +230,7 @@ class IntegrationTest(BaseTestCase):
             url = 'https://api.polyswarm.network/v2/download/sha256/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
             responses.add(responses.GET, url, body=self.test_eicar, stream=True)
 
-            result = self._run_cli(['download', self.test_hash_value, path])
+            result = self._run_cli(['download', '-d', path, self.test_hash_value])
 
             self._assert_text_result(
                 result,

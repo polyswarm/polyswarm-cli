@@ -20,7 +20,8 @@ def parse_hashes(hashes, hash_file=None):
     hashes = list(hashes)
     if hash_file is not None:
         hashes += hash_file.readlines()
-    return hashes
+
+    return [h.strip('\n') for h in hashes]
 
 
 ####################################################
@@ -59,6 +60,10 @@ def validate_key(ctx, param, value):
     return value
 
 
+def true_value_safe_bool(value):
+    return True if isinstance(value, bool) else bool(value)
+
+
 def any_provided(*required):
     if not required:
         raise exceptions.PolyswarmException('At least one required click argument must be provided.')
@@ -66,7 +71,7 @@ def any_provided(*required):
     def wrap(f):
         @functools.wraps(f)
         def any_validator(ctx, **kwargs):
-            if not any(kwargs[r] for r in required):
+            if not any(true_value_safe_bool(kwargs[r]) for r in required):
                 required_commands = {c.name: c for c in ctx.command.params[::-1] if c.name in required}
                 if len(required) > 1:
                     human_names = [c.human_readable_name for c in required_commands.values()]

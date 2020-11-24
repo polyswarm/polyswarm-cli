@@ -162,8 +162,9 @@ class TextOutput(base.BaseOutput):
         output = []
         output.append(self._blue('SHA256: {}'.format(result.sha256)))
         output.append(self._white('First seen: {}'.format(result.first_seen)))
-        output.append(self._white('Tags:: {}'.format(result.tags)))
+        output.append(self._white('Tags: {}'.format(result.tags)))
         output.append(self._white('Families: {}'.format(result.families)))
+        output.append(self._white('Emerging: {}'.format(result.emerging)))
         return self._output(output, write)
 
     def family(self, result, write=True):

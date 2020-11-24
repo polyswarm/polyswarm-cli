@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import logging
+import os
 
 from polyswarm.client import utils
 
@@ -16,11 +17,12 @@ logger = logging.getLogger(__name__)
 @click.command('download', short_help='Download file(s).')
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5].', default=None)
+@click.option('-d', '--destination', type=click.Path(file_okay=False),
+              help='Path where to store the downloaded files.', default=os.getcwd())
 @click.argument('hash_value', nargs=-1, callback=utils.validate_hashes)
-@click.argument('destination', nargs=1, type=click.Path(file_okay=False))
 @click.pass_context
 @utils.any_provided('hash_file', 'hash_value')
-def download(ctx, hash_file, hash_type, hash_value, destination):
+def download(ctx, hash_file, hash_type, destination, hash_value):
     """
     Download files from matching hashes
     """
