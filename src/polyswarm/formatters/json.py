@@ -3,10 +3,13 @@ import json
 
 import click
 from click import termui
+from jello.cli import pyquery
 from pygments import highlight
 from pygments.lexers import JsonLexer
 from pygments.formatters import Terminal256Formatter
 from pygments.formatters.terminal256 import EscapeSequence
+import jello
+
 
 
 from polyswarm.formatters import base
@@ -82,9 +85,21 @@ class ClickFormatter(Terminal256Formatter):
 
 class JSONOutput(base.BaseOutput):
     name = 'json'
-    @staticmethod
-    def _to_json(json_data):
-        return json.dumps(json_data, sort_keys=True)
+
+    def __init__(self, output, **kwargs):
+        super(JSONOutput, self).__init__(output, **kwargs)
+        self.json_query = kwargs['json_query']
+
+
+    def _to_json(self, json_data):
+
+        js_py = json.dumps(json_data, sort_keys=True)
+        if self.json_query:
+            (output, compact, nulls, raw, lines, mono, schema, keyname_color, keyword_color, number_color, string_color,
+             arrayid_color, arraybracket_color) = pyquery(json_data, self.json_query)
+            return json.dumps(output, sort_keys=True)
+        return js_py
+
 
     def artifact_instance(self, result, timeout=False):
         click.echo(self._to_json(result.json), file=self.out)

@@ -108,6 +108,8 @@ class ExceptionHandlingGroup(click.Group):
 @click.option('-o', '--output-file', type=click.File('w', encoding='utf8'), help='Path to output file.')
 @click.option('--output-format', '--fmt', default='text', type=click.Choice(formatters.keys()),
               help='Output format. Human-readable text or JSON.')
+@click.option('-j', '--json-query', default='',
+              help='jello format query to reform JSON, only valid for --fmt json or pretty-json')
 @click.option('--color/--no-color', default=True, help='Use colored output in text mode.')
 @click.option('-v', '--verbose', default=0, count=True)
 @click.option('-c', '--community', default='default', envvar='POLYSWARM_COMMUNITY', help='Community to use.')
@@ -115,7 +117,7 @@ class ExceptionHandlingGroup(click.Group):
 @click.version_option(polyswarm.__version__, '--version', prog_name='polyswarm-cli')
 @click.version_option(lambda: polyswarm_api.__version__, '--api-version', prog_name='polyswarm-api')
 @click.pass_context
-def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verbose, community, parallel):
+def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, json_query, color, verbose, community, parallel):
     """
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
@@ -125,14 +127,17 @@ def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verb
                 polyswarm.__version__, polyswarm_api.__version__)
 
     ctx.obj = {}
+    if json_query and output_format == "text":
+        # todo should we silently flip here
+        output_format = "json"
 
     if ctx.invoked_subcommand is None:
         return
-
+    # todo check if we've got a -j and don't have a json output format
     output_file = output_file or click.get_text_stream('stdout')
 
     ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community, parallel=parallel)
-    ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
+    ctx.obj['output'] = formatters[output_format](color=color, output=output_file, json_query=json_query)
 
 
 commands = [
