@@ -100,7 +100,7 @@ class JSONOutput(base.BaseOutput):
 
     def local_artifact(self, artifact):
         click.echo(
-            json.dumps({'hash': artifact.artifact_name, 'path': artifact.path}, sort_keys=True),
+            json.dumps({'artifact_name': artifact.artifact_name, 'path': artifact.name}, sort_keys=True),
             file=self.out,
         )
 
