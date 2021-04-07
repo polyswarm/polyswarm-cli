@@ -200,7 +200,7 @@ class Polyswarm(PolyswarmAPI):
         :param hunt_id: List of hunt ids.
         :return: An iterator of hunt objects.
         """
-        kwargs = [dict(hunt=h) for h in hunt_id] if hunt_id else [dict(hunt_id=None)]
+        kwargs = [dict(hunt=h) for h in hunt_id] if hunt_id else [dict(hunt=None)]
         args = [(False,)] * len(kwargs)
         for result in utils.parallel_executor(self.live_update, args_list=args, kwargs_list=kwargs):
             yield result

@@ -322,6 +322,7 @@ def cat_request(data):
             self.status_code = status_code
             self.json = json
             self.content = content
+            self.headers = {'content-disposition': 'attachment;filename=test_cat_file'}
 
         def iter_content(self, chunk_size=None):
             yield self.content
