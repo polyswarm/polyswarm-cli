@@ -113,7 +113,7 @@ class ExceptionHandlingGroup(click.Group):
 @click.option('-c', '--community', default='default', envvar='POLYSWARM_COMMUNITY', help='Community to use.')
 @click.option('--parallel', default=8, help='Number of threads to be used in parallel http requests.')
 @click.version_option(polyswarm.__version__, '--version', prog_name='polyswarm-cli')
-@click.version_option(lambda: polyswarm_api.__version__, '--api-version', prog_name='polyswarm-api')
+@click.version_option(polyswarm_api.__version__, '--api-version', prog_name='polyswarm-api')
 @click.pass_context
 def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verbose, community, parallel):
     """
