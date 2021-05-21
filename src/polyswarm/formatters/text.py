@@ -265,6 +265,28 @@ class TextOutput(base.BaseOutput):
 
         return self._output(output, write)
 
+    def assertions(self, instance, write=True):
+        output = []
+        output.append(self._white('============================= Assertions ============================='))
+        output.append(self._blue('Assertions Id: {}'.format(instance.id)))
+        output.append(self._white('Engine Id: {}'.format(instance.engine_id)))
+        output.append(self._white('Created at: {}'.format(instance.created)))
+
+        if instance.storage_path is not None:
+            output.append(self._white('Download: {}'.format(instance.storage_path)))
+        if instance.storage_path is not None:
+            output.append(self._white('True positive: {}'.format(instance.true_positive)))
+        if instance.storage_path is not None:
+            output.append(self._white('True Negative: {}'.format(instance.true_negative)))
+        if instance.storage_path is not None:
+            output.append(self._white('False Positive: {}'.format(instance.false_positive)))
+        if instance.storage_path is not None:
+            output.append(self._white('False Negative: {}'.format(instance.false_negative)))
+        if instance.storage_path is not None:
+            output.append(self._white('Total: {}'.format(instance.total)))
+
+        return self._output(output, write)
+
     @is_grouped
     def _white(self, text):
         return click.style(text, fg='white')
