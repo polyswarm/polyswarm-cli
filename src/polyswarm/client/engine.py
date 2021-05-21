@@ -48,3 +48,32 @@ def assertions_get(ctx, assertions_id):
     output = ctx.obj['output']
     result = api.assertions_get(assertions_id)
     output.assertions(result)
+
+
+@votes.command('create', short_help='Create a new bundle with the consolidated votes data.')
+@click.argument('engine-id', type=click.STRING)
+@click.argument('date-start', type=click.STRING)
+@click.argument('date-end', type=click.STRING)
+@click.pass_context
+def votes_create(ctx, engine_id, date_start, date_end):
+    """
+    Create a new bundle with the consolidated votes data for the provided
+    period of time.
+    """
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    result = api.votes_create(engine_id, date_start, date_end)
+    output.votes(result)
+
+
+@votes.command('get', short_help='Get an votes bundle.')
+@click.argument('votes-id', type=click.INT)
+@click.pass_context
+def votes_get(ctx, votes_id):
+    """
+    Get the votes bundle for the given bundle id.
+    """
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    result = api.votes_get(votes_id)
+    output.votes(result)
