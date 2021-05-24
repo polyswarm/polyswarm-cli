@@ -122,6 +122,12 @@ class JSONOutput(base.BaseOutput):
     def mapping(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 
+    def assertions(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
+
+    def votes(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
+
 
 class PrettyJSONOutput(JSONOutput):
     name = 'pretty-json'

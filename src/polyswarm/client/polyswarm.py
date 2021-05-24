@@ -26,6 +26,7 @@ from polyswarm.client.links import link
 from polyswarm.client.tags import tag
 from polyswarm.client.families import family
 from polyswarm.client.metadata import metadata
+from polyswarm.client.engine import engine
 
 logger = logging.getLogger(__name__)
 
@@ -139,6 +140,7 @@ commands = [
     scan, wait, lookup, search, live, historical,
     download, cat, stream, rescan, rescan_id,
     rules, link, tag, family, metadata,
+    engine,
 ]
 
 for command in commands:
