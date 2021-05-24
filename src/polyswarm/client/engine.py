@@ -66,7 +66,7 @@ def votes_create(ctx, engine_id, date_start, date_end):
     output.votes(result)
 
 
-@votes.command('get', short_help='Get an votes bundle.')
+@votes.command('get', short_help='Get a votes bundle.')
 @click.argument('votes-id', type=click.INT)
 @click.pass_context
 def votes_get(ctx, votes_id):
