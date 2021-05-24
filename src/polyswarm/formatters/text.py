@@ -268,7 +268,7 @@ class TextOutput(base.BaseOutput):
     def assertions(self, instance, write=True):
         output = []
         output.append(self._white('============================= Assertions ============================='))
-        output.append(self._blue('Assertions id: {}'.format(instance.id)))
+        output.append(self._blue('Assertions Job id: {}'.format(instance.id)))
         output.append(self._white('Engine id: {}'.format(instance.engine_id)))
         output.append(self._white('Created at: {}'.format(instance.created)))
 
@@ -290,7 +290,7 @@ class TextOutput(base.BaseOutput):
     def votes(self, instance, write=True):
         output = []
         output.append(self._white('============================= Votes ============================='))
-        output.append(self._blue('Votes id: {}'.format(instance.id)))
+        output.append(self._blue('Votes Job id: {}'.format(instance.id)))
         output.append(self._white('Engine id: {}'.format(instance.engine_id)))
         output.append(self._white('Created at: {}'.format(instance.created)))
 
