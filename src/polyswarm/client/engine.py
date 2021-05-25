@@ -38,15 +38,15 @@ def assertions_create(ctx, engine_id, date_start, date_end):
 
 
 @assertions.command('get', short_help='Get an assertions bundle.')
-@click.argument('assertions-id', type=click.INT)
+@click.argument('assertions-job-id', type=click.INT)
 @click.pass_context
-def assertions_get(ctx, assertions_id):
+def assertions_get(ctx, assertions_job_id):
     """
     Get the assertions bundle for the given bundle id.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.assertions_get(assertions_id)
+    result = api.assertions_get(assertions_job_id)
     output.assertions(result)
 
 
@@ -67,13 +67,13 @@ def votes_create(ctx, engine_id, date_start, date_end):
 
 
 @votes.command('get', short_help='Get a votes bundle.')
-@click.argument('votes-id', type=click.INT)
+@click.argument('votes-job-id', type=click.INT)
 @click.pass_context
-def votes_get(ctx, votes_id):
+def votes_get(ctx, votes_job_id):
     """
     Get the votes bundle for the given bundle id.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.votes_get(votes_id)
+    result = api.votes_get(votes_job_id)
     output.votes(result)
