@@ -3,6 +3,7 @@ import os
 from unittest import TestCase
 import re
 import json
+import yaml
 import difflib
 import traceback
 from deepdiff import DeepDiff
@@ -25,17 +26,14 @@ except NameError:
 class BaseTestCase(TestCase):
     def __init__(self, *args, **kwargs):
         super(BaseTestCase, self).__init__(*args, **kwargs)
+        self.click_vcr_folder = 'tests/vcr'
+        self.click_vcr_suffix = 'click'
         self.test_runner = CliRunner()
-        self.test_captured_output_file = '/tmp/output.txt'
         self.api_url = 'https://api.polyswarm.network/v2'
         self.test_api_key = '11111111111111111111111111111111'
         self.community = 'lima'
         self.api = PolyswarmAPI(self.test_api_key, community=self.community)
         self.test_hash_value = '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
-        self.test_query = '_exists_:lief.libraries'
-        self.test_submission_uuid = '49091542211453596'
-        self.test_hunt_id = '63433636835291189'
-        self.test_since = '2880'
         self.test_eicar = b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*'
         self.test_s3_file_url = 'http://minio:9000/'\
                                 'testing/testing/files/27/5a/02/'\
@@ -47,22 +45,25 @@ class BaseTestCase(TestCase):
                                 'AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE'\
                                 '&Signature=VLCdYUh8skB6cRqo7RUfGrycsKo%3D&Expires=1573768889'
 
-    def setUp(self):
-        self._remove_file(self.test_captured_output_file)
-
-    @staticmethod
-    def _remove_file(file_path):
-        if os.path.exists(file_path):
-            try:
-                os.remove(file_path)
-            except (FileNotFoundError, OSError) as e:
-                logger.warning('File %s does not exist', file_path)
-                logger.exception(e)
-
-    @staticmethod
-    def _get_text_file_content(file_path):
-        with open(file_path, 'r') as file:
-            return file.read()
+    def click_vcr(self, result, name='result'):
+        test_name = self.id().rpartition('.')[2]
+        file_name = '{}.{}'.format(test_name, self.click_vcr_suffix)
+        file_path = os.path.join(os.getcwd(), self.click_vcr_folder, file_name)
+        try:
+            with open(file_path, 'r') as f:
+                data = yaml.load(f)
+            entry = data.get(name)
+            if entry is None:
+                entry = result.output
+                data[name] = entry
+                with open(file_path, 'w') as f:
+                    yaml.dump(data, f)
+        except OSError:
+            entry = result.output
+            data = {name: entry}
+            with open(file_path, 'w') as f:
+                yaml.dump(data, f)
+        return entry
 
     def _run_cli(self, commands):
         commands = [
@@ -93,8 +94,6 @@ class BaseTestCase(TestCase):
         output = ''
         if result.output:
             output = result.output
-        if os.path.isfile(self.test_captured_output_file):
-            output += self._get_text_file_content(self.test_captured_output_file)
         return output
 
     @staticmethod

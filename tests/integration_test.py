@@ -1,10 +1,16 @@
 import os
+import json
 
 import responses
+import vcr as vcr_
 
 from tests.utils.base_test_case import BaseTestCase
 from tests.utils import mock_polyswarm_api_results
 from tests.utils import file_utils
+
+
+vcr = vcr_.VCR(cassette_library_dir='tests/vcr',
+               path_transformer=vcr_.VCR.ensure_suffix('.vcr'))
 
 
 class IntegrationTest(BaseTestCase):
@@ -53,7 +59,7 @@ class IntegrationTest(BaseTestCase):
     def test_search_metadata(self):
         url = 'https://api.polyswarm.network/v2/search/metadata/query?query=_exists_%3Alief.libraries'
         responses.add(responses.GET, url, body=self.mock_metadata_search_response)
-        result = self._run_cli(['--output-format', 'json', 'search', 'metadata', self.test_query])
+        result = self._run_cli(['--output-format', 'json', 'search', 'metadata', '_exists_:lief.libraries'])
 
         self._assert_json_result(
             result,
@@ -65,7 +71,7 @@ class IntegrationTest(BaseTestCase):
         url = 'https://api.polyswarm.network/v2/consumer/submission/lima/49091542211453596'
         responses.add(responses.GET, url, body=self.mock_submission_response)
 
-        result = self._run_cli(['--output-format', 'json', '-c', self.community, 'lookup', self.test_submission_uuid])
+        result = self._run_cli(['--output-format', 'json', '-c', self.community, 'lookup', '49091542211453596'])
 
         self._assert_json_result(
             result,
@@ -73,19 +79,18 @@ class IntegrationTest(BaseTestCase):
             expected_return_code=0,
         )
 
-    @responses.activate
+    @vcr.use_cassette()
     def test_scan_submission_create(self):
-        url = 'https://api.polyswarm.network/v2/consumer/submission/lima/49091542211453596'
-        responses.add(responses.GET, url, body=self.mock_submission_response)
-        url = 'https://api.polyswarm.network/v2/consumer/submission/lima'
-        responses.add(responses.POST, url, body=self.mock_submission_response)
-
         malicious_file = self._get_test_resource_file_path('malicious')
-        result = self._run_cli(['--output-format', 'json', '-c', self.community, 'scan', 'file', malicious_file])
-
+        result = self._run_cli([
+            '--output-format', 'json',
+            '-c', 'gamma',
+            '-u', 'http://artifact-index-e2e:9696/v2',
+            'scan', 'file', malicious_file,
+        ])
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
+            expected_output=json.loads(self.click_vcr(result)),
             expected_return_code=0,
         )
 
@@ -109,8 +114,8 @@ class IntegrationTest(BaseTestCase):
         url = 'https://api.polyswarm.network/v2/hunt/live/results?id=63433636835291189&since=2880'
         responses.add(responses.GET, url, body=self.mock_hunt_live_results_response_page1)
 
-        result = self._run_cli(['--output-format', 'json', 'live', 'results', self.test_hunt_id,
-                                '--since', self.test_since])
+        result = self._run_cli(['--output-format', 'json', 'live', 'results', '63433636835291189',
+                                '--since', '2880'])
         self._assert_json_result(
             result,
             expected_output=mock_polyswarm_api_results.live_results(self)[0].json,
@@ -122,7 +127,7 @@ class IntegrationTest(BaseTestCase):
         url = 'https://api.polyswarm.network/v2/hunt/historical/results?id=63433636835291189'
         responses.add(responses.GET, url, body=self.mock_hunt_historical_results_response_page1)
 
-        result = self._run_cli(['--output-format', 'json', 'historical', 'results', self.test_hunt_id])
+        result = self._run_cli(['--output-format', 'json', 'historical', 'results', '63433636835291189'])
 
         self._assert_json_result(
             result,
@@ -177,7 +182,7 @@ class IntegrationTest(BaseTestCase):
         url = 'https://api.polyswarm.network/v2/hunt/live?id=63433636835291189'
         responses.add(responses.DELETE, url, body=self.mock_hunt_response)
 
-        result = self._run_cli(['--output-format', 'json', 'live', 'delete', self.test_hunt_id])
+        result = self._run_cli(['--output-format', 'json', 'live', 'delete', '63433636835291189'])
 
         self._assert_json_result(
             result,
@@ -190,7 +195,7 @@ class IntegrationTest(BaseTestCase):
         url = 'https://api.polyswarm.network/v2/hunt/historical?id=63433636835291189'
         responses.add(responses.DELETE, url, body=self.mock_hunt_response)
 
-        result = self._run_cli(['--output-format', 'json', 'historical', 'delete', self.test_hunt_id])
+        result = self._run_cli(['--output-format', 'json', 'historical', 'delete', '63433636835291189'])
 
         self._assert_json_result(
             result,
@@ -247,7 +252,7 @@ class IntegrationTest(BaseTestCase):
             responses.add(responses.GET, url, body=self.mock_stream_response_page1)
             responses.add(responses.GET, self.test_s3_file_url, body=self.test_eicar, stream=True)
 
-            result = self._run_cli(['stream', '--since', self.test_since, path])
+            result = self._run_cli(['stream', '--since', '2880', path])
 
             self._assert_text_result(
                 result,
