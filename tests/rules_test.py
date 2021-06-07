@@ -27,7 +27,7 @@ class RulesetTest(BaseTestCase):
                                     'rules', 'create', 'test', self._get_test_resource_file_path('eicar.yara')])
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.ruleset(self)[0].json,
+            expected_results=mock_polyswarm_api_results.ruleset(self)[0].json,
             expected_return_code=0,
         )
 
@@ -38,7 +38,7 @@ class RulesetTest(BaseTestCase):
                                     'rules', 'view', '67713199207380968'])
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.ruleset(self)[0].json,
+            expected_results=mock_polyswarm_api_results.ruleset(self)[0].json,
             expected_return_code=0,
         )
 
@@ -49,7 +49,7 @@ class RulesetTest(BaseTestCase):
                                     'rules', 'update', '67713199207380968', '--name', 'test2'])
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.ruleset(self, name='test2')[0].json,
+            expected_results=mock_polyswarm_api_results.ruleset(self, name='test2')[0].json,
             expected_return_code=0,
         )
 
@@ -60,7 +60,7 @@ class RulesetTest(BaseTestCase):
                                     'rules', 'delete', '67713199207380968'])
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.ruleset(self)[0].json,
+            expected_results=mock_polyswarm_api_results.ruleset(self)[0].json,
             expected_return_code=0,
         )
 
@@ -71,6 +71,6 @@ class RulesetTest(BaseTestCase):
                                     'rules', 'list'])
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.ruleset(self)[0].json,
+            expected_results=mock_polyswarm_api_results.ruleset(self)[0].json,
             expected_return_code=0,
         )

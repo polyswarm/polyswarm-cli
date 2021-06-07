@@ -21,7 +21,7 @@ class SearchTest(BaseTestCase):
             result = self._run_cli(['--output-format', 'json', 'search', 'hash', self.test_hash_value])
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
+            expected_results=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0,
         )
 
@@ -30,7 +30,7 @@ class SearchTest(BaseTestCase):
             result = self._run_cli(['--output-format', 'text', 'search', 'hash', self.test_hash_value])
         self._assert_text_result(
             result,
-            expected_output=mock_polyswarm_api_results.text_instances()[0],
+            expected_result=mock_polyswarm_api_results.text_instances()[0],
             expected_return_code=0,
         )
 
@@ -49,7 +49,7 @@ class SearchTest(BaseTestCase):
                                     'hash.sha256:' + self.test_hash_value])
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
+            expected_results=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0)
 
     def test_search_metadata_with_text_output(self):
@@ -59,7 +59,7 @@ class SearchTest(BaseTestCase):
                                     'hash.sha256:' + self.test_hash_value])
         self._assert_text_result(
             result,
-            expected_output=mock_polyswarm_api_results.text_metadata()[0],
+            expected_result=mock_polyswarm_api_results.text_metadata()[0],
             expected_return_code=0,
         )
 

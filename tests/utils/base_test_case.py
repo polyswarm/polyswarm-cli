@@ -1,11 +1,11 @@
 import logging
 import os
 from unittest import TestCase
-import re
 import json
 import yaml
-import difflib
 import traceback
+
+import vcr as vcr_
 from deepdiff import DeepDiff
 from click.testing import CliRunner
 from pkg_resources import resource_filename
@@ -23,13 +23,17 @@ except NameError:
     FileNotFoundError = IOError
 
 
+vcr = vcr_.VCR(cassette_library_dir='tests/vcr',
+               path_transformer=vcr_.VCR.ensure_suffix('.vcr'))
+
+
 class BaseTestCase(TestCase):
     def __init__(self, *args, **kwargs):
         super(BaseTestCase, self).__init__(*args, **kwargs)
         self.click_vcr_folder = 'tests/vcr'
         self.click_vcr_suffix = 'click'
         self.test_runner = CliRunner()
-        self.api_url = 'https://api.polyswarm.network/v2'
+        self.api_url = 'http://artifact-index-e2e:9696/v2'
         self.test_api_key = '11111111111111111111111111111111'
         self.community = 'lima'
         self.api = PolyswarmAPI(self.test_api_key, community=self.community)
@@ -51,7 +55,7 @@ class BaseTestCase(TestCase):
         file_path = os.path.join(os.getcwd(), self.click_vcr_folder, file_name)
         try:
             with open(file_path, 'r') as f:
-                data = yaml.load(f)
+                data = yaml.full_load(f)
             entry = data.get(name)
             if entry is None:
                 entry = result.output
@@ -66,65 +70,29 @@ class BaseTestCase(TestCase):
         return entry
 
     def _run_cli(self, commands):
-        commands = [
-                       '--api-key', self.test_api_key,
-                       '-u', self.api_url,
-                   ] + commands
+        commands = ['--api-key', self.test_api_key, '-u', self.api_url] + commands
         return self.test_runner.invoke(client.polyswarm_cli, commands, catch_exceptions=False)
 
-    def _assert_text_result(self, result, expected_output=None, expected_return_code=None):
-        result_output = self._get_result_output(result)
-        if expected_output is not None:
-            self._assert_text_equal(result_output, expected_output)
-        if expected_return_code is not None:
-            self.assertEqual(expected_return_code, result.exit_code, msg=traceback.format_tb(result.exc_info[2]))
+    def _assert_text_result(self, result, expected_result, expected_return_code=0):
+        assert result.output == expected_result
+        self.assertEqual(expected_return_code, result.exit_code, msg=traceback.format_tb(result.exc_info[2]))
 
-    def _assert_json_result(self, result, expected_output, expected_return_code):
-        result_output = self._get_result_output(result)
-        output = json.loads(result_output)
-        # TODO: this fixes issues with unicode as when loading we always consider it is a unicode string
-        #  to be removed once we drop support to python 2.7
-        expected_output = json.loads(json.dumps(expected_output, sort_keys=True))
-        if expected_output is not None:
-            self._assert_json_equal(output, expected_output)
-        if expected_return_code is not None:
-            self.assertEqual(expected_return_code, result.exit_code, msg=traceback.format_tb(result.exc_info[2]))
-
-    def _get_result_output(self, result):
-        output = ''
-        if result.output:
-            output = result.output
-        return output
+    def _assert_json_result(self, results, expected_results, expected_return_code=0):
+        result_lines = results.output.splitlines()
+        expected_lines = expected_results.splitlines()
+        if len(result_lines) != len(expected_lines):
+            raise AssertionError('Number of json lines does not match')
+        self.assertEqual(expected_return_code, results.exit_code, msg=traceback.format_tb(results.exc_info[2]))
+        for result, expected_result in zip(result_lines, expected_lines):
+            result = json.loads(result)
+            expected_result = json.loads(expected_result)
+            assert result == expected_result
 
     @staticmethod
     def _assert_json_equal(first, second):
         diff = DeepDiff(first, second, ignore_order=True)
         if diff:
             raise AssertionError('Input JSON\'s differ: %s' % diff)
-
-    def _assert_text_equal(self, first, second):
-        diff = list(difflib.ndiff(self._text_to_normalized_lines(first),
-                                  self._text_to_normalized_lines(second),
-                                  linejunk=difflib.IS_LINE_JUNK))
-        if self._is_different(diff):
-            raise AssertionError('Input texts differ: %s' % '\n'.join(diff))
-
-    @staticmethod
-    def _text_to_normalized_lines(text):
-        return [re.sub(r'[^\S\r\n]+', ' ', diff_line)
-                for diff_line in text.splitlines() if not re.match(r'^[\s\n]*$', diff_line)]
-
-    def _is_different(self, diff):
-        result = False
-        for line in diff:
-            if self._is_diff_line_different(line):
-                result = True
-                break
-        return result
-
-    @staticmethod
-    def _is_diff_line_different(diff_line):
-        return diff_line.startswith('+') or diff_line.startswith('-') or diff_line.startswith('?')
 
     @staticmethod
     def _get_test_resource_file_path(filename):

@@ -22,7 +22,7 @@ class DownloadTest(BaseTestCase):
                 result = self._run_cli(['download', '-d', path, self.test_hash_value])
                 self._assert_text_result(
                     result,
-                    expected_output=mock_polyswarm_api_results.text_local_artifacts(
+                    expected_result=mock_polyswarm_api_results.text_local_artifacts(
                         self.test_hash_value,
                         os.path.join(path, self.test_hash_value))[0],
                     expected_return_code=0,
@@ -34,7 +34,7 @@ class DownloadTest(BaseTestCase):
             result = self._run_cli(['cat', self.test_hash_value])
             self._assert_text_result(
                 result,
-                expected_output=self.test_eicar.decode(),
+                expected_result=self.test_eicar.decode(),
                 expected_return_code=0,
             )
 
@@ -48,7 +48,7 @@ class DownloadTest(BaseTestCase):
 
                 self._assert_text_result(
                     result,
-                    expected_output=mock_polyswarm_api_results.text_local_artifacts(
+                    expected_result=mock_polyswarm_api_results.text_local_artifacts(
                         self.test_hash_value,
                         os.path.join(path, self.test_hash_value))[0],
                     expected_return_code=0,

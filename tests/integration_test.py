@@ -1,16 +1,10 @@
 import os
-import json
 
 import responses
-import vcr as vcr_
 
-from tests.utils.base_test_case import BaseTestCase
+from tests.utils.base_test_case import BaseTestCase, vcr
 from tests.utils import mock_polyswarm_api_results
 from tests.utils import file_utils
-
-
-vcr = vcr_.VCR(cassette_library_dir='tests/vcr',
-               path_transformer=vcr_.VCR.ensure_suffix('.vcr'))
 
 
 class IntegrationTest(BaseTestCase):
@@ -52,7 +46,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
+            expected_results=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0)
 
     @responses.activate
@@ -63,7 +57,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.metadata(self)[0].json,
+            expected_results=mock_polyswarm_api_results.metadata(self)[0].json,
             expected_return_code=0)
 
     @responses.activate
@@ -75,7 +69,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
+            expected_results=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0,
         )
 
@@ -85,12 +79,11 @@ class IntegrationTest(BaseTestCase):
         result = self._run_cli([
             '--output-format', 'json',
             '-c', 'gamma',
-            '-u', 'http://artifact-index-e2e:9696/v2',
             'scan', 'file', malicious_file,
         ])
         self._assert_json_result(
             result,
-            expected_output=json.loads(self.click_vcr(result)),
+            expected_results=self.click_vcr(result),
             expected_return_code=0,
         )
 
@@ -105,7 +98,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
+            expected_results=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0,
         )
 
@@ -118,7 +111,7 @@ class IntegrationTest(BaseTestCase):
                                 '--since', '2880'])
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.live_results(self)[0].json,
+            expected_results=mock_polyswarm_api_results.live_results(self)[0].json,
             expected_return_code=0,
         )
 
@@ -131,7 +124,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.historical_results(self)[0].json,
+            expected_results=mock_polyswarm_api_results.historical_results(self)[0].json,
             expected_return_code=0,
         )
 
@@ -145,7 +138,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.hunts(self)[0].json,
+            expected_results=mock_polyswarm_api_results.hunts(self)[0].json,
             expected_return_code=0,
         )
 
@@ -159,7 +152,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_text_result(
             result,
-            expected_output='error [polyswarm.client.polyswarm]: Malformed yara file: line 1: syntax error, unexpected identifier',
+            expected_result='error [polyswarm.client.polyswarm]: Malformed yara file: line 1: syntax error, unexpected identifier',
             expected_return_code=2,
         )
 
@@ -173,7 +166,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.hunts(self)[0].json,
+            expected_results=mock_polyswarm_api_results.hunts(self)[0].json,
             expected_return_code=0,
         )
 
@@ -186,7 +179,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.hunts(self)[0].json,
+            expected_results=mock_polyswarm_api_results.hunts(self)[0].json,
             expected_return_code=0,
         )
 
@@ -199,7 +192,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.hunts(self)[0].json,
+            expected_results=mock_polyswarm_api_results.hunts(self)[0].json,
             expected_return_code=0,
         )
 
@@ -212,7 +205,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.hunts(self)[0].json,
+            expected_results=mock_polyswarm_api_results.hunts(self)[0].json,
             expected_return_code=0,
         )
 
@@ -225,7 +218,7 @@ class IntegrationTest(BaseTestCase):
 
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.hunts(self)[0].json,
+            expected_results=mock_polyswarm_api_results.hunts(self)[0].json,
             expected_return_code=0,
         )
 
@@ -239,7 +232,7 @@ class IntegrationTest(BaseTestCase):
 
             self._assert_text_result(
                 result,
-                expected_output=mock_polyswarm_api_results.text_local_artifacts(
+                expected_result=mock_polyswarm_api_results.text_local_artifacts(
                     self.test_hash_value,
                     os.path.join(path, self.test_hash_value))[0],
                 expected_return_code=0,
@@ -256,7 +249,7 @@ class IntegrationTest(BaseTestCase):
 
             self._assert_text_result(
                 result,
-                expected_output=mock_polyswarm_api_results.text_local_artifacts(
+                expected_result=mock_polyswarm_api_results.text_local_artifacts(
                     self.test_hash_value,
                     os.path.join(path, self.test_hash_value))[0],
                 expected_return_code=0,
@@ -271,6 +264,6 @@ class IntegrationTest(BaseTestCase):
             result = self._run_cli(['cat', self.test_hash_value])
             self._assert_text_result(
                 result,
-                expected_output=self.test_eicar.decode(),
+                expected_result=self.test_eicar.decode(),
                 expected_return_code=0,
             )

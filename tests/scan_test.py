@@ -21,7 +21,7 @@ class SubmissionTest(BaseTestCase):
                                     'lookup', '49091542211453596'])
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
+            expected_results=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0,
         )
 
@@ -31,7 +31,7 @@ class SubmissionTest(BaseTestCase):
                                     'lookup', '49091542211453596'])
         self._assert_text_result(
             result,
-            expected_output=mock_polyswarm_api_results.text_instances()[0],
+            expected_result=mock_polyswarm_api_results.text_instances()[0],
             expected_return_code=0,
         )
 
@@ -42,7 +42,7 @@ class SubmissionTest(BaseTestCase):
                                     'scan', 'file', self._get_test_resource_file_path('malicious')])
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
+            expected_results=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0,
         )
 
@@ -53,7 +53,7 @@ class SubmissionTest(BaseTestCase):
                                     'scan', 'file', self._get_test_resource_file_path('malicious')])
         self._assert_text_result(
             result,
-            expected_output=mock_polyswarm_api_results.text_instances()[0],
+            expected_result=mock_polyswarm_api_results.text_instances()[0],
             expected_return_code=0,
         )
 
@@ -64,7 +64,7 @@ class SubmissionTest(BaseTestCase):
                                     'rescan', '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'])
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
+            expected_results=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0,
         )
 
@@ -75,7 +75,7 @@ class SubmissionTest(BaseTestCase):
                                     'rescan', '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'])
         self._assert_text_result(
             result,
-            expected_output=mock_polyswarm_api_results.text_instances()[0],
+            expected_result=mock_polyswarm_api_results.text_instances()[0],
             expected_return_code=0,
         )
 
@@ -86,7 +86,7 @@ class SubmissionTest(BaseTestCase):
                                     'rescan-id', '11611818710765483'])
         self._assert_json_result(
             result,
-            expected_output=mock_polyswarm_api_results.instances(self)[0].json,
+            expected_results=mock_polyswarm_api_results.instances(self)[0].json,
             expected_return_code=0,
         )
 
@@ -97,6 +97,6 @@ class SubmissionTest(BaseTestCase):
                                     'rescan-id', '11611818710765483'])
         self._assert_text_result(
             result,
-            expected_output=mock_polyswarm_api_results.text_instances()[0],
+            expected_result=mock_polyswarm_api_results.text_instances()[0],
             expected_return_code=0,
         )
