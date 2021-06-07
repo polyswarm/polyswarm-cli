@@ -38,40 +38,20 @@ class IntegrationTest(BaseTestCase):
             [mock_polyswarm_api_results.stream_results(self.test_s3_file_url)[0]],
             offset=1, limit=1, has_more=False)
 
-    @responses.activate
+    @vcr.use_cassette()
     def test_search_hash(self):
-        url = 'https://api.polyswarm.network/v2/search/hash/sha256?hash=275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
-        responses.add(responses.GET, url, body=self.mock_search_response_page1)
         result = self._run_cli(['--output-format', 'json', 'search', 'hash', self.test_hash_value])
+        self._assert_json_result(result, self.click_vcr(result))
 
-        self._assert_json_result(
-            result,
-            expected_results=mock_polyswarm_api_results.instances(self)[0].json,
-            expected_return_code=0)
-
-    @responses.activate
+    @vcr.use_cassette()
     def test_search_metadata(self):
-        url = 'https://api.polyswarm.network/v2/search/metadata/query?query=_exists_%3Alief.libraries'
-        responses.add(responses.GET, url, body=self.mock_metadata_search_response)
-        result = self._run_cli(['--output-format', 'json', 'search', 'metadata', '_exists_:lief.libraries'])
+        result = self._run_cli(['--output-format', 'json', 'search', 'metadata', '_exists_:artifact.sha256'])
+        self._assert_json_result(result, self.click_vcr(result))
 
-        self._assert_json_result(
-            result,
-            expected_results=mock_polyswarm_api_results.metadata(self)[0].json,
-            expected_return_code=0)
-
-    @responses.activate
+    @vcr.use_cassette()
     def test_scan_submission_lookup(self):
-        url = 'https://api.polyswarm.network/v2/consumer/submission/lima/49091542211453596'
-        responses.add(responses.GET, url, body=self.mock_submission_response)
-
-        result = self._run_cli(['--output-format', 'json', '-c', self.community, 'lookup', '49091542211453596'])
-
-        self._assert_json_result(
-            result,
-            expected_results=mock_polyswarm_api_results.instances(self)[0].json,
-            expected_return_code=0,
-        )
+        result = self._run_cli(['--output-format', 'json', '-c', 'gamma', 'lookup', '19610779111217241'])
+        self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_scan_submission_create(self):
@@ -81,189 +61,84 @@ class IntegrationTest(BaseTestCase):
             '-c', 'gamma',
             'scan', 'file', malicious_file,
         ])
-        self._assert_json_result(
-            result,
-            expected_results=self.click_vcr(result),
-            expected_return_code=0,
-        )
+        self._assert_json_result(result, self.click_vcr(result))
 
-    @responses.activate
+    @vcr.use_cassette()
     def test_scan_submission_rescan(self):
-        url = 'https://api.polyswarm.network/v2/consumer/submission/lima/rescan/sha256/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
-        responses.add(responses.POST, url, body=self.mock_submission_response)
-        url = 'https://api.polyswarm.network/v2/consumer/submission/lima/49091542211453596'
-        responses.add(responses.GET, url, body=self.mock_submission_response)
+        result = self._run_cli(['--output-format', 'json', '-c', 'gamma', 'rescan', self.test_hash_value])
+        self._assert_json_result(result, self.click_vcr(result))
 
-        result = self._run_cli(['--output-format', 'json', '-c', self.community, 'rescan', self.test_hash_value])
-
-        self._assert_json_result(
-            result,
-            expected_results=mock_polyswarm_api_results.instances(self)[0].json,
-            expected_return_code=0,
-        )
-
-    @responses.activate
+    @vcr.use_cassette()
     def test_live_hunt_results(self):
-        url = 'https://api.polyswarm.network/v2/hunt/live/results?id=63433636835291189&since=2880'
-        responses.add(responses.GET, url, body=self.mock_hunt_live_results_response_page1)
+        result = self._run_cli([
+            '--output-format', 'json', 'live', 'results', '26105308820047659', '--since', '2880'])
+        self._assert_json_result(result, self.click_vcr(result))
 
-        result = self._run_cli(['--output-format', 'json', 'live', 'results', '63433636835291189',
-                                '--since', '2880'])
-        self._assert_json_result(
-            result,
-            expected_results=mock_polyswarm_api_results.live_results(self)[0].json,
-            expected_return_code=0,
-        )
-
-    @responses.activate
+    @vcr.use_cassette()
     def test_historical_hunt_results(self):
-        url = 'https://api.polyswarm.network/v2/hunt/historical/results?id=63433636835291189'
-        responses.add(responses.GET, url, body=self.mock_hunt_historical_results_response_page1)
+        result = self._run_cli(['--output-format', 'json', 'historical', 'results', '39972292131000736'])
+        self._assert_json_result(result, self.click_vcr(result))
 
-        result = self._run_cli(['--output-format', 'json', 'historical', 'results', '63433636835291189'])
-
-        self._assert_json_result(
-            result,
-            expected_results=mock_polyswarm_api_results.historical_results(self)[0].json,
-            expected_return_code=0,
-        )
-
-    @responses.activate
+    @vcr.use_cassette()
     def test_live_hunt_start(self):
-        url = 'https://api.polyswarm.network/v2/hunt/live'
-        responses.add(responses.POST, url, body=self.mock_hunt_response)
-
         yara_file = self._get_test_resource_file_path('eicar.yara')
         result = self._run_cli(['--output-format', 'json', 'live', 'create', yara_file])
+        self._assert_json_result(result, self.click_vcr(result))
 
-        self._assert_json_result(
-            result,
-            expected_results=mock_polyswarm_api_results.hunts(self)[0].json,
-            expected_return_code=0,
-        )
-
-    @responses.activate
+    @vcr.use_cassette()
     def test_live_hunt_start_with_invalid_yara_file(self):
-        url = 'https://api.polyswarm.network/v2/hunt/live'
-        responses.add(responses.POST, url, body=self.mock_hunt_response)
-
         broken_yara_file = self._get_test_resource_file_path('broken.yara')
         result = self._run_cli(['--output-format', 'json', 'live', 'create', broken_yara_file])
-
         self._assert_text_result(
             result,
-            expected_result='error [polyswarm.client.polyswarm]: Malformed yara file: line 1: syntax error, unexpected identifier',
+            'error [polyswarm.client.polyswarm]: Malformed yara file: line 1: syntax error, unexpected identifier\n',
             expected_return_code=2,
         )
 
-    @responses.activate
+    @vcr.use_cassette()
     def test_historical_hunt_start(self):
-        url = 'https://api.polyswarm.network/v2/hunt/historical'
-        responses.add(responses.POST, url, body=self.mock_hunt_response)
-
         yara_file = self._get_test_resource_file_path('eicar.yara')
         result = self._run_cli(['--output-format', 'json', 'historical', 'start', yara_file])
+        self._assert_json_result(result, self.click_vcr(result))
 
-        self._assert_json_result(
-            result,
-            expected_results=mock_polyswarm_api_results.hunts(self)[0].json,
-            expected_return_code=0,
-        )
-
-    @responses.activate
+    @vcr.use_cassette()
     def test_live_hunt_delete(self):
-        url = 'https://api.polyswarm.network/v2/hunt/live?id=63433636835291189'
-        responses.add(responses.DELETE, url, body=self.mock_hunt_response)
+        result = self._run_cli(['--output-format', 'json', 'live', 'delete', '1876773693834725'])
+        self._assert_json_result(result, self.click_vcr(result))
 
-        result = self._run_cli(['--output-format', 'json', 'live', 'delete', '63433636835291189'])
-
-        self._assert_json_result(
-            result,
-            expected_results=mock_polyswarm_api_results.hunts(self)[0].json,
-            expected_return_code=0,
-        )
-
-    @responses.activate
+    @vcr.use_cassette()
     def test_historical_hunt_delete(self):
-        url = 'https://api.polyswarm.network/v2/hunt/historical?id=63433636835291189'
-        responses.add(responses.DELETE, url, body=self.mock_hunt_response)
+        result = self._run_cli(['--output-format', 'json', 'historical', 'delete', '93536118162554562'])
+        self._assert_json_result(result, self.click_vcr(result))
 
-        result = self._run_cli(['--output-format', 'json', 'historical', 'delete', '63433636835291189'])
-
-        self._assert_json_result(
-            result,
-            expected_results=mock_polyswarm_api_results.hunts(self)[0].json,
-            expected_return_code=0,
-        )
-
-    @responses.activate
+    @vcr.use_cassette()
     def test_live_hunt_list(self):
-        url = 'https://api.polyswarm.network/v2/hunt/live/list'
-        responses.add(responses.GET, url, body=self.mock_hunt_response_page1)
-
         result = self._run_cli(['--output-format', 'json', 'live', 'list'])
+        self._assert_json_result(result, self.click_vcr(result))
 
-        self._assert_json_result(
-            result,
-            expected_results=mock_polyswarm_api_results.hunts(self)[0].json,
-            expected_return_code=0,
-        )
-
-    @responses.activate
+    @vcr.use_cassette()
     def test_historical_hunt_list(self):
-        url = 'https://api.polyswarm.network/v2/hunt/historical/list'
-        responses.add(responses.GET, url, body=self.mock_hunt_response_page1)
-
         result = self._run_cli(['--output-format', 'json', 'historical', 'list'])
+        self._assert_json_result(result, self.click_vcr(result))
 
-        self._assert_json_result(
-            result,
-            expected_results=mock_polyswarm_api_results.hunts(self)[0].json,
-            expected_return_code=0,
-        )
-
-    @responses.activate
+    @vcr.use_cassette()
     def test_download(self):
         with file_utils.temp_dir({self.test_hash_value: self.test_eicar}) as (path, files):
-            url = 'https://api.polyswarm.network/v2/download/sha256/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
-            responses.add(responses.GET, url, body=self.test_eicar, stream=True)
+            result = self._run_cli([
+                '-u', self.api_url + '/consumer', 'download', '-d', path, self.test_hash_value])
+            expected_result = self.click_vcr(result, replace=((path, 'temporary_folder'),))
+            self._assert_text_result(result, expected_result, replace=((path, 'temporary_folder'),))
 
-            result = self._run_cli(['download', '-d', path, self.test_hash_value])
-
-            self._assert_text_result(
-                result,
-                expected_result=mock_polyswarm_api_results.text_local_artifacts(
-                    self.test_hash_value,
-                    os.path.join(path, self.test_hash_value))[0],
-                expected_return_code=0,
-            )
-
-    @responses.activate
+    @vcr.use_cassette()
     def test_download_stream(self):
         with file_utils.temp_dir({self.test_hash_value: self.test_eicar}) as (path, files):
-            url = 'https://api.polyswarm.network/v2/consumer/download/stream?since=2880'
-            responses.add(responses.GET, url, body=self.mock_stream_response_page1)
-            responses.add(responses.GET, self.test_s3_file_url, body=self.test_eicar, stream=True)
-
             result = self._run_cli(['stream', '--since', '2880', path])
+            expected_result = self.click_vcr(result, replace=((path, 'temporary_folder'),))
+            self._assert_text_result(result, expected_result, replace=((path, 'temporary_folder'),))
 
-            self._assert_text_result(
-                result,
-                expected_result=mock_polyswarm_api_results.text_local_artifacts(
-                    self.test_hash_value,
-                    os.path.join(path, self.test_hash_value))[0],
-                expected_return_code=0,
-            )
-
-    @responses.activate
+    @vcr.use_cassette()
     def test_download_cat(self):
         with file_utils.temp_dir({self.test_hash_value: self.test_eicar}) as (path, files):
-            url = 'https://api.polyswarm.network/v2/download/sha256/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
-            responses.add(responses.GET, url, body=self.test_eicar, stream=True)
-
-            result = self._run_cli(['cat', self.test_hash_value])
-            self._assert_text_result(
-                result,
-                expected_result=self.test_eicar.decode(),
-                expected_return_code=0,
-            )
+            result = self._run_cli(['-u', self.api_url + '/consumer', 'cat', self.test_hash_value])
+            expected_result = self.click_vcr(result, replace=((path, 'temporary_folder'),))
+            self._assert_text_result(result, expected_result, replace=((path, 'temporary_folder'),))
