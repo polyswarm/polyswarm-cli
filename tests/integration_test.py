@@ -1,9 +1,4 @@
-import os
-
-import responses
-
 from tests.utils.base_test_case import BaseTestCase, vcr
-from tests.utils import mock_polyswarm_api_results
 from tests.utils import file_utils
 
 
@@ -11,33 +6,6 @@ class IntegrationTest(BaseTestCase):
     """
         These tests mock the resource end-point, thus also sanity testing polyswarm-api.
     """
-
-    @responses.activate
-    def __init__(self, *args, **kwargs):
-        super(IntegrationTest, self).__init__(*args, **kwargs)
-        self.mock_search_response_page1 = self._create_response([mock_polyswarm_api_results.instances(self)[0].json],
-                                                                offset=1, limit=1, has_more=False)
-
-        self.mock_metadata_search_response = self._create_response([mock_polyswarm_api_results.metadata(self)[0].json],
-                                                                   offset=1, limit=1, has_more=False)
-
-        self.mock_submission_response = \
-            self._create_response(mock_polyswarm_api_results.instances(self)[0].json)
-
-        self.mock_hunt_live_results_response_page1 = \
-            self._create_response([mock_polyswarm_api_results.live_results(self)[0].json], offset=1, limit=1, has_more=False)
-
-        self.mock_hunt_historical_results_response_page1 = \
-            self._create_response([mock_polyswarm_api_results.historical_results(self)[0].json], offset=1, limit=1, has_more=False)
-
-        self.mock_hunt_response = self._create_response(mock_polyswarm_api_results.hunts(self)[0].json)
-        self.mock_hunt_response_page1 = self._create_response([mock_polyswarm_api_results.hunts(self)[0].json],
-                                                              offset=1, limit=1, has_more=False)
-
-        self.mock_stream_response_page1 = self._create_response(
-            [mock_polyswarm_api_results.stream_results(self.test_s3_file_url)[0]],
-            offset=1, limit=1, has_more=False)
-
     @vcr.use_cassette()
     def test_search_hash(self):
         result = self._run_cli(['--output-format', 'json', 'search', 'hash', self.test_hash_value])

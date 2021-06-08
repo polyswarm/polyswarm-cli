@@ -1,17 +1,4 @@
-import os
-
 from tests.utils.base_test_case import BaseTestCase, vcr
-
-from click.testing import CliRunner
-
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
-
-from tests.utils import mock_polyswarm_api_results
-
-BASE_PATH = os.path.dirname(__file__)
 
 
 class HuntResultsTest(BaseTestCase):
