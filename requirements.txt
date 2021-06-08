@@ -1,4 +1,4 @@
-polyswarm-api~=2.9.0
+polyswarm-api~=2.9
 click==7.0
 bump2version==0.5.11
 future==0.18.2
