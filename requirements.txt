@@ -12,4 +12,4 @@ mock==3.0.4
 responses==0.10.6
 colorama~=0.4.3
 vcrpy==3.0.0
-PyYAML~=5.4
+PyYAML~=5.3
