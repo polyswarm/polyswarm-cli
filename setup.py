@@ -24,7 +24,7 @@ setup(
         'colorama~=0.4.3',
         'future~=0.18.2',
         'click-log~=0.3.2',
-        'pygments~=2.5.2',
+        'pygments>=2.5.2,<2.8.0',
     ],
     extras_require={
         ':python_version < "3.0"': ['futures~=3.3.0'],
