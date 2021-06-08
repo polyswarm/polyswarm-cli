@@ -206,3 +206,123 @@ class HistoricalHuntTest(BaseTestCase):
     def test_historical_hunt_list_text(self):
         result = self._run_cli(['--output-format', 'text', 'historical', 'list'])
         self._assert_text_result(result, self.click_vcr(result))
+
+
+class RulesetTest(BaseTestCase):
+    @vcr.use_cassette()
+    def test_ruleset_create_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'rules', 'create', 'test', self._get_test_resource_file_path('eicar.yara')])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_ruleset_get_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'rules', 'view', '59706989547481262'])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_ruleset_update_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'rules', 'update', '59706989547481262', '--name', 'test2'])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_ruleset_delete_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'rules', 'delete', '59706989547481262'])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_ruleset_list_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'rules', 'list'])
+        self._assert_json_result(result, self.click_vcr(result))
+
+
+class SubmissionTest(BaseTestCase):
+    @vcr.use_cassette()
+    def test_submission_lookup_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', '-c', 'gamma', 'lookup', '82046699255546478'])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_submission_lookup_text(self):
+        result = self._run_cli([
+            '--output-format', 'text', '-c', 'gamma', 'lookup', '82046699255546478'])
+        self._assert_text_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_submission_create_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', '-c', 'gamma', 'scan', 'file', self._get_test_resource_file_path('malicious')])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_submission_create_text(self):
+        result = self._run_cli([
+            '--output-format', 'text', '-c', 'gamma', 'scan', 'file', self._get_test_resource_file_path('malicious')])
+        self._assert_text_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_submission_rescan_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', '-c', 'gamma', 'rescan', '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_submission_rescan_text(self):
+        result = self._run_cli([
+            '--output-format', 'text', '-c', 'gamma', 'rescan', '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'])
+        self._assert_text_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_submission_rescan_id_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', '-c', 'gamma', 'rescan-id', '82046699255546478'])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_submission_rescan_id_text(self):
+        result = self._run_cli([
+            '--output-format', 'text', '-c', 'gamma', 'rescan-id', '82046699255546478'])
+        self._assert_text_result(result, self.click_vcr(result))
+
+
+class SearchTest(BaseTestCase):
+    @vcr.use_cassette()
+    def test_search_hash_with_json_output(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'search', 'hash', self.test_hash_value])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_search_hash_with_text_output(self):
+        result = self._run_cli([
+            '--output-format', 'text', 'search', 'hash', self.test_hash_value])
+        self._assert_text_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_search_hash_with_no_results(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'search', 'hash', '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0a'])
+        self._assert_text_result(result, self.click_vcr(result), expected_return_code=1)
+
+    @vcr.use_cassette()
+    def test_search_metadata_with_json_output(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'search', 'metadata', 'hash.sha256:' + self.test_hash_value])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_search_metadata_with_text_output(self):
+        result = self._run_cli([
+            '--output-format', 'text', 'search', 'metadata', 'hash.sha256:' + self.test_hash_value])
+        self._assert_text_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_search_metadata_with_no_results(self):
+        result = self._run_cli([
+            '--output-format', 'text', 'search', 'metadata', 'hash.sha256:275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0a'])
+        self._assert_text_result(result, self.click_vcr(result), expected_return_code=1)

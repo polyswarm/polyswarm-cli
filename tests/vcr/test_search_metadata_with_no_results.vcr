@@ -1,0 +1,30 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - '11111111111111111111111111111111'
+      Connection:
+      - keep-alive
+      User-Agent:
+      - polyswarm-api/2.9.0 (x86_64-Linux-CPython-3.6.5)
+    method: GET
+    uri: http://artifact-index-e2e:9696/v2/search/metadata/query?query=hash.sha256%3A275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0a
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Type:
+      - text/html; charset=utf-8
+      Date:
+      - Tue, 08 Jun 2021 19:50:11 GMT
+      Server:
+      - Werkzeug/1.0.1 Python/3.7.3
+    status:
+      code: 204
+      message: NO CONTENT
+version: 1
