@@ -1,0 +1,38 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - '11111111111111111111111111111111'
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - polyswarm-api/2.9.0 (x86_64-Linux-CPython-3.6.5)
+    method: DELETE
+    uri: http://artifact-index-e2e:9696/v2/hunt/historical?id=93536118162554562
+  response:
+    body:
+      string: '{"result":{"created":"2021-06-02T21:42:44.127084","id":"93536118162554562","ruleset_name":null,"status":"SUCCESS"},"status":"OK"}
+
+        '
+    headers:
+      Content-Length:
+      - '130'
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 07 Jun 2021 23:37:05 GMT
+      Server:
+      - Werkzeug/1.0.1 Python/3.7.3
+      X-Billing-ID:
+      - '1'
+    status:
+      code: 200
+      message: OK
+version: 1

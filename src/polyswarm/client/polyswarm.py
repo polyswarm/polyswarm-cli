@@ -76,6 +76,8 @@ class ExceptionHandlingGroup(click.Group):
         except (
                 exceptions.NoResultsException,
                 exceptions.NotFoundException,
+                api_exceptions.NoResultsException,
+                api_exceptions.NotFoundException,
         ) as e:
             logger.error(e)
             raise Exit(1)
