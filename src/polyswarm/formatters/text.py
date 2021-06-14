@@ -265,6 +265,44 @@ class TextOutput(base.BaseOutput):
 
         return self._output(output, write)
 
+    def assertions(self, instance, write=True):
+        output = []
+        output.append(self._white('============================= Assertions Job ============================='))
+        output.append(self._blue('Assertions Job id: {}'.format(instance.id)))
+        output.append(self._white('Engine id: {}'.format(instance.engine_id)))
+        output.append(self._white('Created at: {}'.format(instance.created)))
+
+        if instance.storage_path is not None:
+            output.append(self._white('Download: {}'.format(instance.storage_path)))
+            output.append(self._white('True Positive: {}'.format(instance.true_positive)))
+            output.append(self._white('True Negative: {}'.format(instance.true_negative)))
+            output.append(self._white('False Positive: {}'.format(instance.false_positive)))
+            output.append(self._white('False Negative: {}'.format(instance.false_negative)))
+            output.append(self._white('Suspicious: {}'.format(instance.suspicious)))
+            output.append(self._white('Unknown: {}'.format(instance.unknown)))
+            output.append(self._white('Total: {}'.format(instance.total)))
+
+        return self._output(output, write)
+
+    def votes(self, instance, write=True):
+        output = []
+        output.append(self._white('============================= Votes Job ============================='))
+        output.append(self._blue('Votes Job id: {}'.format(instance.id)))
+        output.append(self._white('Engine id: {}'.format(instance.engine_id)))
+        output.append(self._white('Created at: {}'.format(instance.created)))
+
+        if instance.storage_path is not None:
+            output.append(self._white('Download: {}'.format(instance.storage_path)))
+            output.append(self._white('True Positive: {}'.format(instance.true_positive)))
+            output.append(self._white('True Negative: {}'.format(instance.true_negative)))
+            output.append(self._white('False Positive: {}'.format(instance.false_positive)))
+            output.append(self._white('False Negative: {}'.format(instance.false_negative)))
+            output.append(self._white('Suspicious: {}'.format(instance.suspicious)))
+            output.append(self._white('Unknown: {}'.format(instance.unknown)))
+            output.append(self._white('Total: {}'.format(instance.total)))
+
+        return self._output(output, write)
+
     @is_grouped
     def _white(self, text):
         return click.style(text, fg='white')
