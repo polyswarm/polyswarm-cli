@@ -50,6 +50,19 @@ def assertions_get(ctx, assertions_job_id):
     output.assertions(result)
 
 
+@assertions.command('delete', short_help='Delete an assertions bundle.')
+@click.argument('assertions-job-id', type=click.INT)
+@click.pass_context
+def assertions_delete(ctx, assertions_job_id):
+    """
+    Delete the assertions bundle for the given bundle id.
+    """
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    result = api.assertions_delete(assertions_job_id)
+    output.assertions(result)
+
+
 @assertions.command('list', short_help='List all assertions bundles for the given engine.')
 @click.argument('engine-id', type=click.STRING)
 @click.pass_context
@@ -87,6 +100,19 @@ def votes_get(ctx, votes_job_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
     result = api.votes_get(votes_job_id)
+    output.votes(result)
+
+
+@votes.command('delete', short_help='Delete a votes bundle.')
+@click.argument('votes-job-id', type=click.INT)
+@click.pass_context
+def votes_delete(ctx, votes_job_id):
+    """
+    Delete the votes bundle for the given bundle id.
+    """
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    result = api.votes_delete(votes_job_id)
     output.votes(result)
 
 
