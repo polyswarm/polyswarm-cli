@@ -271,6 +271,8 @@ class TextOutput(base.BaseOutput):
         output.append(self._blue('Assertions Job id: {}'.format(instance.id)))
         output.append(self._white('Engine id: {}'.format(instance.engine_id)))
         output.append(self._white('Created at: {}'.format(instance.created)))
+        output.append(self._white('Start date: {}'.format(instance.date_start)))
+        output.append(self._white('End date: {}'.format(instance.date_end)))
 
         if instance.storage_path is not None:
             output.append(self._white('Download: {}'.format(instance.storage_path)))
@@ -290,6 +292,8 @@ class TextOutput(base.BaseOutput):
         output.append(self._blue('Votes Job id: {}'.format(instance.id)))
         output.append(self._white('Engine id: {}'.format(instance.engine_id)))
         output.append(self._white('Created at: {}'.format(instance.created)))
+        output.append(self._white('Start date: {}'.format(instance.date_start)))
+        output.append(self._white('End date: {}'.format(instance.date_end)))
 
         if instance.storage_path is not None:
             output.append(self._white('Download: {}'.format(instance.storage_path)))

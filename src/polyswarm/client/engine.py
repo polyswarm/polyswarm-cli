@@ -50,6 +50,17 @@ def assertions_get(ctx, assertions_job_id):
     output.assertions(result)
 
 
+@assertions.command('list', short_help='List all assertions bundles for the given engine.')
+@click.argument('engine-id', type=click.STRING)
+@click.pass_context
+def assertions_list(ctx, engine_id):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    results = api.assertions_list(engine_id)
+    for result in results:
+        output.assertions(result)
+
+
 @votes.command('create', short_help='Create a new bundle with the consolidated votes data.')
 @click.argument('engine-id', type=click.STRING)
 @click.argument('date-start', type=click.STRING)
@@ -77,3 +88,14 @@ def votes_get(ctx, votes_job_id):
     output = ctx.obj['output']
     result = api.votes_get(votes_job_id)
     output.votes(result)
+
+
+@votes.command('list', short_help='List all votes bundles for the given engine.')
+@click.argument('engine-id', type=click.STRING)
+@click.pass_context
+def votes_list(ctx, engine_id):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    results = api.votes_list(engine_id)
+    for result in results:
+        output.votes(result)
