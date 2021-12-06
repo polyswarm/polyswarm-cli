@@ -135,7 +135,7 @@ def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verb
 
     output_file = output_file or click.get_text_stream('stdout')
 
-    ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community, parallel=parallel, verify)
+    ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community, parallel=parallel, verify=verify)
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
 
 
