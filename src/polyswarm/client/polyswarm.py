@@ -115,10 +115,11 @@ class ExceptionHandlingGroup(click.Group):
 @click.option('-v', '--verbose', default=0, count=True)
 @click.option('-c', '--community', default='default', envvar='POLYSWARM_COMMUNITY', help='Community to use.')
 @click.option('--parallel', default=8, help='Number of threads to be used in parallel http requests.')
+@click.option('--verify/--no-verify', default=True, help='Verify TLS connections.')
 @click.version_option(polyswarm.__version__, '--version', prog_name='polyswarm-cli')
 @click.version_option(polyswarm_api.__version__, '--api-version', prog_name='polyswarm-api')
 @click.pass_context
-def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verbose, community, parallel):
+def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verbose, community, parallel, verify):
     """
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
@@ -134,7 +135,7 @@ def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verb
 
     output_file = output_file or click.get_text_stream('stdout')
 
-    ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community, parallel=parallel)
+    ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community, parallel=parallel, verify=verify)
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
 
 
