@@ -42,16 +42,6 @@ def live_create(ctx, rule_file, rule_id, disabled, name):
     output.hunt(result)
 
 
-@live.command('start', short_help='Start an existing live hunt.')
-@click.argument('hunt_id', nargs=-1, type=click.INT, required=True)
-@click.pass_context
-def live_start(ctx, hunt_id):
-    api = ctx.obj['api']
-    output = ctx.obj['output']
-    for result in api.live_start(hunt_id):
-        output.hunt(result)
-
-
 @live.command('stop', short_help='Stop an existing live hunt.')
 @click.argument('hunt_id', nargs=-1, type=click.INT)
 @click.pass_context
@@ -62,44 +52,15 @@ def live_stop(ctx, hunt_id):
         output.hunt(result)
 
 
-@live.command('delete', short_help='Delete the live hunt associated with the given hunt_id.')
-@click.argument('hunt_id', nargs=-1, type=click.INT)
-@click.pass_context
-def live_delete(ctx, hunt_id):
-    api = ctx.obj['api']
-    output = ctx.obj['output']
-    for result in api.live_delete_multiple(hunt_id):
-        output.hunt_deletion(result)
-
-
-@live.command('list', short_help='List all live hunts performed.')
-@click.option('-s', '--since', type=click.INT, help='How far back in seconds to request results.')
-@click.option('-a', '--all', 'all_', is_flag=True, help='Request all live hunts ever created.')
-@click.pass_context
-def live_list(ctx, since, all_):
-    api = ctx.obj['api']
-    output = ctx.obj['output']
-    kwargs = {}
-    if since is not None:
-        kwargs['since'] = since
-    if all_ is not None:
-        kwargs['all_'] = all_
-    result = api.live_list(**kwargs)
-    for hunt in result:
-        output.hunt(hunt)
-
-
-@live.command('results', short_help='Get results from live hunt.')
-@click.argument('hunt_id', nargs=-1, type=click.INT, required=True)
+@live.command('feed', short_help='Get results from live hunt.')
 @click.option('-s', '--since', type=click.INT, default=1440,
               help='How far back in seconds to request results (default: 1440).')
-@click.option('-t', '--tag', help='Filter results on this tag.')
 @click.option('-r', '--rule-name', help='Filter results on this rule name.')
 @click.pass_context
-def live_results(ctx, hunt_id, since, tag, rule_name):
+def live_results(ctx, since, rule_name):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    for result in api.live_results_multiple(hunt_id, since, tag, rule_name):
+    for result in api.live_feed(since, rule_name):
         output.hunt_result(result)
 
 
