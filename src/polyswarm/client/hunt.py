@@ -19,37 +19,24 @@ def historical():
     pass
 
 
-@live.command('create', short_help='Create a live hunt.')
-@click.argument('rule_file', type=click.File('r'), required=False)
-@click.option('-r', '--rule-id', type=click.INT, help='If provided, create the live hunt from the existing ruleset.')
-@click.option('-d', '--disabled', is_flag=True, help='If provided, create the live hunt with active=False.')
-@click.option('-n', '--name', help='Explicitly set the ruleset name for this hunt.')
+@live.command('start', short_help='Create a live hunt.')
+@click.argument('rule_id', type=click.INT)
 @click.pass_context
-@utils.any_provided('rule_file', 'rule_id')
-def live_create(ctx, rule_file, rule_id, disabled, name):
+def live_create(ctx, rule_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    params = {}
-    if rule_file:
-        rule = rule_file.read()
-        params['ruleset_name'] = path.basename(rule_file.name)
-    elif rule_id:
-        rule = rule_id
-    if name:
-        params['ruleset_name'] = name
-    params['active'] = not disabled
-    result = api.live_create(rule, **params)
-    output.hunt(result)
+    result = api.live_start(rule_id)
+    output.ruleset(result)
 
 
-@live.command('stop', short_help='Stop an existing live hunt.')
-@click.argument('hunt_id', nargs=-1, type=click.INT)
+@live.command('stop', short_help='Stop a live hunt.')
+@click.argument('rule_id', type=click.INT)
 @click.pass_context
-def live_stop(ctx, hunt_id):
+def live_stop(ctx, rule_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    for result in api.live_stop(hunt_id):
-        output.hunt(result)
+    result = api.live_stop(rule_id)
+    output.ruleset(result)
 
 
 @live.command('feed', short_help='Get results from live hunt.')

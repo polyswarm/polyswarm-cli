@@ -181,30 +181,6 @@ class Polyswarm(PolyswarmAPI):
         for result in utils.parallel_executor(self.download_archive, args_list=args):
             yield result
 
-    def live_start(self, hunt_id):
-        """
-        Start an existing live hunt.
-
-        :param hunt_id: List of hunt ids.
-        :return: An iterator of hunt objects.
-        """
-        kwargs = [dict(hunt=h) for h in hunt_id]
-        args = [(True,)]*len(kwargs)
-        for result in utils.parallel_executor(self.live_update, args_list=args, kwargs_list=kwargs):
-            yield result
-
-    def live_stop(self, hunt_id):
-        """
-        Stop an existing live hunt.
-
-        :param hunt_id: List of hunt ids.
-        :return: An iterator of hunt objects.
-        """
-        kwargs = [dict(hunt=h) for h in hunt_id] if hunt_id else [dict(hunt=None)]
-        args = [(False,)] * len(kwargs)
-        for result in utils.parallel_executor(self.live_update, args_list=args, kwargs_list=kwargs):
-            yield result
-
     def live_delete_multiple(self, hunt_id):
         """
         Delete the live hunt associated with the given hunt_id.
