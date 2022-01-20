@@ -48,7 +48,7 @@ def live_results(ctx, since, rule_name):
     api = ctx.obj['api']
     output = ctx.obj['output']
     for result in api.live_feed(since, rule_name):
-        output.hunt_result(result)
+        output.live_result(result)
 
 
 @historical.command('start', short_help='Start a new historical hunt.')

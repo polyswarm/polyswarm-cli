@@ -147,9 +147,27 @@ class TextOutput(base.BaseOutput):
         output.extend(self.artifact_instance(result.artifact, write=False))
         return self._output(output, write)
 
+    def live_result(self, result, write=True):
+        output = []
+        output.append(self._blue('Id: {}'.format(result.id)))
+        output.append(self._blue('Instance Id: {}'.format(result.instance_id)))
+        output.append(self._white('SHA256: {}'.format(result.sha256)))
+        output.append(self._white('Rule: {}'.format(result.rule_name)))
+        if result.tags:
+            output.append(self._white('Tags: {result_tags}'.format(result_tags=result.tags)))
+        output.append(self._white('Created at: {}'.format(result.created)))
+        if result.polyscore is not None:
+            formatter = self._get_score_format(result.polyscore)
+            output.append(formatter('PolyScore: {:.20f}'.format(result.polyscore)))
+        if result.malware_family:
+            output.append(self._white('Malware Family: {result_tags}'.format(result_tags=result.malware_family)))
+        return self._output(output, write)
+
     def ruleset(self, result, write=True, contents=False):
         output = []
         output.append(self._blue('Ruleset Id: {}'.format(result.id)))
+        if result.livescan_id:
+            output.append(self._yellow('Live Hunt Id: {}'.format(result.livescan_id)))
         output.append(self._white('Name: {}'.format(result.name)))
         output.append(self._white('Description: {}'.format(result.description)))
         output.append(self._white('Created at: {}'.format(result.created)))

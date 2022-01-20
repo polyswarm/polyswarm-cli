@@ -92,6 +92,9 @@ class JSONOutput(base.BaseOutput):
     def hunt_result(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 
+    def live_result(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
+
     def hunt_deletion(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 
