@@ -68,6 +68,17 @@ def historical_list(ctx, since):
         output.hunt(hunt)
 
 
+@historical.command('delete-list', short_help='Delete a list of historical hunts.')
+@click.argument('historical-ids', nargs=-1, type=click.INT, required=True)
+@click.pass_context
+def historical_list(ctx, historical_ids):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    result = api.historical_delete_list(historical_ids)
+    for hunt in result:
+        output.hunt(hunt)
+
+
 @historical.command('results', short_help='Get results from historical hunt.')
 @click.argument('hunt_id', nargs=-1, type=click.INT, required=True)
 @click.option('-t', '--tag', help='Filter results on this tag.')
