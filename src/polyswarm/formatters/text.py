@@ -139,12 +139,30 @@ class TextOutput(base.BaseOutput):
 
         return self._output(output, write)
 
-    def hunt_result(self, result, write=True):
+    def historical_result(self, result, write=True):
         output = []
-        output.append(self._white('Match on rule {name}'.format(name=result.rule_name) +
-                                  (', tags: {result_tags}'.format(
-                                     result_tags=result.tags) if result.tags != '' else '')))
-        output.extend(self.artifact_instance(result.artifact, write=False))
+        output.append(self._blue('Id: {}'.format(result.id)))
+        output.append(self._blue('Instance Id: {}'.format(result.instance_id)))
+        output.append(self._white('SHA256: {}'.format(result.sha256)))
+        output.append(self._white('Rule: {}'.format(result.rule_name)))
+        if result.tags:
+            output.append(self._white('Tags: {result_tags}'.format(result_tags=result.tags)))
+        output.append(self._white('Created at: {}'.format(result.created)))
+        if result.polyscore is not None:
+            formatter = self._get_score_format(result.polyscore)
+            output.append(formatter('PolyScore: {:.20f}'.format(result.polyscore)))
+        if result.malware_family:
+            output.append(self._white('Malware Family: {result_tags}'.format(result_tags=result.malware_family)))
+        if result.detections:
+            if result.detections['total'] == 0:
+                output.append(self._white('Detections: No engines responded to this scan. You can trigger a rescan now.'))
+            else:
+                malicious = 'Detections: {}/{} engines reported malicious'\
+                    .format(result.detections['malicious'], result.detections['total'])
+                if result.detections['malicious'] > 0:
+                    output.append(self._red(malicious))
+                else:
+                    output.append(self._white(malicious))
         return self._output(output, write)
 
     def live_result(self, result, write=True):
@@ -161,6 +179,16 @@ class TextOutput(base.BaseOutput):
             output.append(formatter('PolyScore: {:.20f}'.format(result.polyscore)))
         if result.malware_family:
             output.append(self._white('Malware Family: {result_tags}'.format(result_tags=result.malware_family)))
+        if result.detections:
+            if result.detections['total'] == 0:
+                output.append(self._white('Detections: No engines responded to this scan. You can trigger a rescan now.'))
+            else:
+                malicious = 'Detections: {}/{} engines reported malicious'\
+                    .format(result.detections['malicious'], result.detections['total'])
+                if result.detections['malicious'] > 0:
+                    output.append(self._red(malicious))
+                else:
+                    output.append(self._white(malicious))
         return self._output(output, write)
 
     def ruleset(self, result, write=True, contents=False):

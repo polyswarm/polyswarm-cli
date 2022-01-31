@@ -88,4 +88,4 @@ def historical_results(ctx, hunt_id, tag, rule_name):
     api = ctx.obj['api']
     output = ctx.obj['output']
     for result in api.historical_results_multiple(hunt_id, tag, rule_name):
-        output.hunt_result(result)
+        output.historical_result(result)

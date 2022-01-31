@@ -20,7 +20,10 @@ class SHA256Output(base.BaseOutput):
     def artifact_instance(self, instance, timeout=False):
         click.echo(instance.sha256, file=self.out)
 
-    def hunt_result(self, result):
+    def historical_result(self, result):
+        click.echo(result.artifact.sha256, file=self.out)
+
+    def live_result(self, result):
         click.echo(result.artifact.sha256, file=self.out)
 
     def tag_link(self, result):

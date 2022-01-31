@@ -89,7 +89,7 @@ class JSONOutput(base.BaseOutput):
     def artifact_instance(self, result, timeout=False):
         click.echo(self._to_json(result.json), file=self.out)
 
-    def hunt_result(self, result):
+    def historical_result(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 
     def live_result(self, result):
