@@ -35,11 +35,16 @@ def live_stop(ctx, rule_id):
 @click.option('-s', '--since', type=click.INT, default=1440,
               help='How far back in seconds to request results (default: 1440).')
 @click.option('-r', '--rule-name', help='Filter results on this rule name.')
+@click.option('-f', '--family', help='Filter hunt results based on the family name.')
+@click.option('-l', '--polyscore-lower', help='Polyscore lower bound for the hunt results.')
+@click.option('-u', '--polyscore-upper', help='Polyscore upper bound for the hunt results.')
 @click.pass_context
-def live_results(ctx, since, rule_name):
+def live_results(ctx, since, rule_name, family, polyscore_lower, polyscore_upper):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    for result in api.live_feed(since, rule_name):
+    for result in api.live_feed(
+            since, rule_name=rule_name, family=family,
+            polyscore_lower=polyscore_lower, polyscore_upper=polyscore_upper):
         output.live_result(result)
 
 
@@ -50,3 +55,15 @@ def live_results(ctx, result_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
     output.live_result(api.live_result(result_id))
+
+
+@live.command('results-delete', short_help='Delete a list of live results.')
+@click.argument('result-ids', nargs=-1, type=click.INT, required=True)
+@click.pass_context
+def historical_results_delete(ctx, result_ids):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    result = api.live_feed_delete(result_ids)
+    for hunt in result:
+        output.live_result(hunt)
+

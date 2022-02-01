@@ -71,7 +71,7 @@ def historical_list(ctx, since):
 @historical.command('delete-list', short_help='Delete a list of historical hunts.')
 @click.argument('historical-ids', nargs=-1, type=click.INT, required=True)
 @click.pass_context
-def historical_list(ctx, historical_ids):
+def historical_delete_list(ctx, historical_ids):
     api = ctx.obj['api']
     output = ctx.obj['output']
     result = api.historical_delete_list(historical_ids)
@@ -80,12 +80,37 @@ def historical_list(ctx, historical_ids):
 
 
 @historical.command('results', short_help='Get results from historical hunt.')
-@click.argument('hunt_id', nargs=-1, type=click.INT, required=True)
-@click.option('-t', '--tag', help='Filter results on this tag.')
+@click.argument('hunt-id', nargs=-1, type=click.INT, required=True)
 @click.option('-r', '--rule-name', help='Filter results on this rule name.')
+@click.option('-f', '--family', help='Filter hunt results based on the family name.')
+@click.option('-l', '--polyscore-lower', help='Polyscore lower bound for the hunt results.')
+@click.option('-u', '--polyscore-upper', help='Polyscore upper bound for the hunt results.')
 @click.pass_context
-def historical_results(ctx, hunt_id, tag, rule_name):
+def historical_results(ctx, hunt_id, rule_name, family, polyscore_lower, polyscore_upper):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    for result in api.historical_results_multiple(hunt_id, tag, rule_name):
+    for result in api.historical_results_multiple(
+            hunt_id, rule_name=rule_name, family=family,
+            polyscore_lower=polyscore_lower, polyscore_upper=polyscore_upper):
         output.historical_result(result)
+
+
+@historical.command('result', short_help='Get historical hunt result.')
+@click.argument('result-id', type=click.INT, required=True)
+@click.pass_context
+def historical_results(ctx, result_id):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    output.historical_result(api.historical_result(result_id))
+
+
+@historical.command('results-delete', short_help='Delete a list of historical results.')
+@click.argument('result-ids', nargs=-1, type=click.INT, required=True)
+@click.pass_context
+def historical_results_delete(ctx, result_ids):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    result = api.historical_results_delete(result_ids)
+    for hunt in result:
+        output.historical_result(hunt)
+

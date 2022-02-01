@@ -163,6 +163,8 @@ class TextOutput(base.BaseOutput):
                     output.append(self._red(malicious))
                 else:
                     output.append(self._white(malicious))
+        if result.download_url:
+            output.append(self._white('Download Url: {result_tags}'.format(result_tags=result.download_url)))
         return self._output(output, write)
 
     def live_result(self, result, write=True):
@@ -189,6 +191,8 @@ class TextOutput(base.BaseOutput):
                     output.append(self._red(malicious))
                 else:
                     output.append(self._white(malicious))
+        if result.download_url:
+            output.append(self._white('Download Url: {result_tags}'.format(result_tags=result.download_url)))
         return self._output(output, write)
 
     def ruleset(self, result, write=True, contents=False):
@@ -196,6 +200,7 @@ class TextOutput(base.BaseOutput):
         output.append(self._blue('Ruleset Id: {}'.format(result.id)))
         if result.livescan_id:
             output.append(self._yellow('Live Hunt Id: {}'.format(result.livescan_id)))
+            output.append(self._white('Live Hunt Created at: {}'.format(result.livescan_created)))
         output.append(self._white('Name: {}'.format(result.name)))
         output.append(self._white('Description: {}'.format(result.description)))
         output.append(self._white('Created at: {}'.format(result.created)))
