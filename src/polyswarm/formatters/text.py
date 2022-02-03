@@ -129,7 +129,14 @@ class TextOutput(base.BaseOutput):
         if result.ruleset_name is not None:
             output.append(self._white('Ruleset Name: {}'.format(result.ruleset_name)))
         output.append(self._white('Created at: {}'.format(result.created)))
-
+        if result.yara:
+            output.append(self._white('Contents:\n{}'.format(result.yara)))
+        if result.summary:
+            output.append(self._white('Total count: {}'.format(result.summary['count'])))
+            self._open_group()
+            for rule, data in result.summary.get('rule', []).items():
+                output.append(self._white('{}: {}'.format(rule, data['count'])))
+            self._close_group()
         return self._output(output, write)
 
     def hunt_deletion(self, result, write=True):

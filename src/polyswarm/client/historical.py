@@ -17,10 +17,10 @@ def historical():
 @historical.command('view', short_help='View the historical hunt associated with the given hunt_id.')
 @click.argument('hunt_id', type=click.INT)
 @click.pass_context
-def historical_delete(ctx, hunt_id):
+def historical_view(ctx, hunt_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    output.hunt_deletion(api.historical_get(hunt_id))
+    output.hunt(api.historical_get(hunt_id))
 
 
 @historical.command('start', short_help='Start a new historical hunt.')
