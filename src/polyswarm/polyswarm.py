@@ -181,32 +181,6 @@ class Polyswarm(PolyswarmAPI):
         for result in utils.parallel_executor(self.download_archive, args_list=args):
             yield result
 
-    def live_delete_multiple(self, hunt_id):
-        """
-        Delete the live hunt associated with the given hunt_id.
-
-        :param hunt_id: List of hunt ids.
-        :return: An iterator of hunt objects.
-        """
-        kwargs = [dict(hunt=h) for h in hunt_id]
-        for result in utils.parallel_executor(self.live_delete, kwargs_list=kwargs):
-            yield result
-
-    def live_results_multiple(self, hunt_id, since=1440, tag=None, rule_name=None):
-        """
-        Get results from live hunt.
-
-        :param hunt_id: List of hunt ids.
-        :param since: How far back in seconds to request results (default: 1440).
-        :param tag: Filter results on this tag.
-        :param rule_name: Filter results on this rule name.
-        :return: An iterator of hunt objects.
-        """
-        args = [(h,) for h in hunt_id] if hunt_id else [(None,)]
-        kwargs = [dict(since=since, tag=tag, rule_name=rule_name)]*len(args)
-        for result in utils.parallel_executor_iterable_results(self.live_results, args_list=args, kwargs_list=kwargs):
-            yield result
-
     def historical_delete_multiple(self, hunt_id):
         """
         Delete the historical hunt associated with the given hunt_id.
@@ -218,17 +192,15 @@ class Polyswarm(PolyswarmAPI):
         for result in utils.parallel_executor(self.historical_delete, kwargs_list=kwargs):
             yield result
 
-    def historical_results_multiple(self, hunt_id, tag=None, rule_name=None):
+    def historical_results_multiple(self, hunt_id, **kwargs):
         """
         Get results from historical hunt.
 
         :param hunt_id: List of hunt ids.
-        :param tag: Filter results on this tag.
-        :param rule_name: Filter results on this rule name.
         :return: An iterator of hunt objects.
         """
         args = [(h,) for h in hunt_id] if hunt_id else [(None,)]
-        kwargs = [dict(tag=tag, rule_name=rule_name)] * len(args)
+        kwargs = [kwargs] * len(args)
         for result in utils.parallel_executor_iterable_results(self.historical_results, args_list=args, kwargs_list=kwargs):
             yield result
 
