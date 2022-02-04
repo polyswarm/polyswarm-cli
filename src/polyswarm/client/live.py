@@ -12,22 +12,22 @@ def live():
 
 
 @live.command('start', short_help='Create a live hunt.')
-@click.argument('rule_id', type=click.INT)
+@click.argument('ruleset-id', type=click.INT)
 @click.pass_context
-def live_start(ctx, rule_id):
+def live_start(ctx, ruleset_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.live_start(rule_id)
+    result = api.live_start(ruleset_id)
     output.ruleset(result)
 
 
 @live.command('stop', short_help='Stop a live hunt.')
-@click.argument('rule_id', type=click.INT)
+@click.argument('ruleset-id', type=click.INT)
 @click.pass_context
-def live_stop(ctx, rule_id):
+def live_stop(ctx, ruleset_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.live_stop(rule_id)
+    result = api.live_stop(ruleset_id)
     output.ruleset(result)
 
 

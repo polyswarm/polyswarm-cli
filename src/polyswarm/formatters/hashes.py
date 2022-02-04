@@ -21,10 +21,10 @@ class SHA256Output(base.BaseOutput):
         click.echo(instance.sha256, file=self.out)
 
     def historical_result(self, result):
-        click.echo(result.artifact.sha256, file=self.out)
+        click.echo(result.sha256, file=self.out)
 
     def live_result(self, result):
-        click.echo(result.artifact.sha256, file=self.out)
+        click.echo(result.sha256, file=self.out)
 
     def tag_link(self, result):
         click.echo(result.sha256, file=self.out)
@@ -46,9 +46,6 @@ class SHA1Output(base.BaseOutput):
     def artifact_instance(self, result, timeout=False):
         click.echo(result.sha1, file=self.out)
 
-    def hunt_result(self, result):
-        click.echo(result.artifact.sha1, file=self.out)
-
     def metadata(self, result):
         if result.sha1:
             click.echo(result.sha1, file=self.out)
@@ -65,9 +62,6 @@ class MD5Output(base.BaseOutput):
 
     def artifact_instance(self, result, timeout=False):
         click.echo(result.md5, file=self.out)
-
-    def hunt_result(self, result):
-        click.echo(result.artifact.md5, file=self.out)
 
     def metadata(self, result):
         if result.md5:

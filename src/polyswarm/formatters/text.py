@@ -26,9 +26,9 @@ class TextOutput(base.BaseOutput):
         self.color = color
 
     def _get_score_format(self, score):
-        if score < 0.15:
+        if score < 0.3:
             return self._white
-        elif score < 0.4:
+        elif score < 0.7:
             return self._yellow
         else:
             return self._red
@@ -124,19 +124,27 @@ class TextOutput(base.BaseOutput):
     def hunt(self, result, write=True):
         output = []
         output.append(self._blue('Hunt Id: {}'.format(result.id)))
+        output.append(self._white('Status: {}'.format(result.status)))
+        if result.progress is not None:
+            output.append(self._white('Progress: {:.2f}%'.format(result.progress)))
         if result.active is not None:
             output.append(self._white('Active: {}'.format(result.active)))
-        if result.ruleset_name is not None:
-            output.append(self._white('Ruleset Name: {}'.format(result.ruleset_name)))
         output.append(self._white('Created at: {}'.format(result.created)))
-        if result.yara:
-            output.append(self._white('Contents:\n{}'.format(result.yara)))
         if result.summary:
             output.append(self._white('Total count: {}'.format(result.summary['count'])))
             self._open_group()
             for rule, data in result.summary.get('rule', []).items():
                 output.append(self._white('{}: {}'.format(rule, data['count'])))
             self._close_group()
+        if result.results_csv_uri:
+            output.append(self._white('Download Results CSV:'))
+            self._open_group()
+            output.append(self._white(result.results_csv_uri))
+            self._close_group()
+        if result.ruleset_name is not None:
+            output.append(self._white('Ruleset Name: {}'.format(result.ruleset_name)))
+        if result.yara:
+            output.append(self._white('Ruleset Contents:\n{}'.format(result.yara)))
         return self._output(output, write)
 
     def hunt_deletion(self, result, write=True):
@@ -150,16 +158,14 @@ class TextOutput(base.BaseOutput):
         output = []
         output.append(self._blue('Id: {}'.format(result.id)))
         output.append(self._blue('Instance Id: {}'.format(result.instance_id)))
+        output.append(self._white('Created at: {}'.format(result.created)))
         output.append(self._white('SHA256: {}'.format(result.sha256)))
         output.append(self._white('Rule: {}'.format(result.rule_name)))
-        if result.tags:
-            output.append(self._white('Tags: {result_tags}'.format(result_tags=result.tags)))
-        output.append(self._white('Created at: {}'.format(result.created)))
+        if result.malware_family:
+            output.append(self._red('Malware Family: {result_tags}'.format(result_tags=result.malware_family)))
         if result.polyscore is not None:
             formatter = self._get_score_format(result.polyscore)
             output.append(formatter('PolyScore: {:.20f}'.format(result.polyscore)))
-        if result.malware_family:
-            output.append(self._white('Malware Family: {result_tags}'.format(result_tags=result.malware_family)))
         if result.detections:
             if result.detections['total'] == 0:
                 output.append(self._white('Detections: No engines responded to this scan. You can trigger a rescan now.'))
@@ -170,6 +176,8 @@ class TextOutput(base.BaseOutput):
                     output.append(self._red(malicious))
                 else:
                     output.append(self._white(malicious))
+        if result.tags:
+            output.append(self._white('Tags: {result_tags}'.format(result_tags=result.tags)))
         if result.download_url:
             output.append(self._white('Download Url: {result_tags}'.format(result_tags=result.download_url)))
         return self._output(output, write)
@@ -178,16 +186,14 @@ class TextOutput(base.BaseOutput):
         output = []
         output.append(self._blue('Id: {}'.format(result.id)))
         output.append(self._blue('Instance Id: {}'.format(result.instance_id)))
+        output.append(self._white('Created at: {}'.format(result.created)))
         output.append(self._white('SHA256: {}'.format(result.sha256)))
         output.append(self._white('Rule: {}'.format(result.rule_name)))
-        if result.tags:
-            output.append(self._white('Tags: {result_tags}'.format(result_tags=result.tags)))
-        output.append(self._white('Created at: {}'.format(result.created)))
+        if result.malware_family:
+            output.append(self._red('Malware Family: {result_tags}'.format(result_tags=result.malware_family)))
         if result.polyscore is not None:
             formatter = self._get_score_format(result.polyscore)
             output.append(formatter('PolyScore: {:.20f}'.format(result.polyscore)))
-        if result.malware_family:
-            output.append(self._white('Malware Family: {result_tags}'.format(result_tags=result.malware_family)))
         if result.detections:
             if result.detections['total'] == 0:
                 output.append(self._white('Detections: No engines responded to this scan. You can trigger a rescan now.'))
@@ -198,6 +204,8 @@ class TextOutput(base.BaseOutput):
                     output.append(self._red(malicious))
                 else:
                     output.append(self._white(malicious))
+        if result.tags:
+            output.append(self._white('Tags: {result_tags}'.format(result_tags=result.tags)))
         if result.download_url:
             output.append(self._white('Download Url: {result_tags}'.format(result_tags=result.download_url)))
         return self._output(output, write)
@@ -213,7 +221,7 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('Created at: {}'.format(result.created)))
         output.append(self._white('Modified at: {}'.format(result.modified)))
         if contents:
-            output.append(self._white('Contents:\n{}'.format(result.yara)))
+            output.append(self._white('Ruleset Contents:\n{}'.format(result.yara)))
         return self._output(output, write)
 
     def tag_link(self, result, write=True):
