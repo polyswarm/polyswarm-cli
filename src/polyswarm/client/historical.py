@@ -44,6 +44,15 @@ def historical_start(ctx, rule_file, rule_id, name):
     output.hunt(result)
 
 
+@historical.command('cancel', short_help='Cancel the historical hunt associated with the given hunt_id.')
+@click.argument('hunt_id', type=click.INT)
+@click.pass_context
+def historical_cancel(ctx, hunt_id):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    output.hunt(api.historical_update(hunt_id))
+
+
 @historical.command('delete', short_help='Delete the historical hunt associated with the given hunt_id.')
 @click.argument('hunt_id', nargs=-1, type=click.INT, required=True)
 @click.pass_context
