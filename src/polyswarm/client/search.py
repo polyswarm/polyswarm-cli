@@ -55,13 +55,15 @@ def urls(ctx, url):
               help='Field to be included in the result (.* wildcards are accepted).')
 @click.option('-x', '--exclude', type=click.STRING, multiple=True,
               help='Field to be excluded from the result (.* wildcards are accepted).')
+@click.option('-p', '--ip', type=click.STRING, multiple=True,
+              help='IP address IOC to search')
 @click.argument('query_string', nargs=-1, required=True)
 @click.pass_context
-def metadata(ctx, query_string, include, exclude):
+def metadata(ctx, query_string, include, exclude, ip):
     api = ctx.obj['api']
     output = ctx.obj['output']
     query_string = ' '.join(query_string)
-    for metadata_result in api.search_by_metadata(query_string, include=include, exclude=exclude):
+    for metadata_result in api.search_by_metadata(query_string, include=include, exclude=exclude, ips=ip):
         output.metadata(metadata_result)
 
 
