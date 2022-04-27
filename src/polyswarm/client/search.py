@@ -57,13 +57,21 @@ def urls(ctx, url):
               help='Field to be excluded from the result (.* wildcards are accepted).')
 @click.option('-p', '--ip', type=click.STRING, multiple=True,
               help='IP address IOC to search')
-@click.argument('query_string', nargs=-1, required=True)
+@click.option('-u', '--url', type=click.STRING, multiple=True,
+              help='URL address IOC to search')
+@click.option('-d', '--domain', type=click.STRING, multiple=True,
+              help='Domain address IOC to search')
+@click.argument('query_string', nargs=-1, required=False)
 @click.pass_context
-def metadata(ctx, query_string, include, exclude, ip):
+def metadata(ctx, query_string, include, exclude, ip, url, domain):
     api = ctx.obj['api']
     output = ctx.obj['output']
     query_string = ' '.join(query_string)
-    for metadata_result in api.search_by_metadata(query_string, include=include, exclude=exclude, ips=ip):
+
+    if sum([not ip, not url, not domain]) < 2:
+        raise click.exceptions.BadParameter("Only one of the following paramters may be provided per request: ip, url, or domain")
+
+    for metadata_result in api.search_by_metadata(query_string, include=include, exclude=exclude, ips=ip, urls=url, domains=domain):
         output.metadata(metadata_result)
 
 
