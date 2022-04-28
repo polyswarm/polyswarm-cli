@@ -68,9 +68,6 @@ def metadata(ctx, query_string, include, exclude, ip, url, domain):
     output = ctx.obj['output']
     query_string = ' '.join(query_string)
 
-    if sum([not ip, not url, not domain]) < 2:
-        raise click.exceptions.BadParameter("Only one of the following paramters may be provided per request: ip, url, or domain")
-
     for metadata_result in api.search_by_metadata(query_string, include=include, exclude=exclude, ips=ip, urls=url, domains=domain):
         output.metadata(metadata_result)
 
