@@ -58,9 +58,9 @@ def urls(ctx, url):
 @click.option('-p', '--ip', type=click.STRING, multiple=True,
               help='IP address IOC to search')
 @click.option('-u', '--url', type=click.STRING, multiple=True,
-              help='URL address IOC to search')
+              help='URL IOC to search')
 @click.option('-d', '--domain', type=click.STRING, multiple=True,
-              help='Domain address IOC to search')
+              help='Domain name IOC to search')
 @click.argument('query_string', nargs=-1, required=False)
 @click.pass_context
 def metadata(ctx, query_string, include, exclude, ip, url, domain):
