@@ -76,7 +76,7 @@ def iocs_by_hash(ctx, hash_type, hash_value, hide_known_good):
     output.iocs(api.iocs_by_hash(hash_type, hash_value, hide_known_good=hide_known_good))
 
 
-@search.command('artifact_by_ioc', short_help='Retrieve the associated ')
+@search.command('artifact_by_ioc', short_help='Retrieve the artifacts associated with the given IOC.')
 @click.option('-h', '--hide-known-good', is_flag=True)
 @click.argument('ioc_type', required=True)
 @click.argument('ioc_value', required=True)
@@ -90,7 +90,7 @@ def artifact_by_ioc(ctx, ioc_type, ioc_value, hide_known_good):
 
     output.iocs(api.search_by_ioc(**params))
 
-@search.command('check_known_hosts', short_help='Retrieve the associated ')
+@search.command('check_known_hosts', short_help='Check if given ip or domain is known.')
 @click.option('-p', '--ip', type=click.STRING, multiple=True)
 @click.option('-d', '--domain', type=click.STRING, multiple=True)
 @click.pass_context
@@ -101,7 +101,7 @@ def check_known_hosts(ctx, ip, domain):
     for result in api.check_known_hosts(ips=ip, domains=domain):
         output.known_host(result)
 
-@search.command('add_known_good_host', short_help='Retrieve the associated ')
+@search.command('add_known_good_host', short_help='Add a known ip or domain.')
 @click.argument('type', required=True)
 @click.argument('host', required=True)
 @click.argument('source', required=True)
@@ -113,7 +113,7 @@ def add_known_good_host(ctx, type, host, source):
     output.known_host(api.add_known_good_host(type, source, host))
 
 
-@search.command('update_known_good_host', short_help='Retrieve the associated ')
+@search.command('update_known_good_host', short_help='Update a known ip or domain.')
 @click.argument('id', required=True)
 @click.argument('type', required=True)
 @click.argument('host', required=True)
