@@ -34,7 +34,7 @@ class BaseTestCase(TestCase):
         self.cli = CliRunner()
         self.click_vcr_folder = 'tests/vcr'
         self.click_vcr_suffix = 'click'
-        self.api_url = 'http://artifact-index-e2e:9696/v2'
+        self.api_url = 'http://artifact-index-e2e:9696/v3'
         self.api_key = '11111111111111111111111111111111'
         self.community = 'gamma'
         self.eicar_hash = '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
@@ -409,3 +409,47 @@ class SearchTest(BaseTestCase):
         result = self._run_cli([
             '--output-format', 'text', 'search', 'metadata', 'hash.sha256:275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0a'])
         self._assert_text_result(result, self.click_vcr(result), expected_return_code=1)
+
+class IOCTest(BaseTestCase):
+
+    @vcr.use_cassette()
+    def test_ioc_by_hash(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'search', 'iocs_by_hash', 'sha256', '18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40'])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_ioc_by_hash_no_results(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'search', 'iocs_by_hash', 'sha256', self.eicar_hash])
+        self._assert_text_result(result, self.click_vcr(result), expected_return_code=1)
+
+    @vcr.use_cassette()
+    def test_ioc_artifact_by_ioc(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'search', 'artifact_by_ioc', 'ip', '2.2.2.2'])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_ioc_artifact_by_ioc_no_results(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'search', 'artifact_by_ioc', 'ip', '192.0.0.1'])
+        self._assert_text_result(result, self.click_vcr(result), expected_return_code=1)
+
+    @vcr.use_cassette()
+    def test_check_known_hosts(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'search', 'check_known_hosts', '-d', 'www.polyswarm.io', '-p', '1.1.1.1'])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_add_known_host(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'search', 'add_known_good_host', 'domain', 'www.polyswarm.plus', 'some list'])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_update_known_host(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'search', 'update_known_good_host', '1', 'domain', 'www.google.com', 'some list'])
+        self._assert_json_result(result, self.click_vcr(result))
