@@ -65,7 +65,7 @@ def metadata(ctx, query_string, include, exclude):
         output.metadata(metadata_result)
 
 @search.command('iocs_by_hash', short_help='Retrieve the IOCs associated with the artifact hash.')
-@click.option('-h', '--hide-known-good', type=click.BOOL)
+@click.option('-h', '--hide-known-good', type=click.BOOL, is_flag=True)
 @click.argument('hash_type',  required=True)
 @click.argument('hash_value', required=True)
 @click.pass_context
@@ -73,19 +73,22 @@ def iocs_by_hash(ctx, hash_type, hash_value, hide_known_good):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.mapping(api.iocs_by_hash(hash_type, hash_value))
+    output.iocs(api.iocs_by_hash(hash_type, hash_value, hide_known_good=hide_known_good))
 
 
 @search.command('artifact_by_ioc', short_help='Retrieve the associated ')
-@click.option('-h', '--hide-known-good', type=click.BOOL)
+@click.option('-h', '--hide-known-good', is_flag=True)
 @click.argument('ioc_type', required=True)
 @click.argument('ioc_value', required=True)
 @click.pass_context
-def artifact_by_ioc(ctx, ip, domain, ttp, imphash, hide_known_good):
+def artifact_by_ioc(ctx, ioc_type, ioc_value, hide_known_good):
     api = ctx.obj['api']
     output = ctx.obj['output']
+    params = dict()
+    if ioc_type == 'ip':
+        params['ip'] = ioc_value
 
-    output.mapping(api.search_by_ioc(ip=ip, domain=domain, ttp=ttp, imphash=imphash))
+    output.iocs(api.search_by_ioc(**params))
 
 @search.command('check_known_hosts', short_help='Retrieve the associated ')
 @click.option('-p', '--ip', type=click.STRING, multiple=True)
@@ -95,28 +98,33 @@ def check_known_hosts(ctx, ip, domain):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.mapping(api.check_known_hosts(ips=ip, domains=domain))
+    for result in api.check_known_hosts(ips=ip, domains=domain):
+        output.known_host(result)
 
 @search.command('add_known_good_host', short_help='Retrieve the associated ')
 @click.argument('type', required=True)
 @click.argument('host', required=True)
+@click.argument('source', required=True)
 @click.pass_context
 def add_known_good_host(ctx, type, host, source):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.mapping(api.add_known_good_host(type, source, host))
+    output.known_host(api.add_known_good_host(type, source, host))
 
-@search.command('add_known_good_ioc', short_help='Retrieve the associated ')
+
+@search.command('update_known_good_host', short_help='Retrieve the associated ')
+@click.argument('id', required=True)
 @click.argument('type', required=True)
 @click.argument('host', required=True)
+@click.argument('source', required=True)
+@click.argument('good', default='true')
 @click.pass_context
-def add_known_good_ioc(ctx, id, type, ioc_host, source):
+def update_known_good_host(ctx, id, type, host, source, good):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.mapping(api.update_known_good_host(id, type, source, ioc_host))
-
+    output.known_host(api.update_known_good_host(id, type, source, host, good == 'true'))
 
 @search.command('mapping', short_help='Retrieve the metadata search mapping.')
 @click.pass_context

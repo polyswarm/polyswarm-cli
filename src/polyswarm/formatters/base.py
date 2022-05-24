@@ -25,6 +25,12 @@ class BaseOutput(object):
     def ruleset(self, result, contents=False):
         raise NotImplementedError
 
+    def iocs(self, iocs, write=True):
+        raise NotImplementedError
+
+    def known_host(self, iocs, write=True):
+        raise NotImplementedError
+
     def metadata(self, result):
         raise NotImplementedError
 
