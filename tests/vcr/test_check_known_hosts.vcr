@@ -1,0 +1,35 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - '11111111111111111111111111111111'
+      Connection:
+      - keep-alive
+      User-Agent:
+      - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.9.10)
+    method: GET
+    uri: http://artifact-index-e2e:9696/v3/ioc/known?ip=1.1.1.1&domain=www.polyswarm.io
+  response:
+    body:
+      string: '{"result":[{"good":true,"host":"www.polyswarm.io","id":1,"source":"some
+        list","type":"domain"}],"status":"OK"}
+
+        '
+    headers:
+      Connection:
+      - Keep-Alive
+      Content-Length:
+      - '111'
+      Content-Type:
+      - application/json
+      X-Billing-ID:
+      - '1'
+    status:
+      code: 200
+      message: OK
+version: 1
