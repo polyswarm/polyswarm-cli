@@ -178,7 +178,7 @@ class Polyswarm(PolyswarmAPI):
         :return: An iterator of local artifacts.
         """
         args = [(destination, artifact_archive.uri) for artifact_archive in self.stream(since=since)]
-        for result in utils.parallel_executor(self.download_archive, args_list=args):
+        for result in utils.parallel_executor(self.download_archive, args_list=args, max_workers=self.parallel):
             yield result
 
     def historical_delete_multiple(self, hunt_id):
