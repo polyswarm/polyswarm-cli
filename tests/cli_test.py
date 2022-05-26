@@ -227,12 +227,6 @@ class HistoricalHuntTest(BaseTestCase):
 
 class RulesetTest(BaseTestCase):
     @vcr.use_cassette()
-    def test_ruleset_create_broken_text(self):
-        broken_yara_file = self.resource('broken.yara')
-        result = self._run_cli(['--output-format', 'text', 'rules', 'create', 'broken', broken_yara_file])
-        self._assert_text_result(result, self.click_vcr(result), expected_return_code=2)
-
-    @vcr.use_cassette()
     def test_ruleset_create_json(self):
         result = self._run_cli([
             '--output-format', 'json', 'rules', 'create', 'test', self.resource('eicar.yara')])
