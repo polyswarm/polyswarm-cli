@@ -11,5 +11,5 @@ pygments==2.5.2
 mock==3.0.4
 responses==0.10.6
 colorama~=0.4.3
-vcrpy==4.1.1
+vcrpy==3.0.0
 PyYAML~=5.3
