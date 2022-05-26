@@ -11,9 +11,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - polyswarm-api/2.9.0 (x86_64-Linux-CPython-3.6.5)
+      - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.6.5)
     method: GET
-    uri: http://artifact-index-e2e:9696/v2/search/hash/sha256?hash=275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0a
+    uri: http://artifact-index-e2e:9696/v3/search/hash/sha256?hash=275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0a
   response:
     body:
       string: ''
@@ -21,9 +21,9 @@ interactions:
       Content-Type:
       - text/html; charset=utf-8
       Date:
-      - Tue, 08 Jun 2021 19:37:09 GMT
+      - Thu, 26 May 2022 19:10:39 GMT
       Server:
-      - Werkzeug/1.0.1 Python/3.7.3
+      - Werkzeug/1.0.1 Python/3.9.6
     status:
       code: 204
       message: NO CONTENT
