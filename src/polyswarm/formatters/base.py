@@ -10,7 +10,7 @@ class BaseOutput(object):
     def artifact_instance(self, result, timeout=False):
         raise NotImplementedError
 
-    def hunt_result(self, result):
+    def historical_result(self, result):
         raise NotImplementedError
 
     def hunt_deletion(self, result):

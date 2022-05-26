@@ -17,7 +17,8 @@ from polyswarm import exceptions
 from polyswarm.polyswarm import Polyswarm
 from polyswarm.formatters import formatters
 from polyswarm.client.utils import validate_key
-from polyswarm.client.hunt import live, historical
+from polyswarm.client.live import live
+from polyswarm.client.historical import historical
 from polyswarm.client.scan import scan, lookup, wait, rescan, rescan_id
 from polyswarm.client.download import download, cat, stream
 from polyswarm.client.search import search
