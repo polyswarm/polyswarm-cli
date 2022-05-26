@@ -100,7 +100,7 @@ def artifact_by_ioc(ctx, ioc_type, ioc_value):
     elif ioc_type.lower() == 'imphash':
         params['imphash'] = ioc_value
     else:
-        raise click.exceptions.BadArgumentUsage(f"Invalid ioc_type {ioc_type}")
+        raise click.exceptions.BadArgumentUsage("Invalid ioc_type argument. Must be either ip, domain, ttp, or imphash")
 
     output.iocs(api.search_by_ioc(**params))
 
