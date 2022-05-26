@@ -103,7 +103,7 @@ class DownloadTest(BaseTestCase):
     @vcr.use_cassette()
     def test_download_stream(self):
         with TemporaryDirectory() as path:
-            result = self._run_cli(['stream', '--since', '2880', path])
+            result = self._run_cli(['-u', self.api_url, 'stream', '--since', '2880', path])
             expected_result = self.click_vcr(result, replace=((path, 'temporary_folder'),))
             self._assert_text_result(result, expected_result, replace=((path, 'temporary_folder'),))
 
