@@ -84,11 +84,10 @@ def iocs_by_hash(ctx, hash_type, hash_value, hide_known_good):
 
 
 @search.command('artifact_by_ioc', short_help='Retrieve the artifacts associated with the given IOC.')
-@click.option('-h', '--hide-known-good', is_flag=True)
 @click.argument('ioc_type', required=True)
 @click.argument('ioc_value', required=True)
 @click.pass_context
-def artifact_by_ioc(ctx, ioc_type, ioc_value, hide_known_good):
+def artifact_by_ioc(ctx, ioc_type, ioc_value):
     api = ctx.obj['api']
     output = ctx.obj['output']
     params = dict()
