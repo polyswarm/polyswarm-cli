@@ -91,106 +91,26 @@ class BaseTestCase(TestCase):
         return resource_filename('tests', filename)
 
 
-class IntegrationTest(BaseTestCase):
-    @vcr.use_cassette()
-    def test_search_hash(self):
-        result = self._run_cli(['--output-format', 'json', 'search', 'hash', self.eicar_hash])
-        self._assert_json_result(result, self.click_vcr(result))
-
-    @vcr.use_cassette()
-    def test_search_metadata(self):
-        result = self._run_cli(['--output-format', 'json', 'search', 'metadata', '_exists_:artifact.sha256'])
-        self._assert_json_result(result, self.click_vcr(result))
-
-    @vcr.use_cassette()
-    def test_scan_submission_lookup(self):
-        result = self._run_cli(['--output-format', 'json', 'lookup', '19610779111217241'])
-        self._assert_json_result(result, self.click_vcr(result))
-
-    @vcr.use_cassette()
-    def test_scan_submission_create(self):
-        malicious_file = self.resource('malicious')
-        result = self._run_cli([
-            '--output-format', 'json', 'scan', 'file', malicious_file])
-        self._assert_json_result(result, self.click_vcr(result))
-
-    @vcr.use_cassette()
-    def test_scan_submission_rescan(self):
-        result = self._run_cli(['--output-format', 'json', 'rescan', self.eicar_hash])
-        self._assert_json_result(result, self.click_vcr(result))
-
-    @vcr.use_cassette()
-    def test_live_hunt_results(self):
-        result = self._run_cli([
-            '--output-format', 'json', 'live', 'results', '26105308820047659', '--since', '2880'])
-        self._assert_json_result(result, self.click_vcr(result))
-
-    @vcr.use_cassette()
-    def test_historical_hunt_results(self):
-        result = self._run_cli(['--output-format', 'json', 'historical', 'results', '39972292131000736'])
-        self._assert_json_result(result, self.click_vcr(result))
-
-    @vcr.use_cassette()
-    def test_live_hunt_start(self):
-        yara_file = self.resource('eicar.yara')
-        result = self._run_cli(['--output-format', 'json', 'live', 'create', yara_file])
-        self._assert_json_result(result, self.click_vcr(result))
-
-    @vcr.use_cassette()
-    def test_live_hunt_start_with_invalid_yara_file(self):
-        broken_yara_file = self.resource('broken.yara')
-        result = self._run_cli(['--output-format', 'json', 'live', 'create', broken_yara_file])
-        self._assert_text_result(
-            result,
-            'error [polyswarm.client.polyswarm]: Malformed yara file: line 1: syntax error, unexpected identifier\n',
-            expected_return_code=2,
-        )
-
-    @vcr.use_cassette()
-    def test_historical_hunt_start(self):
-        yara_file = self.resource('eicar.yara')
-        result = self._run_cli(['--output-format', 'json', 'historical', 'start', yara_file])
-        self._assert_json_result(result, self.click_vcr(result))
-
-    @vcr.use_cassette()
-    def test_live_hunt_delete(self):
-        result = self._run_cli(['--output-format', 'json', 'live', 'delete', '1876773693834725'])
-        self._assert_json_result(result, self.click_vcr(result))
-
-    @vcr.use_cassette()
-    def test_historical_hunt_delete(self):
-        result = self._run_cli(['--output-format', 'json', 'historical', 'delete', '93536118162554562'])
-        self._assert_json_result(result, self.click_vcr(result))
-
-    @vcr.use_cassette()
-    def test_live_hunt_list(self):
-        result = self._run_cli(['--output-format', 'json', 'live', 'list'])
-        self._assert_json_result(result, self.click_vcr(result))
-
-    @vcr.use_cassette()
-    def test_historical_hunt_list(self):
-        result = self._run_cli(['--output-format', 'json', 'historical', 'list'])
-        self._assert_json_result(result, self.click_vcr(result))
-
+class DownloadTest(BaseTestCase):
     @vcr.use_cassette()
     def test_download(self):
         with TemporaryDirectory() as path:
             result = self._run_cli([
-                '-u', self.api_url + '/consumer', 'download', '-d', path, self.eicar_hash])
+                '-u', self.api_url, 'download', '-d', path, self.eicar_hash])
             expected_result = self.click_vcr(result, replace=((path, 'temporary_folder'),))
             self._assert_text_result(result, expected_result, replace=((path, 'temporary_folder'),))
 
     @vcr.use_cassette()
     def test_download_stream(self):
         with TemporaryDirectory() as path:
-            result = self._run_cli(['stream', '--since', '2880', path])
+            result = self._run_cli(['--parallel', '1', '-u', self.api_url, 'stream', '--since', '2880', path])
             expected_result = self.click_vcr(result, replace=((path, 'temporary_folder'),))
             self._assert_text_result(result, expected_result, replace=((path, 'temporary_folder'),))
 
     @vcr.use_cassette()
     def test_download_cat(self):
         with TemporaryDirectory() as path:
-            result = self._run_cli(['-u', self.api_url + '/consumer', 'cat', self.eicar_hash])
+            result = self._run_cli(['-u', self.api_url, 'cat', self.eicar_hash])
             expected_result = self.click_vcr(result, replace=((path, 'temporary_folder'),))
             self._assert_text_result(result, expected_result, replace=((path, 'temporary_folder'),))
 
@@ -199,59 +119,73 @@ class HuntResultsTest(BaseTestCase):
     @vcr.use_cassette()
     def test_historical_hunt_results_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'historical', 'results', '16499733629565737'])
+            '--output-format', 'json', 'historical', 'results', '48011760326110718'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_historical_hunt_results_text(self):
         result = self._run_cli([
-            '--output-format', 'text', 'historical', 'results', '16499733629565737'])
+            '--output-format', 'text', 'historical', 'results', '48011760326110718'])
         self._assert_text_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
-    def test_live_hunt_results_json(self):
+    def test_live_feed_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'live', 'results', '1876773693834725', '--since', '9999999'])
+            '--output-format', 'json', 'live', 'feed', '--since', '9999999'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
-    def test_live_hunt_results_text(self):
+    def test_live_feed_text(self):
         result = self._run_cli([
-            '--output-format', 'text', 'live', 'results', '1876773693834725', '--since', '9999999'])
+            '--output-format', 'text', 'live', 'feed', '--since', '9999999'])
+        self._assert_text_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_live_result_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'live', 'result', '11704609705052856'])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_live_result_text(self):
+        result = self._run_cli([
+            '--output-format', 'text', 'live', 'result', '11704609705052856'])
+        self._assert_text_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_live_result_delete_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'live', 'results-delete', '11704609705052856'])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_live_result_delete_text(self):
+        result = self._run_cli([
+            '--output-format', 'text', 'live', 'results-delete', '11704609705052856'])
         self._assert_text_result(result, self.click_vcr(result))
 
 
 class LiveHuntTest(BaseTestCase):
     @vcr.use_cassette()
-    def test_live_hunt_create_json(self):
+    def test_live_hunt_start_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'live', 'create', self.resource('eicar.yara')])
+            '--output-format', 'json', 'live', 'start', '17388152480558505'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
-    def test_live_hunt_create_text(self):
+    def test_live_hunt_start_text(self):
         result = self._run_cli([
-            '--output-format', 'text', 'live', 'create', self.resource('eicar.yara')])
+            '--output-format', 'text', 'live', 'start', '17388152480558505'])
         self._assert_text_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
-    def test_live_hunt_delete_json(self):
-        result = self._run_cli(['--output-format', 'json', 'live', 'delete', '85659245822016383'])
+    def test_live_hunt_stop_json(self):
+        result = self._run_cli(['--output-format', 'json', 'live', 'stop', '17388152480558505'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
-    def test_live_hunt_delete_text(self):
-        result = self._run_cli(['--output-format', 'text', 'live', 'delete', '84466777730273290'])
-        self._assert_text_result(result, self.click_vcr(result))
-
-    @vcr.use_cassette()
-    def test_live_hunt_list_json(self):
-        result = self._run_cli(['--output-format', 'json', 'live', 'list'])
-        self._assert_json_result(result, self.click_vcr(result))
-
-    @vcr.use_cassette()
-    def test_live_hunt_list_text(self):
-        result = self._run_cli(['--output-format', 'text', 'live', 'list'])
+    def test_live_hunt_stop_text(self):
+        result = self._run_cli(['--output-format', 'text', 'live', 'stop', '17388152480558505'])
         self._assert_text_result(result, self.click_vcr(result))
 
 
@@ -271,13 +205,13 @@ class HistoricalHuntTest(BaseTestCase):
     @vcr.use_cassette()
     def test_historical_hunt_delete_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'historical', 'delete', '47234186287723204'])
+            '--output-format', 'json', 'historical', 'delete', '75914219779430298'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_historical_hunt_delete_text(self):
         result = self._run_cli([
-            '--output-format', 'text', 'historical', 'delete', '94311373661871161'])
+            '--output-format', 'text', 'historical', 'delete', '96916002705221564'])
         self._assert_text_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
@@ -299,21 +233,21 @@ class RulesetTest(BaseTestCase):
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
-    def test_ruleset_get_json(self):
+    def test_ruleset_view_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'rules', 'view', '59706989547481262'])
+            '--output-format', 'json', 'rules', 'view', '71213140536342873'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_ruleset_update_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'rules', 'update', '59706989547481262', '--name', 'test2'])
+            '--output-format', 'json', 'rules', 'update', '71213140536342873', '--name', 'test2'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_ruleset_delete_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'rules', 'delete', '59706989547481262'])
+            '--output-format', 'json', 'rules', 'delete', '71213140536342873'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
@@ -327,13 +261,13 @@ class SubmissionTest(BaseTestCase):
     @vcr.use_cassette()
     def test_submission_lookup_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'lookup', '82046699255546478'])
+            '--output-format', 'json', 'lookup', '51433256212000920'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_submission_lookup_text(self):
         result = self._run_cli([
-            '--output-format', 'text', 'lookup', '82046699255546478'])
+            '--output-format', 'text', 'lookup', '51433256212000920'])
         self._assert_text_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
@@ -363,13 +297,13 @@ class SubmissionTest(BaseTestCase):
     @vcr.use_cassette()
     def test_submission_rescan_id_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'rescan-id', '82046699255546478'])
+            '--output-format', 'json', 'rescan-id', '78691987955427124'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_submission_rescan_id_text(self):
         result = self._run_cli([
-            '--output-format', 'text', 'rescan-id', '82046699255546478'])
+            '--output-format', 'text', 'rescan-id', '78691987955427124'])
         self._assert_text_result(result, self.click_vcr(result))
 
 
