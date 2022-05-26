@@ -91,8 +91,16 @@ def artifact_by_ioc(ctx, ioc_type, ioc_value):
     api = ctx.obj['api']
     output = ctx.obj['output']
     params = dict()
-    if ioc_type == 'ip':
+    if ioc_type.lower() == 'ip':
         params['ip'] = ioc_value
+    elif ioc_type.lower() == 'domain':
+        params['domain'] = ioc_value
+    elif ioc_type.lower() == 'ttp':
+        params['ttp'] = 'ioc_value'
+    elif ioc_type.lower() == 'imphash':
+        params['imphash'] = ioc_value
+    else:
+        raise click.exceptions.BadArgumentUsage(f"Invalid ioc_type {ioc_type}")
 
     output.iocs(api.search_by_ioc(**params))
 
