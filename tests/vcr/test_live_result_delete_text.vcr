@@ -1,0 +1,40 @@
+interactions:
+- request:
+    body: '{"result_ids": [11704609705052856]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - '11111111111111111111111111111111'
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '35'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.6.5)
+    method: DELETE
+    uri: http://artifact-index-e2e:9696/v3/hunt/live/list
+  response:
+    body:
+      string: '{"has_more":true,"limit":2,"result":[{"created":"2022-05-26T19:41:33.797898","detections":{"benign":0,"malicious":1,"total":1},"download_url":null,"id":"11704609705052856","instance_id":"99734963618630386","livescan_id":"51856636346307547","malware_family":null,"polyscore":0.23213458159978606,"rule_name":"eicar_substring_test","sha256":"275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f","tags":"{}","yara":null}],"status":"OK"}
+
+        '
+    headers:
+      Content-Length:
+      - '446'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 26 May 2022 19:46:48 GMT
+      Server:
+      - Werkzeug/1.0.1 Python/3.9.6
+      X-Billing-ID:
+      - '1'
+    status:
+      code: 200
+      message: OK
+version: 1

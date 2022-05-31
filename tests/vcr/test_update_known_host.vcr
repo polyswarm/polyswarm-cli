@@ -1,0 +1,40 @@
+interactions:
+- request:
+    body: '{"id": "1", "type": "domain", "host": "www.google.com", "source": "some
+      list", "good": true}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - '11111111111111111111111111111111'
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '92'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.9.10)
+    method: PUT
+    uri: http://artifact-index-e2e:9696/v3/ioc/known
+  response:
+    body:
+      string: '{"result":{"good":true,"host":"www.google.com","id":1,"source":"some
+        list","type":"domain"},"status":"OK"}
+
+        '
+    headers:
+      Connection:
+      - Keep-Alive
+      Content-Length:
+      - '107'
+      Content-Type:
+      - application/json
+      X-Billing-ID:
+      - '1'
+    status:
+      code: 200
+      message: OK
+version: 1

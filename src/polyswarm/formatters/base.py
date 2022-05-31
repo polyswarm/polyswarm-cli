@@ -10,7 +10,7 @@ class BaseOutput(object):
     def artifact_instance(self, result, timeout=False):
         raise NotImplementedError
 
-    def hunt_result(self, result):
+    def historical_result(self, result):
         raise NotImplementedError
 
     def hunt_deletion(self, result):
@@ -23,6 +23,12 @@ class BaseOutput(object):
         raise NotImplementedError
 
     def ruleset(self, result, contents=False):
+        raise NotImplementedError
+
+    def iocs(self, iocs, write=True):
+        raise NotImplementedError
+
+    def known_host(self, iocs, write=True):
         raise NotImplementedError
 
     def metadata(self, result):

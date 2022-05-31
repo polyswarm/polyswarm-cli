@@ -89,7 +89,10 @@ class JSONOutput(base.BaseOutput):
     def artifact_instance(self, result, timeout=False):
         click.echo(self._to_json(result.json), file=self.out)
 
-    def hunt_result(self, result):
+    def historical_result(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
+
+    def live_result(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 
     def hunt_deletion(self, result):
@@ -128,6 +131,11 @@ class JSONOutput(base.BaseOutput):
     def votes(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 
+    def iocs(self, results):
+        click.echo(self._to_json([result.json for result in results]), file=self.out)
+
+    def known_host(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
 
 class PrettyJSONOutput(JSONOutput):
     name = 'pretty-json'
