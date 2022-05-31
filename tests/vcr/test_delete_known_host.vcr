@@ -1,7 +1,6 @@
 interactions:
 - request:
-    body: '{"type": "domain", "host": "www.polyswarm.plus", "source": "some list",
-      "good": true}'
+    body: null
     headers:
       Accept:
       - '*/*'
@@ -12,13 +11,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '85'
-      Content-Type:
-      - application/json
+      - '0'
       User-Agent:
       - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.9.10)
-    method: POST
-    uri: http://artifact-index-e2e:9696/v3/ioc/known
+    method: DELETE
+    uri: http://artifact-index-e2e:9696/v3/ioc/known?id=5
   response:
     body:
       string: '{"result":{"good":true,"host":"www.polyswarm.plus","id":5,"source":"some
