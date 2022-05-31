@@ -131,6 +131,11 @@ class JSONOutput(base.BaseOutput):
     def votes(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 
+    def iocs(self, results):
+        click.echo(self._to_json([result.json for result in results]), file=self.out)
+
+    def known_host(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
 
 class PrettyJSONOutput(JSONOutput):
     name = 'pretty-json'

@@ -1,4 +1,5 @@
 from __future__ import absolute_import, unicode_literals
+from re import L
 import sys
 import functools
 import json
@@ -265,6 +266,30 @@ class TextOutput(base.BaseOutput):
         output = []
         output.append(self._white('============================= Mapping ============================='))
         self._dfs_mapping_render(output, [], mapping.json)
+        return self._output(output, write)
+
+    def iocs(self, iocs, write=True):
+        output = []
+        output.append(self._white('============================= IOCs ============================='))
+        for result in iocs:
+            data = result.json
+            if type(data) is dict:
+                output.append(self._white('ImpHash: {}'.format(data['imphash'])))
+                output.append(self._white('IPs: {}'.format(", ".join(data['ips']))))
+                output.append(self._white('URLs: {}'.format(", ".join(data['urls']))))
+                output.append(self._white('TTPs: {}'.format(", ".join(data['ttps']))))
+            else:
+                output.append(self._white('SHA256: {}'.format(data)))
+        return self._output(output, write)
+    
+    def known_host(self, ioc_known, write=True):
+        output = []
+        output.append(self._white('============================= Known IOC ============================='))
+        output.append(self._white('ID: {}'.format(ioc_known.json['id'])))
+        output.append(self._white('type: {}'.format(ioc_known.json['type'])))
+        output.append(self._white('host: {}'.format(ioc_known.json['host'])))
+        output.append(self._white('source: {}'.format(ioc_known.json['source'])))
+        output.append(self._white('good: {}'.format(ioc_known.json['good'])))
         return self._output(output, write)
 
     def metadata(self, instance, write=True):
