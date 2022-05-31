@@ -21,7 +21,7 @@ from polyswarm.client.live import live
 from polyswarm.client.historical import historical
 from polyswarm.client.scan import scan, lookup, wait, rescan, rescan_id
 from polyswarm.client.download import download, cat, stream
-from polyswarm.client.search import search
+from polyswarm.client.search import known, search
 from polyswarm.client.rules import rules
 from polyswarm.client.links import link
 from polyswarm.client.tags import tag
@@ -144,7 +144,7 @@ commands = [
     scan, wait, lookup, search, live, historical,
     download, cat, stream, rescan, rescan_id,
     rules, link, tag, family, metadata,
-    engine,
+    engine, known,
 ]
 
 for command in commands:
