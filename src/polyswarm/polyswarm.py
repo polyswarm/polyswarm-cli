@@ -223,3 +223,16 @@ class Polyswarm(PolyswarmAPI):
                 kwargs_list=kwargs,
         ):
             yield tag_link
+
+    def sandbox_file(self, sha256, **kwargs):
+        """
+        Send a file to be sandboxed by sha256 hash.
+
+        :param sha256: A list of sha256 of the artifacts.
+        :return: A
+        """
+        args = [(u,) for u in sha256]
+        kwargs = [kwargs] * len(args)
+        for result in utils.parallel_executor(self.sandbox, args_list=args, kwargs_list=kwargs):
+            yield result
+        
