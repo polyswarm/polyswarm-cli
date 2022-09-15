@@ -34,9 +34,9 @@ class BaseTestCase(TestCase):
         self.cli = CliRunner()
         self.click_vcr_folder = 'tests/vcr'
         self.click_vcr_suffix = 'click'
-        self.api_url = 'http://artifact-index-e2e:9696/v3'
-        self.api_key = '11111111111111111111111111111111'
-        self.community = 'gamma'
+        self.api_url = 'https://api.stage-new.polyswarm.network/v2'
+        self.api_key = 'bb1f23f60beae817372a88043c4fee1d'
+        self.community = 'default'
         self.eicar_hash = '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
 
     def _replace(self, replace, content):
@@ -393,4 +393,10 @@ class IOCTest(BaseTestCase):
     def test_delete_known_host(self):
         result = self._run_cli([
             '--output-format', 'json', 'known', 'delete', '5'])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_sandbox_file(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'sandbox', 'd856f0c3abfce46b07621563e31af71d9e770d6ee357f380bfd6ac309509931b'])
         self._assert_json_result(result, self.click_vcr(result))
