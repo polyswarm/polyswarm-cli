@@ -7,7 +7,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - bb1f23f60beae817372a88043c4fee1d
+      - 11111111111111111111111111111111
       Connection:
       - keep-alive
       Content-Length:
@@ -15,7 +15,7 @@ interactions:
       User-Agent:
       - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.9.10)
     method: POST
-    uri: https://api.stage-new.polyswarm.network/v2/consumer/submission/default/sandbox/d856f0c3abfce46b07621563e31af71d9e770d6ee357f380bfd6ac309509931b?force=False
+    uri: http://artifact-index-e2e:9696/v3/consumer/submission/default/sandbox/d856f0c3abfce46b07621563e31af71d9e770d6ee357f380bfd6ac309509931b?force=False
   response:
     body:
       string: '{"result":null,"status":"OK"}
