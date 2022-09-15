@@ -235,4 +235,3 @@ class Polyswarm(PolyswarmAPI):
         kwargs = [kwargs] * len(args)
         for result in utils.parallel_executor(self.sandbox, args_list=args, kwargs_list=kwargs):
             yield result
-        
