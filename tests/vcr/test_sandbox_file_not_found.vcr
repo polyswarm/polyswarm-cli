@@ -15,7 +15,7 @@ interactions:
       User-Agent:
       - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.9.10)
     method: POST
-    uri: https://api.stage-new.polyswarm.network/v3/consumer/submission/pi/sandbox/d856f0c3abfce46b07621563e31af71d9e770d6ee357f380bfd6ac3095099311?force=False
+    uri: https://artifact-index-e2e:9696/v3/consumer/submission/gamma/sandbox/d856f0c3abfce46b07621563e31af71d9e770d6ee357f380bfd6ac3095099311?force=False
   response:
     body:
       string: '{"errors":null,"result":"Artifact metadata not found.","status":"error"}
