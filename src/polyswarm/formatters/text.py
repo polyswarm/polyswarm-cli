@@ -292,6 +292,12 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('good: {}'.format(ioc_known.json['good'])))
         return self._output(output, write)
 
+    def sandbox_result(self, result, write=True):
+        output = []
+        output.append(self._white('============================= Sandbox result ============================='))
+        output.append(self._white('result: {}'.format(result.json['status'])))
+        return self._output(output, write)
+
     def metadata(self, instance, write=True):
         output = []
         output.append(self._white('============================= Metadata ============================='))
