@@ -144,14 +144,13 @@ def wait(ctx, scan_id, timeout):
 
 @click.command('sandbox', short_help='Submit a scanned artifact to be run through sandbox.')
 @click.argument('sha256', nargs=-1, callback=utils.validate_hashes)
-@click.option('-f', 'force', is_flag=True, help='')
 @click.pass_context
-def sandbox(ctx, sha256, force):
+def sandbox(ctx, sha256):
     """
     Submit an artifact by sha256 to the sandbox system.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    for instance in api.sandbox_file(sha256, force=force):
+    for instance in api.sandbox_file(sha256):
         output.sandbox_result(instance)
