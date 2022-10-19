@@ -1,0 +1,38 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - bb1f23f60beae817372a88043c4fee1d
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.9.10)
+    method: POST
+    uri: http://artifact-index-e2e:9696/v3/consumer/submission/gamma/sandbox/d856f0c3abfce46b07621563e31af71d9e770d6ee357f380bfd6ac3095099311
+  response:
+    body:
+      string: '{"errors":null,"result":"Artifact metadata not found.","status":"error"}
+
+        '
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '73'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 16 Sep 2022 17:47:00 GMT
+      Strict-Transport-Security:
+      - max-age=15724800; includeSubDomains
+    status:
+      code: 404
+      message: NOT FOUND
+version: 1
