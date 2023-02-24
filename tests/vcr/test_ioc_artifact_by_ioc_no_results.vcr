@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.9.10)
     method: GET
-    uri: http://artifact-index-e2e:9696/v3/ioc/search?ip=192.0.0.1
+    uri: http://artifact-index-e2e:9696/v3/ioc/search?ip=192.0.0.1&community=gamma
   response:
     body:
       string: ''
