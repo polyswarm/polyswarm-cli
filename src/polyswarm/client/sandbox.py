@@ -9,7 +9,7 @@ from polyswarm.client import utils
 
 logger = logging.getLogger(__name__)
 
-@click.group(short_help='Interact with Scans sent to Polyswarm.')
+@click.group(short_help='Interact with the Polyswarm sandbox system.')
 def sandbox():
     pass
 
