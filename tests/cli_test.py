@@ -401,12 +401,12 @@ class SandoxTest(BaseTestCase):
     @vcr.use_cassette()
     def test_sandbox_file(self):
         result = self._run_cli([
-            '--output-format', 'json', 'sandbox', 'd856f0c3abfce46b07621563e31af71d9e770d6ee357f380bfd6ac309509931b'])
+            '--output-format', 'json', 'sandbox', 'submit', 'd856f0c3abfce46b07621563e31af71d9e770d6ee357f380bfd6ac309509931b'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_sandbox_file_not_found(self):
         result = self._run_cli([
-            '--output-format', 'json', 'sandbox', 'd856f0c3abfce46b07621563e31af71d9e770d6ee357f380bfd6ac3095099311'])
+            '--output-format', 'json', 'sandbox', 'submit', 'd856f0c3abfce46b07621563e31af71d9e770d6ee357f380bfd6ac3095099311'])
         self._assert_text_result(result, self.click_vcr(result), expected_return_code=1)
 
