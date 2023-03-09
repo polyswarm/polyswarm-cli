@@ -298,6 +298,12 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('result: {}'.format(result.json['status'])))
         return self._output(output, write)
 
+    def sandbox_list(self, result, write=True):
+        output = []
+        output.append(self._white('============================= Sandboxes ============================='))
+        output.append(self._white('result: {}'.format(result.json['result'])))
+        return self._output(output, write)
+
     def metadata(self, instance, write=True):
         output = []
         output.append(self._white('============================= Metadata ============================='))
