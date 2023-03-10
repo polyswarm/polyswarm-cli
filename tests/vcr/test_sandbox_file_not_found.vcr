@@ -1,37 +1,39 @@
 interactions:
 - request:
-    body: null
+    body: '{"artifact_id": "34302170701478837"}'
     headers:
       Accept:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - bb1f23f60beae817372a88043c4fee1d
+      - '11111111111111111111111111111111'
       Connection:
       - keep-alive
       Content-Length:
-      - '0'
+      - '36'
+      Content-Type:
+      - application/json
       User-Agent:
-      - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.9.10)
+      - polyswarm-api/3.1.3 (x86_64-Linux-CPython-3.10.7)
     method: POST
-    uri: http://artifact-index-e2e:9696/v3/consumer/submission/gamma/sandbox/d856f0c3abfce46b07621563e31af71d9e770d6ee357f380bfd6ac3095099311
+    uri: http://artifact-index-e2e:9696/v3/sandbox
   response:
     body:
-      string: '{"errors":null,"result":"Artifact metadata not found.","status":"error"}
+      string: '{"errors":null,"result":"No instance found for the artifact id provided","status":"error"}
 
         '
     headers:
       Connection:
-      - keep-alive
+      - close
       Content-Length:
-      - '73'
+      - '91'
       Content-Type:
       - application/json
       Date:
-      - Fri, 16 Sep 2022 17:47:00 GMT
-      Strict-Transport-Security:
-      - max-age=15724800; includeSubDomains
+      - Fri, 10 Mar 2023 21:08:36 GMT
+      Server:
+      - Werkzeug/2.2.2 Python/3.10.7
     status:
       code: 404
       message: NOT FOUND
