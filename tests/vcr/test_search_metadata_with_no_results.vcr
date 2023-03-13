@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.6.5)
     method: GET
-    uri: http://artifact-index-e2e:9696/v3/search/metadata/query?query=hash.sha256%3A275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0a
+    uri: http://artifact-index-e2e:9696/v3/search/metadata/query?query=hash.sha256%3A275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0a&community=gamma
   response:
     body:
       string: ''
