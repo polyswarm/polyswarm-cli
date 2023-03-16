@@ -292,10 +292,24 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('good: {}'.format(ioc_known.json['good'])))
         return self._output(output, write)
 
-    def sandbox_result(self, result, write=True):
+    def sandbox_result(self, instance, write=True):
         output = []
         output.append(self._white('============================= Sandbox result ============================='))
-        output.append(self._white('result: {}'.format(result.json['status'])))
+        output.append(self._blue('Scan id: {}'.format(instance.id)))
+
+        self._open_group()
+        for metadata in instance.json['metadata']:
+            if metadata['tool'] in ['cape_sandbox_v2', 'triage_sandbox_v0']:
+                output.append('%s: Created at %s Updated at %s' %
+                              (self._white(metadata['tool']), metadata['created'], metadata['updated']))
+        self._close_group()
+
+        return self._output(output, write)
+
+    def sandbox_list(self, result, write=True):
+        output = []
+        output.append(self._white('============================= Sandboxes ============================='))
+        output.append(self._white('result: {}'.format(result.json['result'])))
         return self._output(output, write)
 
     def metadata(self, instance, write=True):
