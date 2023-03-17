@@ -43,7 +43,7 @@ class BaseOutput(object):
     def tag(self, result):
         raise NotImplementedError
 
-    def sandbox_result(self, result):
+    def artifact_metadata(self, result, only=None):
         raise NotImplementedError
 
     def sandbox_list(self, result):

@@ -26,3 +26,15 @@ def rerun(ctx, hash_file, analysis, skip_es, hashes):
     hashes = utils.parse_hashes(hashes, hash_file=hash_file)
     for artifact in api.rerun_metadata(hashes, analyses=analysis, skip_es=skip_es):
         output.artifact_instance(artifact)
+
+
+@metadata.command('status', short_help='Lookup the last updated time of the metadata for an instance.')
+@click.argument('scan-id', nargs=-1, callback=utils.validate_id)
+@click.pass_context
+def status(ctx, scan_id):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    scan_ids = list(scan_id)
+
+    for instance in api.scan_lookup(scan_ids):
+        output.artifact_metadata(instance)
