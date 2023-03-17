@@ -46,9 +46,9 @@ test-run27:
     - pip install --upgrade pip
   script:
     # install the version from the related branch or the one in the develop branch
-    - pip install $POLYSWARM_API_ARCHIVE/$CI_COMMIT_BRANCH.zip || pip install $POLYSWARM_API_ARCHIVE/develop.zip
     - pip install -r requirements.txt
     - pip install .
+    - pip install $POLYSWARM_API_ARCHIVE/$CI_COMMIT_BRANCH.zip || pip install $POLYSWARM_API_ARCHIVE/develop.zip
     - pytest -s -v
 
 test-run35:
@@ -59,9 +59,9 @@ test-run35:
   before_script:
     - pip install --upgrade pip
   script:
-    - pip install $POLYSWARM_API_ARCHIVE/$CI_COMMIT_BRANCH.zip || pip install $POLYSWARM_API_ARCHIVE/develop.zip
     - pip install -r requirements.txt
     - pip install .
+    - pip install $POLYSWARM_API_ARCHIVE/$CI_COMMIT_BRANCH.zip || pip install $POLYSWARM_API_ARCHIVE/develop.zip
     - pytest -s -v
 
 test-run36:
