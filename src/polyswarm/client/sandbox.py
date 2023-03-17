@@ -26,7 +26,7 @@ def submit(ctx, artifact_id):
     output = ctx.obj['output']
 
     for instance in api.sandbox_instances(artifact_id):
-        output.sandbox_result(instance)
+        output.artifact_metadata(instance, only=['cape_sandbox_v2', 'triage_sandbox_v0'])
 
 
 @sandbox.command('list', short_help='List the names of available sandboxes.')
@@ -39,3 +39,15 @@ def sandbox_list(ctx):
     output = ctx.obj['output']
 
     output.sandbox_list(api.sandbox_list())
+
+
+@sandbox.command('status', short_help='Lookup the last updated time of the sandbox metadata for an instance.')
+@click.argument('scan-id', nargs=-1, callback=utils.validate_id)
+@click.pass_context
+def status(ctx, scan_id):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    scan_ids = list(scan_id)
+
+    for instance in api.scan_lookup(scan_ids):
+        output.artifact_metadata(instance, only=['cape_sandbox_v2', 'triage_sandbox_v0'])

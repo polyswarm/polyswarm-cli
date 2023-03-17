@@ -75,6 +75,7 @@ def metadata(ctx, query_string, include, exclude, ip, url, domain):
     for metadata_result in api.search_by_metadata(query_string, include=include, exclude=exclude, ips=ip, urls=url, domains=domain):
         output.metadata(metadata_result)
 
+
 @search.command('ioc', short_help='Retrieve IOCs by artifact hash.')
 @click.option('-h', '--hide-known-good', type=click.BOOL, is_flag=True)
 @click.argument('type',  required=True,
@@ -102,6 +103,7 @@ def iocs_by_hash(ctx, type, value, hide_known_good):
     else:
         output.iocs(api.iocs_by_hash(type, value, hide_known_good=hide_known_good))
 
+
 @search.command('known', short_help='Check if host is known.')
 @click.option('-p', '--ip', type=click.STRING, multiple=True)
 @click.option('-d', '--domain', type=click.STRING, multiple=True)
@@ -115,6 +117,7 @@ def search_known(ctx, ip, domain):
 
     for result in api.check_known_hosts(ips=ip, domains=domain):
         output.known_host(result)
+
 
 @known.command('add', short_help='Add a known host.')
 @click.argument('type', required=True)
@@ -147,6 +150,7 @@ def update(ctx, id, type, host, source, good):
 
     output.known_host(api.update_known_good_host(id, type, source, host, good))
 
+
 @known.command('delete', short_help='Delete a known host.')
 @click.argument('id', required=True)
 @click.pass_context
@@ -158,6 +162,7 @@ def delete(ctx, id):
     output = ctx.obj['output']
 
     output.known_host(api.delete_known_good_host(id))
+
 
 @search.command('mapping', short_help='Retrieve the metadata search mapping.')
 @click.pass_context
@@ -178,4 +183,3 @@ def scans(ctx, hash_value):
     output = ctx.obj['output']
     for instance in api.search_scans(hash_value):
         output.artifact_instance(instance)
-
