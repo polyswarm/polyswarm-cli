@@ -137,8 +137,12 @@ class JSONOutput(base.BaseOutput):
     def known_host(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 
-    def sandbox_result(self, result):
+    def artifact_metadata(self, result, only=None):
         click.echo(self._to_json(result.json), file=self.out)
+
+    def sandbox_list(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
+
 
 class PrettyJSONOutput(JSONOutput):
     name = 'pretty-json'

@@ -1,12 +1,21 @@
 from __future__ import absolute_import, unicode_literals
-from re import L
 import sys
 import functools
 import json
+from datetime import datetime
 
 import click
+from polyswarm_api.core import parse_isoformat
 
 from polyswarm.formatters import base
+
+
+def pretty_print_datetime(value):
+    if value is None:
+        return None
+    if isinstance(value, str):
+        value = parse_isoformat(value)
+    return datetime.strftime(value, '%Y-%m-%d %H:%M:%S UTC')
 
 
 def is_grouped(fn):
@@ -58,10 +67,13 @@ class TextOutput(base.BaseOutput):
         p = artifact.metadata.pefile
         if 'imphash' in p:
             output.append(self._white('Imphash: {}'.format(p['imphash'])))
-        output.append(self._white('First seen: {}'.format(artifact.first_seen)))
-        output.append(self._white('Last scanned: {}'.format(artifact.last_scanned)))
+        output.append(self._white('First seen: {}'.format(
+            pretty_print_datetime(artifact.first_seen))))
+        output.append(self._white('Last scanned: {}'.format(
+            pretty_print_datetime(artifact.last_scanned))))
         # Deprecated
-        output.append(self._white('Last seen: {}'.format(artifact.last_scanned)))
+        output.append(self._white('Last seen: {}'.format(
+            pretty_print_datetime(artifact.last_scanned))))
         return self._output(output, write)
 
     def artifact_instance(self, instance, write=True, timeout=False):
@@ -292,10 +304,30 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('good: {}'.format(ioc_known.json['good'])))
         return self._output(output, write)
 
-    def sandbox_result(self, result, write=True):
+    def artifact_metadata(self, instance, write=True, only=None):
         output = []
-        output.append(self._white('============================= Sandbox result ============================='))
-        output.append(self._white('result: {}'.format(result.json['status'])))
+        output.append(self._white('============================= Metadata Status ============================='))
+        output.append(self._blue('Scan id: {}'.format(instance.id)))
+
+        self._open_group()
+        max_len = 0
+        entries = sorted(iter(m for m in instance.json['metadata']),
+                         key=lambda m: m['updated'], reverse=True)
+        for metadata in entries:
+            if only is None or metadata['tool'] in only:
+                max_len = max(max_len, len(metadata['tool']))
+        for metadata in entries:
+            if only is None or metadata['tool'] in only:
+                tool = self._white(metadata['tool'].rjust(max_len))
+                output.append('%s: Updated at %s' % (tool, pretty_print_datetime(metadata['updated'])))
+        self._close_group()
+
+        return self._output(output, write)
+
+    def sandbox_list(self, result, write=True):
+        output = []
+        output.append(self._white('============================= Sandboxes ============================='))
+        output.append(self._white('result: {}'.format(result.json['result'])))
         return self._output(output, write)
 
     def metadata(self, instance, write=True):
