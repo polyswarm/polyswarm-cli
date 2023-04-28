@@ -58,25 +58,29 @@ def status(ctx, scan_id):
 def task_status(ctx, sandbox_task_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
+    sandbox_task_ids = list(sandbox_task_id)
 
-    output.sandbox_task(api.sandbox_task_status(sandbox_task_id))
+    for sandbox_task_id in sandbox_task_ids:
+        output.sandbox_task(api.sandbox_task_status(sandbox_task_id))
 
 @sandbox.command('task-latest', short_help='Lookup the latest sandbox task by sha256.')
 @click.argument('sha256', type=click.STRING, required=True)
+@click.option('--sandbox', type=click.STRING)
 @click.pass_context
-def task_latest(ctx, sha256):
+def task_latest(ctx, sha256, sandbox):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.sandbox_task(api.sandbox_task_latest(sha256))
+    output.sandbox_task(api.sandbox_task_latest(sha256, sandbox))
 
 @sandbox.command('task-list', short_help='List the sandbox tasks for a given sha256.')
 @click.argument('sha256', type=click.STRING, required=True)
+@click.option('--sandbox', type=click.STRING)
 @click.pass_context
-def task_list(ctx, sha256):
+def task_list(ctx, sha256, sandbox):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    tasks = api.sandbox_task_list(sha256)
+    tasks = api.sandbox_task_list(sha256, sandbox)
 
     for task in tasks:
         output.sandbox_task(task)
