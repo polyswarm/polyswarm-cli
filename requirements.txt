@@ -3,4 +3,4 @@ pytest==3.9.2
 pytest-cov==2.8.1
 vcrpy==3.0.0
 PyYAML~=5.3
-polyswarmmodels==3.2.1.dev0+20230503203043
+polyswarm-api==3.2.1.dev0+20230503223944
