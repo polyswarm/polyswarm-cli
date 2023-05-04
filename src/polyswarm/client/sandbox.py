@@ -25,8 +25,8 @@ def submit(ctx, artifact_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    for instance in api.sandbox_instances(artifact_id):
-        output.artifact_metadata(instance, only=['cape_sandbox_v2', 'triage_sandbox_v0'])
+    for tasks in api.sandbox_instances(artifact_id):
+        output.sandbox_tasks(tasks)
 
 
 @sandbox.command('list', short_help='List the names of available sandboxes.')
@@ -71,7 +71,8 @@ def task_latest(ctx, sha256, sandbox):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.sandbox_task(api.sandbox_task_latest(sha256, sandbox))
+    task = api.sandbox_task_latest(sha256, sandbox)
+    output.sandbox_task(task.json)
 
 @sandbox.command('task-list', short_help='List the sandbox tasks for a given sha256.')
 @click.argument('sha256', type=click.STRING, required=True)
@@ -83,4 +84,4 @@ def task_list(ctx, sha256, sandbox):
     tasks = api.sandbox_task_list(sha256, sandbox)
 
     for task in tasks:
-        output.sandbox_task(task)
+        output.sandbox_task(task.json)

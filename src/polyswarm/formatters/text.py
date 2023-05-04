@@ -330,14 +330,18 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('result: {}'.format(result.json['result'])))
         return self._output(output, write)
     
-    def sandbox_task(self, result, write=True):
+    def sandbox_task(self, task, write=True):
         output = []
         output.append(self._white('============================= Sandbox Task ============================='))
-        output.append(self._white('id: {}'.format(result.json['id'])))
-        output.append(self._blue('created: {}'.format(result.json['created'])))
-        output.append(self._blue('community: {}'.format(result.json['community'])))
-        output.append(self._white('status: {}'.format(result.json['status'])))
+        output.append(self._white('id: {}'.format(task.id)))
+        output.append(self._blue('created: {}'.format(task.created)))
+        output.append(self._blue('community: {}'.format(task.community)))
+        output.append(self._white('status: {}'.format(task.status)))
         return self._output(output, write)
+    
+    def sandbox_tasks(self, tasks, write=True):
+        for task in tasks:
+            self.sandbox_task(task, write=write)
 
     def metadata(self, instance, write=True):
         output = []
