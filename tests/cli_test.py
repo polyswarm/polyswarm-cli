@@ -401,7 +401,7 @@ class SandoxTest(BaseTestCase):
     @vcr.use_cassette()
     def test_sandbox_file(self):
         result = self._run_cli([
-            '--output-format', 'json', 'sandbox', 'submit', '34302170701478836'])
+            '--output-format', 'json', 'sandbox', 'submit', '11708599140460142'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
