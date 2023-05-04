@@ -415,3 +415,23 @@ class SandoxTest(BaseTestCase):
         result = self._run_cli([
             '--output-format', 'json', 'sandbox', 'list'])
         self._assert_text_result(result, self.click_vcr(result))
+
+class SandboxTaskTest(BaseTestCase):
+
+    @vcr.use_cassette()
+    def test_sandboxtask_status(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'sandbox', 'task-status', '97'])
+        self._assert_text_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_sandboxtask_list(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'sandbox', 'task-list', '18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40'])
+        self._assert_text_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_sandboxtask_latest(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'sandbox', 'task-latest', '18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40'])
+        self._assert_text_result(result, self.click_vcr(result))
