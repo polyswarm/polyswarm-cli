@@ -99,7 +99,8 @@ def iocs_by_hash(ctx, type, value, hide_known_good):
         params['imphash'] = value
 
     if params:
-        output.iocs(api.search_by_ioc(**params))
+        for result in api.search_by_ioc(**params):
+            output.ioc(result)
     else:
         output.iocs(api.iocs_by_hash(type, value, hide_known_good=hide_known_good))
 
