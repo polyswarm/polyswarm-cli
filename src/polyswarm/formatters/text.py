@@ -324,9 +324,9 @@ class TextOutput(base.BaseOutput):
 
         return self._output(output, write)
 
-    def sandbox_list(self, result, write=True):
+    def sandbox_providers(self, result, write=True):
         output = []
-        output.append(self._white('============================= Sandboxes ============================='))
+        output.append(self._white('============================= Providers ============================='))
         output.append(self._white('result: {}'.format(result.json['result'])))
         return self._output(output, write)
     
