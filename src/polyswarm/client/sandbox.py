@@ -95,4 +95,4 @@ def my_task_list(ctx, sandbox_, start_date, end_date):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.sandbox_tasks(api.sandbox_my_task_list(sandbox=sandbox_, start_date=start_date, end_date=end_date))
+    output.sandbox_tasks(api.sandbox_my_tasks_list(sandbox=sandbox_, start_date=start_date, end_date=end_date))

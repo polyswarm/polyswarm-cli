@@ -140,7 +140,7 @@ class JSONOutput(base.BaseOutput):
     def artifact_metadata(self, result, only=None):
         click.echo(self._to_json(result.json), file=self.out)
 
-    def sandbox_list(self, result):
+    def sandbox_providers(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 
     def sandbox_task(self, result):
@@ -148,6 +148,7 @@ class JSONOutput(base.BaseOutput):
 
     def sandbox_tasks(self, results):
         click.echo(self._to_json([result.json for result in results]), file=self.out)
+
 
 class PrettyJSONOutput(JSONOutput):
     name = 'pretty-json'
