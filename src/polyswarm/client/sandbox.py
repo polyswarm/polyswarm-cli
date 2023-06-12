@@ -90,7 +90,7 @@ def task_list(ctx, sha256, sandbox_):
 @click.pass_context
 def my_task_list(ctx, sandbox_, start_date, end_date):
     """
-    Search my SandboxTasks identified by the tuple (hash, community, [sandbox], [start_date], [end_date]).
+    List the SandboxTasks associated with my account/team for the tuple (community, [start_date], [end_date])
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
