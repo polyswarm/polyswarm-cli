@@ -294,6 +294,19 @@ class TextOutput(base.BaseOutput):
                 output.append(self._white('SHA256: {}'.format(data)))
         return self._output(output, write)
     
+    def ioc(self, ioc, write=True):
+        output = []
+        output.append(self._white('============================= IOC ============================='))
+        data = ioc.json
+        if type(data) is dict:
+            output.append(self._white('ImpHash: {}'.format(data['imphash'])))
+            output.append(self._white('IPs: {}'.format(", ".join(data['ips']))))
+            output.append(self._white('URLs: {}'.format(", ".join(data['urls']))))
+            output.append(self._white('TTPs: {}'.format(", ".join(data['ttps']))))
+        else:
+            output.append(self._white('SHA256: {}'.format(data)))
+        return self._output(output, write)
+    
     def known_host(self, ioc_known, write=True):
         output = []
         output.append(self._white('============================= Known IOC ============================='))

@@ -27,6 +27,9 @@ class BaseOutput(object):
 
     def iocs(self, iocs, write=True):
         raise NotImplementedError
+    
+    def ioc(self, iocs, write=True):
+        raise NotImplementedError
 
     def known_host(self, iocs, write=True):
         raise NotImplementedError
