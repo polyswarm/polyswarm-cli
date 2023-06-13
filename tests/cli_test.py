@@ -397,41 +397,40 @@ class IOCTest(BaseTestCase):
 
 
 class SandoxTest(BaseTestCase):
-
     @vcr.use_cassette()
     def test_sandbox_file(self):
         result = self._run_cli([
-            '--output-format', 'json', 'sandbox', 'submit', '11708599140460142'])
+            '--output-format', 'json', 'sandbox', 'submit', '65983931533820379'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_sandbox_file_not_found(self):
         result = self._run_cli([
-            '--output-format', 'json', 'sandbox', 'submit', '34302170701478837'])
+            '--output-format', 'json', 'sandbox', 'submit', '65983931533820370'])
         self._assert_text_result(result, self.click_vcr(result), expected_return_code=1)
 
     @vcr.use_cassette()
     def test_sandbox_list(self):
         result = self._run_cli([
-            '--output-format', 'json', 'sandbox', 'list'])
+            '--output-format', 'json', 'sandbox', 'providers'])
         self._assert_text_result(result, self.click_vcr(result))
 
-class SandboxTaskTest(BaseTestCase):
 
+class SandboxTaskTest(BaseTestCase):
     @vcr.use_cassette()
     def test_sandboxtask_status(self):
         result = self._run_cli([
-            '--output-format', 'json', 'sandbox', 'task-status', '97'])
+            '--output-format', 'json', 'sandbox', 'lookup-id', '56508049741935550'])
         self._assert_text_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_sandboxtask_list(self):
         result = self._run_cli([
-            '--output-format', 'json', 'sandbox', 'task-list', '18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40'])
+            '--output-format', 'json', 'sandbox', 'search', 'a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427'])
         self._assert_text_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_sandboxtask_latest(self):
         result = self._run_cli([
-            '--output-format', 'json', 'sandbox', 'task-latest', '18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40'])
+            '--output-format', 'json', 'sandbox', 'lookup', 'a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427', 'triage'])
         self._assert_text_result(result, self.click_vcr(result))

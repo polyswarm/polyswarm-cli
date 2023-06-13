@@ -1,43 +1,47 @@
-result: '[{"account_number": 1, "artifact_metadata_id": 61466677371649277, "community":
-  "gamma", "created": "Thu, 04 May 2023 20:01:45 GMT", "expiration": "Thu, 04 May
-  2023 20:01:45 GMT", "id": 1, "instance_id": 1, "meta_community": "_public", "sandbox":
-  "cape_sandbox_v2", "sandbox_artifacts": [], "sha256": "18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40",
-  "status": 0, "team_account_number": 1}, {"account_number": 1, "artifact_metadata_id":
-  37088277438902662, "community": "gamma", "created": "Thu, 04 May 2023 20:01:45 GMT",
-  "expiration": "Thu, 04 May 2023 20:01:45 GMT", "id": 2, "instance_id": 1, "meta_community":
-  "_public", "sandbox": "triage_sandbox_v0", "sandbox_artifacts": [], "sha256": "18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40",
-  "status": 0, "team_account_number": 1}, {"account_number": 1, "artifact_metadata_id":
-  61466677371649277, "community": "gamma", "created": "Thu, 04 May 2023 20:06:12 GMT",
-  "expiration": "Thu, 04 May 2023 20:06:12 GMT", "id": 3, "instance_id": 1, "meta_community":
-  "_public", "sandbox": "cape_sandbox_v2", "sandbox_artifacts": [], "sha256": "18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40",
-  "status": 0, "team_account_number": 1}, {"account_number": 1, "artifact_metadata_id":
-  37088277438902662, "community": "gamma", "created": "Thu, 04 May 2023 20:06:12 GMT",
-  "expiration": "Thu, 04 May 2023 20:06:12 GMT", "id": 4, "instance_id": 1, "meta_community":
-  "_public", "sandbox": "triage_sandbox_v0", "sandbox_artifacts": [], "sha256": "18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40",
-  "status": 0, "team_account_number": 1}, {"account_number": 1, "artifact_metadata_id":
-  61466677371649277, "community": "gamma", "created": "Thu, 04 May 2023 20:07:37 GMT",
-  "expiration": "Thu, 04 May 2023 20:07:37 GMT", "id": 5, "instance_id": 1, "meta_community":
-  "_public", "sandbox": "cape_sandbox_v2", "sandbox_artifacts": [], "sha256": "18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40",
-  "status": 0, "team_account_number": 1}, {"account_number": 1, "artifact_metadata_id":
-  37088277438902662, "community": "gamma", "created": "Thu, 04 May 2023 20:07:37 GMT",
-  "expiration": "Thu, 04 May 2023 20:07:37 GMT", "id": 6, "instance_id": 1, "meta_community":
-  "_public", "sandbox": "triage_sandbox_v0", "sandbox_artifacts": [], "sha256": "18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40",
-  "status": 0, "team_account_number": 1}, {"account_number": 1, "artifact_metadata_id":
-  61466677371649277, "community": "gamma", "created": "Thu, 04 May 2023 20:08:23 GMT",
-  "expiration": "Thu, 04 May 2023 20:08:23 GMT", "id": 7, "instance_id": 1, "meta_community":
-  "_public", "sandbox": "cape_sandbox_v2", "sandbox_artifacts": [], "sha256": "18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40",
-  "status": 0, "team_account_number": 1}, {"account_number": 1, "artifact_metadata_id":
-  37088277438902662, "community": "gamma", "created": "Thu, 04 May 2023 20:08:23 GMT",
-  "expiration": "Thu, 04 May 2023 20:08:23 GMT", "id": 8, "instance_id": 1, "meta_community":
-  "_public", "sandbox": "triage_sandbox_v0", "sandbox_artifacts": [], "sha256": "18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40",
-  "status": 0, "team_account_number": 1}, {"account_number": 1, "artifact_metadata_id":
-  61466677371649277, "community": "gamma", "created": "Thu, 04 May 2023 20:31:48 GMT",
-  "expiration": "Thu, 04 May 2023 20:31:48 GMT", "id": 9, "instance_id": 1, "meta_community":
-  "_public", "sandbox": "cape_sandbox_v2", "sandbox_artifacts": [], "sha256": "18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40",
-  "status": 0, "team_account_number": 1}, {"account_number": 1, "artifact_metadata_id":
-  37088277438902662, "community": "gamma", "created": "Thu, 04 May 2023 20:31:48 GMT",
-  "expiration": "Thu, 04 May 2023 20:31:48 GMT", "id": 10, "instance_id": 1, "meta_community":
-  "_public", "sandbox": "triage_sandbox_v0", "sandbox_artifacts": [], "sha256": "18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40",
-  "status": 0, "team_account_number": 1}]
+result: '[{"account_number": null, "community": "gamma", "created": "Tue, 13 Jun 2023
+  15:53:58 GMT", "expiration": "Tue, 13 Jun 2023 16:23:58 GMT", "id": 70468704765069182,
+  "instance_id": 65983931533820379, "meta_community": "_public", "report": {}, "sandbox":
+  "triage", "sandbox_artifacts": [], "sha256": "a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427",
+  "status": "STARTED", "team_account_number": null}, {"account_number": null, "community":
+  "gamma", "created": "Tue, 13 Jun 2023 15:53:58 GMT", "expiration": "Tue, 13 Jun
+  2023 16:23:58 GMT", "id": 35707962445520890, "instance_id": 65983931533820379, "meta_community":
+  "_public", "report": {}, "sandbox": "cape", "sandbox_artifacts": [], "sha256": "a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427",
+  "status": "PENDING", "team_account_number": null}, {"account_number": null, "community":
+  "gamma", "created": "Mon, 12 Jun 2023 19:47:19 GMT", "expiration": "Mon, 12 Jun
+  2023 20:17:19 GMT", "id": 90509298268232193, "instance_id": 65983931533820379, "meta_community":
+  "_public", "report": {}, "sandbox": "triage", "sandbox_artifacts": [], "sha256":
+  "a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427", "status": "SUCCEEDED",
+  "team_account_number": null}, {"account_number": null, "community": "gamma", "created":
+  "Mon, 12 Jun 2023 19:47:11 GMT", "expiration": "Mon, 12 Jun 2023 20:17:19 GMT",
+  "id": 71508674642004078, "instance_id": 65983931533820379, "meta_community": "_public",
+  "report": {}, "sandbox": "cape", "sandbox_artifacts": [], "sha256": "a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427",
+  "status": "PENDING", "team_account_number": null}, {"account_number": null, "community":
+  "gamma", "created": "Mon, 12 Jun 2023 19:19:30 GMT", "expiration": "Mon, 12 Jun
+  2023 19:49:30 GMT", "id": 6352098734134277, "instance_id": 65983931533820379, "meta_community":
+  "_public", "report": {}, "sandbox": "triage", "sandbox_artifacts": [], "sha256":
+  "a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427", "status": "SUCCEEDED",
+  "team_account_number": null}, {"account_number": null, "community": "gamma", "created":
+  "Mon, 12 Jun 2023 17:51:14 GMT", "expiration": "Mon, 12 Jun 2023 18:21:14 GMT",
+  "id": 40223659277538354, "instance_id": 39959583255468338, "meta_community": "_public",
+  "report": {}, "sandbox": "triage", "sandbox_artifacts": [], "sha256": "a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427",
+  "status": "SUCCEEDED", "team_account_number": null}, {"account_number": null, "community":
+  "gamma", "created": "Mon, 12 Jun 2023 17:09:22 GMT", "expiration": "Mon, 12 Jun
+  2023 17:39:22 GMT", "id": 99338268339662717, "instance_id": 36206485721733777, "meta_community":
+  "_public", "report": {}, "sandbox": "triage", "sandbox_artifacts": [], "sha256":
+  "a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427", "status": "SUCCEEDED",
+  "team_account_number": null}, {"account_number": null, "community": "gamma", "created":
+  "Mon, 12 Jun 2023 17:04:36 GMT", "expiration": "Mon, 12 Jun 2023 17:34:36 GMT",
+  "id": 83944531400370478, "instance_id": 8521441049795344, "meta_community": "_public",
+  "report": {}, "sandbox": "triage", "sandbox_artifacts": [], "sha256": "a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427",
+  "status": "SUCCEEDED", "team_account_number": null}, {"account_number": null, "community":
+  "gamma", "created": "Mon, 12 Jun 2023 16:18:27 GMT", "expiration": "Mon, 12 Jun
+  2023 16:48:27 GMT", "id": 55429924914141595, "instance_id": 51007984228684869, "meta_community":
+  "_public", "report": {}, "sandbox": "triage", "sandbox_artifacts": [], "sha256":
+  "a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427", "status": "SUCCEEDED",
+  "team_account_number": null}, {"account_number": null, "community": "gamma", "created":
+  "Mon, 12 Jun 2023 16:07:49 GMT", "expiration": "Mon, 12 Jun 2023 16:37:49 GMT",
+  "id": 56508049741935550, "instance_id": 7702883613815649, "meta_community": "_public",
+  "report": {}, "sandbox": "triage", "sandbox_artifacts": [], "sha256": "a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427",
+  "status": "SUCCEEDED", "team_account_number": null}]
 
   '

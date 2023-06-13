@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"artifact_id": "11708599140460142"}'
+    body: '{"artifact_id": "65983931533820379"}'
     headers:
       Accept:
       - '*/*'
@@ -15,23 +15,27 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - polyswarm-api/3.2.1 (x86_64-Linux-CPython-3.9.10)
+      - polyswarm-api/3.3.0 (x86_64-Linux-CPython-3.10.7)
     method: POST
-    uri: http://artifact-index-e2e:9696/v3/sandbox
+    uri: http://artifact-index-e2e:9696/v3/sandbox/sandboxtask
   response:
     body:
-      string: '{"result":[{"account_number":1,"artifact_metadata_id":61466677371649277,"community":"gamma","created":"Thu,
-        04 May 2023 20:31:48 GMT","expiration":"Thu, 04 May 2023 20:31:48 GMT","id":9,"instance_id":1,"meta_community":"_public","sandbox":"cape_sandbox_v2","sandbox_artifacts":[],"sha256":"18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40","status":0,"team_account_number":1},{"account_number":1,"artifact_metadata_id":37088277438902662,"community":"gamma","created":"Thu,
-        04 May 2023 20:31:48 GMT","expiration":"Thu, 04 May 2023 20:31:48 GMT","id":10,"instance_id":1,"meta_community":"_public","sandbox":"triage_sandbox_v0","sandbox_artifacts":[],"sha256":"18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40","status":0,"team_account_number":1}],"status":"OK"}
+      string: '{"result":[{"account_number":null,"community":"gamma","created":"Tue,
+        13 Jun 2023 15:53:58 GMT","expiration":"2023-06-13T16:23:58.704674","id":35707962445520890,"instance_id":65983931533820379,"meta_community":"_public","report":{},"sandbox":"cape","sandbox_artifacts":[],"sha256":"a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427","status":"PENDING","team_account_number":null},{"account_number":null,"community":"gamma","created":"Tue,
+        13 Jun 2023 15:53:58 GMT","expiration":"2023-06-13T16:23:58.769541","id":70468704765069182,"instance_id":65983931533820379,"meta_community":"_public","report":{"analysis":{"score":1},"extracted":null,"extracted_c2_ip_port":[],"extracted_c2_ips":[],"malware_family":[],"sample_id":"230612-yhnpmsghbg","targets":[{"md5":"ecbcbde87b9837f89600f8f14f6a4914","score":1,"sha1":"c2aa803de3ab0b05ce91b75ebb417a8036baf845","sha256":"a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427","sha512":"acd689f74db9b9fded23052d67005c804f4512cc2df1d5211363ab563ec3ca223afed18bddbd04349e1f832327a65bd25053d0cf5ab92534e96b1c88dad7467f","signatures":[],"size":29696,"ssdeep":"384:mRrObUH/O49wvPabV2CIbbMhXSEH8fYqmpli8GsXZHM6KHhowhjllWAwsuEJgc94:+SbUfOLabiQhClQqmpH7Xshowlagg3","target":"a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427","tasks":["behavioral1"]}],"ttp":[],"version":"0.2.3"},"sandbox":"triage","sandbox_artifacts":[],"sha256":"a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427","status":"PENDING","team_account_number":null}],"status":"OK"}
 
         '
     headers:
       Connection:
-      - Keep-Alive
+      - close
       Content-Length:
-      - '792'
+      - '1534'
       Content-Type:
       - application/json
+      Date:
+      - Tue, 13 Jun 2023 15:53:58 GMT
+      Server:
+      - Werkzeug/2.3.3 Python/3.10.7
       X-Billing-ID:
       - '1'
     status:
