@@ -51,3 +51,9 @@ class BaseOutput(object):
 
     def sandbox_list(self, result):
         raise NotImplementedError
+
+    def sandbox_task(self, result):
+        raise NotImplementedError
+
+    def sandbox_tasks(self, results):
+        raise NotImplementedError

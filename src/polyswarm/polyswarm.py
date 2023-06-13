@@ -226,7 +226,7 @@ class Polyswarm(PolyswarmAPI):
 
     def sandbox_instances(self, instance_ids, **kwargs):
         """
-        Send a file to be sandboxed by sha256 hash.
+        Send a file to be sandboxed by instance id.
         """
         args = [(u,) for u in instance_ids]
         kwargs = [kwargs] * len(args)
