@@ -1,5 +1,5 @@
 bump2version==0.5.11
 pytest==3.9.2
 pytest-cov==2.8.1
-vcrpy==3.0.0
+vcrpy~=4.3
 PyYAML~=5.3
