@@ -78,7 +78,7 @@ def task_latest(ctx, sandbox_, sha256):
 @click.pass_context
 def task_list(ctx, sha256, sandbox_, start_date, end_date, status):
     """
-    Search for all the SandboxTasks identified by the tuple (hash, community, [sandbox], [start_date], [end_date]).
+    Search for all the SandboxTasks identified by the tuple (hash, community, [sandbox], [start_date], [end_date], [status]).
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -93,7 +93,7 @@ def task_list(ctx, sha256, sandbox_, start_date, end_date, status):
 @click.pass_context
 def my_task_list(ctx, sandbox_, start_date, end_date):
     """
-    List the SandboxTasks associated with my account/team for the tuple (community, [start_date], [end_date])
+    List the SandboxTasks associated with my account/team for the tuple (community, [sandbox], [start_date], [end_date])
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
