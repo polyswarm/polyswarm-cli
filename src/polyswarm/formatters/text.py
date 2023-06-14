@@ -347,10 +347,33 @@ class TextOutput(base.BaseOutput):
         output = []
         output.append(self._white('============================= Sandbox Task ============================='))
         output.append(self._white('id: {}'.format(task.id)))
-        output.append(self._blue('sandbox: {}'.format(task.sandbox)))
+        output.append(self._blue('sha256: {}'.format(task.sha256)))
         output.append(self._white('created: {}'.format(task.created)))
-        output.append(self._blue('community: {}'.format(task.community)))
+        output.append(self._blue('sandbox: {}'.format(task.sandbox)))
+        output.append(self._white('community: {}'.format(task.community)))
+        output.append(self._blue('instance id: {}'.format(task.instance_id)))
         output.append(self._white('status: {}'.format(task.status)))
+
+        if task.account_number:
+            output.append(self._blue('account number: {}'.format(task.account_number)))
+        if task.team_account_number:
+            output.append(self._blue('team account number: {}'.format(task.team_account_number)))
+
+        for artifact in task.sandbox_artifacts:
+            output_string = '{}: '.format(artifact.type)
+            if artifact.name:
+                output_string = ': '.format(artifact.name)
+            if artifact.mimetype:
+                output_string += ' {}, '.format(artifact.mimetype)
+            output_string += 'instance id: {}'.format(artifact.instance_id)
+
+            output.append(self._white(output_string))
+        
+        if task.report:
+            output.append(self._blue('report: use `--fmt pretty-json` to see report content'))
+        else:
+            output.append(self._blue('report: {}'))
+
         return self._output(output, write)
     
     def sandbox_tasks(self, tasks, write=True):

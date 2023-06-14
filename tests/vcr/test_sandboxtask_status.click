@@ -9,17 +9,17 @@ result: '{"account_number": null, "community": "gamma", "created": "Mon, 12 Jun 
   "signatures": [], "size": 29696, "ssdeep": "384:mRrObUH/O49wvPabV2CIbbMhXSEH8fYqmpli8GsXZHM6KHhowhjllWAwsuEJgc94:+SbUfOLabiQhClQqmpH7Xshowlagg3",
   "target": "a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427", "tasks":
   ["behavioral1"]}], "ttp": [], "version": "0.2.3"}, "sandbox": "triage", "sandbox_artifacts":
-  [{"created": "2023-06-12T16:09:53.329941", "description": "", "extended_type": "",
-  "id": 7919963457057990, "instance_id": 60795105530778952, "mimetype": "", "sandbox_task_id":
+  [{"created": "2023-06-12T16:09:53.329941", "extended_type": "", "id": 7919963457057990,
+  "instance_id": 60795105530778952, "mimetype": "", "name": "", "sandbox_task_id":
   56508049741935550, "type": "raw_report"}, {"created": "2023-06-12T16:09:53.458566",
-  "description": "", "extended_type": "", "id": 90660662271938425, "instance_id":
-  87394410444141173, "mimetype": "", "sandbox_task_id": 56508049741935550, "type":
-  "report"}, {"created": "2023-06-12T16:09:53.575677", "description": "", "extended_type":
-  "", "id": 18879197408503516, "instance_id": 63129213937274724, "mimetype": "", "sandbox_task_id":
+  "extended_type": "", "id": 90660662271938425, "instance_id": 87394410444141173,
+  "mimetype": "", "name": "", "sandbox_task_id": 56508049741935550, "type": "report"},
+  {"created": "2023-06-12T16:09:53.575677", "extended_type": "", "id": 18879197408503516,
+  "instance_id": 63129213937274724, "mimetype": "", "name": "", "sandbox_task_id":
   56508049741935550, "type": "dropped_file"}, {"created": "2023-06-12T16:09:53.692621",
-  "description": "", "extended_type": "", "id": 21707099340828188, "instance_id":
-  69053567502849778, "mimetype": "", "sandbox_task_id": 56508049741935550, "type":
-  "dropped_file"}], "sha256": "a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427",
-  "status": "SUCCEEDED", "team_account_number": null}
+  "extended_type": "", "id": 21707099340828188, "instance_id": 69053567502849778,
+  "mimetype": "", "name": "", "sandbox_task_id": 56508049741935550, "type": "dropped_file"}],
+  "sha256": "a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427", "status":
+  "SUCCEEDED", "team_account_number": null}
 
   '
