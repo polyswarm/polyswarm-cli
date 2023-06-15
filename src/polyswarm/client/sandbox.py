@@ -14,7 +14,7 @@ def sandbox():
     pass
 
 
-@sandbox.command('submit', short_help='Submit a scanned artifact to be run through sandbox.')
+@sandbox.command('instance', short_help='Submit a scanned artifact to be run through sandbox.')
 @click.argument('sandbox', type=click.STRING)
 @click.argument('artifact-id', nargs=-1, callback=utils.validate_id)
 @click.pass_context
@@ -27,6 +27,20 @@ def submit(ctx, sandbox, artifact_id):
 
     for tasks in api.sandbox_instances(artifact_id, sandbox=sandbox):
         output.sandbox_task(tasks)
+
+
+@sandbox.command('file', short_help='Scan files/directories.')
+@click.argument('sandbox', type=click.STRING)
+@click.argument('path', type=click.Path(exists=True), required=True)
+@click.pass_context
+def file(ctx, path, sandbox):
+    """
+    Submit a local file to the sandbox system.
+    """
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+
+    output.sandbox_task(api.sandbox_file(path, sandbox))
 
 
 @sandbox.command('providers', short_help='List the names of available sandboxes.')
