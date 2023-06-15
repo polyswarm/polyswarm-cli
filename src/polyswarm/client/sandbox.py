@@ -98,7 +98,7 @@ def task_list(ctx, sha256, sandbox_, start_date, end_date, status):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    for task in api.sandbox_task_list(sha256, sandbox_, start_date=start_date, end_date=end_date, status=status):
+    for task in api.sandbox_task_list(sha256, sandbox=sandbox_, start_date=start_date, end_date=end_date, status=status):
         output.sandbox_task(task)
 
 

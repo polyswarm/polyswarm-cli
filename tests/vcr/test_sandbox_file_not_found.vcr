@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"artifact_id": "65983931533820370"}'
+    body: '{"artifact_id": "86147028965243380", "sandbox": "triage"}'
     headers:
       Accept:
       - '*/*'
@@ -11,11 +11,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '36'
+      - '57'
       Content-Type:
       - application/json
       User-Agent:
-      - polyswarm-api/3.3.0 (x86_64-Linux-CPython-3.10.7)
+      - polyswarm-api/3.3.2 (x86_64-Linux-CPython-3.10.7)
     method: POST
     uri: http://artifact-index-e2e:9696/v3/sandbox/sandboxtask
   response:
@@ -31,7 +31,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 13 Jun 2023 15:53:58 GMT
+      - Thu, 15 Jun 2023 22:02:21 GMT
       Server:
       - Werkzeug/2.3.3 Python/3.10.7
     status:
