@@ -375,10 +375,6 @@ class TextOutput(base.BaseOutput):
             output.append(self._blue('report: {}'))
 
         return self._output(output, write)
-    
-    def sandbox_tasks(self, tasks, write=True):
-        for task in tasks:
-            self.sandbox_task(task, write=write)
 
     def metadata(self, instance, write=True):
         output = []

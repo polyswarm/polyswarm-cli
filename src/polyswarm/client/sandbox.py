@@ -15,17 +15,18 @@ def sandbox():
 
 
 @sandbox.command('submit', short_help='Submit a scanned artifact to be run through sandbox.')
+@click.argument('sandbox', type=click.STRING)
 @click.argument('artifact-id', nargs=-1, callback=utils.validate_id)
 @click.pass_context
-def submit(ctx, artifact_id):
+def submit(ctx, sandbox, artifact_id):
     """
     Submit an artifact by artifact id to the sandbox system.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    for tasks in api.sandbox_instances(artifact_id):
-        output.sandbox_tasks(tasks)
+    for tasks in api.sandbox_instances(artifact_id, sandbox=sandbox):
+        output.sandbox_task(tasks)
 
 
 @sandbox.command('providers', short_help='List the names of available sandboxes.')
@@ -83,7 +84,8 @@ def task_list(ctx, sha256, sandbox_, start_date, end_date, status):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.sandbox_tasks(api.sandbox_task_list(sha256, sandbox_, start_date=start_date, end_date=end_date, status=status))
+    for task in api.sandbox_task_list(sha256, sandbox_, start_date=start_date, end_date=end_date, status=status):
+        output.sandbox_task(task)
 
 
 @sandbox.command('my-tasks', short_help='Search for all the SandboxTasks created by my account or team.')
@@ -98,4 +100,5 @@ def my_task_list(ctx, sandbox_, start_date, end_date):
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.sandbox_tasks(api.sandbox_my_tasks_list(sandbox=sandbox_, start_date=start_date, end_date=end_date))
+    for task in api.sandbox_my_tasks_list(sandbox=sandbox_, start_date=start_date, end_date=end_date):
+        output.sandbox_task(task)
