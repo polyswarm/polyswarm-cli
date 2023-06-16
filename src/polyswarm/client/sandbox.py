@@ -71,10 +71,10 @@ def task_status(ctx, sandbox_task_id):
 
 
 @sandbox.command('lookup', short_help='Search the latest entry of SandboxTasks.')
-@click.argument('sha256', type=click.STRING, required=True)
 @click.argument('sandbox_', type=click.STRING, required=True)
+@click.argument('sha256', type=click.STRING, required=True)
 @click.pass_context
-def task_latest(ctx, sandbox_, sha256):
+def task_latest(ctx, sha256, sandbox_):
     """
     Lookup the latest entry of SandboxTasks by the tuple (hash, community, sandbox name).
     """
