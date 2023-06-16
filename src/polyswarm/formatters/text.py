@@ -362,9 +362,9 @@ class TextOutput(base.BaseOutput):
         for artifact in task.sandbox_artifacts:
             output_string = '{}: '.format(artifact.type)
             if artifact.name:
-                output_string = ': '.format(artifact.name)
+                output_string += '{}, '.format(artifact.name)
             if artifact.mimetype:
-                output_string += ' {}, '.format(artifact.mimetype)
+                output_string += '{}, '.format(artifact.mimetype)
             output_string += 'instance id: {}'.format(artifact.instance_id)
 
             output.append(self._white(output_string))
