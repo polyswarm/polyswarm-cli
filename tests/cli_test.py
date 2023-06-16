@@ -432,5 +432,5 @@ class SandboxTaskTest(BaseTestCase):
     @vcr.use_cassette()
     def test_sandboxtask_latest(self):
         result = self._run_cli([
-            '--output-format', 'json', 'sandbox', 'lookup', 'a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427', 'triage'])
+            '--output-format', 'json', 'sandbox', 'lookup', 'triage', 'a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427'])
         self._assert_text_result(result, self.click_vcr(result))
