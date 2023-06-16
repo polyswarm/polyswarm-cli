@@ -362,9 +362,9 @@ class TextOutput(base.BaseOutput):
         for artifact in task.sandbox_artifacts:
             output_string = '{}: '.format(artifact.type)
             if artifact.name:
-                output_string = ': '.format(artifact.name)
+                output_string += '{}, '.format(artifact.name)
             if artifact.mimetype:
-                output_string += ' {}, '.format(artifact.mimetype)
+                output_string += '{}, '.format(artifact.mimetype)
             output_string += 'instance id: {}'.format(artifact.instance_id)
 
             output.append(self._white(output_string))
@@ -375,10 +375,6 @@ class TextOutput(base.BaseOutput):
             output.append(self._blue('report: {}'))
 
         return self._output(output, write)
-    
-    def sandbox_tasks(self, tasks, write=True):
-        for task in tasks:
-            self.sandbox_task(task, write=write)
 
     def metadata(self, instance, write=True):
         output = []
