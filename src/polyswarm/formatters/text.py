@@ -337,10 +337,45 @@ class TextOutput(base.BaseOutput):
 
         return self._output(output, write)
 
-    def sandbox_list(self, result, write=True):
+    def sandbox_providers(self, result, write=True):
         output = []
-        output.append(self._white('============================= Sandboxes ============================='))
-        output.append(self._white('result: {}'.format(result.json['result'])))
+        output.append(self._white('============================= Providers ============================='))
+        for provider in result.json['result']:
+            output.append(self._white('name: {}'.format(provider['name'])))
+        return self._output(output, write)
+    
+    def sandbox_task(self, task, write=True):
+        output = []
+        output.append(self._white('============================= Sandbox Task ============================='))
+        output.append(self._blue('id: {}'.format(task.id)))
+        output.append(self._blue('sha256: {}'.format(task.sha256)))
+        output.append(self._blue('sandbox: {}'.format(task.sandbox)))
+        output.append(self._white('created: {}'.format(task.created)))
+        output.append(self._white('community: {}'.format(task.community)))
+        output.append(self._white('instance id: {}'.format(task.instance_id)))
+        output.append(self._white('status: {}'.format(task.status)))
+
+        if task.account_number:
+            output.append(self._white('account number: {}'.format(task.account_number)))
+        if task.team_account_number:
+            output.append(self._white('team account number: {}'.format(task.team_account_number)))
+
+        if task.sandbox_artifacts:
+            output.append(self._white('sandbox artifacts:'))
+        self._open_group()
+        for artifact in task.sandbox_artifacts:
+            output_string = '{}: '.format(artifact.type)
+            if artifact.name:
+                output_string += '{}, '.format(artifact.name)
+            if artifact.mimetype:
+                output_string += '{}, '.format(artifact.mimetype)
+            output_string += 'instance id: {}'.format(artifact.instance_id)
+            output.append(self._white(output_string))
+        self._close_group()
+
+        if task.report:
+            output.append(self._white('report: use `--fmt pretty-json` to see report content'))
+
         return self._output(output, write)
 
     def metadata(self, instance, write=True):

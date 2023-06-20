@@ -1,0 +1,38 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - '11111111111111111111111111111111'
+      Connection:
+      - keep-alive
+      User-Agent:
+      - polyswarm-api/3.3.2 (x86_64-Linux-CPython-3.10.7)
+    method: GET
+    uri: http://artifact-index-e2e:9696/v3/sandbox/sandboxtask?community=gamma&sandbox_task_id=83909716318937863
+  response:
+    body:
+      string: '{"result":{"account_number":null,"community":"gamma","created":"2023-06-15T22:02:21.587725","expiration":"2023-06-15T22:32:21.611999","id":83909716318937863,"instance_id":86147028965243383,"report":{},"sandbox":"triage","sandbox_artifacts":[],"sha256":"a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427","status":"STARTED","team_account_number":null,"upload_url":null},"status":"OK"}
+
+        '
+    headers:
+      Connection:
+      - close
+      Content-Length:
+      - '399'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 15 Jun 2023 22:03:10 GMT
+      Server:
+      - Werkzeug/2.3.3 Python/3.10.7
+      X-Billing-ID:
+      - '1'
+    status:
+      code: 200
+      message: OK
+version: 1

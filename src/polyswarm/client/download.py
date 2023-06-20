@@ -33,6 +33,21 @@ def download(ctx, hash_file, hash_type, destination, hash_value):
         out.local_artifact(result)
 
 
+@click.command('download-id', short_help='Download file(s).')
+@click.option('-d', '--destination', type=click.Path(file_okay=False),
+              help='Path where to store the downloaded files.', default=os.getcwd())
+@click.argument('instance_id', nargs=-1, type=click.INT)
+@click.pass_context
+def download_id(ctx, destination, instance_id):
+    """
+    Download files from instance ids
+    """
+    api = ctx.obj['api']
+    out = ctx.obj['output']
+    for result in api.download_id_multiple(instance_id, destination):
+        out.local_artifact(result)
+
+
 @click.command('stream', short_help='Access the polyswarm file stream.')
 @click.option('-s', '--since', type=click.IntRange(1, 2880), default=1440,
               help='Request archives X minutes into the past. Default: 1440, Max: 2880.')

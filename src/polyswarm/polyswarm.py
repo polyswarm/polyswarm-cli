@@ -169,6 +169,19 @@ class Polyswarm(PolyswarmAPI):
                                               kwargs_list=[{'hash_type': hash_type}]*len(args)):
             yield result
 
+    def download_id_multiple(self, instance_id, destination):
+        """
+        Download files from matching instance ids.
+
+        :param instance_id: A list of instance ids to download.
+        :param destination: Folder where to download the files to.
+        :return: An iterator of local artifacts.
+        """
+        args = [(destination, h) for h in instance_id]
+
+        for result in utils.parallel_executor(self.download_id, args_list=args):
+            yield result
+
     def download_stream(self, destination, since=1440):
         """
         Access the polyswarm file stream.
@@ -226,7 +239,7 @@ class Polyswarm(PolyswarmAPI):
 
     def sandbox_instances(self, instance_ids, **kwargs):
         """
-        Send a file to be sandboxed by sha256 hash.
+        Send a file to be sandboxed by instance id.
         """
         args = [(u,) for u in instance_ids]
         kwargs = [kwargs] * len(args)

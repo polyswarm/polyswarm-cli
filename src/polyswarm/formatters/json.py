@@ -143,7 +143,10 @@ class JSONOutput(base.BaseOutput):
     def artifact_metadata(self, result, only=None):
         click.echo(self._to_json(result.json), file=self.out)
 
-    def sandbox_list(self, result):
+    def sandbox_providers(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
+
+    def sandbox_task(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 
 

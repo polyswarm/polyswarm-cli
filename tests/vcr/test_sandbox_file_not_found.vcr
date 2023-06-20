@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"artifact_id": "34302170701478837"}'
+    body: '{"artifact_id": "86147028965243380", "sandbox": "triage"}'
     headers:
       Accept:
       - '*/*'
@@ -11,13 +11,13 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '36'
+      - '57'
       Content-Type:
       - application/json
       User-Agent:
-      - polyswarm-api/3.1.3 (x86_64-Linux-CPython-3.10.7)
+      - polyswarm-api/3.3.2 (x86_64-Linux-CPython-3.10.7)
     method: POST
-    uri: http://artifact-index-e2e:9696/v3/sandbox
+    uri: http://artifact-index-e2e:9696/v3/sandbox/sandboxtask
   response:
     body:
       string: '{"errors":null,"result":"No instance found for the artifact id provided","status":"error"}
@@ -31,9 +31,9 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Fri, 10 Mar 2023 21:08:36 GMT
+      - Thu, 15 Jun 2023 22:02:21 GMT
       Server:
-      - Werkzeug/2.2.2 Python/3.10.7
+      - Werkzeug/2.3.3 Python/3.10.7
     status:
       code: 404
       message: NOT FOUND
