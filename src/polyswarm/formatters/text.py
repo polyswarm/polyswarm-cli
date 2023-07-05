@@ -339,9 +339,17 @@ class TextOutput(base.BaseOutput):
 
     def sandbox_providers(self, result, write=True):
         output = []
-        output.append(self._white('============================= Providers ============================='))
-        for provider in result.json['result']:
+        for provider in result.json['result'].values():
+            output.append(self._white('============================= Provider ============================='))
+            output.append(self._blue('slug: {}'.format(provider['slug'])))
             output.append(self._white('name: {}'.format(provider['name'])))
+            output.append(self._white('tool: {}'.format(provider['tool'])))
+            self._open_group()
+            for vm in provider['vms'].values():
+                output.append(self._white('============================= VM ============================='))
+                for k, v in vm.items():
+                    output.append(self._white('{}: {}'.format(k, v)))
+            self._close_group()
         return self._output(output, write)
     
     def sandbox_task(self, task, write=True):

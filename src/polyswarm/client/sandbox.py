@@ -15,32 +15,34 @@ def sandbox():
 
 
 @sandbox.command('instance', short_help='Submit an existing artifact by id to be sandboxed.')
-@click.argument('sandbox', type=click.STRING)
+@click.argument('provider_slug', type=click.STRING)
 @click.argument('artifact-id', nargs=-1, callback=utils.validate_id)
+@click.option('--vm_slug', 'vm_slug', type=click.STRING)
 @click.pass_context
-def submit(ctx, sandbox, artifact_id):
+def submit(ctx, provider_slug, artifact_id, vm_slug):
     """
     Submit an artifact by artifact id to be sandboxed.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    for tasks in api.sandbox_instances(artifact_id, sandbox=sandbox):
+    for tasks in api.sandbox_instances(artifact_id, provider_slug=provider_slug, vm_slug=vm_slug):
         output.sandbox_task(tasks)
 
 
 @sandbox.command('file', short_help='Submit a local file to be sandboxed.')
 @click.argument('sandbox', type=click.STRING)
 @click.argument('path', type=click.Path(exists=True), required=True)
+@click.option('--vm_slug', 'vm_slug', type=click.STRING)
 @click.pass_context
-def file(ctx, path, sandbox):
+def file(ctx, path, sandbox, vm_slug):
     """
     Submit a local file to be sandboxed.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.sandbox_task(api.sandbox_file(path, sandbox))
+    output.sandbox_task(api.sandbox_file(path, sandbox, vm_slug))
 
 
 @sandbox.command('providers', short_help='List the names of available sandboxes.')
