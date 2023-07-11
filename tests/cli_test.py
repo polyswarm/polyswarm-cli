@@ -402,7 +402,7 @@ class SandoxTest(BaseTestCase):
     @pytest.mark.skip(reason="workaround CI failures because tests are run with polyswarm-api master branch")
     def test_sandbox_file(self):
         result = self._run_cli([
-            '--output-format', 'json', 'sandbox', 'instance', 'triage', '86147028965243383'])
+            '--output-format', 'json', 'sandbox', 'instance', 'triage', '59710030898207379'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
