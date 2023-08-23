@@ -17,7 +17,7 @@ setup(
     author_email='info@polyswarm.io',
     url='https://github.com/polyswarm/polyswarm-cli',
     license='MIT',
-    python_requires='>=3.5,<4',
+    python_requires='>3.5,<4',
     install_requires=[
         'polyswarm-api~=3.4.0',
         'click~=7.0',
