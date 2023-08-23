@@ -1,8 +1,9 @@
-result: '{"created": "2022-05-26T19:08:31.291890", "deleted": false, "description":
-  null, "id": "71213140536342873", "livescan_created": null, "livescan_id": null,
-  "modified": "2022-05-26T19:59:46.678724", "name": "test2", "yara": "rule eicar_av_test
-  {\n    /*\n       Per standard, match only if entire file is EICAR string plus optional
-  trailing whitespace.\n       The raw EICAR string to be matched is:\n       X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\n    */\n\n    meta:\n        description
+result: '{"community": "_public", "created": "2023-08-23T15:16:04.148857", "deleted":
+  false, "description": null, "id": "27214252780064715", "livescan_created": null,
+  "livescan_id": null, "modified": "2023-08-23T15:16:04.148857", "name": "eicar2",
+  "yara": "rule eicar_av_test {\n    /*\n       Per standard, match only if entire
+  file is EICAR string plus optional trailing whitespace.\n       The raw EICAR string
+  to be matched is:\n       X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\n    */\n\n    meta:\n        description
   = \"This is a standard AV test, intended to verify that BinaryAlert is working correctly.\"\n        author
   = \"Austin Byers | Airbnb CSIRT\"\n        reference = \"http://www.eicar.org/86-0-Intended-use.html\"\n\n    strings:\n        $eicar_regex
   = /^X5O!P%@AP\\[4\\\\PZX54\\(P\\^\\)7CC\\)7\\}\\$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!\\$H\\+H\\*\\s*$/\n\n    condition:\n        all
