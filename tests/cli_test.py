@@ -120,13 +120,13 @@ class HuntResultsTest(BaseTestCase):
     @vcr.use_cassette()
     def test_historical_hunt_results_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'historical', 'results', '48011760326110718'])
+            '--output-format', 'json', 'historical', 'results', '76083665328102613'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_historical_hunt_results_text(self):
         result = self._run_cli([
-            '--output-format', 'text', 'historical', 'results', '48011760326110718'])
+            '--output-format', 'text', 'historical', 'results', '76083665328102613'])
         self._assert_text_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
@@ -236,7 +236,7 @@ class RulesetTest(BaseTestCase):
     @vcr.use_cassette()
     def test_ruleset_view_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'rules', 'view', '71213140536342873'])
+            '--output-format', 'json', 'rules', 'view', '27214252780064715'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()

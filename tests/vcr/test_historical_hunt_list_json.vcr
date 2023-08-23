@@ -11,57 +11,25 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.6.5)
+      - polyswarm-api/3.4.2 (x86_64-Linux-CPython-3.10.7)
     method: GET
-    uri: http://artifact-index-e2e:9696/v3/hunt/historical/list
+    uri: http://artifact-index-e2e:9696/v3/hunt/historical/list?community=gamma
   response:
     body:
-      string: '{"has_more":true,"limit":2,"offset":"gAAAAABij9AuCgME3n0TENx-85wsh3JVmaPKmJKqY3zoq9NQ_hwNOxwon9-2eZ-AmYUqYxqTddMSBdiQ8H_d59zNwnAgCdivvA==","result":[{"created":"2022-05-26T19:08:30.527759","id":"75914219779430298","progress":null,"results_csv_uri":null,"ruleset_name":"eicar.yara","status":"PENDING","summary":null,"yara":null},{"created":"2022-05-26T19:08:30.323397","id":"96916002705221564","progress":null,"results_csv_uri":null,"ruleset_name":"eicar.yara","status":"PENDING","summary":null,"yara":null}],"status":"OK"}
+      string: '{"has_more":false,"limit":2,"result":[{"created":"2023-08-23T15:14:52.254659","id":"30246442833374528","progress":null,"results_csv_uri":null,"ruleset_name":"eicar.yara","status":"PENDING","summary":null,"yara":null},{"created":"2023-08-23T15:12:38.073323","id":"76083665328102613","progress":100.0,"results_csv_uri":null,"ruleset_name":"eicar.yara","status":"STOPPED","summary":null,"yara":null}],"status":"OK"}
 
         '
     headers:
-      Content-Length:
-      - '523'
-      Content-Type:
-      - application/json
-      Date:
-      - Thu, 26 May 2022 19:08:30 GMT
-      Server:
-      - Werkzeug/1.0.1 Python/3.9.6
-      X-Billing-ID:
-      - '1'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Authorization:
-      - '11111111111111111111111111111111'
       Connection:
       - keep-alive
-      User-Agent:
-      - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.6.5)
-    method: GET
-    uri: http://artifact-index-e2e:9696/v3/hunt/historical/list?offset=gAAAAABij9AuCgME3n0TENx-85wsh3JVmaPKmJKqY3zoq9NQ_hwNOxwon9-2eZ-AmYUqYxqTddMSBdiQ8H_d59zNwnAgCdivvA%3D%3D&limit=2
-  response:
-    body:
-      string: '{"has_more":false,"limit":2,"result":[{"created":"2022-05-26T19:07:25.339932","id":"79157116618547376","progress":null,"results_csv_uri":null,"ruleset_name":"eicar.yara","status":"PENDING","summary":null,"yara":null},{"created":"2022-05-26T17:53:07.832218","id":"48011760326110718","progress":100.0,"results_csv_uri":null,"ruleset_name":"eicar.yara","status":"STOPPED","summary":null,"yara":null}],"status":"OK"}
-
-        '
-    headers:
       Content-Length:
       - '413'
       Content-Type:
       - application/json
       Date:
-      - Thu, 26 May 2022 19:08:31 GMT
+      - Wed, 23 Aug 2023 15:15:11 GMT
       Server:
-      - Werkzeug/1.0.1 Python/3.9.6
+      - gunicorn
       X-Billing-ID:
       - '1'
     status:
