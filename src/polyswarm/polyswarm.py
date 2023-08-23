@@ -190,7 +190,7 @@ class Polyswarm(PolyswarmAPI):
         :param since: Request archives X minutes into the past. Default: 1440, Max: 2880.
         :return: An iterator of local artifacts.
         """
-        args = [(destination, artifact_archive.uri) for artifact_archive in self.stream(since=since)]
+        args = iter((destination, artifact_archive.uri) for artifact_archive in self.stream(since=since))
         for result in utils.parallel_executor(self.download_archive, args_list=args, max_workers=self.parallel):
             yield result
 
