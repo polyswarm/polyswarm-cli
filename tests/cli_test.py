@@ -350,7 +350,7 @@ class IOCTest(BaseTestCase):
     @vcr.use_cassette()
     def test_ioc_by_hash(self):
         result = self._run_cli([
-            '--output-format', 'json', 'search', 'ioc', 'sha256', '18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40'])
+            '--output-format', 'json', 'search', 'ioc', 'sha256', '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0a'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()

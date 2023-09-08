@@ -11,7 +11,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.9.10)
+      - polyswarm-api/3.4.1 (x86_64-Linux-CPython-3.9.10)
     method: GET
     uri: http://artifact-index-e2e:9696/v3/ioc/sha256/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f?community=gamma
   response:
@@ -19,9 +19,13 @@ interactions:
       string: ''
     headers:
       Connection:
-      - Keep-Alive
+      - keep-alive
       Content-Type:
       - text/html; charset=utf-8
+      Date:
+      - Thu, 07 Sep 2023 23:33:33 GMT
+      Server:
+      - gunicorn
     status:
       code: 204
       message: NO CONTENT

@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.9.10)
     method: GET
-    uri: http://artifact-index-e2e:9696/v3/ioc/sha256/18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40?community=gamma
+    uri: http://artifact-index-e2e:9696/v3/ioc/sha256/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0a?community=gamma
   response:
     body:
       string: '{"has_more":false,"limit":50,"result":{"imphash":"","ips":[],"ttps":[],"urls":[]},"status":"OK"}
