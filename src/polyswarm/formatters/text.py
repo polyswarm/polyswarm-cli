@@ -298,13 +298,18 @@ class TextOutput(base.BaseOutput):
         output = []
         output.append(self._white('============================= IOC ============================='))
         data = ioc.json
-        if type(data) is dict:
+        if 'imphash' in data:
             output.append(self._white('ImpHash: {}'.format(data['imphash'])))
+        if 'ips' in data:
             output.append(self._white('IPs: {}'.format(", ".join(data['ips']))))
-            output.append(self._white('URLs: {}'.format(", ".join(data['urls']))))
+        if 'ttps' in data:
             output.append(self._white('TTPs: {}'.format(", ".join(data['ttps']))))
-        else:
-            output.append(self._white('SHA256: {}'.format(data)))
+        if 'urls' in data:
+            for url in data['urls']:
+                output.append(self._white('URL: {}, Polyscore: {}'.format(url['value'], url['polyscore'])))
+        if 'sha256' in data:
+            output.append(self._white('SHA256: {}'.format(data['sha256'])))
+            output.append(self._white('Polyscore: {}'.format(data['polyscore'])))
         return self._output(output, write)
     
     def known_host(self, ioc_known, write=True):
