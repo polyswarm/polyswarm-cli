@@ -288,8 +288,17 @@ class TextOutput(base.BaseOutput):
             if type(data) is dict:
                 output.append(self._white('ImpHash: {}'.format(data['imphash'])))
                 output.append(self._white('IPs: {}'.format(", ".join(data['ips']))))
-                output.append(self._white('URLs: {}'.format(", ".join(data['urls']))))
                 output.append(self._white('TTPs: {}'.format(", ".join(data['ttps']))))
+                output.append(self._white('URLs: '))
+                self._open_group()
+                for url in data['urls']:
+                    if url['polyscore'] is not None:
+                        polyscore = float(url['polyscore'])
+                        formatter = self._get_score_format(polyscore)
+                        output.append(url['value'] + formatter(' PolyScore: {:.20f}'.format(polyscore)))
+                    else:
+                        output.append(url['value'])
+                self._close_group()
             else:
                 output.append(self._white('SHA256: {}'.format(data)))
         return self._output(output, write)
@@ -309,7 +318,10 @@ class TextOutput(base.BaseOutput):
                 output.append(self._white('URL: {}, Polyscore: {}'.format(url['value'], url['polyscore'])))
         if 'sha256' in data:
             output.append(self._white('SHA256: {}'.format(data['sha256'])))
-            output.append(self._white('Polyscore: {}'.format(data['polyscore'])))
+            if data['polyscore'] is not None:
+                polyscore = float(data['polyscore'])
+                formatter = self._get_score_format(polyscore)
+                output.append(formatter('PolyScore: {:.20f}'.format(polyscore)))
         return self._output(output, write)
     
     def known_host(self, ioc_known, write=True):
