@@ -1,0 +1,38 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - '11111111111111111111111111111111'
+      Connection:
+      - keep-alive
+      User-Agent:
+      - polyswarm-api/3.4.2 (x86_64-Linux-CPython-3.9.10)
+    method: GET
+    uri: http://artifact-index-e2e:9696/v3/hunt/live/list?since=9999999&community=gamma
+  response:
+    body:
+      string: '{"has_more":false,"limit":50,"result":[{"community":"gamma","created":"2023-09-18T22:55:01.418046","detections":{"benign":0,"malicious":1,"total":1},"download_url":null,"id":"85163241984390761","instance_id":"56151690517356729","livescan_id":"79107905790338419","malware_family":"EICAR","polyscore":0.23213458159978606,"rule_name":"eicar_substring_test","sha256":"275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f","tags":"{}","yara":null},{"community":"gamma","created":"2023-09-18T22:55:01.411548","detections":{"benign":0,"malicious":1,"total":1},"download_url":null,"id":"48317612869530221","instance_id":"56151690517356729","livescan_id":"79107905790338419","malware_family":"EICAR","polyscore":0.23213458159978606,"rule_name":"eicar_av_test","sha256":"275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f","tags":"{}","yara":null}],"status":"OK"}
+
+        '
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '880'
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 18 Sep 2023 23:16:19 GMT
+      Server:
+      - gunicorn
+      X-Billing-ID:
+      - '1'
+    status:
+      code: 200
+      message: OK
+version: 1

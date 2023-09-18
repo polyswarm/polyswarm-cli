@@ -1,0 +1,37 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - '11111111111111111111111111111111'
+      Connection:
+      - keep-alive
+      User-Agent:
+      - polyswarm-api/3.4.2 (x86_64-Linux-CPython-3.9.10)
+    method: GET
+    uri: http://artifact-index-e2e:9696/v3/hunt/live/list?since=9999999&community=private
+  response:
+    body:
+      string: '{"errors":null,"result":"Account does not have access to any private
+        communities","status":"error"}
+
+        '
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '100'
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 18 Sep 2023 23:22:15 GMT
+      Server:
+      - gunicorn
+    status:
+      code: 401
+      message: UNAUTHORIZED
+version: 1
