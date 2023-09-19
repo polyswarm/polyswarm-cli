@@ -24,7 +24,7 @@ interactions:
 
         <h1>Redirecting...</h1>
 
-        <p>You should be redirected automatically to the target URL: <a href="http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&amp;response-content-type=application%2Foctet-stream&amp;X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20230919%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20230919T182310Z&amp;X-Amz-Expires=3600&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=8860a738d048d2296459f82790a6ffc677977c104e1dbbec5547f7ff6a881b00">http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&amp;response-content-type=application%2Foctet-stream&amp;X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20230919%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20230919T182310Z&amp;X-Amz-Expires=3600&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=8860a738d048d2296459f82790a6ffc677977c104e1dbbec5547f7ff6a881b00</a>.
+        <p>You should be redirected automatically to the target URL: <a href="http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&amp;response-content-type=application%2Foctet-stream&amp;X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20230919%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20230919T202040Z&amp;X-Amz-Expires=3600&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=b1d54a1f5b2420d28e26a65415a23b0fd7c5657cd6158811a10282d421356be5">http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&amp;response-content-type=application%2Foctet-stream&amp;X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20230919%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20230919T202040Z&amp;X-Amz-Expires=3600&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=b1d54a1f5b2420d28e26a65415a23b0fd7c5657cd6158811a10282d421356be5</a>.
         If not, click the link.
 
         '
@@ -36,9 +36,9 @@ interactions:
       Content-Type:
       - text/html; charset=utf-8
       Date:
-      - Tue, 19 Sep 2023 18:23:10 GMT
+      - Tue, 19 Sep 2023 20:20:40 GMT
       Location:
-      - http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&response-content-type=application%2Foctet-stream&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20230919%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230919T182310Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=8860a738d048d2296459f82790a6ffc677977c104e1dbbec5547f7ff6a881b00
+      - http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&response-content-type=application%2Foctet-stream&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20230919%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230919T202040Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=b1d54a1f5b2420d28e26a65415a23b0fd7c5657cd6158811a10282d421356be5
       Server:
       - gunicorn
     status:
@@ -56,11 +56,11 @@ interactions:
       User-Agent:
       - polyswarm-api/3.4.3.dev0+20230918233132 (x86_64-Linux-CPython-3.9.10)
     method: GET
-    uri: http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&response-content-type=application%2Foctet-stream&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20230919%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230919T182310Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=8860a738d048d2296459f82790a6ffc677977c104e1dbbec5547f7ff6a881b00
+    uri: http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&response-content-type=application%2Foctet-stream&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20230919%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230919T202040Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=b1d54a1f5b2420d28e26a65415a23b0fd7c5657cd6158811a10282d421356be5
   response:
     body:
       string: !!binary |
-        H4sIANLmCWUC/4sw9VcMUHVwDIg2iQmIijA10QiI0zR3dtY0r1Vx9XR2DNINDnH0c3EMctF19Avx
+        H4sIAAP9CWUC/4sw9VcMUHVwDIg2iQmIijA10QiI0zR3dtY0r1Vx9XR2DNINDnH0c3EMctF19Avx
         DPMMCg3WDXENDtF18/RxVVTx0PbQAgA8z1FoRAAAAA==
     headers:
       Accept-Ranges:
@@ -76,11 +76,11 @@ interactions:
       Content-Type:
       - application/octet-stream
       Date:
-      - Tue, 19 Sep 2023 18:23:10 GMT
+      - Tue, 19 Sep 2023 20:20:40 GMT
       ETag:
-      - '"2af5706bff25a68abd02532800b3d685"'
+      - '"e299c8adc88de587d6feec42edabe662"'
       Last-Modified:
-      - Tue, 19 Sep 2023 18:22:10 GMT
+      - Tue, 19 Sep 2023 19:56:51 GMT
       Server:
       - MinIO
       Strict-Transport-Security:
@@ -88,7 +88,7 @@ interactions:
       Vary:
       - Origin
       X-Amz-Request-Id:
-      - 17865FEF1984F7F7
+      - 178666589D7E0E1D
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
