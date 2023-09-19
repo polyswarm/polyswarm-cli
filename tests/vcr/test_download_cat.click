@@ -1,1 +1,1 @@
-result: x1f�x08x00x03�tex02��0�Wx0cPupx0c�6�t��05�x08��4wv�4�Uq�tvx0c�rx0eq�sqx0cr�u�x0b�x0c�x0cnr�rqrx0e�u��qUT����x02x00<�QhDx00x00x00
+result: X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
