@@ -129,6 +129,13 @@ class HuntResultsTest(BaseTestCase):
             '--output-format', 'text', 'historical', 'results', '76083665328102613'])
         self._assert_text_result(result, self.click_vcr(result))
 
+
+    @vcr.use_cassette()
+    def test_historical_hunt_results_private_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'historical', 'results', '76083665328102613', '--private'])
+        self._assert_json_result(result, self.click_vcr(result))
+
     @vcr.use_cassette()
     def test_live_feed_json(self):
         result = self._run_cli([
@@ -140,6 +147,13 @@ class HuntResultsTest(BaseTestCase):
         result = self._run_cli([
             '--output-format', 'text', 'live', 'feed', '--since', '9999999'])
         self._assert_text_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_live_feed_private_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'live', 'feed', '--since', '9999999', '--private'])
+        print(result.stdout)
+        self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_live_result_json(self):
