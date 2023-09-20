@@ -94,13 +94,14 @@ def historical_delete_list(ctx, historical_ids):
 @click.option('-f', '--family', help='Filter hunt results based on the family name.')
 @click.option('-l', '--polyscore-lower', help='Polyscore lower bound for the hunt results.')
 @click.option('-u', '--polyscore-upper', help='Polyscore upper bound for the hunt results.')
+@click.option('-p', '--private', is_flag=True, help='Filter results to only your private community.')
 @click.pass_context
-def historical_results(ctx, hunt_id, rule_name, family, polyscore_lower, polyscore_upper):
+def historical_results(ctx, hunt_id, rule_name, family, polyscore_lower, polyscore_upper, private):
     api = ctx.obj['api']
     output = ctx.obj['output']
     for result in api.historical_results_multiple(
             hunt_id, rule_name=rule_name, family=family,
-            polyscore_lower=polyscore_lower, polyscore_upper=polyscore_upper):
+            polyscore_lower=polyscore_lower, polyscore_upper=polyscore_upper, community='private' if private else None):
         output.historical_result(result)
 
 

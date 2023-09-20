@@ -129,6 +129,13 @@ class HuntResultsTest(BaseTestCase):
             '--output-format', 'text', 'historical', 'results', '76083665328102613'])
         self._assert_text_result(result, self.click_vcr(result))
 
+
+    @vcr.use_cassette()
+    def test_historical_hunt_results_private_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'historical', 'results', '76083665328102613', '--private'])
+        self._assert_json_result(result, self.click_vcr(result))
+
     @vcr.use_cassette()
     def test_live_feed_json(self):
         result = self._run_cli([
@@ -140,6 +147,12 @@ class HuntResultsTest(BaseTestCase):
         result = self._run_cli([
             '--output-format', 'text', 'live', 'feed', '--since', '9999999'])
         self._assert_text_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_live_feed_private_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'live', 'feed', '--since', '9999999', '--private'])
+        self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_live_result_json(self):
@@ -262,13 +275,13 @@ class SubmissionTest(BaseTestCase):
     @vcr.use_cassette()
     def test_submission_lookup_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'lookup', '51433256212000920'])
+            '--output-format', 'json', 'lookup', '79185011799085464'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_submission_lookup_text(self):
         result = self._run_cli([
-            '--output-format', 'text', 'lookup', '51433256212000920'])
+            '--output-format', 'text', 'lookup', '79185011799085464'])
         self._assert_text_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
@@ -298,13 +311,13 @@ class SubmissionTest(BaseTestCase):
     @vcr.use_cassette()
     def test_submission_rescan_id_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'rescan-id', '78691987955427124'])
+            '--output-format', 'json', 'rescan-id', '79185011799085464'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_submission_rescan_id_text(self):
         result = self._run_cli([
-            '--output-format', 'text', 'rescan-id', '78691987955427124'])
+            '--output-format', 'text', 'rescan-id', '79185011799085464'])
         self._assert_text_result(result, self.click_vcr(result))
 
 
