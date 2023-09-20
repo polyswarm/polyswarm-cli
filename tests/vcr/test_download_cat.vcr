@@ -59,16 +59,12 @@ interactions:
     uri: http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&response-content-type=application%2Foctet-stream&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20230919%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230919T202040Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=b1d54a1f5b2420d28e26a65415a23b0fd7c5657cd6158811a10282d421356be5
   response:
     body:
-      string: !!binary |
-        H4sIAAP9CWUC/4sw9VcMUHVwDIg2iQmIijA10QiI0zR3dtY0r1Vx9XR2DNINDnH0c3EMctF19Avx
-        DPMMCg3WDXENDtF18/RxVVTx0PbQAgA8z1FoRAAAAA==
+      string: X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
     headers:
       Accept-Ranges:
       - bytes
       Content-Disposition:
       - attachment;filename=275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
-      Content-Encoding:
-      - gzip
       Content-Length:
       - '88'
       Content-Security-Policy:
