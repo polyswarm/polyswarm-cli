@@ -11,30 +11,36 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.6.5)
+      - polyswarm-api/3.4.3.dev0+20230918233132 (x86_64-Linux-CPython-3.9.10)
     method: GET
     uri: http://artifact-index-e2e:9696/v3/consumer/download/sha256/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f?community=gamma
   response:
     body:
-      string: '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+      string: '<!doctype html>
+
+        <html lang=en>
 
         <title>Redirecting...</title>
 
         <h1>Redirecting...</h1>
 
-        <p>You should be redirected automatically to target URL: <a href="http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&amp;response-content-type=application%2Foctet-stream&amp;X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20220526%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20220526T190723Z&amp;X-Amz-Expires=3600&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=b81f07feb91150710db5317efd274095054ce76e2f1644a5e38008f28c29b464">http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&amp;response-content-type=application%2Foctet-stream&amp;X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20220526%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20220526T190723Z&amp;X-Amz-Expires=3600&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=b81f07feb91150710db5317efd274095054ce76e2f1644a5e38008f28c29b464</a>.  If
-        not click the link.'
+        <p>You should be redirected automatically to the target URL: <a href="http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&amp;response-content-type=application%2Foctet-stream&amp;X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20230919%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20230919T202040Z&amp;X-Amz-Expires=3600&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=b1d54a1f5b2420d28e26a65415a23b0fd7c5657cd6158811a10282d421356be5">http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&amp;response-content-type=application%2Foctet-stream&amp;X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20230919%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20230919T202040Z&amp;X-Amz-Expires=3600&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=b1d54a1f5b2420d28e26a65415a23b0fd7c5657cd6158811a10282d421356be5</a>.
+        If not, click the link.
+
+        '
     headers:
+      Connection:
+      - keep-alive
       Content-Length:
-      - '1483'
+      - '1463'
       Content-Type:
       - text/html; charset=utf-8
       Date:
-      - Thu, 26 May 2022 19:07:23 GMT
+      - Tue, 19 Sep 2023 20:20:40 GMT
       Location:
-      - http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&response-content-type=application%2Foctet-stream&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20220526%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220526T190723Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=b81f07feb91150710db5317efd274095054ce76e2f1644a5e38008f28c29b464
+      - http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&response-content-type=application%2Foctet-stream&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20230919%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230919T202040Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=b1d54a1f5b2420d28e26a65415a23b0fd7c5657cd6158811a10282d421356be5
       Server:
-      - Werkzeug/1.0.1 Python/3.9.6
+      - gunicorn
     status:
       code: 302
       message: FOUND
@@ -48,21 +54,17 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.6.5)
+      - polyswarm-api/3.4.3.dev0+20230918233132 (x86_64-Linux-CPython-3.9.10)
     method: GET
-    uri: http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&response-content-type=application%2Foctet-stream&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20220526%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220526T190723Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=b81f07feb91150710db5317efd274095054ce76e2f1644a5e38008f28c29b464
+    uri: http://minio:9000/cache-public/27/5a/02/275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f3395856ce81f2b7382dee72602f798b642f1414044d88612fea8a8f36de82e1278abb02f?response-content-disposition=attachment%3Bfilename%3D275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&response-content-type=application%2Foctet-stream&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20230919%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230919T202040Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=b1d54a1f5b2420d28e26a65415a23b0fd7c5657cd6158811a10282d421356be5
   response:
     body:
-      string: !!binary |
-        H4sIAIbLj2IC/4sw9VcMUHVwDIg2iQmIijA10QiI0zR3dtY0r1Vx9XR2DNINDnH0c3EMctF19Avx
-        DPMMCg3WDXENDtF18/RxVVTx0PbQAgA8z1FoRAAAAA==
+      string: X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
     headers:
       Accept-Ranges:
       - bytes
       Content-Disposition:
       - attachment;filename=275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f
-      Content-Encoding:
-      - gzip
       Content-Length:
       - '88'
       Content-Security-Policy:
@@ -70,11 +72,11 @@ interactions:
       Content-Type:
       - application/octet-stream
       Date:
-      - Thu, 26 May 2022 19:07:23 GMT
+      - Tue, 19 Sep 2023 20:20:40 GMT
       ETag:
-      - '"6ae6c246f20e0ef091ed775c6d68a2fb"'
+      - '"e299c8adc88de587d6feec42edabe662"'
       Last-Modified:
-      - Thu, 26 May 2022 18:48:38 GMT
+      - Tue, 19 Sep 2023 19:56:51 GMT
       Server:
       - MinIO
       Strict-Transport-Security:
@@ -82,13 +84,13 @@ interactions:
       Vary:
       - Origin
       X-Amz-Request-Id:
-      - 16F2BD33F1D72430
+      - 178666589D7E0E1D
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
       - 1; mode=block
       x-amz-expiration:
-      - expiry-date="Sat, 28 May 2022 00:00:00 GMT", rule-id="_public_1"
+      - expiry-date="Thu, 21 Sep 2023 00:00:00 GMT", rule-id="_public_1"
     status:
       code: 200
       message: OK
