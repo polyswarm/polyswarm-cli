@@ -149,6 +149,9 @@ class JSONOutput(base.BaseOutput):
     def sandbox_task(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 
+    def event(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
+
 
 class PrettyJSONOutput(JSONOutput):
     name = 'pretty-json'
