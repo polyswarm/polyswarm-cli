@@ -492,6 +492,19 @@ class TextOutput(base.BaseOutput):
 
         return self._output(output, write)
 
+    def event(self, event, write=True):
+        output = []
+        output.append(self._white('============================= Event ============================='))
+        output.append(self._white('event_timestamp: {}'.format(event.json['event_timestamp'])))
+        output.append(self._white('event_type: {}'.format(event.json['event_type'])))
+        output.append(self._white('source: {}'.format(event.json['source'])))
+        output.append(self._white('team_account_id: {}'.format(event.json['team_account_id'])))
+        output.append(self._white('user_account_id: {}'.format(event.json['user_account_id'])))
+        for key in event.json:
+            if key not in {'event_timestamp', 'event_type', 'source', 'team_account_id', 'user_account_id'}:
+                output.append(self._white('{}: {}'.format(key, event.json[key])))
+        return self._output(output, write)
+
     @is_grouped
     def _white(self, text):
         return click.style(text, fg='white')
