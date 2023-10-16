@@ -500,6 +500,9 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('source: {}'.format(event.json['source'])))
         output.append(self._white('team_account_id: {}'.format(event.json['team_account_id'])))
         output.append(self._white('user_account_id: {}'.format(event.json['user_account_id'])))
+        for key in event.json:
+            if key not in {'event_timestamp', 'event_type', 'source', 'team_account_id', 'user_account_id'}:
+                output.append(self._white('{}: {}'.format(key, event.json[key])))
         return self._output(output, write)
 
     @is_grouped
