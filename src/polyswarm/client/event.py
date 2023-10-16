@@ -3,14 +3,16 @@ import click
 
 
 @click.group(short_help='Interact with Yara Rules stored in Polyswarm.')
-def event():
+def activity():
     pass
 
 
-@event.command('list', short_help='List all events.')
+@activity.command('list', short_help='List all activity.')
+@click.option("--filter", "-f", multiple=True, type=click.STRING)
 @click.pass_context
-def list_rules(ctx):
+def list_rules(ctx, filter):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    for event in api.event_list():
+    filters = {v[0]: v[2] for v in iter(entry.partition('=') for entry in filter)}
+    for event in api.event_list(**filters):
         output.event(event)
