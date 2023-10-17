@@ -18,15 +18,17 @@ def sandbox():
 @click.argument('provider_slug', type=click.STRING)
 @click.argument('artifact-id', nargs=-1, callback=utils.validate_id)
 @click.option('--vm_slug', 'vm_slug', type=click.STRING)
+@click.option('--internet_disabled', 'internet_disabled', type=click.BOOL, is_flag=True, default=False)
 @click.pass_context
-def submit(ctx, provider_slug, artifact_id, vm_slug):
+def submit(ctx, provider_slug, artifact_id, vm_slug, internet_disabled):
     """
     Submit an artifact by artifact id to be sandboxed.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    for tasks in api.sandbox_instances(artifact_id, provider_slug=provider_slug, vm_slug=vm_slug):
+    for tasks in api.sandbox_instances(
+            artifact_id, provider_slug=provider_slug, vm_slug=vm_slug, network_enabled=not internet_disabled):
         output.sandbox_task(tasks)
 
 
@@ -34,15 +36,16 @@ def submit(ctx, provider_slug, artifact_id, vm_slug):
 @click.argument('sandbox', type=click.STRING)
 @click.argument('path', type=click.Path(exists=True), required=True)
 @click.option('--vm_slug', 'vm_slug', type=click.STRING)
+@click.option('--internet_disabled', 'internet_disabled', type=click.BOOL, is_flag=True, default=False)
 @click.pass_context
-def file(ctx, path, sandbox, vm_slug):
+def file(ctx, path, sandbox, vm_slug, internet_disabled):
     """
     Submit a local file to be sandboxed.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.sandbox_task(api.sandbox_file(path, sandbox, vm_slug))
+    output.sandbox_task(api.sandbox_file(path, sandbox, vm_slug, network_enabled=not internet_disabled))
 
 
 @sandbox.command('providers', short_help='List the names of available sandboxes.')
