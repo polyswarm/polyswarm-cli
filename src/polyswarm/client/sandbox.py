@@ -18,7 +18,7 @@ def sandbox():
 @click.argument('provider_slug', type=click.STRING)
 @click.argument('artifact-id', nargs=-1, callback=utils.validate_id)
 @click.option('--vm_slug', 'vm_slug', type=click.STRING)
-@click.option('--internet_disabled', 'internet_disabled', type=click.BOOL, is_flag=True, default=False)
+@click.option('--internet-disabled', 'internet_disabled', type=click.BOOL, is_flag=True, default=False)
 @click.pass_context
 def submit(ctx, provider_slug, artifact_id, vm_slug, internet_disabled):
     """
@@ -36,7 +36,7 @@ def submit(ctx, provider_slug, artifact_id, vm_slug, internet_disabled):
 @click.argument('sandbox', type=click.STRING)
 @click.argument('path', type=click.Path(exists=True), required=True)
 @click.option('--vm_slug', 'vm_slug', type=click.STRING)
-@click.option('--internet_disabled', 'internet_disabled', type=click.BOOL, is_flag=True, default=False)
+@click.option('--internet-disabled', 'internet_disabled', type=click.BOOL, is_flag=True, default=False)
 @click.pass_context
 def file(ctx, path, sandbox, vm_slug, internet_disabled):
     """
