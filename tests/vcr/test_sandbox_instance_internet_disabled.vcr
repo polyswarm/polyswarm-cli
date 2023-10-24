@@ -1,0 +1,43 @@
+interactions:
+- request:
+    body: '{"artifact_id": "73332334527130690", "provider_slug": "triage", "network_enabled":
+      0}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - '11111111111111111111111111111111'
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '85'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - polyswarm-api/3.4.3.dev0+20231017225624 (x86_64-Linux-CPython-3.9.10)
+    method: POST
+    uri: http://artifact-index-e2e:9696/v3/sandbox/sandboxtask
+  response:
+    body:
+      string: '{"result":{"account_number":null,"community":"gamma","config":{"network_enabled":false,"provider":{"id":"2","name":"triage","slug":"triage","tool":"triage_sandbox_v0"},"vm":{}},"created":"2023-10-23T16:11:10.518251","expiration":"2023-10-23T16:41:10.540773","id":"3753381379185287","instance_id":"73332334527130690","report":{},"sandbox":"triage","sandbox_artifacts":[],"sha256":"275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f","status":"PENDING","team_account_number":null,"upload_url":null},"status":"OK"}
+
+        '
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '526'
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 23 Oct 2023 16:11:10 GMT
+      Server:
+      - gunicorn
+      X-Billing-ID:
+      - '1'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -1,4 +1,4 @@
-rule eicar_av_test {
+rule eicar_av_test : eicar match {
     /*
        Per standard, match only if entire file is EICAR string plus optional trailing whitespace.
        The raw EICAR string to be matched is:
@@ -17,7 +17,7 @@ rule eicar_av_test {
         all of them
 }
 
-rule eicar_substring_test {
+rule eicar_substring_test : eicar substring {
     /*
        More generic - match just the embedded EICAR string (e.g. in packed executables, PDFs, etc)
     */
