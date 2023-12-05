@@ -1,3 +1,3 @@
-result: '[{"imphash": "", "ips": [], "ttps": [], "urls": []}]
+result: '{"imphash": "", "ips": [], "ttps": [], "urls": []}
 
   '
