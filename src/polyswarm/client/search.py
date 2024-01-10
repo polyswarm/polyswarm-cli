@@ -103,7 +103,7 @@ def iocs_by_hash(ctx, type, value, hide_known_good, beta):
         for result in api.search_by_ioc(**params):
             output.ioc(result)
     else:
-        output.ioc(api.iocs_by_hash(type, value, hide_known_good=hide_known_good, beta=beta))
+        output.ioc(api.iocs_by_hash(type, value, hide_known_good=hide_known_good, beta=beta), beta=beta)
 
 
 @search.command('known', short_help='Check if host is known.')

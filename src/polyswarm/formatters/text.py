@@ -295,13 +295,23 @@ class TextOutput(base.BaseOutput):
                 output.append(self._white('SHA256: {}'.format(data)))
         return self._output(output, write)
     
-    def ioc(self, ioc, write=True):
+    def ioc(self, ioc, write=True, beta=False):
         output = []
         output.append(self._white('============================= IOC ============================='))
         data = ioc.json
         if type(data) is dict:
             output.append(self._white('ImpHash: {}'.format(data['imphash'])))
-            output.append(self._white('IPs: {}'.format(", ".join(data['ips']))))
+            if beta:
+                output.append(self._white('IPs:'))
+                self._open_group()
+                for ip in data['ips']:
+                    output.append(
+                        self._white('{} confidence: {}'.format(ip['ip'], ip['confidence']))
+                    )
+                self._close_group()
+            else:
+                output.append(self._white('IPs: {}'.format(", ".join(data['ips']))))
+
             output.append(self._white('URLs: {}'.format(", ".join(data['urls']))))
             output.append(self._white('TTPs: {}'.format(", ".join(data['ttps']))))
         else:
