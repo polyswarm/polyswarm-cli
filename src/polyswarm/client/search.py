@@ -135,9 +135,9 @@ def add(ctx, type, host, source, good):
     output = ctx.obj['output']
 
     if good:
-        output.known_host(api.add_known_host(type, source, host))
+        output.known_host(api.add_known_good_host(type, source, host))
     else:
-        output.known_host(api.add_known_host(type, source, host, good=False))
+        output.known_host(api.add_known_bad_host(type, source, host))
 
 @known.command('update', short_help='Update a known host.')
 @click.option('-g', '--good', type=click.BOOL)

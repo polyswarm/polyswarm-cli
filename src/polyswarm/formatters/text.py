@@ -309,6 +309,7 @@ class TextOutput(base.BaseOutput):
                         self._white('{} confidence: {}'.format(ip['ip'], ip['confidence']))
                     )
                 self._close_group()
+                output.append(self._white('Domains: {}'.format(", ".join(data['domains']))))
             else:
                 output.append(self._white('IPs: {}'.format(", ".join(data['ips']))))
 

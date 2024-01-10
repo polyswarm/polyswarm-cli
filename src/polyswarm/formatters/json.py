@@ -134,7 +134,7 @@ class JSONOutput(base.BaseOutput):
     def iocs(self, results):
         click.echo(self._to_json([result.json for result in results]), file=self.out)
 
-    def ioc(self, result):
+    def ioc(self, result, beta=None):
         click.echo(self._to_json(result.json), file=self.out)
 
     def known_host(self, result):
