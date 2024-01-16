@@ -81,8 +81,9 @@ def metadata(ctx, query_string, include, exclude, ip, url, domain):
 @click.argument('type',  required=True,
                 type=click.Choice(['ip', 'domain', 'ttp', 'imphash', 'sha256', 'sha1', 'md5'], case_sensitive=False))
 @click.argument('value', required=True)
+@click.option('-b', '--beta', type=click.BOOL, is_flag=True)
 @click.pass_context
-def iocs_by_hash(ctx, type, value, hide_known_good):
+def iocs_by_hash(ctx, type, value, hide_known_good, beta):
     """
     Provide an artifact hash to get the associated IOCs.
     """
@@ -102,7 +103,7 @@ def iocs_by_hash(ctx, type, value, hide_known_good):
         for result in api.search_by_ioc(**params):
             output.ioc(result)
     else:
-        output.ioc(api.iocs_by_hash(type, value, hide_known_good=hide_known_good))
+        output.ioc(api.iocs_by_hash(type, value, hide_known_good=hide_known_good, beta=beta))
 
 
 @search.command('known', short_help='Check if host is known.')
@@ -124,15 +125,19 @@ def search_known(ctx, ip, domain):
 @click.argument('type', required=True)
 @click.argument('host', required=True)
 @click.argument('source', required=True)
+@click.option('-g', '--good', type=click.BOOL, default=True)
 @click.pass_context
-def add(ctx, type, host, source):
+def add(ctx, type, host, source, good):
     """
     Add a known good ip or domain.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.known_host(api.add_known_good_host(type, source, host))
+    if good:
+        output.known_host(api.add_known_good_host(type, source, host))
+    else:
+        output.known_host(api.add_known_bad_host(type, source, host))
 
 
 @known.command('update', short_help='Update a known host.')
