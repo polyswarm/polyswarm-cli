@@ -47,6 +47,21 @@ def file(ctx, path, sandbox, vm_slug, internet_disabled):
 
     output.sandbox_task(api.sandbox_file(path, sandbox, vm_slug, network_enabled=not internet_disabled))
 
+@sandbox.command('url', short_help='Submit a url to be sandboxed.')
+@click.argument('sandbox', type=click.STRING)
+@click.argument('url', type=click.STRING, required=True)
+@click.option('--vm_slug', 'vm_slug', type=click.STRING)
+@click.option('--browser', 'browser', type=click.STRING)
+@click.pass_context
+def file(ctx, url, sandbox, vm_slug, browser):
+    """
+    Submit a local file to be sandboxed.
+    """
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+
+    output.sandbox_task(api.sandbox_url(url, sandbox, vm_slug, browser=browser))
+
 
 @sandbox.command('providers', short_help='List the names of available sandboxes.')
 @click.pass_context
