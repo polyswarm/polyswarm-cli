@@ -53,9 +53,9 @@ def file(ctx, path, sandbox, vm_slug, internet_disabled):
 @click.option('--vm_slug', 'vm_slug', type=click.STRING)
 @click.option('--browser', 'browser', type=click.STRING)
 @click.pass_context
-def file(ctx, url, sandbox, vm_slug, browser):
+def url(ctx, url, sandbox, vm_slug, browser):
     """
-    Submit a local file to be sandboxed.
+    Submit a url to be sandboxed.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
