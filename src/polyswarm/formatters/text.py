@@ -43,6 +43,14 @@ class TextOutput(base.BaseOutput):
         else:
             return self._red
 
+    def _get_confidence_format(self, confidence):
+        if confidence < 10:
+            return self._white
+        elif confidence < 50:
+            return self._yellow
+        else:
+            return self._red
+
     def _output(self, output, write):
         if write:
             click.echo('\n'.join(output) + '\n', file=self.out)
@@ -300,10 +308,53 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('============================= IOC ============================='))
         data = ioc.json
         if type(data) is dict:
-            output.append(self._white('ImpHash: {}'.format(data['imphash'])))
-            output.append(self._white('IPs: {}'.format(", ".join(data['ips']))))
-            output.append(self._white('URLs: {}'.format(", ".join(data['urls']))))
-            output.append(self._white('TTPs: {}'.format(", ".join(data['ttps']))))
+            if 'iocs' in data:
+                # /v3/ioc-beta format
+                iocs = data['iocs']
+                polyscore = data['polyscore']
+                output.append(self._white('Malware Family: {}'.format(data['malware_family'])))
+                if polyscore:
+                    formatter = self._get_score_format(polyscore)
+                    output.append(formatter('PolyScore: {:.20f}'.format(polyscore)))
+                output.append(self._white('ImpHash: {}'.format(iocs['imphash'])))
+                output.append(self._white('TTPs: {}'.format(", ".join(iocs['ttps']))))
+                output.append(self._white('IPs:'))
+
+                self._open_group()
+                for ip in iocs['ips']:
+                    formatter = self._get_confidence_format(ip['confidence'])
+                    output.append(self._white('{}'.format(ip['ip'])))
+                    self._open_group()
+                    output.append(formatter('confidence: {}'.format(ip['confidence'])))
+                    output.append(self._white('ports: {}'.format(ip['ports'])))
+                    self._close_group()
+                self._close_group()
+
+                output.append(self._white('Domains:'))
+                self._open_group()
+                for domain in iocs['domains']:
+                    formatter = self._get_confidence_format(domain['confidence'])
+                    output.append(self._white('{}'.format(domain['domain'])))
+                    self._open_group()
+                    output.append(formatter('confidence: {}'.format(domain['confidence'])))
+                    self._close_group()
+                self._close_group()
+
+                output.append(self._white('URLs:'))
+                self._open_group()
+                for url in iocs['urls']:
+                    formatter = self._get_confidence_format(url['confidence'])
+                    output.append(self._white('{}'.format(url['url'])))
+                    self._open_group()
+                    output.append(formatter('confidence: {}'.format(url['confidence'])))
+                    self._close_group()
+                self._close_group()
+            else:
+                # /v3/ioc format
+                output.append(self._white('ImpHash: {}'.format(data['imphash'])))
+                output.append(self._white('TTPs: {}'.format(", ".join(data['ttps']))))
+                output.append(self._white('IPs: {}'.format(", ".join(data['ips']))))
+                output.append(self._white('URLs: {}'.format(", ".join(data['urls']))))
         else:
             output.append(self._white('SHA256: {}'.format(data)))
         return self._output(output, write)
