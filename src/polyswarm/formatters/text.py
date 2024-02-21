@@ -79,7 +79,8 @@ class TextOutput(base.BaseOutput):
     def artifact_instance(self, instance, write=True, timeout=False):
         output = []
         output.append(self._white('============================= Artifact Instance ============================='))
-        output.append(self._white('Scan permalink: {}'.format(instance.permalink)))
+        if not instance.failed:
+            output.append(self._white('Scan permalink: {}'.format(instance.permalink)))
 
         if instance.community == 'stream':
             output.append(self._white('Detections: This artifact has not been scanned. You can trigger a scan now.'))
