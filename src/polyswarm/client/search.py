@@ -78,11 +78,12 @@ def metadata(ctx, query_string, include, exclude, ip, url, domain):
 
 @search.command('ioc', short_help='Retrieve IOCs by artifact hash.')
 @click.option('-h', '--hide-known-good', type=click.BOOL, is_flag=True)
+@click.option('--triggered-by', type=click.STRING)
 @click.argument('type',  required=True,
                 type=click.Choice(['ip', 'domain', 'ttp', 'imphash', 'sha256', 'sha1', 'md5'], case_sensitive=False))
 @click.argument('value', required=True)
 @click.pass_context
-def iocs_by_hash(ctx, type, value, hide_known_good):
+def iocs_by_hash(ctx, type, value, hide_known_good, triggered_by):
     """
     Provide an artifact hash to get the associated IOCs.
     """
@@ -99,10 +100,10 @@ def iocs_by_hash(ctx, type, value, hide_known_good):
         params['imphash'] = value
 
     if params:
-        for result in api.search_by_ioc(**params):
+        for result in api.search_by_ioc(**params, triggered_by=triggered_by):
             output.ioc(result)
     else:
-        output.ioc(api.iocs_by_hash(type, value, hide_known_good=hide_known_good))
+        output.ioc(api.iocs_by_hash(type, value, hide_known_good=hide_known_good, triggered_by=triggered_by))
 
 
 @search.command('known', short_help='Check if host is known.')
