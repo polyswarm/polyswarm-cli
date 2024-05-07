@@ -358,7 +358,7 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('============================= Sandbox Task ============================='))
         output.append(self._blue('id: {}'.format(task.id)))
         output.append(self._blue('sha256: {}'.format(task.sha256)))
-        output.append(self._blue('sandbox: {}'.format(task.sandbox)))
+        output.append(self._blue('sandbox: {}'.format(task.report)))
         output.append(self._white('created: {}'.format(task.created)))
         output.append(self._white('community: {}'.format(task.community)))
         output.append(self._white('instance id: {}'.format(task.instance_id)))

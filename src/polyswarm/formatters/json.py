@@ -152,6 +152,9 @@ class JSONOutput(base.BaseOutput):
     def event(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 
+    def report_task(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
+
 
 class PrettyJSONOutput(JSONOutput):
     name = 'pretty-json'
