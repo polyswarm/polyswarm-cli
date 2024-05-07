@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 import logging
+import os
 
+import requests
 import click
 
 
@@ -12,6 +14,7 @@ logger = logging.getLogger(__name__)
 @click.group(short_help='Interact with the Polyswarm reporting system.')
 def report():
     pass
+
 
 @report.command('create', short_help='Create a report for an instance or sandbox id.')
 @click.argument('type', type=click.STRING)
@@ -41,10 +44,9 @@ def file(ctx, report_id):
 @click.option('-d', '--destination', type=click.Path(file_okay=False),
               help='Path where to store the downloaded files.', default=os.getcwd())
 @click.pass_context
-def file(ctx, report_id):
+def download(ctx, report_id, destination):
     api = ctx.obj['api']
     out = ctx.obj['output']
 
-    report = api.report_get(id=report_id)
-    out.local_artifact(result)
-
+    report_object = api.report_download(report_id, destination)
+    out.local_artifact(report_object)
