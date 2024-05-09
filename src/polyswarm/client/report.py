@@ -16,9 +16,9 @@ def report():
 
 
 @report.command('create', short_help='Create a report for an instance or sandbox id.')
-@click.argument('type', type=click.STRING)
+@click.argument('format', type=click.Choice(['html', 'pdf']))
+@click.argument('type', type=click.Choice(['scan', 'sandbox']))
 @click.argument('object-id', callback=utils.validate_id)
-@click.argument('format', type=click.STRING)
 @click.option('--template-id', type=click.STRING)
 @click.option('--includes',
               multiple=True,
@@ -27,7 +27,7 @@ def report():
               multiple=True,
               callback=lambda _,o,x: x[0].split(',') if len(x) == 1 else x)
 @click.pass_context
-def create(ctx, type, object_id, format, template_id, includes, excludes):
+def create(ctx, format, type, object_id, template_id, includes, excludes):
     api = ctx.obj['api']
     output = ctx.obj['output']
     object_d = {'instance_id': object_id} if type == 'scan' else {'sandbox_task_id': object_id}
