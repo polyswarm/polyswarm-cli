@@ -20,12 +20,27 @@ def report():
 @click.argument('object-id', callback=utils.validate_id)
 @click.argument('format', type=click.STRING)
 @click.option('--template-id', type=click.STRING)
+@click.option('--includes',
+              multiple=True,
+              callback=lambda _,o,x: x[0].split(',') if len(x) == 1 else x)
+@click.option('--excludes',
+              multiple=True,
+              callback=lambda _,o,x: x[0].split(',') if len(x) == 1 else x)
 @click.pass_context
-def create(ctx, type, object_id, format, template_id):
+def create(ctx, type, object_id, format, template_id, includes, excludes):
     api = ctx.obj['api']
     output = ctx.obj['output']
     object_d = {'instance_id': object_id} if type == 'scan' else {'sandbox_task_id': object_id}
-    output.report_task(api.report_create(type=type, format=format, template_id=template_id, **object_d))
+    template_metadata = {}
+    if includes:
+        template_metadata['includes'] = includes
+    if excludes:
+        template_metadata['excludes'] = excludes
+    output.report_task(api.report_create(type=type,
+                                         format=format,
+                                         template_id=template_id,
+                                         template_metadata=template_metadata or None,
+                                         **object_d))
 
 
 @report.command('get', short_help='Fetch a report task for an instance or sandbox id.')
