@@ -507,29 +507,27 @@ class TextOutput(base.BaseOutput):
         return self._output(output, write)
 
     def report_task(self, report, write=True):
-        json = report.json
-        template_metadata = json.get('template_metadata', {})
         output = []
         output.append(self._white('============================= Report ============================='))
-        output.append(self._blue('ID: {}'.format(json['id'])))
-        output.append(self._white('Community: {}'.format(json['community'])))
-        output.append(self._white('Created: {}'.format(json['created'])))
-        output.append(self._white('Type: {}'.format(json['type'])))
-        output.append(self._white('Format: {}'.format(json['format'])))
-        if 'template_id' in json:
-            output.append(self._white('Template ID: {}'.format(json['template_id'])))
-        if 'includes' in template_metadata:
-            output.append(self._white('Includes: {}'.format(", ".join(template_metadata['includes']))))
-        if 'excludes' in template_metadata:
-            output.append(self._white('Excludes: {}'.format(", ".join(template_metadata['excludes']))))
-        if 'instance_id' in json:
-            output.append(self._white('Scan ID: {}'.format(json['instance_id'])))
-        elif 'sandbox_task_id' in json:
-            output.append(self._white('Sandbox ID: {}'.format(json['sandbox_task_id'])))
-        state_writer = self._red if json['state'] == 'FAILED' else self._yellow
-        output.append(state_writer('State: {}'.format(json['state'])))
-        if json.get('url'):
-            output.append(self._white('URL: {}'.format(json['url'])))
+        output.append(self._blue('ID: {}'.format(report.id)))
+        output.append(self._white('Community: {}'.format(report.community)))
+        output.append(self._white('Created: {}'.format(report.created)))
+        output.append(self._white('Type: {}'.format(report.type)))
+        output.append(self._white('Format: {}'.format(report.format)))
+        if report.template_id:
+            output.append(self._white('Template ID: {}'.format(report.template_id)))
+        if 'includes' in report.template_metadata:
+            output.append(self._white('Includes: {}'.format(", ".join(report.template_metadata['includes']))))
+        if 'excludes' in report.template_metadata:
+            output.append(self._white('Excludes: {}'.format(", ".join(report.template_metadata['excludes']))))
+        if report.instance_id:
+            output.append(self._white('Scan ID: {}'.format(report.instance_id)))
+        elif report.sandbox_task_id:
+            output.append(self._white('Sandbox ID: {}'.format(report.sandbox_task_id)))
+        state_writer = self._red if report.state == 'FAILED' else self._yellow
+        output.append(state_writer('State: {}'.format(report.state)))
+        if report.url:
+            output.append(self._white('URL: {}'.format(report.url)))
         return self._output(output, write)
 
     @is_grouped
