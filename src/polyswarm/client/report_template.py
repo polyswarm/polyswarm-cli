@@ -55,7 +55,7 @@ def create(ctx, template_name, is_default, primary_color, footer_text, last_page
 def get(ctx, template_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    output.report_template(api.report_template_get(id=template_id))
+    output.report_template(api.report_template_get(template_id=template_id))
 
 
 @report_template.command('delete', short_help='Delete a report template.')
@@ -63,8 +63,17 @@ def get(ctx, template_id):
 @click.pass_context
 def delete(ctx, template_id):
     api = ctx.obj['api']
-    api.report_template_delete(id=template_id)
+    api.report_template_delete(template_id=template_id)
     click.echo('Template deleted')
+
+
+@report_template.command('default', short_help='Set as default a report template.')
+@click.argument('template-id', type=click.INT, required=True)
+@click.pass_context
+def set_default(ctx, template_id):
+    api = ctx.obj['api']
+    api.report_template_default(template_id=template_id)
+    click.echo('Template set as default')
 
 
 @report_template.command('list', short_help='List all templates.')
