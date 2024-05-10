@@ -77,7 +77,7 @@ def set_default(ctx, template_id):
 
 
 @report_template.command('list', short_help='List all templates.')
-@click.option('--is-default', type=click.BOOL)
+@click.option('--is-default', type=click.BOOL, is_flag=True, default=False)
 @click.pass_context
 def list_templates(ctx, is_default):
     api = ctx.obj['api']
