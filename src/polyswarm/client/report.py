@@ -15,15 +15,20 @@ def report():
     pass
 
 
+SECTIONS = "summary, detections, fileMetadata, network, droppedFiles, extractedConfig, analysis"
+
+
 @report.command('create', short_help='Create a report for an instance or sandbox id.')
 @click.argument('format', type=click.Choice(['html', 'pdf']))
 @click.argument('type', type=click.Choice(['scan', 'sandbox']))
 @click.argument('object-id', callback=utils.validate_id)
-@click.option('--template-id', type=click.STRING)
+@click.option('--template-id', metavar='ID', type=click.STRING)
 @click.option('--includes',
+              help=f'Comma-separated list of sections to include in the report. Can be one ore more of: {SECTIONS}',
               multiple=True,
               callback=lambda _,o,x: x[0].split(',') if len(x) == 1 else x)
 @click.option('--excludes',
+              help=f'Comma-separated list of sections to exclude in the report. Can be one ore more of: {SECTIONS}',
               multiple=True,
               callback=lambda _,o,x: x[0].split(',') if len(x) == 1 else x)
 @click.pass_context

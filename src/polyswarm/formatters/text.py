@@ -530,6 +530,26 @@ class TextOutput(base.BaseOutput):
             output.append(self._white('URL: {}'.format(report.url)))
         return self._output(output, write)
 
+    def report_template(self, template, write=True):
+        output = []
+        output.append(self._white('============================= Report Template ============================='))
+        output.append(self._blue('ID: {}'.format(template.id)))
+        output.append(self._white('Template Name: {}'.format(template.template_name)))
+        output.append(self._white('Created: {}'.format(template.created)))
+        if template.primary_color:
+            output.append(self._white('Primary Color: {}'.format(template.primary_color)))
+        if template.is_default:
+            output.append('Is Default: {}'.format(template.is_default))
+        if template.includes:
+            output.append(self._white('Includes: {}'.format(", ".join(template.includes))))
+        if template.excludes:
+            output.append(self._white('Excludes: {}'.format(", ".join(template.excludes))))
+        if template.footer_text:
+            output.append(self._white('Footer Text: {}'.format(template.footer_text)))
+        if template.last_page_text:
+            output.append(self._white('Last Page Text: {}'.format(template.last_page_text)))
+        return self._output(output, write)
+
     @is_grouped
     def _white(self, text):
         return click.style(text, fg='white')
