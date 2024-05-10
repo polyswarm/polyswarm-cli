@@ -107,16 +107,17 @@ class ExceptionHandlingGroup(click.Group):
 
 
 @click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS)
-@click.option('-a', '--api-key', help='Your API key for polyswarm.network (required). $POLYSWARM_API_KEY',
-              default='', callback=validate_key, envvar='POLYSWARM_API_KEY')
+@click.option('-a', '--api-key', help='Your API key for polyswarm.network (required).',
+              default='', callback=validate_key, envvar='POLYSWARM_API_KEY', show_envvar=True)
 @click.option('-u', '--api-uri', default='https://api.polyswarm.network/v3',
-              envvar='POLYSWARM_API_URI', help='The API endpoint (ADVANCED). $POLYSWARM_API_URI')
+              envvar='POLYSWARM_API_URI', help='The API endpoint (ADVANCED).', show_envvar=True)
 @click.option('-o', '--output-file', type=click.File('w', encoding='utf8'), help='Path to output file.')
 @click.option('--output-format', '--fmt', default='text', type=click.Choice(formatters.keys()),
               help='Output format. Human-readable text or JSON.')
 @click.option('--color/--no-color', default=True, help='Use colored output in text mode.')
 @click.option('-v', '--verbose', default=0, count=True)
-@click.option('-c', '--community', default='default', envvar='POLYSWARM_COMMUNITY', help='Community to use. $POLYSWARM_COMMUNITY')
+@click.option('-c', '--community', default='default', envvar='POLYSWARM_COMMUNITY',
+              help='Community to use.', show_envvar=True)
 @click.option('--parallel', default=8, help='Number of threads to be used in parallel http requests.')
 @click.option('--verify/--no-verify', default=True, help='Verify TLS connections.')
 @click.version_option(polyswarm.__version__, '--version', prog_name='polyswarm-cli')
