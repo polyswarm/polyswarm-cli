@@ -548,6 +548,12 @@ class TextOutput(base.BaseOutput):
             output.append(self._white('Footer Text: {}'.format(template.footer_text)))
         if template.last_page_text:
             output.append(self._white('Last Page Text: {}'.format(template.last_page_text)))
+        if template.logo_content_length:
+            output.append(self._white('Logo Content Length: {}'.format(template.logo_content_length)))
+            output.append(self._white('Logo Content Type: {}'.format(template.logo_content_type)))
+            output.append(self._white('Logo URL: {}'.format(template.logo_url)))
+            output.append(self._white('Logo Height: {}'.format(template.logo_height)))
+            output.append(self._white('Logo Width: {}'.format(template.logo_width)))
         return self._output(output, write)
 
     @is_grouped

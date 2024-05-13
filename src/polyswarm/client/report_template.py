@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import logging
+import os
 
 import click
 
@@ -83,4 +84,42 @@ def list_templates(ctx, is_default):
     api = ctx.obj['api']
     output = ctx.obj['output']
     for template in api.report_template_list(is_default=is_default):
+        output.report_template(template)
+
+
+@report_template.command('logo-download', short_help='Download the template logo.')
+@click.argument('template-id', type=click.INT, required=True)
+@click.option('-d', '--destination', type=click.Path(file_okay=False),
+              help='Path where to store the downloaded file.', default=os.getcwd())
+@click.pass_context
+def logo_download(ctx, template_id, destination):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    report_object = api.report_template_logo_download(template_id, destination)
+    output.local_artifact(report_object)
+
+
+@report_template.command('logo-delete', short_help='Delete the template logo.')
+@click.argument('template-id', type=click.INT, required=True)
+@click.pass_context
+def logo_delete(ctx, template_id):
+    api = ctx.obj['api']
+    api.report_template_logo_delete(template_id=template_id)
+    click.echo('Template logo deleted')
+
+
+@report_template.command('logo-upload', short_help='Upload template logo.')
+@click.argument('template-id', type=click.INT, required=True)
+@click.argument('path', type=click.Path(exists=True), required=True)
+@click.pass_context
+def logo_upload(ctx, template_id, path):
+    file_extension = path.split('.')[-1]
+    if file_extension not in ('png', 'jpg', 'jpeg'):
+        raise click.BadArgumentUsage('Only PNG and JPEG images are supported.')
+
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    content_type = 'image/png' if file_extension == 'png' else 'image/jpeg'
+    with open(path, 'rb') as logo_file:
+        template = api.report_template_logo_upload(template_id, logo_file, content_type)
         output.report_template(template)
