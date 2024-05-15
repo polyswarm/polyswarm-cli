@@ -39,7 +39,7 @@ dev-pypi:
 
 test-run310:
   tags:
-    - kube-small-new
+    - kube-new
   image: python:3.10
   stage: test
   before_script:

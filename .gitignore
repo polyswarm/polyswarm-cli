@@ -12,6 +12,7 @@ tests/.hypothesis/
 .eggs
 build
 dist
+.env
 
 # Ignored Read the Docs assets
 _build

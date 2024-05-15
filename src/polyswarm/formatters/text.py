@@ -506,6 +506,56 @@ class TextOutput(base.BaseOutput):
                 output.append(self._white('{}: {}'.format(key, event.json[key])))
         return self._output(output, write)
 
+    def report_task(self, report, write=True):
+        output = []
+        output.append(self._white('============================= Report ============================='))
+        output.append(self._blue('ID: {}'.format(report.id)))
+        output.append(self._white('Community: {}'.format(report.community)))
+        output.append(self._white('Created: {}'.format(report.created)))
+        output.append(self._white('Type: {}'.format(report.type)))
+        output.append(self._white('Format: {}'.format(report.format)))
+        if report.template_id:
+            output.append(self._white('Template ID: {}'.format(report.template_id)))
+        if 'includes' in report.template_metadata:
+            output.append(self._white('Includes: {}'.format(", ".join(report.template_metadata['includes']))))
+        if 'excludes' in report.template_metadata:
+            output.append(self._white('Excludes: {}'.format(", ".join(report.template_metadata['excludes']))))
+        if report.instance_id:
+            output.append(self._white('Scan ID: {}'.format(report.instance_id)))
+        elif report.sandbox_task_id:
+            output.append(self._white('Sandbox ID: {}'.format(report.sandbox_task_id)))
+        state_writer = self._red if report.state == 'FAILED' else self._yellow
+        output.append(state_writer('State: {}'.format(report.state)))
+        if report.url:
+            output.append(self._white('URL: {}'.format(report.url)))
+        return self._output(output, write)
+
+    def report_template(self, template, write=True):
+        output = []
+        output.append(self._white('============================= Report Template ============================='))
+        output.append(self._blue('ID: {}'.format(template.id)))
+        output.append(self._white('Template Name: {}'.format(template.template_name)))
+        output.append(self._white('Created: {}'.format(template.created)))
+        if template.primary_color:
+            output.append(self._white('Primary Color: {}'.format(template.primary_color)))
+        if template.is_default:
+            output.append('Is Default: {}'.format(template.is_default))
+        if template.includes:
+            output.append(self._white('Includes: {}'.format(", ".join(template.includes))))
+        if template.excludes:
+            output.append(self._white('Excludes: {}'.format(", ".join(template.excludes))))
+        if template.footer_text:
+            output.append(self._white('Footer Text: {}'.format(template.footer_text)))
+        if template.last_page_text:
+            output.append(self._white('Last Page Text: {}'.format(template.last_page_text)))
+        if template.logo_content_length:
+            output.append(self._white('Logo Content Length: {}'.format(template.logo_content_length)))
+            output.append(self._white('Logo Content Type: {}'.format(template.logo_content_type)))
+            output.append(self._white('Logo URL: {}'.format(template.logo_url)))
+            output.append(self._white('Logo Height: {}'.format(template.logo_height)))
+            output.append(self._white('Logo Width: {}'.format(template.logo_width)))
+        return self._output(output, write)
+
     @is_grouped
     def _white(self, text):
         return click.style(text, fg='white')
