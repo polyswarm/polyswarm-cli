@@ -54,6 +54,7 @@ def create(ctx, template_name, is_default, primary_color,
 @report_template.command('update', short_help='Edit a report template.')
 @click.argument('template-id', callback=utils.validate_id)
 @click.option('--template-name', type=click.STRING)
+@click.option('--is-default', type=click.BOOL, is_flag=True, help='Make the report template is default or not.')
 @click.option('--primary-color', type=click.STRING)
 @click.option('--footer-text', type=click.STRING)
 @click.option('--last-page-text', type=click.STRING)
@@ -67,7 +68,7 @@ def create(ctx, template_name, is_default, primary_color,
               multiple=True,
               callback=lambda _,o,x: x[0].split(',') if len(x) == 1 else x)
 @click.pass_context
-def update(ctx, template_id, template_name, primary_color,
+def update(ctx, template_id, template_name, is_default, primary_color,
            footer_text, last_page_text, last_page_text_file, includes, excludes):
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -79,6 +80,7 @@ def update(ctx, template_id, template_name, primary_color,
             last_page_text = f.read()
     output.report_template(api.report_template_update(template_id=template_id,
                                                       template_name=template_name,
+                                                      is_default=is_default,
                                                       primary_color=primary_color,
                                                       footer_text=footer_text,
                                                       last_page_text=last_page_text,
@@ -102,15 +104,6 @@ def delete(ctx, template_id):
     api = ctx.obj['api']
     api.report_template_delete(template_id=template_id)
     click.echo('Template deleted')
-
-
-@report_template.command('default', short_help='Set as default a report template.')
-@click.argument('template-id', type=click.INT, required=True)
-@click.pass_context
-def set_default(ctx, template_id):
-    api = ctx.obj['api']
-    api.report_template_default(template_id=template_id)
-    click.echo('Template set as default')
 
 
 @report_template.command('list', short_help='List all templates.')
