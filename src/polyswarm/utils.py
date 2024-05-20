@@ -86,7 +86,7 @@ def collect_files(paths, recursive=False, log_errors=False):
         elif log_errors:
             logger.error('Path %s is neither a file nor a directory.', path)
         else:
-            raise api_exceptions.InvalidValueException('Path {} is neither a file nor a directory.'.format(path))
+            raise api_exceptions.InvalidValueException(f'Path {path} is neither a file nor a directory.')
     return all_files
 
 

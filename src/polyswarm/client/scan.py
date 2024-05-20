@@ -17,7 +17,7 @@ def scan():
 @scan.command('file', short_help='Scan files/directories.')
 @click.option('-r', '--recursive', is_flag=True, default=False, help='Scan directories recursively.')
 @click.option('-t', '--timeout', type=click.INT, default=settings.DEFAULT_SCAN_TIMEOUT,
-              help='How long to wait for results (default: {}).'.format(settings.DEFAULT_SCAN_TIMEOUT))
+              help=f'How long to wait for results (default: {settings.DEFAULT_SCAN_TIMEOUT}).')
 @click.option('-n', '--nowait', is_flag=True,
               help='Does not wait for the scan window to close, just create it and return right away.')
 @click.option('-s', '--scan-config', type=click.STRING, default=None,
@@ -38,7 +38,7 @@ def file(ctx, recursive, timeout, nowait, path, scan_config):
 @scan.command('url', short_help='Scan url.')
 @click.option('-r', '--url-file', help='File of URLs, one per line.', type=click.File('r'))
 @click.option('-t', '--timeout', type=click.INT, default=settings.DEFAULT_SCAN_TIMEOUT,
-              help='How long to wait for results (default: {}).'.format(settings.DEFAULT_SCAN_TIMEOUT))
+              help=f'How long to wait for results (default: {settings.DEFAULT_SCAN_TIMEOUT}).')
 @click.option('-n', '--nowait', is_flag=True,
               help='Does not wait for the scan window to close, just create it and return right away.')
 @click.option('-s', '--scan-config', type=click.STRING, default='more-time',
@@ -63,7 +63,7 @@ def url_(ctx, url_file, timeout, nowait, url, scan_config):
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
 @click.option('--hash-type', help='Hash type to search [default:autodetect, sha256|sha1|md5].', default=None)
 @click.option('-t', '--timeout', type=click.INT, default=settings.DEFAULT_SCAN_TIMEOUT,
-              help='How long to wait for results (default: {}).'.format(settings.DEFAULT_SCAN_TIMEOUT))
+              help=f'How long to wait for results (default: {settings.DEFAULT_SCAN_TIMEOUT}).')
 @click.option('-n', '--nowait', is_flag=True,
               help='Does not wait for the scan window to close, just create it and return right away.')
 @click.option('-s', '--scan-config', type=click.STRING, default=None,
@@ -84,7 +84,7 @@ def rescan(ctx, hash_file, hash_type, timeout, nowait, hash_value, scan_config):
 
 @click.command('rescan-id', short_help='Rescan by scan id.')
 @click.option('-t', '--timeout', type=click.INT, default=settings.DEFAULT_SCAN_TIMEOUT,
-              help='How long to wait for results (default: {}).'.format(settings.DEFAULT_SCAN_TIMEOUT))
+              help=f'How long to wait for results (default: {settings.DEFAULT_SCAN_TIMEOUT}).')
 @click.option('-n', '--nowait', is_flag=True,
               help='Does not wait for the scan window to close, just create it and return right away.')
 @click.option('-s', '--scan-config', type=click.STRING, default=None,
@@ -128,7 +128,7 @@ def lookup(ctx, scan_id, scan_id_file):
 
 @click.command('wait', short_help='Wait for a  scan to finish.')
 @click.option('-t', '--timeout', type=click.INT, default=settings.DEFAULT_SCAN_TIMEOUT,
-              help='How long to wait for results (default: {}).'.format(settings.DEFAULT_SCAN_TIMEOUT))
+              help=f'How long to wait for results (default: {settings.DEFAULT_SCAN_TIMEOUT}).')
 @click.argument('scan_id', nargs=-1, callback=utils.validate_id, required=True)
 @click.pass_context
 def wait(ctx, scan_id, timeout):

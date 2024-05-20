@@ -38,7 +38,7 @@ class BaseTestCase(TestCase):
 
     def click_vcr(self, result, name='result', replace=None):
         test_name = self.id().rpartition('.')[2]
-        file_name = '{}.{}'.format(test_name, self.click_vcr_suffix)
+        file_name = f'{test_name}.{self.click_vcr_suffix}'
         file_path = os.path.join(os.getcwd(), self.click_vcr_folder, file_name)
         try:
             with open(file_path, 'r') as f:
