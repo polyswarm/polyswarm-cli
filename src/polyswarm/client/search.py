@@ -1,12 +1,6 @@
-from __future__ import absolute_import
 import logging
 
 from polyswarm.client import utils
-
-try:
-    from json import JSONDecodeError
-except ImportError:
-    JSONDecodeError = ValueError
 
 import click
 
@@ -17,6 +11,7 @@ logger = logging.getLogger(__name__)
 @click.group(short_help='Interact search api.')
 def search():
     pass
+
 
 @click.group(short_help='Interact with known ioc api.')
 def known():

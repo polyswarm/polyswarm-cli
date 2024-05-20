@@ -1,12 +1,7 @@
-from __future__ import absolute_import
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
-# TODO: Change this to import itertools once we drop support for python 2.7
-try:
-    from itertools import zip_longest
-except ImportError:
-    from itertools import izip_longest as zip_longest
+from itertools import zip_longest
 
 from polyswarm_api import exceptions as api_exceptions
 

@@ -1,9 +1,5 @@
-from __future__ import absolute_import
 import logging
-try:
-    from json import JSONDecodeError
-except ImportError:
-    JSONDecodeError = ValueError
+from json import JSONDecodeError
 
 import click
 import click_log
