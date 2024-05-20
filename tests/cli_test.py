@@ -1,10 +1,8 @@
-import shutil
 import tempfile
 import os
 import json
 import pytest
 import yaml
-from contextlib import contextmanager
 from unittest import TestCase
 import traceback
 
@@ -21,7 +19,7 @@ vcr = vcr_.VCR(cassette_library_dir='tests/vcr',
 
 class BaseTestCase(TestCase):
     def __init__(self, *args, **kwargs):
-        super(BaseTestCase, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.cli = CliRunner()
         self.click_vcr_folder = 'tests/vcr'
         self.click_vcr_suffix = 'click'
@@ -118,7 +116,6 @@ class HuntResultsTest(BaseTestCase):
         result = self._run_cli([
             '--output-format', 'text', 'historical', 'results', '76083665328102613'])
         self._assert_text_result(result, self.click_vcr(result))
-
 
     @vcr.use_cassette()
     def test_historical_hunt_results_private_json(self):

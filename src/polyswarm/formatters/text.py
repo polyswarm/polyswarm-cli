@@ -29,7 +29,7 @@ class TextOutput(base.BaseOutput):
     name = 'text'
 
     def __init__(self, color=True, output=sys.stdout, **kwargs):
-        super(TextOutput, self).__init__(output)
+        super().__init__(output)
         self.color = color
         self._depth = 0
         self.color = color

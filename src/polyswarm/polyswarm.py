@@ -34,7 +34,7 @@ class Polyswarm(PolyswarmAPI):
     def __init__(self, *args, **kwargs):
         # signature should be __init__(self, *args, parallel=None, **kwargs), but python 2 does not like it
         parallel = kwargs.pop('parallel', None)
-        super(Polyswarm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.parallel = parallel
 
     def scan_file(self, path, recursive=False, timeout=settings.DEFAULT_SCAN_TIMEOUT, nowait=False, scan_config=None):

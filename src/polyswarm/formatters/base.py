@@ -1,4 +1,4 @@
-class BaseOutput(object):
+class BaseOutput:
     name = 'base'
 
     def __init__(self, output, **kwargs):

@@ -73,7 +73,7 @@ def setup_logging(verbosity):
 class ExceptionHandlingGroup(click.Group):
     def invoke(self, ctx):
         try:
-            return super(ExceptionHandlingGroup, self).invoke(ctx)
+            return super().invoke(ctx)
         except (
                 exceptions.NoResultsException,
                 exceptions.NotFoundException,
