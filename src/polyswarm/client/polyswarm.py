@@ -1,9 +1,5 @@
-from __future__ import absolute_import
 import logging
-try:
-    from json import JSONDecodeError
-except ImportError:
-    JSONDecodeError = ValueError
+from json import JSONDecodeError
 
 import click
 import click_log
@@ -51,7 +47,7 @@ def setup_logging(verbosity):
                 level = record.levelname.lower()
                 msg = record.getMessage()
                 if level in self.colors:
-                    prefix = click.style('{} [{}]: '.format(level, record.name),
+                    prefix = click.style(f'{level} [{record.name}]: ',
                                          **self.colors[level])
                     msg = '\n'.join(prefix + x for x in msg.splitlines())
                 return msg
@@ -77,7 +73,7 @@ def setup_logging(verbosity):
 class ExceptionHandlingGroup(click.Group):
     def invoke(self, ctx):
         try:
-            return super(ExceptionHandlingGroup, self).invoke(ctx)
+            return super().invoke(ctx)
         except (
                 exceptions.NoResultsException,
                 exceptions.NotFoundException,

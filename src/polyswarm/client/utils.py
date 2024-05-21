@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 import logging
 import functools
 
@@ -32,7 +31,7 @@ def parse_hashes(hashes, hash_file=None):
 def validate_id(ctx, param, value):
     for id_ in value:
         if not is_valid_id(id_):
-            raise click.BadParameter('Id {} not valid, please check and try again.'.format(id_))
+            raise click.BadParameter(f'Id {id_} not valid, please check and try again.')
     return value
 
 
@@ -45,7 +44,7 @@ def validate_hash(ctx, param, h):
     elif any(validator(h) for validator in HASH_VALIDATORS.values()):
         return h
 
-    raise click.BadParameter('Hash {} not valid, must be sha256|md5|sha1 in hexadecimal format'.format(h))
+    raise click.BadParameter(f'Hash {h} not valid, must be sha256|md5|sha1 in hexadecimal format')
 
 
 def validate_hashes(ctx, param, value):
@@ -56,7 +55,8 @@ def validate_hashes(ctx, param, value):
 
 def validate_key(ctx, param, value):
     if not resources.core.is_hex(value) or len(value) != 32:
-        raise click.BadParameter('Invalid API key. Make sure you specified your key via -a or environment variable and try again.')
+        raise click.BadParameter(
+            'Invalid API key. Make sure you specified your key via -a or environment variable and try again.')
     return value
 
 
@@ -76,7 +76,7 @@ def any_provided(*required):
                 if len(required) > 1:
                     human_names = [c.human_readable_name for c in required_commands.values()]
                     names = "|".join(human_names)
-                    raise click.exceptions.BadArgumentUsage('At least one of [{}] should be provided.'.format(names))
+                    raise click.exceptions.BadArgumentUsage(f'At least one of [{names}] should be provided.')
                 else:
                     raise click.exceptions.MissingParameter(ctx=ctx, param=required_commands[required[0]])
             return f(ctx, **kwargs)

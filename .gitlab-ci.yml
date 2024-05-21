@@ -37,10 +37,36 @@ dev-pypi:
 # Test Stage
 ###############################################################
 
+test-run37:
+  tags:
+    - kube-new
+  image: python:3.7
+  stage: test
+  before_script:
+    - pip install --upgrade pip
+  script:
+    - pip install $POLYSWARM_API_ARCHIVE/$CI_COMMIT_BRANCH.zip || pip install $POLYSWARM_API_ARCHIVE/develop.zip
+    - pip install -r requirements.txt
+    - pip install .
+    - pytest -s -v
+
 test-run310:
   tags:
     - kube-new
   image: python:3.10
+  stage: test
+  before_script:
+    - pip install --upgrade pip
+  script:
+    - pip install $POLYSWARM_API_ARCHIVE/$CI_COMMIT_BRANCH.zip || pip install $POLYSWARM_API_ARCHIVE/develop.zip
+    - pip install -r requirements.txt
+    - pip install .
+    - pytest -s -v
+
+test-run312:
+  tags:
+    - kube-new
+  image: python:3.12
   stage: test
   before_script:
     - pip install --upgrade pip

@@ -1,4 +1,3 @@
-from __future__ import absolute_import, unicode_literals
 import json
 
 import click
@@ -163,7 +162,7 @@ class PrettyJSONOutput(JSONOutput):
     name = 'pretty-json'
 
     def __init__(self, output, color, **kwargs):
-        super(PrettyJSONOutput, self).__init__(output, **kwargs)
+        super().__init__(output, **kwargs)
         self.color = color
 
     def _to_json(self, json_data):
