@@ -509,8 +509,6 @@ class TextOutput(base.BaseOutput):
             output.append(self._white(f'Template ID: {report.template_id}'))
         if 'includes' in report.template_metadata:
             output.append(self._white(f'Includes: {", ".join(report.template_metadata["includes"])}'))
-        if 'excludes' in report.template_metadata:
-            output.append(self._white(f'Excludes: {", ".join(report.template_metadata["excludes"])}'))
         if report.instance_id:
             output.append(self._white(f'Scan ID: {report.instance_id}'))
         elif report.sandbox_task_id:
@@ -533,8 +531,6 @@ class TextOutput(base.BaseOutput):
             output.append(f'Is Default: {template.is_default}')
         if template.includes:
             output.append(self._white(f'Includes: {", ".join(template.includes)}'))
-        if template.excludes:
-            output.append(self._white(f'Excludes: {", ".join(template.excludes)}'))
         if template.footer_text:
             output.append(self._white(f'Footer Text: {template.footer_text}'))
         if template.last_page_text:

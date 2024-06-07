@@ -26,13 +26,9 @@ def report_template():
               help=f'Comma-separated list of sections to include in the report. Can be one ore more of: {SECTIONS}',
               multiple=True,
               callback=lambda _,o,x: x[0].split(',') if len(x) == 1 else x)
-@click.option('--excludes',
-              help=f'Comma-separated list of sections to exclude in the report. Can be one ore more of: {SECTIONS}',
-              multiple=True,
-              callback=lambda _,o,x: x[0].split(',') if len(x) == 1 else x)
 @click.pass_context
 def create(ctx, template_name, is_default, primary_color,
-           footer_text, last_page_text, last_page_text_file, includes, excludes):
+           footer_text, last_page_text, last_page_text_file, includes):
     api = ctx.obj['api']
     output = ctx.obj['output']
     if last_page_text_file:
@@ -46,8 +42,7 @@ def create(ctx, template_name, is_default, primary_color,
                                                       primary_color=primary_color,
                                                       footer_text=footer_text,
                                                       last_page_text=last_page_text,
-                                                      includes=includes if includes else None,
-                                                      excludes=excludes if excludes else None))
+                                                      includes=includes if includes else None))
 
 
 @report_template.command('update', short_help='Edit a report template.')
@@ -62,13 +57,9 @@ def create(ctx, template_name, is_default, primary_color,
               help=f'Comma-separated list of sections to include in the report. Can be one ore more of: {SECTIONS}',
               multiple=True,
               callback=lambda _,o,x: x[0].split(',') if len(x) == 1 else x)
-@click.option('--excludes',
-              help=f'Comma-separated list of sections to exclude in the report. Can be one ore more of: {SECTIONS}',
-              multiple=True,
-              callback=lambda _,o,x: x[0].split(',') if len(x) == 1 else x)
 @click.pass_context
 def update(ctx, template_id, template_name, is_default, primary_color,
-           footer_text, last_page_text, last_page_text_file, includes, excludes):
+           footer_text, last_page_text, last_page_text_file, includes):
     api = ctx.obj['api']
     output = ctx.obj['output']
     if last_page_text_file:
@@ -83,8 +74,7 @@ def update(ctx, template_id, template_name, is_default, primary_color,
                                                       primary_color=primary_color,
                                                       footer_text=footer_text,
                                                       last_page_text=last_page_text,
-                                                      includes=includes if includes else None,
-                                                      excludes=excludes if excludes else None))
+                                                      includes=includes if includes else None))
 
 
 @report_template.command('get', short_help='Fetch a report template.')
