@@ -26,20 +26,14 @@ SECTIONS = "summary, detections, fileMetadata, network, droppedFiles, extractedC
               help=f'Comma-separated list of sections to include in the report. Can be one ore more of: {SECTIONS}',
               multiple=True,
               callback=lambda _,o,x: x[0].split(',') if len(x) == 1 else x)
-@click.option('--excludes',
-              help=f'Comma-separated list of sections to exclude in the report. Can be one ore more of: {SECTIONS}',
-              multiple=True,
-              callback=lambda _,o,x: x[0].split(',') if len(x) == 1 else x)
 @click.pass_context
-def create(ctx, format, type, object_id, template_id, includes, excludes):
+def create(ctx, format, type, object_id, template_id, includes):
     api = ctx.obj['api']
     output = ctx.obj['output']
     object_d = {'instance_id': object_id} if type == 'scan' else {'sandbox_task_id': object_id}
     template_metadata = {}
     if includes:
         template_metadata['includes'] = includes
-    if excludes:
-        template_metadata['excludes'] = excludes
     output.report_task(api.report_create(type=type,
                                          format=format,
                                          template_id=template_id,
