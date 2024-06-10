@@ -1,10 +1,8 @@
-import shutil
 import tempfile
 import os
 import json
 import pytest
 import yaml
-from contextlib import contextmanager
 from unittest import TestCase
 import traceback
 
@@ -19,19 +17,9 @@ vcr = vcr_.VCR(cassette_library_dir='tests/vcr',
                path_transformer=vcr_.VCR.ensure_suffix('.vcr'))
 
 
-@contextmanager
-def TemporaryDirectory():
-    """The day we drop python 2.7 support we can use python 3 version of this"""
-    name = tempfile.mkdtemp()
-    try:
-        yield name
-    finally:
-        shutil.rmtree(name)
-
-
 class BaseTestCase(TestCase):
     def __init__(self, *args, **kwargs):
-        super(BaseTestCase, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.cli = CliRunner()
         self.click_vcr_folder = 'tests/vcr'
         self.click_vcr_suffix = 'click'
@@ -48,7 +36,7 @@ class BaseTestCase(TestCase):
 
     def click_vcr(self, result, name='result', replace=None):
         test_name = self.id().rpartition('.')[2]
-        file_name = '{}.{}'.format(test_name, self.click_vcr_suffix)
+        file_name = f'{test_name}.{self.click_vcr_suffix}'
         file_path = os.path.join(os.getcwd(), self.click_vcr_folder, file_name)
         try:
             with open(file_path, 'r') as f:
@@ -95,7 +83,7 @@ class BaseTestCase(TestCase):
 class DownloadTest(BaseTestCase):
     @vcr.use_cassette()
     def test_download(self):
-        with TemporaryDirectory() as path:
+        with tempfile.TemporaryDirectory() as path:
             result = self._run_cli([
                 '-u', self.api_url, 'download', '-d', path, self.eicar_hash])
             expected_result = self.click_vcr(result, replace=((path, 'temporary_folder'),))
@@ -103,14 +91,14 @@ class DownloadTest(BaseTestCase):
 
     @vcr.use_cassette()
     def test_download_stream(self):
-        with TemporaryDirectory() as path:
+        with tempfile.TemporaryDirectory() as path:
             result = self._run_cli(['--parallel', '1', '-u', self.api_url, 'stream', '--since', '2880', path])
             expected_result = self.click_vcr(result, replace=((path, 'temporary_folder'),))
             self._assert_text_result(result, expected_result, replace=((path, 'temporary_folder'),))
 
     @vcr.use_cassette()
     def test_download_cat(self):
-        with TemporaryDirectory() as path:
+        with tempfile.TemporaryDirectory() as path:
             result = self._run_cli(['-u', self.api_url, 'cat', self.eicar_hash])
             expected_result = self.click_vcr(result, replace=((path, 'temporary_folder'),))
             self._assert_text_result(result, expected_result, replace=((path, 'temporary_folder'),))
@@ -128,7 +116,6 @@ class HuntResultsTest(BaseTestCase):
         result = self._run_cli([
             '--output-format', 'text', 'historical', 'results', '76083665328102613'])
         self._assert_text_result(result, self.click_vcr(result))
-
 
     @vcr.use_cassette()
     def test_historical_hunt_results_private_json(self):

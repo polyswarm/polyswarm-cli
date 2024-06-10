@@ -1,13 +1,7 @@
-from __future__ import absolute_import
 import logging
 import os
 
 from polyswarm.client import utils
-
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
 
 import click
 

@@ -1,7 +1,4 @@
-from __future__ import absolute_import, unicode_literals
-
-
-class BaseOutput(object):
+class BaseOutput:
     name = 'base'
 
     def __init__(self, output, **kwargs):

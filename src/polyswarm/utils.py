@@ -1,12 +1,7 @@
-from __future__ import absolute_import
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
-# TODO: Change this to import itertools once we drop support for python 2.7
-try:
-    from itertools import zip_longest
-except ImportError:
-    from itertools import izip_longest as zip_longest
+from itertools import zip_longest
 
 from polyswarm_api import exceptions as api_exceptions
 
@@ -91,7 +86,7 @@ def collect_files(paths, recursive=False, log_errors=False):
         elif log_errors:
             logger.error('Path %s is neither a file nor a directory.', path)
         else:
-            raise api_exceptions.InvalidValueException('Path {} is neither a file nor a directory.'.format(path))
+            raise api_exceptions.InvalidValueException(f'Path {path} is neither a file nor a directory.')
     return all_files
 
 

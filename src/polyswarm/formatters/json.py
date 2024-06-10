@@ -1,4 +1,3 @@
-from __future__ import absolute_import, unicode_literals
 import json
 
 import click
@@ -152,12 +151,18 @@ class JSONOutput(base.BaseOutput):
     def event(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 
+    def report_task(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
+
+    def report_template(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
+
 
 class PrettyJSONOutput(JSONOutput):
     name = 'pretty-json'
 
     def __init__(self, output, color, **kwargs):
-        super(PrettyJSONOutput, self).__init__(output, **kwargs)
+        super().__init__(output, **kwargs)
         self.color = color
 
     def _to_json(self, json_data):

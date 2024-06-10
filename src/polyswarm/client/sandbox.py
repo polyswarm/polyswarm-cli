@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 import logging
 
 import click
@@ -110,15 +109,17 @@ def task_latest(ctx, sha256, sandbox_):
 @click.option('--start-date', 'start_date', type=click.STRING)
 @click.option('--end-date', 'end_date', type=click.STRING)
 @click.option('--status', 'status', type=click.STRING)
+@click.option('--account-id', 'account_id', type=click.STRING)
 @click.pass_context
-def task_list(ctx, sha256, sandbox_, start_date, end_date, status):
+def task_list(ctx, sha256, sandbox_, start_date, end_date, status, account_id):
     """
     Search for all the sandbox results identified by the tuple (hash, community, [sandbox], [start_date], [end_date], [status]).
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    for task in api.sandbox_task_list(sha256, sandbox=sandbox_, start_date=start_date, end_date=end_date, status=status):
+    for task in api.sandbox_task_list(sha256, sandbox=sandbox_, start_date=start_date, end_date=end_date, status=status,
+                                      account_id=account_id):
         output.sandbox_task(task)
 
 

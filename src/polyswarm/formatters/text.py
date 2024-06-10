@@ -1,4 +1,3 @@
-from __future__ import absolute_import, unicode_literals
 import sys
 import functools
 import json
@@ -30,7 +29,7 @@ class TextOutput(base.BaseOutput):
     name = 'text'
 
     def __init__(self, color=True, output=sys.stdout, **kwargs):
-        super(TextOutput, self).__init__(output)
+        super().__init__(output)
         self.color = color
         self._depth = 0
         self.color = color
@@ -51,44 +50,39 @@ class TextOutput(base.BaseOutput):
 
     def artifact(self, artifact, write=True):
         output = []
-        output.append(self._blue('SHA256: {hash}'.format(hash=artifact.sha256)))
-        output.append(self._white('SHA1: {hash}'.format(hash=artifact.sha1)))
-        output.append(self._white('MD5: {hash}'.format(hash=artifact.md5)))
-        output.append(self._white('File type: mimetype: {mimetype}, extended_info: {extended_type}'.
-                                  format(mimetype=artifact.mimetype, extended_type=artifact.extended_type)))
+        output.append(self._blue(f'SHA256: {artifact.sha256}'))
+        output.append(self._white(f'SHA1: {artifact.sha1}'))
+        output.append(self._white(f'MD5: {artifact.md5}'))
+        output.append(self._white(f'File type: mimetype: {artifact.mimetype}, extended_info: {artifact.extended_type}'))
 
         h = artifact.metadata.hash
         if 'ssdeep' in h:
-            output.append(self._white('SSDEEP: {}'.format(h['ssdeep'])))
+            output.append(self._white(f'SSDEEP: {h["ssdeep"]}'))
         if 'tlsh' in h:
-            output.append(self._white('TLSH: {}'.format(h['tlsh'])))
+            output.append(self._white(f'TLSH: {h["tlsh"]}'))
         if 'authentihash' in h:
-            output.append(self._white('Authentihash: {}'.format(h['authentihash'])))
+            output.append(self._white(f'Authentihash: {h["authentihash"]}'))
         p = artifact.metadata.pefile
         if 'imphash' in p:
-            output.append(self._white('Imphash: {}'.format(p['imphash'])))
-        output.append(self._white('First seen: {}'.format(
-            pretty_print_datetime(artifact.first_seen))))
-        output.append(self._white('Last scanned: {}'.format(
-            pretty_print_datetime(artifact.last_scanned))))
+            output.append(self._white(f'Imphash: {p["imphash"]}'))
+        output.append(self._white(f'First seen: {pretty_print_datetime(artifact.first_seen)}'))
+        output.append(self._white(f'Last scanned: {pretty_print_datetime(artifact.last_scanned)}'))
         # Deprecated
-        output.append(self._white('Last seen: {}'.format(
-            pretty_print_datetime(artifact.last_scanned))))
+        output.append(self._white(f'Last seen: {pretty_print_datetime(artifact.last_scanned)}'))
         return self._output(output, write)
 
     def artifact_instance(self, instance, write=True, timeout=False):
         output = []
         output.append(self._white('============================= Artifact Instance ============================='))
         if not instance.failed:
-            output.append(self._white('Scan permalink: {}'.format(instance.permalink)))
+            output.append(self._white(f'Scan permalink: {instance.permalink}'))
 
         if instance.community == 'stream':
             output.append(self._white('Detections: This artifact has not been scanned. You can trigger a scan now.'))
         elif len(instance.valid_assertions) == 0 and instance.window_closed and not instance.failed:
             output.append(self._white('Detections: No engines responded to this scan. You can trigger a rescan now.'))
         elif len(instance.valid_assertions) > 0 and instance.window_closed and not instance.failed:
-            malicious = 'Detections: {}/{} engines reported malicious'\
-                .format(len(instance.malicious_assertions), len(instance.valid_assertions))
+            malicious = f'Detections: {len(instance.malicious_assertions)}/{len(instance.valid_assertions)} engines reported malicious'
             if len(instance.malicious_assertions) > 0:
                 output.append(self._red(malicious))
             else:
@@ -101,16 +95,16 @@ class TextOutput(base.BaseOutput):
         self._open_group()
         for assertion in instance.assertions:
             if assertion.verdict is False:
-                output.append('%s: %s' % (self._green(assertion.engine_name), 'Clean'))
+                output.append(f'{self._green(assertion.engine_name)}: {"Clean"}')
             elif assertion.verdict is None or assertion.mask is False:
-                output.append('%s: %s' % (self._blue(assertion.engine_name), 'Engine chose not respond to this bounty.'))
+                output.append(f"{self._blue(assertion.engine_name)}: Engine chose not respond to this bounty.")
             else:
                 value = 'Malicious'
                 if assertion.metadata:
-                    value += ', metadata: %s' % json.dumps(assertion.metadata, sort_keys=True)
-                output.append('%s: %s' % (self._red(assertion.engine_name), value))
+                    value += f', metadata: {json.dumps(assertion.metadata, sort_keys=True)}'
+                output.append(f'{self._red(assertion.engine_name)}: {value}')
         self._close_group()
-        output.append(self._blue('Scan id: {}'.format(instance.id)))
+        output.append(self._blue(f'Scan id: {instance.id}'))
         output.extend(self.artifact(instance, write=False))
         if instance.failed:
             output.append(self._red('Status: Failed'))
@@ -123,32 +117,32 @@ class TextOutput(base.BaseOutput):
         else:
             output.append(self._white('Status: Running'))
         if instance.type == 'URL':
-            output.append(self._white('URL: {}'.format(instance.filename)))
+            output.append(self._white(f'URL: {instance.filename}'))
         else:
-            output.append(self._white('Filename: {}'.format(instance.filename)))
-        output.append(self._white('Community: {}'.format(instance.community)))
-        output.append(self._white('Country: {}'.format(instance.country)))
+            output.append(self._white(f'Filename: {instance.filename}'))
+        output.append(self._white(f'Community: {instance.community}'))
+        output.append(self._white(f'Country: {instance.country}'))
 
         if instance.polyscore is not None:
             formatter = self._get_score_format(instance.polyscore)
-            output.append(formatter('PolyScore: {:.20f}'.format(instance.polyscore)))
+            output.append(formatter(f'PolyScore: {instance.polyscore:.20f}'))
 
         return self._output(output, write)
 
     def hunt(self, result, write=True):
         output = []
-        output.append(self._blue('Hunt Id: {}'.format(result.id)))
-        output.append(self._white('Status: {}'.format(result.status)))
+        output.append(self._blue(f'Hunt Id: {result.id}'))
+        output.append(self._white(f'Status: {result.status}'))
         if result.progress is not None:
-            output.append(self._white('Progress: {:.2f}%'.format(result.progress)))
+            output.append(self._white(f'Progress: {result.progress:.2f}%'))
         if result.active is not None:
-            output.append(self._white('Active: {}'.format(result.active)))
-        output.append(self._white('Created at: {}'.format(result.created)))
+            output.append(self._white(f'Active: {result.active}'))
+        output.append(self._white(f'Created at: {result.created}'))
         if result.summary:
-            output.append(self._white('Total count: {}'.format(result.summary['count'])))
+            output.append(self._white(f'Total count: {result.summary["count"]}'))
             self._open_group()
             for rule, data in result.summary.get('rule', []).items():
-                output.append(self._white('{}: {}'.format(rule, data['count'])))
+                output.append(self._white(f'{rule}: {data["count"]}'))
             self._close_group()
         if result.results_csv_uri:
             output.append(self._white('Download Results CSV:'))
@@ -156,9 +150,9 @@ class TextOutput(base.BaseOutput):
             output.append(self._white(result.results_csv_uri))
             self._close_group()
         if result.ruleset_name is not None:
-            output.append(self._white('Ruleset Name: {}'.format(result.ruleset_name)))
+            output.append(self._white(f'Ruleset Name: {result.ruleset_name}'))
         if result.yara:
-            output.append(self._white('Ruleset Contents:\n{}'.format(result.yara)))
+            output.append(self._white(f'Ruleset Contents:\n{result.yara}'))
         return self._output(output, write)
 
     def hunt_deletion(self, result, write=True):
@@ -170,98 +164,95 @@ class TextOutput(base.BaseOutput):
 
     def historical_result(self, result, write=True):
         output = []
-        output.append(self._blue('Id: {}'.format(result.id)))
-        output.append(self._blue('Instance Id: {}'.format(result.instance_id)))
-        output.append(self._white('Created at: {}'.format(result.created)))
-        output.append(self._white('SHA256: {}'.format(result.sha256)))
-        output.append(self._white('Rule: {}'.format(result.rule_name)))
+        output.append(self._blue(f'Id: {result.id}'))
+        output.append(self._blue(f'Instance Id: {result.instance_id}'))
+        output.append(self._white(f'Created at: {result.created}'))
+        output.append(self._white(f'SHA256: {result.sha256}'))
+        output.append(self._white(f'Rule: {result.rule_name}'))
         if result.malware_family:
-            output.append(self._red('Malware Family: {result_tags}'.format(result_tags=result.malware_family)))
+            output.append(self._red(f'Malware Family: {result.malware_family}'))
         if result.polyscore is not None:
             formatter = self._get_score_format(result.polyscore)
-            output.append(formatter('PolyScore: {:.20f}'.format(result.polyscore)))
+            output.append(formatter(f'PolyScore: {result.polyscore:.20f}'))
         if result.detections:
             if result.detections['total'] == 0:
                 output.append(self._white('Detections: No engines responded to this scan. You can trigger a rescan now.'))
             else:
-                malicious = 'Detections: {}/{} engines reported malicious'\
-                    .format(result.detections['malicious'], result.detections['total'])
+                malicious = f'Detections: {result.detections["malicious"]}/{result.detections["total"]} engines reported malicious'
                 if result.detections['malicious'] > 0:
                     output.append(self._red(malicious))
                 else:
                     output.append(self._white(malicious))
         if result.tags:
-            output.append(self._white('Tags: {result_tags}'.format(result_tags=result.tags)))
+            output.append(self._white(f'Tags: {result.tags}'))
         if result.download_url:
-            output.append(self._white('Download Url: {result_tags}'.format(result_tags=result.download_url)))
+            output.append(self._white(f'Download Url: {result.download_url}'))
         return self._output(output, write)
 
     def live_result(self, result, write=True):
         output = []
-        output.append(self._blue('Id: {}'.format(result.id)))
-        output.append(self._blue('Instance Id: {}'.format(result.instance_id)))
-        output.append(self._white('Created at: {}'.format(result.created)))
-        output.append(self._white('SHA256: {}'.format(result.sha256)))
-        output.append(self._white('Rule: {}'.format(result.rule_name)))
+        output.append(self._blue(f'Id: {result.id}'))
+        output.append(self._blue(f'Instance Id: {result.instance_id}'))
+        output.append(self._white(f'Created at: {result.created}'))
+        output.append(self._white(f'SHA256: {result.sha256}'))
+        output.append(self._white(f'Rule: {result.rule_name}'))
         if result.malware_family:
-            output.append(self._red('Malware Family: {result_tags}'.format(result_tags=result.malware_family)))
+            output.append(self._red(f'Malware Family: {result.malware_family}'))
         if result.polyscore is not None:
             formatter = self._get_score_format(result.polyscore)
-            output.append(formatter('PolyScore: {:.20f}'.format(result.polyscore)))
+            output.append(formatter(f'PolyScore: {result.polyscore:.20f}'))
         if result.detections:
             if result.detections['total'] == 0:
                 output.append(self._white('Detections: No engines responded to this scan. You can trigger a rescan now.'))
             else:
-                malicious = 'Detections: {}/{} engines reported malicious'\
-                    .format(result.detections['malicious'], result.detections['total'])
+                malicious = f'Detections: {result.detections["malicious"]}/{result.detections["total"]} engines reported malicious'
                 if result.detections['malicious'] > 0:
                     output.append(self._red(malicious))
                 else:
                     output.append(self._white(malicious))
         if result.tags:
-            output.append(self._white('Tags: {result_tags}'.format(result_tags=result.tags)))
+            output.append(self._white(f'Tags: {result.tags}'))
         if result.download_url:
-            output.append(self._white('Download Url: {result_tags}'.format(result_tags=result.download_url)))
+            output.append(self._white(f'Download Url: {result.download_url}'))
         return self._output(output, write)
 
     def ruleset(self, result, write=True, contents=False):
         output = []
-        output.append(self._blue('Ruleset Id: {}'.format(result.id)))
+        output.append(self._blue(f'Ruleset Id: {result.id}'))
         if result.livescan_id:
-            output.append(self._yellow('Live Hunt Id: {}'.format(result.livescan_id)))
-            output.append(self._white('Live Hunt Created at: {}'.format(result.livescan_created)))
-        output.append(self._white('Name: {}'.format(result.name)))
-        output.append(self._white('Description: {}'.format(result.description)))
-        output.append(self._white('Created at: {}'.format(result.created)))
-        output.append(self._white('Modified at: {}'.format(result.modified)))
+            output.append(self._yellow(f'Live Hunt Id: {result.livescan_id}'))
+            output.append(self._white(f'Live Hunt Created at: {result.livescan_created}'))
+        output.append(self._white(f'Name: {result.name}'))
+        output.append(self._white(f'Description: {result.description}'))
+        output.append(self._white(f'Created at: {result.created}'))
+        output.append(self._white(f'Modified at: {result.modified}'))
         if contents:
-            output.append(self._white('Ruleset Contents:\n{}'.format(result.yara)))
+            output.append(self._white(f'Ruleset Contents:\n{result.yara}'))
         return self._output(output, write)
 
     def tag_link(self, result, write=True):
         output = []
-        output.append(self._blue('SHA256: {}'.format(result.sha256)))
-        output.append(self._white('First seen: {}'.format(result.first_seen)))
-        output.append(self._white('Tags: {}'.format(result.tags)))
-        output.append(self._white('Families: {}'.format(result.families)))
-        output.append(self._white('Emerging: {}'.format(result.emerging)))
+        output.append(self._blue(f'SHA256: {result.sha256}'))
+        output.append(self._white(f'First seen: {result.first_seen}'))
+        output.append(self._white(f'Tags: {result.tags}'))
+        output.append(self._white(f'Families: {result.families}'))
+        output.append(self._white(f'Emerging: {result.emerging}'))
         return self._output(output, write)
 
     def family(self, result, write=True):
         output = []
-        output.append(self._blue('Family: {}'.format(result.name)))
-        output.append(self._white('Emerging: {}'.format(result.emerging)))
+        output.append(self._blue(f'Family: {result.name}'))
+        output.append(self._white(f'Emerging: {result.emerging}'))
         return self._output(output, write)
 
     def tag(self, result, write=True):
         output = []
-        output.append(self._blue('Tag: {}'.format(result.name)))
+        output.append(self._blue(f'Tag: {result.name}'))
         return self._output(output, write)
 
     def local_artifact(self, artifact, write=True):
         output = []
-        output.append(self._white('Successfully downloaded artifact {} to {}'
-                                  .format(artifact.artifact_name, artifact.name)))
+        output.append(self._white(f'Successfully downloaded artifact {artifact.artifact_name} to {artifact.name}'))
         return self._output(output, write)
 
     def _dfs_mapping_render(self, output, path, tree, depth=0):
@@ -287,12 +278,12 @@ class TextOutput(base.BaseOutput):
         for result in iocs:
             data = result.json
             if type(data) is dict:
-                output.append(self._white('ImpHash: {}'.format(data['imphash'])))
-                output.append(self._white('IPs: {}'.format(", ".join(data['ips']))))
-                output.append(self._white('URLs: {}'.format(", ".join(data['urls']))))
-                output.append(self._white('TTPs: {}'.format(", ".join(data['ttps']))))
+                output.append(self._white(f'ImpHash: {data["imphash"]}'))
+                output.append(self._white(f'IPs: {", ".join(data["ips"])}'))
+                output.append(self._white(f'URLs: {", ".join(data["urls"])}'))
+                output.append(self._white(f'TTPs: {", ".join(data["ttps"])}'))
             else:
-                output.append(self._white('SHA256: {}'.format(data)))
+                output.append(self._white(f'SHA256: {data}'))
         return self._output(output, write)
     
     def ioc(self, ioc, write=True):
@@ -300,28 +291,28 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('============================= IOC ============================='))
         data = ioc.json
         if type(data) is dict:
-            output.append(self._white('ImpHash: {}'.format(data['imphash'])))
-            output.append(self._white('IPs: {}'.format(", ".join(data['ips']))))
-            output.append(self._white('URLs: {}'.format(", ".join(data['urls']))))
-            output.append(self._white('TTPs: {}'.format(", ".join(data['ttps']))))
+            output.append(self._white(f'ImpHash: {data["imphash"]}'))
+            output.append(self._white(f'IPs: {", ".join(data["ips"])}'))
+            output.append(self._white(f'URLs: {", ".join(data["urls"])}'))
+            output.append(self._white(f'TTPs: {", ".join(data["ttps"])}'))
         else:
-            output.append(self._white('SHA256: {}'.format(data)))
+            output.append(self._white(f'SHA256: {data}'))
         return self._output(output, write)
     
     def known_host(self, ioc_known, write=True):
         output = []
         output.append(self._white('============================= Known IOC ============================='))
-        output.append(self._white('ID: {}'.format(ioc_known.json['id'])))
-        output.append(self._white('type: {}'.format(ioc_known.json['type'])))
-        output.append(self._white('host: {}'.format(ioc_known.json['host'])))
-        output.append(self._white('source: {}'.format(ioc_known.json['source'])))
-        output.append(self._white('good: {}'.format(ioc_known.json['good'])))
+        output.append(self._white(f'ID: {ioc_known.json["id"]}'))
+        output.append(self._white(f'type: {ioc_known.json["type"]}'))
+        output.append(self._white(f'host: {ioc_known.json["host"]}'))
+        output.append(self._white(f'source: {ioc_known.json["source"]}'))
+        output.append(self._white(f'good: {ioc_known.json["good"]}'))
         return self._output(output, write)
 
     def artifact_metadata(self, instance, write=True, only=None):
         output = []
         output.append(self._white('============================= Metadata Status ============================='))
-        output.append(self._blue('Scan id: {}'.format(instance.id)))
+        output.append(self._blue(f'Scan id: {instance.id}'))
 
         self._open_group()
         max_len = 0
@@ -333,7 +324,7 @@ class TextOutput(base.BaseOutput):
         for metadata in entries:
             if only is None or metadata['tool'] in only:
                 tool = self._white(metadata['tool'].rjust(max_len))
-                output.append('%s: Updated at %s' % (tool, pretty_print_datetime(metadata['updated'])))
+                output.append(f'{tool}: Updated at {pretty_print_datetime(metadata["updated"])}')
         self._close_group()
 
         return self._output(output, write)
@@ -342,43 +333,43 @@ class TextOutput(base.BaseOutput):
         output = []
         for provider in result.json['result'].values():
             output.append(self._white('============================= Provider ============================='))
-            output.append(self._blue('slug: {}'.format(provider['slug'])))
-            output.append(self._white('name: {}'.format(provider['name'])))
-            output.append(self._white('tool: {}'.format(provider['tool'])))
+            output.append(self._blue(f'slug: {provider["slug"]}'))
+            output.append(self._white(f'name: {provider["name"]}'))
+            output.append(self._white(f'tool: {provider["tool"]}'))
             self._open_group()
             for vm in provider['vms'].values():
                 output.append(self._white('============================= VM ============================='))
                 for k, v in vm.items():
-                    output.append(self._white('{}: {}'.format(k, v)))
+                    output.append(self._white(f'{k}: {v}'))
             self._close_group()
         return self._output(output, write)
     
     def sandbox_task(self, task, write=True):
         output = []
         output.append(self._white('============================= Sandbox Task ============================='))
-        output.append(self._blue('id: {}'.format(task.id)))
-        output.append(self._blue('sha256: {}'.format(task.sha256)))
-        output.append(self._blue('sandbox: {}'.format(task.sandbox)))
-        output.append(self._white('created: {}'.format(task.created)))
-        output.append(self._white('community: {}'.format(task.community)))
-        output.append(self._white('instance id: {}'.format(task.instance_id)))
-        output.append(self._white('status: {}'.format(task.status)))
+        output.append(self._blue(f'id: {task.id}'))
+        output.append(self._blue(f'sha256: {task.sha256}'))
+        output.append(self._blue(f'sandbox: {task.sandbox}'))
+        output.append(self._white(f'created: {task.created}'))
+        output.append(self._white(f'community: {task.community}'))
+        output.append(self._white(f'instance id: {task.instance_id}'))
+        output.append(self._white(f'status: {task.status}'))
 
         if task.account_number:
-            output.append(self._white('account number: {}'.format(task.account_number)))
+            output.append(self._white(f'account number: {task.account_number}'))
         if task.team_account_number:
-            output.append(self._white('team account number: {}'.format(task.team_account_number)))
+            output.append(self._white(f'team account number: {task.team_account_number}'))
 
         if task.sandbox_artifacts:
             output.append(self._white('sandbox artifacts:'))
         self._open_group()
         for artifact in task.sandbox_artifacts:
-            output_string = '{}: '.format(artifact.type)
+            output_string = f'{artifact.type}: '
             if artifact.name:
-                output_string += '{}, '.format(artifact.name)
+                output_string += f'{artifact.name}, '
             if artifact.mimetype:
-                output_string += '{}, '.format(artifact.mimetype)
-            output_string += 'instance id: {}'.format(artifact.instance_id)
+                output_string += f'{artifact.mimetype}, '
+            output_string += f'instance id: {artifact.instance_id}'
             output.append(self._white(output_string))
         self._close_group()
 
@@ -390,63 +381,63 @@ class TextOutput(base.BaseOutput):
     def metadata(self, instance, write=True):
         output = []
         output.append(self._white('============================= Metadata ============================='))
-        output.append(self._blue('Artifact id: {}'.format(instance.id)))
-        output.append(self._white('Created: {}'.format(instance.created)))
+        output.append(self._blue(f'Artifact id: {instance.id}'))
+        output.append(self._white(f'Created: {instance.created}'))
 
         if instance.sha256:
-            output.append(self._white('SHA256: {}'.format(instance.sha256)))
+            output.append(self._white(f'SHA256: {instance.sha256}'))
         if instance.sha1:
-            output.append(self._white('SHA1: {}'.format(instance.sha1)))
+            output.append(self._white(f'SHA1: {instance.sha1}'))
         if instance.md5:
-            output.append(self._white('MD5: {}'.format(instance.md5)))
+            output.append(self._white(f'MD5: {instance.md5}'))
         if instance.ssdeep:
-            output.append(self._white('SSDEEP: {}'.format(instance.ssdeep)))
+            output.append(self._white(f'SSDEEP: {instance.ssdeep}'))
         if instance.tlsh:
-            output.append(self._white('TLSH: {}'.format(instance.tlsh)))
+            output.append(self._white(f'TLSH: {instance.tlsh}'))
 
         if instance.first_seen:
-            output.append(self._white('First seen: {}'.format(instance.first_seen)))
+            output.append(self._white(f'First seen: {instance.first_seen}'))
         if instance.last_scanned:
-            output.append(self._white('Last scanned: {}'.format(instance.last_scanned)))
+            output.append(self._white(f'Last scanned: {instance.last_scanned}'))
             # Deprecated
-            output.append(self._white('Last seen: {}'.format(instance.last_scanned)))
+            output.append(self._white(f'Last seen: {instance.last_scanned}'))
 
         if instance.mimetype:
-            output.append(self._white('Mimetype: {}'.format(instance.mimetype)))
+            output.append(self._white(f'Mimetype: {instance.mimetype}'))
         if instance.extended_mimetype:
-            output.append(self._white('Extended mimetype: {}'.format(instance.extended_mimetype)))
+            output.append(self._white(f'Extended mimetype: {instance.extended_mimetype}'))
         if instance.malicious:
-            output.append(self._white('Malicious: {}'.format(instance.malicious)))
+            output.append(self._white(f'Malicious: {instance.malicious}'))
         if instance.benign:
-            output.append(self._white('Benign: {}'.format(instance.benign)))
+            output.append(self._white(f'Benign: {instance.benign}'))
         if instance.total_detections:
-            output.append(self._white('Total detections: {}'.format(instance.total_detections)))
+            output.append(self._white(f'Total detections: {instance.total_detections}'))
 
         if instance.domains:
             output.append(self._white('Domains:'))
             self._open_group()
-            output.append(self._white('{}'.format(', '.join(instance.domains))))
+            output.append(self._white(', '.join(instance.domains)))
             self._close_group()
         if instance.ipv4:
             output.append(self._white('Ipv4:'))
             self._open_group()
-            output.append(self._white('{}'.format(', '.join(instance.ipv4))))
+            output.append(self._white(', '.join(instance.ipv4)))
             self._close_group()
         if instance.ipv6:
             output.append(self._white('Ipv6:'))
             self._open_group()
-            output.append(self._white('{}'.format(', '.join(instance.ipv6))))
+            output.append(self._white(', '.join(instance.ipv6)))
             self._close_group()
         if instance.urls:
             output.append(self._white('Urls:'))
             self._open_group()
-            output.append(self._white('{}'.format(', '.join(instance.urls))))
+            output.append(self._white(', '.join(instance.urls)))
             self._close_group()
 
         if instance.filenames:
             output.append(self._white('Filenames:'))
             self._open_group()
-            output.append(self._white('{}'.format(', '.join(instance.filenames))))
+            output.append(self._white(', '.join(instance.filenames)))
             self._close_group()
 
         return self._output(output, write)
@@ -454,56 +445,102 @@ class TextOutput(base.BaseOutput):
     def assertions(self, instance, write=True):
         output = []
         output.append(self._white('============================= Assertions Job ============================='))
-        output.append(self._blue('Assertions Job id: {}'.format(instance.id)))
-        output.append(self._white('Engine id: {}'.format(instance.engine_id)))
-        output.append(self._white('Created at: {}'.format(instance.created)))
-        output.append(self._white('Start date: {}'.format(instance.date_start)))
-        output.append(self._white('End date: {}'.format(instance.date_end)))
+        output.append(self._blue(f'Assertions Job id: {instance.id}'))
+        output.append(self._white(f'Engine id: {instance.engine_id}'))
+        output.append(self._white(f'Created at: {instance.created}'))
+        output.append(self._white(f'Start date: {instance.date_start}'))
+        output.append(self._white(f'End date: {instance.date_end}'))
 
         if instance.storage_path is not None:
-            output.append(self._white('Download: {}'.format(instance.storage_path)))
-            output.append(self._white('True Positive: {}'.format(instance.true_positive)))
-            output.append(self._white('True Negative: {}'.format(instance.true_negative)))
-            output.append(self._white('False Positive: {}'.format(instance.false_positive)))
-            output.append(self._white('False Negative: {}'.format(instance.false_negative)))
-            output.append(self._white('Suspicious: {}'.format(instance.suspicious)))
-            output.append(self._white('Unknown: {}'.format(instance.unknown)))
-            output.append(self._white('Total: {}'.format(instance.total)))
+            output.append(self._white(f'Download: {instance.storage_path}'))
+            output.append(self._white(f'True Positive: {instance.true_positive}'))
+            output.append(self._white(f'True Negative: {instance.true_negative}'))
+            output.append(self._white(f'False Positive: {instance.false_positive}'))
+            output.append(self._white(f'False Negative: {instance.false_negative}'))
+            output.append(self._white(f'Suspicious: {instance.suspicious}'))
+            output.append(self._white(f'Unknown: {instance.unknown}'))
+            output.append(self._white(f'Total: {instance.total}'))
 
         return self._output(output, write)
 
     def votes(self, instance, write=True):
         output = []
         output.append(self._white('============================= Votes Job ============================='))
-        output.append(self._blue('Votes Job id: {}'.format(instance.id)))
-        output.append(self._white('Engine id: {}'.format(instance.engine_id)))
-        output.append(self._white('Created at: {}'.format(instance.created)))
-        output.append(self._white('Start date: {}'.format(instance.date_start)))
-        output.append(self._white('End date: {}'.format(instance.date_end)))
+        output.append(self._blue(f'Votes Job id: {instance.id}'))
+        output.append(self._white(f'Engine id: {instance.engine_id}'))
+        output.append(self._white(f'Created at: {instance.created}'))
+        output.append(self._white(f'Start date: {instance.date_start}'))
+        output.append(self._white(f'End date: {instance.date_end}'))
 
         if instance.storage_path is not None:
-            output.append(self._white('Download: {}'.format(instance.storage_path)))
-            output.append(self._white('True Positive: {}'.format(instance.true_positive)))
-            output.append(self._white('True Negative: {}'.format(instance.true_negative)))
-            output.append(self._white('False Positive: {}'.format(instance.false_positive)))
-            output.append(self._white('False Negative: {}'.format(instance.false_negative)))
-            output.append(self._white('Suspicious: {}'.format(instance.suspicious)))
-            output.append(self._white('Unknown: {}'.format(instance.unknown)))
-            output.append(self._white('Total: {}'.format(instance.total)))
+            output.append(self._white(f'Download: {instance.storage_path}'))
+            output.append(self._white(f'True Positive: {instance.true_positive}'))
+            output.append(self._white(f'True Negative: {instance.true_negative}'))
+            output.append(self._white(f'False Positive: {instance.false_positive}'))
+            output.append(self._white(f'False Negative: {instance.false_negative}'))
+            output.append(self._white(f'Suspicious: {instance.suspicious}'))
+            output.append(self._white(f'Unknown: {instance.unknown}'))
+            output.append(self._white(f'Total: {instance.total}'))
 
         return self._output(output, write)
 
     def event(self, event, write=True):
         output = []
         output.append(self._white('============================= Event ============================='))
-        output.append(self._white('event_timestamp: {}'.format(event.json['event_timestamp'])))
-        output.append(self._white('event_type: {}'.format(event.json['event_type'])))
-        output.append(self._white('source: {}'.format(event.json['source'])))
-        output.append(self._white('team_account_id: {}'.format(event.json['team_account_id'])))
-        output.append(self._white('user_account_id: {}'.format(event.json['user_account_id'])))
+        output.append(self._white(f'event_timestamp: {event.json["event_timestamp"]}'))
+        output.append(self._white(f'event_type: {event.json["event_type"]}'))
+        output.append(self._white(f'source: {event.json["source"]}'))
+        output.append(self._white(f'team_account_id: {event.json["team_account_id"]}'))
+        output.append(self._white(f'user_account_id: {event.json["user_account_id"]}'))
         for key in event.json:
             if key not in {'event_timestamp', 'event_type', 'source', 'team_account_id', 'user_account_id'}:
-                output.append(self._white('{}: {}'.format(key, event.json[key])))
+                output.append(self._white(f'{key}: {event.json[key]}'))
+        return self._output(output, write)
+
+    def report_task(self, report, write=True):
+        output = []
+        output.append(self._white('============================= Report ============================='))
+        output.append(self._blue(f'ID: {report.id}'))
+        output.append(self._white(f'Community: {report.community}'))
+        output.append(self._white(f'Created: {report.created}'))
+        output.append(self._white(f'Type: {report.type}'))
+        output.append(self._white(f'Format: {report.format}'))
+        if report.template_id:
+            output.append(self._white(f'Template ID: {report.template_id}'))
+        if 'includes' in report.template_metadata:
+            output.append(self._white(f'Includes: {", ".join(report.template_metadata["includes"])}'))
+        if report.instance_id:
+            output.append(self._white(f'Scan ID: {report.instance_id}'))
+        elif report.sandbox_task_id:
+            output.append(self._white(f'Sandbox ID: {report.sandbox_task_id}'))
+        state_writer = self._red if report.state == 'FAILED' else self._yellow
+        output.append(state_writer(f'State: {report.state}'))
+        if report.url:
+            output.append(self._white(f'URL: {report.url}'))
+        return self._output(output, write)
+
+    def report_template(self, template, write=True):
+        output = []
+        output.append(self._white('============================= Report Template ============================='))
+        output.append(self._blue(f'ID: {template.id}'))
+        output.append(self._white(f'Template Name: {template.template_name}'))
+        output.append(self._white(f'Created: {template.created}'))
+        if template.primary_color:
+            output.append(self._white(f'Primary Color: {template.primary_color}'))
+        if template.is_default:
+            output.append(f'Is Default: {template.is_default}')
+        if template.includes:
+            output.append(self._white(f'Includes: {", ".join(template.includes)}'))
+        if template.footer_text:
+            output.append(self._white(f'Footer Text: {template.footer_text}'))
+        if template.last_page_text:
+            output.append(self._white(f'Last Page Text: {template.last_page_text}'))
+        if template.logo_content_length:
+            output.append(self._white(f'Logo Content Length: {template.logo_content_length}'))
+            output.append(self._white(f'Logo Content Type: {template.logo_content_type}'))
+            output.append(self._white(f'Logo URL: {template.logo_url}'))
+            output.append(self._white(f'Logo Height: {template.logo_height}'))
+            output.append(self._white(f'Logo Width: {template.logo_width}'))
         return self._output(output, write)
 
     @is_grouped

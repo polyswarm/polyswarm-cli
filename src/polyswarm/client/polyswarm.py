@@ -1,9 +1,5 @@
-from __future__ import absolute_import
 import logging
-try:
-    from json import JSONDecodeError
-except ImportError:
-    JSONDecodeError = ValueError
+from json import JSONDecodeError
 
 import click
 import click_log
@@ -30,6 +26,8 @@ from polyswarm.client.families import family
 from polyswarm.client.metadata import metadata
 from polyswarm.client.engine import engine
 from polyswarm.client.event import activity
+from polyswarm.client.report import report
+from polyswarm.client.report_template import report_template
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +47,7 @@ def setup_logging(verbosity):
                 level = record.levelname.lower()
                 msg = record.getMessage()
                 if level in self.colors:
-                    prefix = click.style('{} [{}]: '.format(level, record.name),
+                    prefix = click.style(f'{level} [{record.name}]: ',
                                          **self.colors[level])
                     msg = '\n'.join(prefix + x for x in msg.splitlines())
                 return msg
@@ -75,7 +73,7 @@ def setup_logging(verbosity):
 class ExceptionHandlingGroup(click.Group):
     def invoke(self, ctx):
         try:
-            return super(ExceptionHandlingGroup, self).invoke(ctx)
+            return super().invoke(ctx)
         except (
                 exceptions.NoResultsException,
                 exceptions.NotFoundException,
@@ -108,15 +106,16 @@ class ExceptionHandlingGroup(click.Group):
 
 @click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS)
 @click.option('-a', '--api-key', help='Your API key for polyswarm.network (required).',
-              default='', callback=validate_key, envvar='POLYSWARM_API_KEY')
+              default='', callback=validate_key, envvar='POLYSWARM_API_KEY', show_envvar=True)
 @click.option('-u', '--api-uri', default='https://api.polyswarm.network/v3',
-              envvar='POLYSWARM_API_URI', help='The API endpoint (ADVANCED).')
+              envvar='POLYSWARM_API_URI', help='The API endpoint (ADVANCED).', show_envvar=True)
 @click.option('-o', '--output-file', type=click.File('w', encoding='utf8'), help='Path to output file.')
 @click.option('--output-format', '--fmt', default='text', type=click.Choice(formatters.keys()),
               help='Output format. Human-readable text or JSON.')
 @click.option('--color/--no-color', default=True, help='Use colored output in text mode.')
 @click.option('-v', '--verbose', default=0, count=True)
-@click.option('-c', '--community', default='default', envvar='POLYSWARM_COMMUNITY', help='Community to use.')
+@click.option('-c', '--community', default='default', envvar='POLYSWARM_COMMUNITY',
+              help='Community to use.', show_envvar=True)
 @click.option('--parallel', default=8, help='Number of threads to be used in parallel http requests.')
 @click.option('--verify/--no-verify', default=True, help='Verify TLS connections.')
 @click.version_option(polyswarm.__version__, '--version', prog_name='polyswarm-cli')
@@ -147,7 +146,7 @@ commands = [
     download, download_id, cat, stream, rescan, rescan_id,
     rules, link, tag, family, metadata,
     engine, known, sandbox, sandbox_list,
-    activity
+    activity, report, report_template
 ]
 
 for command in commands:
