@@ -3,8 +3,8 @@ import os
 
 import click
 
-
 from polyswarm.client import utils
+from polyswarm_api import settings, resources
 
 logger = logging.getLogger(__name__)
 
@@ -26,19 +26,33 @@ SECTIONS = "summary, detections, fileMetadata, network, droppedFiles, extractedC
               help=f'Comma-separated list of sections to include in the report. Can be one ore more of: {SECTIONS}',
               multiple=True,
               callback=lambda _,o,x: x[0].split(',') if len(x) == 1 else x)
+@click.option('-n', '--nowait', is_flag=True,
+              help='Does not wait for the report generation to finish, just create it and return right away.')
+@click.option('-t', '--timeout', type=click.INT, default=settings.DEFAULT_REPORT_TIMEOUT,
+              help=f'How long to wait for results.', show_default=True)
+@click.option('-d', '--destination', type=click.Path(file_okay=False),
+              help='Path where to store the downloaded report.', default=os.getcwd())
 @click.pass_context
-def create(ctx, format, type, object_id, template_id, includes):
+def create(ctx, format, type, object_id, template_id, includes, nowait, timeout, destination):
     api = ctx.obj['api']
     output = ctx.obj['output']
     object_d = {'instance_id': object_id} if type == 'scan' else {'sandbox_task_id': object_id}
     template_metadata = {}
     if includes:
         template_metadata['includes'] = includes
-    output.report_task(api.report_create(type=type,
-                                         format=format,
-                                         template_id=template_id,
-                                         template_metadata=template_metadata or None,
-                                         **object_d))
+    result = api.report_create(type=type,
+                               format=format,
+                               template_id=template_id,
+                               template_metadata=template_metadata or None,
+                               **object_d)
+    if nowait:
+        output.report_task(result)
+    else:
+        _report = api.report_wait_for(result.id, timeout)
+        if destination:
+            result = _report.download_report(folder=destination).result()
+            result.handle.close()
+            output.local_artifact(result)
 
 
 @report.command('get', short_help='Fetch a report task for an instance or sandbox id.')
