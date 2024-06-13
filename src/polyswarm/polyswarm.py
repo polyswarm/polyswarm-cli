@@ -37,7 +37,9 @@ class Polyswarm(PolyswarmAPI):
         super().__init__(*args, **kwargs)
         self.parallel = parallel
 
-    def scan_file(self, path, recursive=False, timeout=settings.DEFAULT_SCAN_TIMEOUT, nowait=False, scan_config=None):
+    def scan_file(self, path, recursive=False,
+                  timeout=settings.DEFAULT_SCAN_TIMEOUT, nowait=False, scan_config=None,
+                  is_zip=False, zip_password=None):
         """
         Scan files or directories via PolySwarm.
 
@@ -46,12 +48,20 @@ class Polyswarm(PolyswarmAPI):
         :param timeout: How long to wait for results.
         :param nowait: Does not wait for the scan window to close, just create it and return right away.
         :param scan_config: Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".
+        :param is_zip: If this flag is set, will handle the file as a zip
+          in the server and decompress before processing.
+        :param zip_password: Will use this password to decompress the zip file.
+          If provided, will handle the file as a zip.
         :return: An iterator of artifact instances.
         """
         args = [(self, timeout, nowait, file) for file in utils.collect_files(path, recursive=recursive)]
         for instance in utils.parallel_executor(submit_and_wait,
                                                 args_list=args,
-                                                kwargs_list=[{'scan_config': scan_config}]*len(args)):
+                                                kwargs_list=[{
+                                                    'scan_config': scan_config,
+                                                    'is_zip': is_zip,
+                                                    'zip_password': zip_password,
+                                                }]*len(args)):
             yield instance
 
     def scan_url(self, urls, timeout=settings.DEFAULT_SCAN_TIMEOUT, nowait=False, scan_config='more-time'):

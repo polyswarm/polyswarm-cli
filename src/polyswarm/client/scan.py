@@ -22,16 +22,20 @@ def scan():
               help='Does not wait for the scan window to close, just create it and return right away.')
 @click.option('-s', '--scan-config', type=click.STRING, default=None,
               help='Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".')
+@click.option('-z', '--is-zip', type=click.BOOL, is_flag=True,
+              help='Will handle the provided file as a zip and decompress server-side.')
+@click.option('-p', '--zip-password', type=click.STRING,
+              help='Will use this password to decompress the zip file. If provided, will handle the file as a zip.')
 @click.argument('path', nargs=-1, type=click.Path(exists=True), required=True)
 @click.pass_context
-def file(ctx, recursive, timeout, nowait, path, scan_config):
+def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_password):
     """
     Scan files or directories via PolySwarm
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    for instance in api.scan_file(path, recursive, timeout, nowait, scan_config):
+    for instance in api.scan_file(path, recursive, timeout, nowait, scan_config, is_zip, zip_password):
         output.artifact_instance(instance)
 
 

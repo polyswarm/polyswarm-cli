@@ -36,15 +36,20 @@ def submit(ctx, provider_slug, artifact_id, vm_slug, internet_disabled):
 @click.argument('path', type=click.Path(exists=True), required=True)
 @click.option('--vm_slug', 'vm_slug', type=click.STRING)
 @click.option('--internet-disabled', 'internet_disabled', type=click.BOOL, is_flag=True, default=False)
+@click.option('-z', '--is-zip', type=click.BOOL, is_flag=True,
+              help='Will handle the provided file as a zip and decompress server-side.')
+@click.option('-p', '--zip-password', type=click.STRING,
+              help='Will use this password to decompress the zip file. If provided, will handle the file as a zip.')
 @click.pass_context
-def file(ctx, path, sandbox, vm_slug, internet_disabled):
+def file(ctx, path, sandbox, vm_slug, internet_disabled, is_zip, zip_password):
     """
     Submit a local file to be sandboxed.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.sandbox_task(api.sandbox_file(path, sandbox, vm_slug, network_enabled=not internet_disabled))
+    output.sandbox_task(api.sandbox_file(path, sandbox, vm_slug, network_enabled=not internet_disabled,
+                                         is_zip=is_zip, zip_password=zip_password))
 
 @sandbox.command('url', short_help='Submit a url to be sandboxed.')
 @click.argument('sandbox', type=click.STRING)
