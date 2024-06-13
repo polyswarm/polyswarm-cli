@@ -44,15 +44,15 @@ def create(ctx, format, type, object_id, template_id, includes, nowait, timeout,
                                format=format,
                                template_id=template_id,
                                template_metadata=template_metadata or None,
-                               nowait=nowait,
-                               timeout=timeout,
-                               destination=destination,
                                **object_d)
-    if isinstance(result, resources.ReportTask):
+    if nowait:
         output.report_task(result)
     else:
-        # LocalArtifact downloaded
-        output.local_artifact(result)
+        _report = api.report_wait_for(result.id, timeout)
+        if destination:
+            result = _report.download_report(folder=destination).result()
+            result.handle.close()
+            output.local_artifact(result)
 
 
 @report.command('get', short_help='Fetch a report task for an instance or sandbox id.')
