@@ -19,7 +19,7 @@ setup(
     license='MIT',
     python_requires='>=3.7,<4',
     install_requires=[
-        'polyswarm-api~=3.7.0.dev',
+        'polyswarm-api~=3.8.0',
         'click~=7.1',
         'colorama~=0.4.6',
         'click-log~=0.4.0',
