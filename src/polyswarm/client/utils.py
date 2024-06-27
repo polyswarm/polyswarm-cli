@@ -1,5 +1,6 @@
 import logging
 import functools
+import sys
 
 import click
 
@@ -55,8 +56,12 @@ def validate_hashes(ctx, param, value):
 
 def validate_key(ctx, param, value):
     if not resources.core.is_hex(value) or len(value) != 32:
-        raise click.BadParameter(
-            'Invalid API key. Make sure you specified your key via -a or environment variable and try again.')
+        if all(     # workaround for the inability of Click to process the -h/--help argument first
+                map(lambda x: x not in ctx.help_option_names, sys.argv)
+        ):
+            raise click.BadParameter(
+                f'Invalid API key. Make sure you specified your key via {", ".join(param.opts)} option, '
+                f'or through the environment variable {param.envvar} and try again.')
     return value
 
 
