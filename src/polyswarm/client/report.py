@@ -15,6 +15,7 @@ def report():
 
 
 SECTIONS = "summary, detections, fileMetadata, network, droppedFiles, extractedConfig, analysis"
+SANDBOX_ARTIFACT_TYPES = "report, raw_report, screenshot, recording, dropped_file, memory_dump, pcap, jarm"
 
 
 @report.command('create', short_help='Create a report for an instance or sandbox id.')
@@ -45,6 +46,37 @@ def create(ctx, format, type, object_id, template_id, includes, nowait, timeout,
                                template_id=template_id,
                                template_metadata=template_metadata or None,
                                **object_d)
+    if nowait:
+        output.report_task(result)
+    else:
+        _report = api.report_wait_for(result.id, timeout)
+        if destination:
+            result = _report.download_report(folder=destination).result()
+            result.handle.close()
+            output.local_artifact(result)
+
+
+@report.command('create-zip', short_help='Create a zip of json reports and sandbox artifacts for a sandbox task id.')
+@click.argument('sandbox-task-id', callback=utils.validate_id)
+@click.option('--sandbox_artifact_types',
+              help=f'Comma-separated list of sandbox artifact types to include in the zip.\
+                     Can be one ore more of: {SANDBOX_ARTIFACT_TYPES}',
+              multiple=True,
+              callback=lambda _, o, x: x[0].split(',') if len(x) == 1 else x)
+@click.option('-n', '--nowait', is_flag=True,
+              help='Does not wait for the report generation to finish, just create it and return right away.')
+@click.option('-t', '--timeout', type=click.INT, default=settings.DEFAULT_REPORT_TIMEOUT,
+              help=f'How long to wait for results.', show_default=True)
+@click.option('-d', '--destination', type=click.Path(file_okay=False),
+              help='Path where to store the downloaded zip.', default=os.getcwd())
+@click.pass_context
+def create_zip(ctx, sandbox_task_id, sandbox_artifact_types, nowait, timeout, destination):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+
+    result = api.report_create('sandbox_zip', 'zip', sandbox_task_id=sandbox_task_id,
+                               template_metadata={'sandbox_artifact_types': sandbox_artifact_types})
+
     if nowait:
         output.report_task(result)
     else:
