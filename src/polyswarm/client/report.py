@@ -19,48 +19,17 @@ SANDBOX_ARTIFACT_TYPES = "report, raw_report, screenshot, recording, dropped_fil
 
 
 @report.command('create', short_help='Create a report for an instance or sandbox id.')
-@click.argument('format', type=click.Choice(['html', 'pdf']))
-@click.argument('type', type=click.Choice(['scan', 'sandbox']))
+@click.argument('format', type=click.Choice(['html', 'pdf', 'zip']))
+@click.argument('type', type=click.Choice(['scan', 'sandbox', 'sandbox_zip']))
 @click.argument('object-id', callback=utils.validate_id)
 @click.option('--template-id', metavar='ID', type=click.STRING)
 @click.option('--includes',
               help=f'Comma-separated list of sections to include in the report. Can be one ore more of: {SECTIONS}',
               multiple=True,
               callback=lambda _,o,x: x[0].split(',') if len(x) == 1 else x)
-@click.option('-n', '--nowait', is_flag=True,
-              help='Does not wait for the report generation to finish, just create it and return right away.')
-@click.option('-t', '--timeout', type=click.INT, default=settings.DEFAULT_REPORT_TIMEOUT,
-              help=f'How long to wait for results.', show_default=True)
-@click.option('-d', '--destination', type=click.Path(file_okay=False),
-              help='Path where to store the downloaded report.', default=os.getcwd())
-@click.pass_context
-def create(ctx, format, type, object_id, template_id, includes, nowait, timeout, destination):
-    api = ctx.obj['api']
-    output = ctx.obj['output']
-    object_d = {'instance_id': object_id} if type == 'scan' else {'sandbox_task_id': object_id}
-    template_metadata = {}
-    if includes:
-        template_metadata['includes'] = includes
-    result = api.report_create(type=type,
-                               format=format,
-                               template_id=template_id,
-                               template_metadata=template_metadata or None,
-                               **object_d)
-    if nowait:
-        output.report_task(result)
-    else:
-        _report = api.report_wait_for(result.id, timeout)
-        if destination:
-            result = _report.download_report(folder=destination).result()
-            result.handle.close()
-            output.local_artifact(result)
-
-
-@report.command('create-zip', short_help='Create a zip of json reports and sandbox artifacts for a sandbox task id.')
-@click.argument('sandbox-task-id', callback=utils.validate_id)
 @click.option('--sandbox_artifact_types',
               help=f'Comma-separated list of sandbox artifact types to include in the zip.\
-                     Can be one ore more of: {SANDBOX_ARTIFACT_TYPES}',
+                     Can be one ore more of: {SANDBOX_ARTIFACT_TYPES}.  Only applicable to sandbox_zip type.',
               multiple=True,
               callback=lambda _, o, x: x[0].split(',') if len(x) == 1 else x)
 @click.option('-n', '--nowait', is_flag=True,
@@ -68,15 +37,22 @@ def create(ctx, format, type, object_id, template_id, includes, nowait, timeout,
 @click.option('-t', '--timeout', type=click.INT, default=settings.DEFAULT_REPORT_TIMEOUT,
               help=f'How long to wait for results.', show_default=True)
 @click.option('-d', '--destination', type=click.Path(file_okay=False),
-              help='Path where to store the downloaded zip.', default=os.getcwd())
+              help='Path where to store the downloaded report.', default=os.getcwd())
 @click.pass_context
-def create_zip(ctx, sandbox_task_id, sandbox_artifact_types, nowait, timeout, destination):
+def create(ctx, format, type, object_id, template_id, includes, sandbox_artifact_types, nowait, timeout, destination):
     api = ctx.obj['api']
     output = ctx.obj['output']
-
-    result = api.report_create('sandbox_zip', 'zip', sandbox_task_id=sandbox_task_id,
-                               template_metadata={'sandbox_artifact_types': sandbox_artifact_types})
-
+    object_d = {'instance_id': object_id} if type == 'scan' else {'sandbox_task_id': object_id}
+    template_metadata = {}
+    if includes:
+        template_metadata['includes'] = includes
+    if sandbox_artifact_types:
+        template_metadata['sandbox_artifact_types'] = sandbox_artifact_types
+    result = api.report_create(type=type,
+                               format=format,
+                               template_id=template_id,
+                               template_metadata=template_metadata or None,
+                               **object_d)
     if nowait:
         output.report_task(result)
     else:
