@@ -20,7 +20,7 @@ SANDBOX_ARTIFACT_TYPES = "report, raw_report, screenshot, recording, dropped_fil
 
 @report.command('create', short_help='Create a report for an instance or sandbox id.')
 @click.argument('format', type=click.Choice(['html', 'pdf', 'zip']))
-@click.argument('type', type=click.Choice(['scan', 'sandbox', 'sandbox_zip']))
+@click.argument('type', type=click.Choice(['scan', 'sandbox']))
 @click.argument('object-id', callback=utils.validate_id)
 @click.option('--template-id', metavar='ID', type=click.STRING)
 @click.option('--includes',
@@ -32,6 +32,10 @@ SANDBOX_ARTIFACT_TYPES = "report, raw_report, screenshot, recording, dropped_fil
                      Can be one ore more of: {SANDBOX_ARTIFACT_TYPES}.  Only applicable to sandbox_zip type.',
               multiple=True,
               callback=lambda _, o, x: x[0].split(',') if len(x) == 1 else x)
+@click.option('--zip-report-ids',
+              help=f'Comma-separated list of report task ids to include in the zip.',
+              multiple=True,
+              callback=lambda _, o, x: x[0].split(',') if len(x) == 1 else x)
 @click.option('-n', '--nowait', is_flag=True,
               help='Does not wait for the report generation to finish, just create it and return right away.')
 @click.option('-t', '--timeout', type=click.INT, default=settings.DEFAULT_REPORT_TIMEOUT,
@@ -39,7 +43,7 @@ SANDBOX_ARTIFACT_TYPES = "report, raw_report, screenshot, recording, dropped_fil
 @click.option('-d', '--destination', type=click.Path(file_okay=False),
               help='Path where to store the downloaded report.', default=os.getcwd())
 @click.pass_context
-def create(ctx, format, type, object_id, template_id, includes, sandbox_artifact_types, nowait, timeout, destination):
+def create(ctx, format, type, object_id, template_id, includes, sandbox_artifact_types, zip_report_ids, nowait, timeout, destination):
     api = ctx.obj['api']
     output = ctx.obj['output']
     object_d = {'instance_id': object_id} if type == 'scan' else {'sandbox_task_id': object_id}
@@ -48,6 +52,10 @@ def create(ctx, format, type, object_id, template_id, includes, sandbox_artifact
         template_metadata['includes'] = includes
     if sandbox_artifact_types:
         template_metadata['sandbox_artifact_types'] = sandbox_artifact_types
+    if format == 'zip':
+        type = 'sandbox_zip'
+        if zip_report_ids:
+            template_metadata['zip_report_ids'] = zip_report_ids
     result = api.report_create(type=type,
                                format=format,
                                template_id=template_id,
