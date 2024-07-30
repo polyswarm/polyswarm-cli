@@ -157,6 +157,9 @@ class JSONOutput(base.BaseOutput):
     def report_template(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 
+    def account_whois(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
+
 
 class PrettyJSONOutput(JSONOutput):
     name = 'pretty-json'

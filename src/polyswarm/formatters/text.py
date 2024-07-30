@@ -543,6 +543,15 @@ class TextOutput(base.BaseOutput):
             output.append(self._white(f'Logo Width: {template.logo_width}'))
         return self._output(output, write)
 
+    def account_whois(self, account, write=True):
+        output = []
+        output.append(self._white('============================= Account Details ============================='))
+        output.append(self._blue(f'Account Number: {account.account_number}'))
+        output.append(self._white(f'Account Name: {account.account_name}'))
+        output.append(self._white(f'Account Type: {account.account_type}'))
+        output.append(self._white(f'Communities: {", ".join(account.communities)}'))
+        return self._output(output, write)
+
     @is_grouped
     def _white(self, text):
         return click.style(text, fg='white')
