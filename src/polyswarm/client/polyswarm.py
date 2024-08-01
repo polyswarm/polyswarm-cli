@@ -28,6 +28,7 @@ from polyswarm.client.engine import engine
 from polyswarm.client.event import activity
 from polyswarm.client.report import report
 from polyswarm.client.report_template import report_template
+from polyswarm.client.account import account
 
 logger = logging.getLogger(__name__)
 
@@ -146,7 +147,7 @@ commands = [
     download, download_id, cat, stream, rescan, rescan_id,
     rules, link, tag, family, metadata,
     engine, known, sandbox, sandbox_list,
-    activity, report, report_template
+    activity, report, report_template, account,
 ]
 
 for command in commands:

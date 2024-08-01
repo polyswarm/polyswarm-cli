@@ -543,6 +543,68 @@ class TextOutput(base.BaseOutput):
             output.append(self._white(f'Logo Width: {template.logo_width}'))
         return self._output(output, write)
 
+    def account_whois(self, account, write=True):
+        output = []
+        output.append(self._white('============================= Account Details ============================='))
+        if account.account_type == 'user':
+            output.append(self._blue(f'User Account Number: {account.account_number}'))
+        else:
+            output.append(self._blue(f'Account Number: {account.account_number}'))
+            if account.account_type == 'team':
+                output.append(self._blue(f'User Account Number: {account.user_account_number}'))
+        output.append(self._white(f'Account Name: {account.account_name}'))
+        output.append(self._white(f'Account Type: {account.account_type}'))
+        if account.tenant:
+            output.append(self._white(f'Tenant: {account.tenant}'))
+        output.append(self._white(f'Communities: {", ".join(account.communities)}'))
+        return self._output(output, write)
+
+    def account_features(self, quota, write=True):
+        output = []
+        output.append(self._white('========================= Account Plan ========================='))
+
+        if quota.user_account_number == quota.account_number:
+            output.append(self._blue(f'User Account Number: {quota.user_account_number}'))
+        else:
+            output.append(self._blue(f'Account Number: {quota.account_number}'))
+            output.append(self._blue(f'User Account Number: {quota.user_account_number}'))
+        if quota.tenant:
+            output.append(self._white(f'Tenant: {quota.tenant}'))
+        output.append(self._white(f'Account Plan Name: {quota.account_plan_name}'))
+        output.append(self._white(f'Plan Period Start: {quota.plan_period_start}'))
+        if quota.plan_period_end:
+            output.append(self._white(f'Plan Period End: {quota.plan_period_end}'))
+        output.append(self._white(f'Window Start: {quota.window_start}'))
+        output.append(self._white(f'Window End: {quota.window_end}'))
+        output.append(self._white(f'Daily API Limit: {quota.daily_api_limit}'))
+        output.append(self._white(f'Daily API Remaining: {quota.daily_api_remaining}'))
+        output.append(self._white(f'Has Stream Access?: {"Yes" if quota.has_stream_access else "No"}'))
+        if quota.is_trial:
+            output.append(self._white('Is Trial?: Yes'))
+            if quota.is_trial_expired:
+                output.append(self._red('Is Trial Expired?: Yes'))
+            else:
+                output.append(self._white('Is Trial Expired?: No'))
+            output.append(self._white(f'Trial Started At: {quota.trial_started_at}'))
+            output.append(self._white(f'Trial Ended At: {quota.trial_ended_at}'))
+        else:
+            output.append(self._white('Is Trial?: No'))
+        output.append(self._white('\n================== Account Features and Quota =================='))
+        for feature in quota.features:
+            output.append(self._yellow(f'Name: {feature["name"]}'))
+            output.append(self._white(f'Tag: {feature["tag"]}'))
+            output.append(self._white(f'Value: {feature["value"]}'))
+            if feature["base_uses"]:
+                output.append(self._white(f'Base Uses: {feature["base_uses"]}'))
+                if feature["remaining_uses"]:
+                    output.append(self._white(f'Remaining Uses: {feature["remaining_uses"]}'))
+                else:
+                    output.append(self._red(f'Remaining Uses: {feature["remaining_uses"]}'))
+                if feature["overage"]:
+                    output.append(self._white(f'Overage: {feature["overage"]}'))
+            output.append(self._white("---"))
+        return self._output(output, write)
+
     @is_grouped
     def _white(self, text):
         return click.style(text, fg='white')
