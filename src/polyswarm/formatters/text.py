@@ -546,7 +546,12 @@ class TextOutput(base.BaseOutput):
     def account_whois(self, account, write=True):
         output = []
         output.append(self._white('============================= Account Details ============================='))
-        output.append(self._blue(f'Account Number: {account.account_number}'))
+        if account.account_type == 'user':
+            output.append(self._blue(f'User Account Number: {account.account_number}'))
+        else:
+            output.append(self._blue(f'Account Number: {account.account_number}'))
+            if account.account_type == 'team':
+                output.append(self._blue(f'User Account Number: {account.user_account_number}'))
         output.append(self._white(f'Account Name: {account.account_name}'))
         output.append(self._white(f'Account Type: {account.account_type}'))
         if account.tenant:
