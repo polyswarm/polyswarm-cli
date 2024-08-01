@@ -581,7 +581,10 @@ class TextOutput(base.BaseOutput):
         output.append(self._white(f'Has Stream Access?: {"Yes" if quota.has_stream_access else "No"}'))
         if quota.is_trial:
             output.append(self._white('Is Trial?: Yes'))
-            output.append(self._white(f'Is Trial Expired?: {"Yes" if quota.is_trial_expired else "No"}'))
+            if quota.is_trial_expired:
+                output.append(self._red('Is Trial Expired?: Yes'))
+            else:
+                output.append(self._white('Is Trial Expired?: No'))
             output.append(self._white(f'Trial Started At: {quota.trial_started_at}'))
             output.append(self._white(f'Trial Ended At: {quota.trial_ended_at}'))
         else:
@@ -590,15 +593,15 @@ class TextOutput(base.BaseOutput):
         for feature in quota.features:
             output.append(self._yellow(f'Name: {feature["name"]}'))
             output.append(self._white(f'Tag: {feature["tag"]}'))
-            if feature["value"]:
-                output.append(self._white(f'Enabled?: Yes'))
-                if feature["base_uses"]:
-                    output.append(self._white(f'Base Uses: {feature["base_uses"]}'))
+            output.append(self._white(f'Value: {feature["value"]}'))
+            if feature["base_uses"]:
+                output.append(self._white(f'Base Uses: {feature["base_uses"]}'))
+                if feature["remaining_uses"]:
                     output.append(self._white(f'Remaining Uses: {feature["remaining_uses"]}'))
-                    if feature["overage"]:
-                        output.append(self._white(f'Overage: {feature["overage"]}'))
-            else:
-                output.append(self._white(f'Enabled?: No'))
+                else:
+                    output.append(self._red(f'Remaining Uses: {feature["remaining_uses"]}'))
+                if feature["overage"]:
+                    output.append(self._white(f'Overage: {feature["overage"]}'))
             output.append(self._white("---"))
         return self._output(output, write)
 
