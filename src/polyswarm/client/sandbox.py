@@ -47,9 +47,15 @@ def file(ctx, path, sandbox, vm_slug, internet_disabled, is_zip, zip_password):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-
+    if is_zip or zip_password:
+        preprocessing = {'type': 'zip'}
+        if zip_password:
+            preprocessing['password'] = zip_password
+    else:
+        preprocessing = None
     output.sandbox_task(api.sandbox_file(path, sandbox, vm_slug, network_enabled=not internet_disabled,
-                                         is_zip=is_zip, zip_password=zip_password))
+                                         preprocessing=preprocessing))
+
 
 @sandbox.command('url', short_help='Submit a url to be sandboxed.')
 @click.argument('sandbox', type=click.STRING)
