@@ -32,7 +32,7 @@ def submit(ctx, provider_slug, artifact_id, vm_slug, internet_disabled):
 
 
 @sandbox.command('file', short_help='Submit a local file to be sandboxed.')
-@click.argument('sandbox', type=click.STRING)
+@click.argument('provider', type=click.STRING)
 @click.argument('path', type=click.Path(exists=True), required=True)
 @click.option('--vm_slug', 'vm_slug', type=click.STRING)
 @click.option('--internet-disabled', 'internet_disabled', type=click.BOOL, is_flag=True, default=False)
@@ -41,7 +41,7 @@ def submit(ctx, provider_slug, artifact_id, vm_slug, internet_disabled):
 @click.option('-p', '--zip-password', type=click.STRING,
               help='Will use this password to decompress the zip file. If provided, will handle the file as a zip.')
 @click.pass_context
-def file(ctx, path, sandbox, vm_slug, internet_disabled, is_zip, zip_password):
+def file(ctx, path, provider, vm_slug, internet_disabled, is_zip, zip_password):
     """
     Submit a local file to be sandboxed.
     """
@@ -53,20 +53,23 @@ def file(ctx, path, sandbox, vm_slug, internet_disabled, is_zip, zip_password):
             preprocessing['password'] = zip_password
     else:
         preprocessing = None
-    output.sandbox_task(api.sandbox_file(path, sandbox, vm_slug, network_enabled=not internet_disabled,
+    output.sandbox_task(api.sandbox_file(path, provider, vm_slug, network_enabled=not internet_disabled,
                                          preprocessing=preprocessing))
 
 
 @sandbox.command('url', short_help='Submit a url to be sandboxed.')
-@click.argument('sandbox', type=click.STRING)
+@click.argument('provider', type=click.STRING)
 @click.argument('url', type=click.STRING, required=False)
 @click.option('--qrcode-file', type=click.Path(exists=True),
               help='QR Code image file with the URL as payload.')
-@click.option('--vm_slug', 'vm_slug', type=click.STRING)
-@click.option('--browser', 'browser', type=click.STRING)
+@click.option('--vm_slug', 'vm_slug', type=click.STRING,
+              help="The slug of the Virtual machine to use. Check the list "
+                   "of available virtual machines with the providers command.")
+@click.option('--browser', 'browser', type=click.STRING,
+              help="Which browser to use, e.g. 'firefox' or 'edge'.")
 @click.pass_context
 @utils.any_provided('url', 'qrcode_file')
-def url(ctx, url, qrcode_file, sandbox, vm_slug, browser):
+def url(ctx, url, qrcode_file, provider, vm_slug, browser):
     """
     Submit an url to be sandboxed.
     """
@@ -80,7 +83,7 @@ def url(ctx, url, qrcode_file, sandbox, vm_slug, browser):
     output = ctx.obj['output']
 
     output.sandbox_task(api.sandbox_url(url,
-                                        sandbox,
+                                        provider,
                                         vm_slug,
                                         artifact=qrcode_file,
                                         artifact_name=qrcode_file,
@@ -88,11 +91,11 @@ def url(ctx, url, qrcode_file, sandbox, vm_slug, browser):
                                         browser=browser))
 
 
-@sandbox.command('providers', short_help='List the names of available sandboxes.')
+@sandbox.command('providers', short_help='List the names of available sandbox providers and VMs.')
 @click.pass_context
 def sandbox_list(ctx):
     """
-    List the names of available sandbox providers.
+    List the names of available sandbox providers, and the virtual machines supported by each.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
