@@ -59,18 +59,33 @@ def file(ctx, path, sandbox, vm_slug, internet_disabled, is_zip, zip_password):
 
 @sandbox.command('url', short_help='Submit a url to be sandboxed.')
 @click.argument('sandbox', type=click.STRING)
-@click.argument('url', type=click.STRING, required=True)
+@click.argument('url', type=click.STRING, required=False)
+@click.option('--qrcode-file', type=click.Path(exists=True),
+              help='QR Code image file with the URL as payload.')
 @click.option('--vm_slug', 'vm_slug', type=click.STRING)
 @click.option('--browser', 'browser', type=click.STRING)
 @click.pass_context
-def url(ctx, url, sandbox, vm_slug, browser):
+@utils.any_provided('url', 'qrcode_file')
+def url(ctx, url, qrcode_file, sandbox, vm_slug, browser):
     """
-    Submit a url to be sandboxed.
+    Submit an url to be sandboxed.
     """
+    if qrcode_file:
+        if url:
+            raise click.BadArgumentUsage('--qrcode-file cannot be used with URL.')
+        preprocessing = {'type': 'qrcode'}
+    else:
+        preprocessing = None
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.sandbox_task(api.sandbox_url(url, sandbox, vm_slug, browser=browser))
+    output.sandbox_task(api.sandbox_url(url,
+                                        sandbox,
+                                        vm_slug,
+                                        artifact=qrcode_file,
+                                        artifact_name=qrcode_file,
+                                        preprocessing=preprocessing,
+                                        browser=browser))
 
 
 @sandbox.command('providers', short_help='List the names of available sandboxes.')
