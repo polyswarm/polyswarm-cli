@@ -45,7 +45,7 @@ def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_passwor
 
 
 @scan.command('url', short_help='Scan url.')
-@click.option('--from-qrcode', type=click.Path(exists=True),
+@click.option('--qrcode-file', type=click.Path(exists=True),
               help='QR Code image file with the URL to scan as payload.')
 @click.option('-r', '--url-file', help='File of URLs, one per line.', type=click.File('r'))
 @click.option('-t', '--timeout', type=click.INT, default=settings.DEFAULT_SCAN_TIMEOUT,
@@ -56,17 +56,17 @@ def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_passwor
               help='Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".')
 @click.argument('url', nargs=-1, type=click.STRING)
 @click.pass_context
-@utils.any_provided('url', 'url_file', 'from_qrcode')
-def url_(ctx, from_qrcode, url_file, timeout, nowait, url, scan_config):
+@utils.any_provided('url', 'url_file', 'qrcode_file')
+def url_(ctx, qrcode_file, url_file, timeout, nowait, url, scan_config):
     """
     Scan files or directories via PolySwarm
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    if from_qrcode:
+    if qrcode_file:
         if url or url_file:
-            raise click.BadArgumentUsage('--from-qrcode cannot be used with URL or -r, --url-file arguments.')
-        urls = [from_qrcode]
+            raise click.BadArgumentUsage('--qrcode-file cannot be used with URL or -r, --url-file arguments.')
+        urls = [qrcode_file]
         preprocessing = {'type': 'qrcode'}
     else:
         urls = list(url)

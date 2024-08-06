@@ -347,21 +347,26 @@ class TextOutput(base.BaseOutput):
     def sandbox_task(self, task, write=True):
         output = []
         output.append(self._white('============================= Sandbox Task ============================='))
-        output.append(self._blue(f'id: {task.id}'))
-        output.append(self._blue(f'sha256: {task.sha256}'))
-        output.append(self._blue(f'sandbox: {task.sandbox}'))
-        output.append(self._white(f'created: {task.created}'))
-        output.append(self._white(f'community: {task.community}'))
-        output.append(self._white(f'instance id: {task.instance_id}'))
-        output.append(self._white(f'status: {task.status}'))
+        output.append(self._blue(f'ID: {task.id}'))
+        output.append(self._blue(f'SHA256: {task.sha256}'))
+        output.append(self._white(f'Sandbox Provider: {task.sandbox}'))
+        output.append(self._white(f'Created: {task.created}'))
+        output.append(self._white(f'Community: {task.community}'))
+        output.append(self._white(f'Instance ID: {task.instance_id}'))
+        if task.status in ('FAILED', 'FAILED_REIMBURSED', 'TIMEDOUT_REIMBURSED', 'TIMEDOUT'):
+            output.append(self._red(f'Status: {task.status}'))
+        elif task.status == 'SUCCEEDED':
+            output.append(self._green(f'Status: {task.status}'))
+        else:
+            output.append(self._yellow(f'Status: {task.status}'))
 
         if task.account_number:
-            output.append(self._white(f'account number: {task.account_number}'))
+            output.append(self._white(f'Account Number: {task.account_number}'))
         if task.team_account_number:
-            output.append(self._white(f'team account number: {task.team_account_number}'))
+            output.append(self._white(f'Team Account Number: {task.team_account_number}'))
 
         if task.sandbox_artifacts:
-            output.append(self._white('sandbox artifacts:'))
+            output.append(self._white('Sandbox Artifacts:'))
         self._open_group()
         for artifact in task.sandbox_artifacts:
             output_string = f'{artifact.type}: '
@@ -369,7 +374,7 @@ class TextOutput(base.BaseOutput):
                 output_string += f'{artifact.name}, '
             if artifact.mimetype:
                 output_string += f'{artifact.mimetype}, '
-            output_string += f'instance id: {artifact.instance_id}'
+            output_string += f'Instance ID: {artifact.instance_id}'
             output.append(self._white(output_string))
         self._close_group()
 
