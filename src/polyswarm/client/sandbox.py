@@ -119,43 +119,46 @@ def task_status(ctx, sandbox_task_id):
 
 
 @sandbox.command('lookup', short_help='Lookup the latest sandbox results for a hash.')
-@click.argument('sandbox_', type=click.STRING, required=True)
+@click.argument('provider', type=click.STRING, required=True)
 @click.argument('sha256', type=click.STRING, required=True)
 @click.pass_context
-def task_latest(ctx, sha256, sandbox_):
+def task_latest(ctx, sha256, provider):
     """
-    Lookup the latest results of sandbox data for the tuple (hash, community, sandbox name).
+    Lookup the latest results of sandbox data for the tuple (SHA256, community, sandbox PROVIDER name).
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.sandbox_task(api.sandbox_task_latest(sha256, sandbox_))
+    output.sandbox_task(api.sandbox_task_latest(sha256, provider))
 
 
 @sandbox.command('search', short_help='Search for all the sandbox results for a hash.')
 @click.argument('sha256', type=click.STRING, required=True)
-@click.option('--sandbox', 'sandbox_', type=click.STRING, help='Filter by slug of the sandbox provider')
-@click.option('--start-date', 'start_date', type=click.STRING)
-@click.option('--end-date', 'end_date', type=click.STRING)
+@click.option('--provider', type=click.STRING, help='Filter by slug of the sandbox provider')
+@click.option('--start-date', 'start_date', type=click.STRING,
+              help='Tasks created the day passed or after (ISO format).')
+@click.option('--end-date', 'end_date', type=click.STRING,
+              help='Tasks created the day passed or before (ISO format).')
 @click.option('--status', 'status', type=click.STRING)
 @click.option('--account-id', 'account_id', type=click.STRING)
 @click.pass_context
-def task_list(ctx, sha256, sandbox_, start_date, end_date, status, account_id):
+def task_list(ctx, sha256, provider, start_date, end_date, status, account_id):
     """
-    Search for all the sandbox results identified by the tuple (hash, community, [sandbox], [start_date], [end_date], [status]).
+    Search for all the sandbox results identified by the tuple (SHA256, community, [sandbox PROVIDER name],
+    [start_date], [end_date], [status]).
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    for task in api.sandbox_task_list(sha256, sandbox=sandbox_, start_date=start_date, end_date=end_date, status=status,
+    for task in api.sandbox_task_list(sha256, sandbox=provider, start_date=start_date, end_date=end_date, status=status,
                                       account_id=account_id):
         output.sandbox_task(task)
 
 
 @sandbox.command('my-tasks', short_help='Search for all the sandbox results created by my account or team.')
 @click.option('--provider', 'sandbox_', type=click.STRING, help='Filter by slug of the sandbox provider.')
-@click.option('--start-date', type=click.STRING, help='List tasks created the day passed or after (ISO format).')
-@click.option('--end-date', type=click.STRING, help='List tasks created the day passed or before (ISO format).')
+@click.option('--start-date', type=click.STRING, help='Tasks created the day passed or after (ISO format).')
+@click.option('--end-date', type=click.STRING, help='Tasks created the day passed or before (ISO format).')
 @click.option('--sha256', type=click.STRING, help='Only list tasks with the SHA256 passed.')
 @click.pass_context
 def my_task_list(ctx, sandbox_, start_date, end_date, sha256):
