@@ -153,10 +153,10 @@ def task_list(ctx, sha256, sandbox_, start_date, end_date, status, account_id):
 
 
 @sandbox.command('my-tasks', short_help='Search for all the sandbox results created by my account or team.')
-@click.option('--sandbox', 'sandbox_', type=click.STRING, help='Filter by slug of the sandbox provider')
-@click.option('--start-date', type=click.STRING)
-@click.option('--end-date', type=click.STRING)
-@click.option('--sha256', type=click.STRING)
+@click.option('--provider', 'sandbox_', type=click.STRING, help='Filter by slug of the sandbox provider.')
+@click.option('--start-date', type=click.STRING, help='List tasks created the day passed or after (ISO format).')
+@click.option('--end-date', type=click.STRING, help='List tasks created the day passed or before (ISO format).')
+@click.option('--sha256', type=click.STRING, help='Only list tasks with the SHA256 passed.')
 @click.pass_context
 def my_task_list(ctx, sandbox_, start_date, end_date, sha256):
     """
