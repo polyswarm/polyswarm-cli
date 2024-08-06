@@ -349,6 +349,13 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('============================= Sandbox Task ============================='))
         output.append(self._blue(f'ID: {task.id}'))
         output.append(self._blue(f'SHA256: {task.sha256}'))
+        output.append(self._white(f'Type: {task.config["artifact_type"]}'))
+        if task.config["artifact_type"] == 'URL':
+            output.append(self._white(f'URL: {task.artifact["filename"]}'))
+        else:
+            output.append(self._white(f'Filename: {task.artifact["filename"]}'))
+            output.append(self._white(f'File type: mimetype: {task.artifact["mimetype"]}, '
+                                      f'extended_info: {task.artifact["extended_type"]}'))
         output.append(self._white(f'Sandbox Provider: {task.sandbox}'))
         output.append(self._white(f'Created: {task.created}'))
         output.append(self._white(f'Community: {task.community}'))
