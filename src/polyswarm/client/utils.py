@@ -54,13 +54,20 @@ def validate_hashes(ctx, param, value):
     return value
 
 
+def param_to_str(param):
+    if isinstance(param, click.Argument):
+        return param.name.upper()
+    # click.Option
+    return ", ".join(param.opts)
+
+
 def validate_key(ctx, param, value):
     if not resources.core.is_hex(value) or len(value) != 32:
         if all(     # workaround for the inability of Click to process the -h/--help argument first
                 map(lambda x: x not in ctx.help_option_names, sys.argv)
         ):
             raise click.BadParameter(
-                f'Invalid API key. Make sure you specified your key via {", ".join(param.opts)} option, '
+                f'Invalid API key. Make sure you specified your key via {param_to_str(param)} option, '
                 f'or through the environment variable {param.envvar} and try again.')
     return value
 
@@ -79,7 +86,7 @@ def any_provided(*required):
             if not any(true_value_safe_bool(kwargs[r]) for r in required):
                 required_commands = {c.name: c for c in ctx.command.params[::-1] if c.name in required}
                 if len(required) > 1:
-                    human_names = [c.human_readable_name for c in required_commands.values()]
+                    human_names = [param_to_str(c) for c in required_commands.values()]
                     names = "|".join(human_names)
                     raise click.exceptions.BadArgumentUsage(f'At least one of [{names}] should be provided.')
                 else:

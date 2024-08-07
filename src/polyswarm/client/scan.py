@@ -34,12 +34,19 @@ def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_passwor
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-
-    for instance in api.scan_file(path, recursive, timeout, nowait, scan_config, is_zip, zip_password):
+    if is_zip or zip_password:
+        preprocessing = {'type': 'zip'}
+        if zip_password:
+            preprocessing['password'] = zip_password
+    else:
+        preprocessing = None
+    for instance in api.scan_file(path, recursive, timeout, nowait, scan_config, preprocessing):
         output.artifact_instance(instance)
 
 
 @scan.command('url', short_help='Scan url.')
+@click.option('--qrcode-file', type=click.Path(exists=True),
+              help='QR Code image file with the URL to scan as payload.')
 @click.option('-r', '--url-file', help='File of URLs, one per line.', type=click.File('r'))
 @click.option('-t', '--timeout', type=click.INT, default=settings.DEFAULT_SCAN_TIMEOUT,
               help=f'How long to wait for results (default: {settings.DEFAULT_SCAN_TIMEOUT}).')
@@ -49,17 +56,24 @@ def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_passwor
               help='Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".')
 @click.argument('url', nargs=-1, type=click.STRING)
 @click.pass_context
-@utils.any_provided('url', 'url_file')
-def url_(ctx, url_file, timeout, nowait, url, scan_config):
+@utils.any_provided('url', 'url_file', 'qrcode_file')
+def url_(ctx, qrcode_file, url_file, timeout, nowait, url, scan_config):
     """
     Scan files or directories via PolySwarm
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    urls = list(url)
-    if url_file:
-        urls.extend([u.strip() for u in url_file.readlines()])
-    for instance in api.scan_url(urls, timeout, nowait, scan_config):
+    if qrcode_file:
+        if url or url_file:
+            raise click.BadArgumentUsage('--qrcode-file cannot be used with URL or -r, --url-file arguments.')
+        urls = [qrcode_file]
+        preprocessing = {'type': 'qrcode'}
+    else:
+        urls = list(url)
+        if url_file:
+            urls.extend([u.strip() for u in url_file.readlines()])
+        preprocessing = None
+    for instance in api.scan_url(urls, timeout, nowait, scan_config, preprocessing):
         output.artifact_instance(instance)
 
 

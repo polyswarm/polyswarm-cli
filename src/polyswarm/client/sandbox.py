@@ -32,7 +32,7 @@ def submit(ctx, provider_slug, artifact_id, vm_slug, internet_disabled):
 
 
 @sandbox.command('file', short_help='Submit a local file to be sandboxed.')
-@click.argument('sandbox', type=click.STRING)
+@click.argument('provider', type=click.STRING)
 @click.argument('path', type=click.Path(exists=True), required=True)
 @click.option('--vm_slug', 'vm_slug', type=click.STRING)
 @click.option('--internet-disabled', 'internet_disabled', type=click.BOOL, is_flag=True, default=False)
@@ -41,37 +41,61 @@ def submit(ctx, provider_slug, artifact_id, vm_slug, internet_disabled):
 @click.option('-p', '--zip-password', type=click.STRING,
               help='Will use this password to decompress the zip file. If provided, will handle the file as a zip.')
 @click.pass_context
-def file(ctx, path, sandbox, vm_slug, internet_disabled, is_zip, zip_password):
+def file(ctx, path, provider, vm_slug, internet_disabled, is_zip, zip_password):
     """
     Submit a local file to be sandboxed.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
+    if is_zip or zip_password:
+        preprocessing = {'type': 'zip'}
+        if zip_password:
+            preprocessing['password'] = zip_password
+    else:
+        preprocessing = None
+    output.sandbox_task(api.sandbox_file(path, provider, vm_slug, network_enabled=not internet_disabled,
+                                         preprocessing=preprocessing))
 
-    output.sandbox_task(api.sandbox_file(path, sandbox, vm_slug, network_enabled=not internet_disabled,
-                                         is_zip=is_zip, zip_password=zip_password))
 
 @sandbox.command('url', short_help='Submit a url to be sandboxed.')
-@click.argument('sandbox', type=click.STRING)
-@click.argument('url', type=click.STRING, required=True)
-@click.option('--vm_slug', 'vm_slug', type=click.STRING)
-@click.option('--browser', 'browser', type=click.STRING)
+@click.argument('provider', type=click.STRING)
+@click.argument('url', type=click.STRING, required=False)
+@click.option('--qrcode-file', type=click.Path(exists=True),
+              help='QR Code image file with the URL as payload.')
+@click.option('--vm_slug', 'vm_slug', type=click.STRING,
+              help="The slug of the Virtual machine to use. Check the list "
+                   "of available virtual machines with the providers command.")
+@click.option('--browser', 'browser', type=click.STRING,
+              help="Which browser to use, e.g. 'firefox' or 'edge'.")
 @click.pass_context
-def url(ctx, url, sandbox, vm_slug, browser):
+@utils.any_provided('url', 'qrcode_file')
+def url(ctx, url, qrcode_file, provider, vm_slug, browser):
     """
-    Submit a url to be sandboxed.
+    Submit an url to be sandboxed.
     """
+    if qrcode_file:
+        if url:
+            raise click.BadArgumentUsage('--qrcode-file cannot be used with URL.')
+        preprocessing = {'type': 'qrcode'}
+    else:
+        preprocessing = None
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.sandbox_task(api.sandbox_url(url, sandbox, vm_slug, browser=browser))
+    output.sandbox_task(api.sandbox_url(url,
+                                        provider,
+                                        vm_slug,
+                                        artifact=qrcode_file,
+                                        artifact_name=qrcode_file,
+                                        preprocessing=preprocessing,
+                                        browser=browser))
 
 
-@sandbox.command('providers', short_help='List the names of available sandboxes.')
+@sandbox.command('providers', short_help='List the names of available sandbox providers and VMs.')
 @click.pass_context
 def sandbox_list(ctx):
     """
-    List the names of available sandbox providers.
+    List the names of available sandbox providers, and the virtual machines supported by each.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -95,50 +119,54 @@ def task_status(ctx, sandbox_task_id):
 
 
 @sandbox.command('lookup', short_help='Lookup the latest sandbox results for a hash.')
-@click.argument('sandbox_', type=click.STRING, required=True)
+@click.argument('provider', type=click.STRING, required=True)
 @click.argument('sha256', type=click.STRING, required=True)
 @click.pass_context
-def task_latest(ctx, sha256, sandbox_):
+def task_latest(ctx, sha256, provider):
     """
-    Lookup the latest results of sandbox data for the tuple (hash, community, sandbox name).
+    Lookup the latest results of sandbox data for the tuple (SHA256, community, sandbox PROVIDER name).
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    output.sandbox_task(api.sandbox_task_latest(sha256, sandbox_))
+    output.sandbox_task(api.sandbox_task_latest(sha256, provider))
 
 
 @sandbox.command('search', short_help='Search for all the sandbox results for a hash.')
 @click.argument('sha256', type=click.STRING, required=True)
-@click.option('--sandbox', 'sandbox_', type=click.STRING)
-@click.option('--start-date', 'start_date', type=click.STRING)
-@click.option('--end-date', 'end_date', type=click.STRING)
+@click.option('--provider', type=click.STRING, help='Filter by slug of the sandbox provider')
+@click.option('--start-date', 'start_date', type=click.STRING,
+              help='Tasks created the day passed or after (ISO format).')
+@click.option('--end-date', 'end_date', type=click.STRING,
+              help='Tasks created the day passed or before (ISO format).')
 @click.option('--status', 'status', type=click.STRING)
 @click.option('--account-id', 'account_id', type=click.STRING)
 @click.pass_context
-def task_list(ctx, sha256, sandbox_, start_date, end_date, status, account_id):
+def task_list(ctx, sha256, provider, start_date, end_date, status, account_id):
     """
-    Search for all the sandbox results identified by the tuple (hash, community, [sandbox], [start_date], [end_date], [status]).
+    Search for all the sandbox results identified by the tuple (SHA256, community, [sandbox PROVIDER name],
+    [start_date], [end_date], [status]).
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    for task in api.sandbox_task_list(sha256, sandbox=sandbox_, start_date=start_date, end_date=end_date, status=status,
+    for task in api.sandbox_task_list(sha256, sandbox=provider, start_date=start_date, end_date=end_date, status=status,
                                       account_id=account_id):
         output.sandbox_task(task)
 
 
 @sandbox.command('my-tasks', short_help='Search for all the sandbox results created by my account or team.')
-@click.option('--sandbox', 'sandbox_', type=click.STRING)
-@click.option('--start-date', type=click.STRING)
-@click.option('--end-date', type=click.STRING)
+@click.option('--provider', 'sandbox_', type=click.STRING, help='Filter by slug of the sandbox provider.')
+@click.option('--start-date', type=click.STRING, help='Tasks created the day passed or after (ISO format).')
+@click.option('--end-date', type=click.STRING, help='Tasks created the day passed or before (ISO format).')
+@click.option('--sha256', type=click.STRING, help='Only list tasks with the SHA256 passed.')
 @click.pass_context
-def my_task_list(ctx, sandbox_, start_date, end_date):
+def my_task_list(ctx, sandbox_, start_date, end_date, sha256):
     """
     List the sandbox results associated with my account/team for the tuple (community, [sandbox], [start_date], [end_date])
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    for task in api.sandbox_my_tasks_list(sandbox=sandbox_, start_date=start_date, end_date=end_date):
+    for task in api.sandbox_my_tasks_list(sandbox=sandbox_, start_date=start_date, end_date=end_date, sha256=sha256):
         output.sandbox_task(task)

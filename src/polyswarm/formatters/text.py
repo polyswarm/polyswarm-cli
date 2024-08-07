@@ -347,21 +347,33 @@ class TextOutput(base.BaseOutput):
     def sandbox_task(self, task, write=True):
         output = []
         output.append(self._white('============================= Sandbox Task ============================='))
-        output.append(self._blue(f'id: {task.id}'))
-        output.append(self._blue(f'sha256: {task.sha256}'))
-        output.append(self._blue(f'sandbox: {task.sandbox}'))
-        output.append(self._white(f'created: {task.created}'))
-        output.append(self._white(f'community: {task.community}'))
-        output.append(self._white(f'instance id: {task.instance_id}'))
-        output.append(self._white(f'status: {task.status}'))
+        output.append(self._blue(f'ID: {task.id}'))
+        output.append(self._blue(f'SHA256: {task.sha256}'))
+        output.append(self._white(f'Type: {task.config["artifact_type"]}'))
+        if task.config["artifact_type"] == 'URL':
+            output.append(self._white(f'URL: {task.artifact["filename"]}'))
+        else:
+            output.append(self._white(f'Filename: {task.artifact["filename"]}'))
+            output.append(self._white(f'File type: mimetype: {task.artifact["mimetype"]}, '
+                                      f'extended_info: {task.artifact["extended_type"]}'))
+        output.append(self._white(f'Sandbox Provider: {task.sandbox}'))
+        output.append(self._white(f'Created: {task.created}'))
+        output.append(self._white(f'Community: {task.community}'))
+        output.append(self._white(f'Instance ID: {task.instance_id}'))
+        if task.status in ('FAILED', 'FAILED_REIMBURSED', 'TIMEDOUT_REIMBURSED', 'TIMEDOUT'):
+            output.append(self._red(f'Status: {task.status}'))
+        elif task.status == 'SUCCEEDED':
+            output.append(self._green(f'Status: {task.status}'))
+        else:
+            output.append(self._yellow(f'Status: {task.status}'))
 
         if task.account_number:
-            output.append(self._white(f'account number: {task.account_number}'))
+            output.append(self._white(f'Account Number: {task.account_number}'))
         if task.team_account_number:
-            output.append(self._white(f'team account number: {task.team_account_number}'))
+            output.append(self._white(f'Team Account Number: {task.team_account_number}'))
 
         if task.sandbox_artifacts:
-            output.append(self._white('sandbox artifacts:'))
+            output.append(self._white('Sandbox Artifacts:'))
         self._open_group()
         for artifact in task.sandbox_artifacts:
             output_string = f'{artifact.type}: '
@@ -369,7 +381,7 @@ class TextOutput(base.BaseOutput):
                 output_string += f'{artifact.name}, '
             if artifact.mimetype:
                 output_string += f'{artifact.mimetype}, '
-            output_string += f'instance id: {artifact.instance_id}'
+            output_string += f'Instance ID: {artifact.instance_id}'
             output.append(self._white(output_string))
         self._close_group()
 
@@ -541,6 +553,68 @@ class TextOutput(base.BaseOutput):
             output.append(self._white(f'Logo URL: {template.logo_url}'))
             output.append(self._white(f'Logo Height: {template.logo_height}'))
             output.append(self._white(f'Logo Width: {template.logo_width}'))
+        return self._output(output, write)
+
+    def account_whois(self, account, write=True):
+        output = []
+        output.append(self._white('============================= Account Details ============================='))
+        if account.account_type == 'user':
+            output.append(self._blue(f'User Account Number: {account.account_number}'))
+        else:
+            output.append(self._blue(f'Account Number: {account.account_number}'))
+            if account.account_type == 'team':
+                output.append(self._blue(f'User Account Number: {account.user_account_number}'))
+        output.append(self._white(f'Account Name: {account.account_name}'))
+        output.append(self._white(f'Account Type: {account.account_type}'))
+        if account.tenant:
+            output.append(self._white(f'Tenant: {account.tenant}'))
+        output.append(self._white(f'Communities: {", ".join(account.communities)}'))
+        return self._output(output, write)
+
+    def account_features(self, quota, write=True):
+        output = []
+        output.append(self._white('========================= Account Plan ========================='))
+
+        if quota.user_account_number == quota.account_number:
+            output.append(self._blue(f'User Account Number: {quota.user_account_number}'))
+        else:
+            output.append(self._blue(f'Account Number: {quota.account_number}'))
+            output.append(self._blue(f'User Account Number: {quota.user_account_number}'))
+        if quota.tenant:
+            output.append(self._white(f'Tenant: {quota.tenant}'))
+        output.append(self._white(f'Account Plan Name: {quota.account_plan_name}'))
+        output.append(self._white(f'Plan Period Start: {quota.plan_period_start}'))
+        if quota.plan_period_end:
+            output.append(self._white(f'Plan Period End: {quota.plan_period_end}'))
+        output.append(self._white(f'Window Start: {quota.window_start}'))
+        output.append(self._white(f'Window End: {quota.window_end}'))
+        output.append(self._white(f'Daily API Limit: {quota.daily_api_limit}'))
+        output.append(self._white(f'Daily API Remaining: {quota.daily_api_remaining}'))
+        output.append(self._white(f'Has Stream Access?: {"Yes" if quota.has_stream_access else "No"}'))
+        if quota.is_trial:
+            output.append(self._white('Is Trial?: Yes'))
+            if quota.is_trial_expired:
+                output.append(self._red('Is Trial Expired?: Yes'))
+            else:
+                output.append(self._white('Is Trial Expired?: No'))
+            output.append(self._white(f'Trial Started At: {quota.trial_started_at}'))
+            output.append(self._white(f'Trial Ended At: {quota.trial_ended_at}'))
+        else:
+            output.append(self._white('Is Trial?: No'))
+        output.append(self._white('\n================== Account Features and Quota =================='))
+        for feature in quota.features:
+            output.append(self._yellow(f'Name: {feature["name"]}'))
+            output.append(self._white(f'Tag: {feature["tag"]}'))
+            output.append(self._white(f'Value: {feature["value"]}'))
+            if feature["base_uses"]:
+                output.append(self._white(f'Base Uses: {feature["base_uses"]}'))
+                if feature["remaining_uses"]:
+                    output.append(self._white(f'Remaining Uses: {feature["remaining_uses"]}'))
+                else:
+                    output.append(self._red(f'Remaining Uses: {feature["remaining_uses"]}'))
+                if feature["overage"]:
+                    output.append(self._white(f'Overage: {feature["overage"]}'))
+            output.append(self._white("---"))
         return self._output(output, write)
 
     @is_grouped
