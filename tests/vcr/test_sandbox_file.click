@@ -1,4 +1,6 @@
-result: '{"account_number": null, "community": "gamma", "config": {"provider": {"id":
+result: '{"account_number": null, "artifact": {"extended_type": null,
+  "filename": "18e5b8fe65e8f73c3a4a637c258c02aeec8a6ab702b15b7ee73f5631a9879e40", "mimetype": "text/plain", "size":68},
+  "community": "gamma", "config": {"provider": {"id":
   "2", "name": "triage", "slug": "triage", "tool": "triage_sandbox_v0"}, "vm": {"Architecture":
   "x64", "id": "200", "language": "English (United States)", "name": "windows10-1703-x64",
   "os_name": "Windows 10 1703 x64", "os_version": "10.0.15063 Build 15063", "profile":
