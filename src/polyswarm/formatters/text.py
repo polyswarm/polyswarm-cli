@@ -109,7 +109,7 @@ class TextOutput(base.BaseOutput):
         if instance.failed:
             output.append(self._red('Status: Failed'))
             if instance.failed_reason:
-                output.append(self._red(f'Failed Reason: {instance.failed_reason}'))
+                output.append(self._red(f'Failure Reason: {instance.failed_reason}'))
         elif instance.window_closed:
             output.append(self._white('Status: Assertion window closed'))
         elif instance.community == 'stream':
