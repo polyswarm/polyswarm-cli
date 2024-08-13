@@ -351,8 +351,9 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('============================= Sandbox Task ============================='))
         output.append(self._blue(f'ID: {task.id}'))
         output.append(self._blue(f'SHA256: {task.sha256}'))
-        output.append(self._white(f'Type: {task.config["artifact_type"]}'))
-        if task.config["artifact_type"] == 'URL':
+        artifact_type = task.config.get("artifact_type", 'FILE')
+        output.append(self._white(f'Type: {artifact_type}'))
+        if artifact_type == 'URL':
             output.append(self._white(f'URL: {task.artifact["filename"]}'))
         else:
             output.append(self._white(f'Filename: {task.artifact["filename"]}'))
