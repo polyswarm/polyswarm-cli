@@ -365,8 +365,8 @@ class TextOutput(base.BaseOutput):
         output.append(self._white(f'Instance ID: {task.instance_id}'))
         if task.status in ('FAILED', 'FAILED_REIMBURSED', 'TIMEDOUT_REIMBURSED', 'TIMEDOUT'):
             output.append(self._red(f'Status: {task.status}'))
-            if task.status == 'FAILED' and task.artifact.get("failed_reason"):
-                output.append(self._red(f'Failure Reason: {task.artifact.get("failed_reason")}'))
+            if task.artifact.get("failed_reason"):
+                output.append(self._red(f'Failure Reason: {task.artifact["failed_reason"]}'))
         elif task.status == 'SUCCEEDED':
             output.append(self._green(f'Status: {task.status}'))
         else:
