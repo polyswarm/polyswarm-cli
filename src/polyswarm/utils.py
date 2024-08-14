@@ -1,5 +1,7 @@
+import ipaddress
 import logging
 import os
+import re
 from concurrent.futures import ThreadPoolExecutor
 from itertools import zip_longest
 
@@ -96,3 +98,33 @@ def is_valid_id(value):
         return True
     except:
         return False
+
+
+#
+# URL validations, port from the same validations applied by Portal
+#
+
+URL_REGEX = re.compile(
+  r"^(?!.*strings\.domain:[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-z]{2,})(\/\w+)?$)"
+  r"(https?:\/\/)?[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-z]{2,})(\/\w+)?")
+
+
+DOMAIN_REGEX = re.compile(
+  r"^(?!:\/\/)(?!-)(?!\d+(\.\d+){3})(?:[a-zA-Z0-9-]{1,63}|xn--[\w-]{1,59})(?<!-)"
+  r"(?:\.(?:[a-zA-Z0-9-]{1,63}|xn--[\w-]{1,59}))+\.?$")
+
+
+def is_ip(value):
+    try:
+        ipaddress.ip_address(value)
+        return True
+    except ValueError:
+        return False
+
+
+def is_domain(value):
+    return bool(DOMAIN_REGEX.match(value))
+
+
+def is_url(value):
+    return bool(URL_REGEX.match(value)) or is_domain(value) or is_ip(value)

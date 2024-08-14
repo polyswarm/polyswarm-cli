@@ -4,6 +4,7 @@ import click
 
 
 from polyswarm.client import utils
+from polyswarm.utils import is_url
 
 logger = logging.getLogger(__name__)
 
@@ -79,9 +80,10 @@ def url(ctx, url, qrcode_file, provider, vm_slug, browser):
         preprocessing = {'type': 'qrcode'}
     else:
         preprocessing = None
+        if url and not is_url(url):
+            raise click.BadArgumentUsage(f'URL "{url}" is not valid.')
     api = ctx.obj['api']
     output = ctx.obj['output']
-
     output.sandbox_task(api.sandbox_url(url,
                                         provider,
                                         vm_slug,
