@@ -75,7 +75,8 @@ def url_(ctx, qrcode_file, url_file, timeout, nowait, url, scan_config):
             urls.extend([u.strip() for u in url_file.readlines()])
         for _url in url:
             if not is_url(_url):
-                raise click.BadArgumentUsage(f'URL "{_url}" is not valid.')
+                raise click.BadArgumentUsage(f'URL "{_url}" is not valid. '
+                                             'Make sure the protocol "https://" or "http://" is set.')
         preprocessing = None
     for instance in api.scan_url(urls, timeout, nowait, scan_config, preprocessing):
         output.artifact_instance(instance)

@@ -100,15 +100,7 @@ def is_valid_id(value):
         return False
 
 
-#
-# URL validations, port from the same validations applied by Portal
-#
-
-URL_REGEX = re.compile(
-  r"^(?!.*strings\.domain:[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-z]{2,})(\/\w+)?$)"
-  r"(https?:\/\/)?[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-z]{2,})(\/\w+)?")
-
-
+# Domain regex validation, port from UI
 DOMAIN_REGEX = re.compile(
   r"^(?!:\/\/)(?!-)(?!\d+(\.\d+){3})(?:[a-zA-Z0-9-]{1,63}|xn--[\w-]{1,59})(?<!-)"
   r"(?:\.(?:[a-zA-Z0-9-]{1,63}|xn--[\w-]{1,59}))+\.?$")
@@ -127,4 +119,6 @@ def is_domain(value):
 
 
 def is_url(value):
-    return bool(URL_REGEX.match(value)) or is_domain(value) or is_ip(value)
+    return value.startswith("https://") or value.startswith("http://") \
+        or is_domain(value) \
+        or is_ip(value)

@@ -81,7 +81,8 @@ def url(ctx, url, qrcode_file, provider, vm_slug, browser):
     else:
         preprocessing = None
         if url and not is_url(url):
-            raise click.BadArgumentUsage(f'URL "{url}" is not valid.')
+            raise click.BadArgumentUsage(f'URL "{url}" is not valid. '
+                                         'Make sure the protocol "https://" or "http://" is set.')
     api = ctx.obj['api']
     output = ctx.obj['output']
     output.sandbox_task(api.sandbox_url(url,
