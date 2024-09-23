@@ -69,7 +69,7 @@ test-run312:
   image: python:3.12
   stage: test
   before_script:
-    - pip install --upgrade pip
+    - pip install --upgrade pip setuptools
   script:
     - pip install $POLYSWARM_API_ARCHIVE/$CI_COMMIT_BRANCH.zip || pip install $POLYSWARM_API_ARCHIVE/develop.zip
     - pip install -r requirements.txt
