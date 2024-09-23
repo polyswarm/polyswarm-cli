@@ -1,5 +1,7 @@
+import ipaddress
 import logging
 import os
+import re
 from concurrent.futures import ThreadPoolExecutor
 from itertools import zip_longest
 
@@ -96,3 +98,27 @@ def is_valid_id(value):
         return True
     except:
         return False
+
+
+# Domain regex validation, port from UI
+DOMAIN_REGEX = re.compile(
+  r"^(?!:\/\/)(?!-)(?!\d+(\.\d+){3})(?:[a-zA-Z0-9-]{1,63}|xn--[\w-]{1,59})(?<!-)"
+  r"(?:\.(?:[a-zA-Z0-9-]{1,63}|xn--[\w-]{1,59}))+\.?$")
+
+
+def is_ip(value):
+    try:
+        ipaddress.ip_address(value)
+        return True
+    except ValueError:
+        return False
+
+
+def is_domain(value):
+    return bool(DOMAIN_REGEX.match(value))
+
+
+def is_url(value):
+    return value.startswith("https://") or value.startswith("http://") \
+        or is_domain(value) \
+        or is_ip(value)

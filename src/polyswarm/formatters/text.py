@@ -108,6 +108,8 @@ class TextOutput(base.BaseOutput):
         output.extend(self.artifact(instance, write=False))
         if instance.failed:
             output.append(self._red('Status: Failed'))
+            if instance.failed_reason:
+                output.append(self._red(f'Failure Reason: {instance.failed_reason}'))
         elif instance.window_closed:
             output.append(self._white('Status: Assertion window closed'))
         elif instance.community == 'stream':
@@ -349,8 +351,9 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('============================= Sandbox Task ============================='))
         output.append(self._blue(f'ID: {task.id}'))
         output.append(self._blue(f'SHA256: {task.sha256}'))
-        output.append(self._white(f'Type: {task.config["artifact_type"]}'))
-        if task.config["artifact_type"] == 'URL':
+        artifact_type = task.config.get("artifact_type", 'FILE')
+        output.append(self._white(f'Type: {artifact_type}'))
+        if artifact_type == 'URL':
             output.append(self._white(f'URL: {task.artifact["filename"]}'))
         else:
             output.append(self._white(f'Filename: {task.artifact["filename"]}'))
@@ -362,6 +365,8 @@ class TextOutput(base.BaseOutput):
         output.append(self._white(f'Instance ID: {task.instance_id}'))
         if task.status in ('FAILED', 'FAILED_REIMBURSED', 'TIMEDOUT_REIMBURSED', 'TIMEDOUT'):
             output.append(self._red(f'Status: {task.status}'))
+            if task.artifact.get("failed_reason"):
+                output.append(self._red(f'Failure Reason: {task.artifact["failed_reason"]}'))
         elif task.status == 'SUCCEEDED':
             output.append(self._green(f'Status: {task.status}'))
         else:
