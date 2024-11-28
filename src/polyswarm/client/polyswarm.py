@@ -103,6 +103,7 @@ class ExceptionHandlingGroup(click.Group):
             if e.__class__.__name__ in ('HTTPError', 'ConnectionError', 'SSLError'):
                 # import these exception classes cannot be done because they are third-party dependencies
                 logger.error(e)
+                logger.error('Unhandled exception happened. Please contact support if the error persists.')
                 raise Exit(1)
             else:
                 logger.exception(e)
