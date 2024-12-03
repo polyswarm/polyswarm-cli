@@ -611,6 +611,8 @@ class TextOutput(base.BaseOutput):
             output.append(self._yellow(f'Name: {feature["name"]}'))
             output.append(self._white(f'Tag: {feature["tag"]}'))
             output.append(self._white(f'Value: {feature["value"]}'))
+            if feature.get("backing_feature"):
+                output.append(self._white(f'Backing Feature: {feature["backing_feature"]}'))
             if feature["base_uses"]:
                 output.append(self._white(f'Base Uses: {feature["base_uses"]}'))
                 if feature["remaining_uses"]:
