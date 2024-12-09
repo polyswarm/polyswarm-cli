@@ -351,7 +351,7 @@ class TextOutput(base.BaseOutput):
         output.append(self._white('============================= Sandbox Task ============================='))
         output.append(self._blue(f'ID: {task.id}'))
         output.append(self._blue(f'SHA256: {task.sha256}'))
-        artifact_type = task.config.get("artifact_type", 'FILE')
+        artifact_type = task.config.get("artifact_type", 'FILE') if task.config else 'FILE'
         output.append(self._white(f'Type: {artifact_type}'))
         if artifact_type == 'URL':
             output.append(self._white(f'URL: {task.artifact["filename"]}'))
@@ -611,6 +611,8 @@ class TextOutput(base.BaseOutput):
             output.append(self._yellow(f'Name: {feature["name"]}'))
             output.append(self._white(f'Tag: {feature["tag"]}'))
             output.append(self._white(f'Value: {feature["value"]}'))
+            if feature.get("backing_feature"):
+                output.append(self._white(f'Backing Feature: {feature["backing_feature"]}'))
             if feature["base_uses"]:
                 output.append(self._white(f'Base Uses: {feature["base_uses"]}'))
                 if feature["remaining_uses"]:

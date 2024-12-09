@@ -100,9 +100,15 @@ class ExceptionHandlingGroup(click.Group):
         except (Exit, ClickException):
             raise
         except Exception as e:
-            logger.exception(e)
-            logger.error('Unhandled exception happened. Please contact support.')
-            raise Exit(2)
+            if e.__class__.__name__ in ('HTTPError', 'ConnectionError', 'SSLError'):
+                # import these exception classes cannot be done because they come from third-party dependencies
+                logger.error(e)
+                logger.error('Unhandled exception happened. Please contact support if the error persists.')
+                raise Exit(1)
+            else:
+                logger.exception(e)
+                logger.error('Unhandled exception happened. Please contact support.')
+                raise Exit(2)
 
 
 @click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS)
