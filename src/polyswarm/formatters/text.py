@@ -514,6 +514,20 @@ class TextOutput(base.BaseOutput):
                 output.append(self._white(f'{key}: {event.json[key]}'))
         return self._output(output, write)
 
+    def sample_zip_task(self, zip_task, write=True):
+        output = []
+        output.append(self._white('============================= Sample Zip ============================='))
+        output.append(self._blue(f'ID: {zip_task.id}'))
+        output.append(self._white(f'Community: {zip_task.community}'))
+        output.append(self._white(f'Created: {zip_task.created}'))
+        if zip_task.instance_ids:
+            output.append(self._white(f'Instance IDs: {zip_task.instance_ids}'))
+        state_writer = self._red if zip_task.state == 'FAILED' else self._yellow
+        output.append(state_writer(f'State: {zip_task.state}'))
+        if zip_task.url:
+            output.append(self._white(f'URL: {zip_task.url}'))
+        return self._output(output, write)
+
     def report_task(self, report, write=True):
         output = []
         output.append(self._white('============================= Report ============================='))
