@@ -514,9 +514,9 @@ class TextOutput(base.BaseOutput):
                 output.append(self._white(f'{key}: {event.json[key]}'))
         return self._output(output, write)
 
-    def sample_zip_task(self, zip_task, write=True):
+    def bundle_task(self, zip_task, write=True):
         output = []
-        output.append(self._white('============================= Sample Zip ============================='))
+        output.append(self._white('============================= Sample Bundle ============================='))
         output.append(self._blue(f'ID: {zip_task.id}'))
         output.append(self._white(f'Community: {zip_task.community}'))
         output.append(self._white(f'Created: {zip_task.created}'))

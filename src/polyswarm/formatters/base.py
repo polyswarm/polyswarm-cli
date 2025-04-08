@@ -55,5 +55,5 @@ class BaseOutput:
     def sandbox_tasks(self, results):
         raise NotImplementedError
 
-    def sample_zip_task(self, result):
+    def bundle_task(self, result):
         raise NotImplementedError
