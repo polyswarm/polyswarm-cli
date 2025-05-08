@@ -163,7 +163,8 @@ def task_list(ctx, sha256, provider, start_date, end_date, status, account_id):
 @click.option('--start-date', type=click.STRING, help='Tasks created the day passed or after (ISO format).')
 @click.option('--end-date', type=click.STRING, help='Tasks created the day passed or before (ISO format).')
 @click.option('--sha256', type=click.STRING, help='Only list tasks with the SHA256 passed.')
-@click.option('--user-account-id', 'user_account_id', type=click.STRING)
+@click.option('--user-account-id', 'user_account_id', type=click.STRING, metavar='NUMBER',
+              help='User account that created the sandbox task.')
 @click.pass_context
 def my_task_list(ctx, sandbox_, start_date, end_date, sha256, user_account_id):
     """
