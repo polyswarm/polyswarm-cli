@@ -17,7 +17,7 @@ from polyswarm.client.live import live
 from polyswarm.client.historical import historical
 from polyswarm.client.scan import scan, lookup, wait, rescan, rescan_id
 from polyswarm.client.sandbox import sandbox, sandbox_list
-from polyswarm.client.download import download, cat, stream, download_id
+from polyswarm.client.download import download, cat, stream, download_id, download_sandbox_artifact
 from polyswarm.client.search import known, search
 from polyswarm.client.rules import rules
 from polyswarm.client.links import link
@@ -150,7 +150,8 @@ def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verb
 
 commands = [
     scan, wait, lookup, search, live, historical,
-    download, download_id, cat, stream, rescan, rescan_id,
+    download, download_id, download_sandbox_artifact,
+    cat, stream, rescan, rescan_id,
     rules, link, tag, family, metadata,
     engine, known, sandbox, sandbox_list,
     activity, report, report_template, account,
