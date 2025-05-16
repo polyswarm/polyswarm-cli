@@ -42,6 +42,22 @@ def download_id(ctx, destination, instance_id):
         out.local_artifact(result)
 
 
+@click.command('download-sandbox-artifact', short_help='Download sandbox artifact file.')
+@click.option('-d', '--destination', type=click.Path(file_okay=False),
+              help='Path where to store the downloaded files.', default=os.getcwd())
+@click.argument('sandbox_task_id', type=click.INT)
+@click.argument('instance_id', nargs=-1, type=click.INT)
+@click.pass_context
+def download_sandbox_artifact(ctx, destination, sandbox_task_id, instance_id):
+    """
+    Download files from instance ids
+    """
+    api = ctx.obj['api']
+    out = ctx.obj['output']
+
+    out.local_artifact(api.download_sandbox_artifact(destination, sandbox_task_id, instance_id))
+
+
 @click.command('stream', short_help='Access the polyswarm file stream.')
 @click.option('-s', '--since', type=click.IntRange(1, 2880), default=1440,
               help='Request archives X minutes into the past. Default: 1440, Max: 2880.')
