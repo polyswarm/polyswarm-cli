@@ -54,3 +54,6 @@ class BaseOutput:
 
     def sandbox_tasks(self, results):
         raise NotImplementedError
+
+    def bundle_task(self, result):
+        raise NotImplementedError
