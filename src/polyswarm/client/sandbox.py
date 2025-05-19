@@ -163,13 +163,19 @@ def task_list(ctx, sha256, provider, start_date, end_date, status, account_id):
 @click.option('--start-date', type=click.STRING, help='Tasks created the day passed or after (ISO format).')
 @click.option('--end-date', type=click.STRING, help='Tasks created the day passed or before (ISO format).')
 @click.option('--sha256', type=click.STRING, help='Only list tasks with the SHA256 passed.')
+@click.option('--user-account-id', 'user_account_id', type=click.STRING, metavar='NUMBER',
+              help='User account that created the sandbox task.')
 @click.pass_context
-def my_task_list(ctx, sandbox_, start_date, end_date, sha256):
+def my_task_list(ctx, sandbox_, start_date, end_date, sha256, user_account_id):
     """
     List the sandbox results associated with my account/team for the tuple (community, [sandbox], [start_date], [end_date])
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
 
-    for task in api.sandbox_my_tasks_list(sandbox=sandbox_, start_date=start_date, end_date=end_date, sha256=sha256):
+    for task in api.sandbox_my_tasks_list(
+            sandbox=sandbox_,
+            start_date=start_date, end_date=end_date,
+            sha256=sha256,
+            user_account_id=user_account_id):
         output.sandbox_task(task)
