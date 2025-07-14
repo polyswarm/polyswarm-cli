@@ -372,6 +372,7 @@ class TextOutput(base.BaseOutput):
                 self._open_group()
                 for error in task.config['errors']:
                     output.append(self._yellow(error))
+                self._close_group()
         elif task.status == 'SUCCEEDED':
             output.append(self._green(f'Status: {task.status}'))
         else:
