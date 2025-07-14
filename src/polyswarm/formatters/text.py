@@ -367,6 +367,11 @@ class TextOutput(base.BaseOutput):
             output.append(self._red(f'Status: {task.status}'))
             if task.artifact.get("failed_reason"):
                 output.append(self._red(f'Failure Reason: {task.artifact["failed_reason"]}'))
+            if task.config and task.config.get('errors'):
+                output.append(self._white(f'Errors:'))
+                self._open_group()
+                for error in task.config['errors']:
+                    output.append(self._yellow(error))
         elif task.status == 'SUCCEEDED':
             output.append(self._green(f'Status: {task.status}'))
         else:
