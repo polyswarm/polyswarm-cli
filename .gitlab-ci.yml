@@ -27,9 +27,9 @@ dev-pypi:
     - stage-kube-newer
   stage: build
   before_script:
-    - pip3 install -q --upgrade pip setuptools twine wheel bump2version
+    - pip3 install -q --upgrade pip setuptools twine wheel bump-my-version
   script:
-    - SHORT_SHA=$(git rev-parse --short HEAD) bumpversion --no-commit --no-tag local
+    - SHORT_SHA=$(git rev-parse --short HEAD) bump-my-version bump --no-commit --no-tag local
     - python setup.py -q bdist_wheel
     - twine upload --skip-existing --disable-progress-bar --non-interactive dist/*
 
