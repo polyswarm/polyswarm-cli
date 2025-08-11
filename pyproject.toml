@@ -64,9 +64,9 @@ commit = true
 tag = false
 sign_tags = true
 tag_name = "{new_version}"
-parse = '^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:\.dev(?P<dev>\d+))?(?:\+[A-Za-z0-9\.]+)?$'
+parse = '^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:\.dev(?P<dev>\d+))?$'
 serialize = [
-  "{major}.{minor}.{patch}.dev{dev}+{utcnow:%Y%m%d%H%M%S}.{short_commit_sha}",
+  "{major}.{minor}.{patch}.dev{dev}+{utcnow:%Y%m%d%H%M%S}.{$SHORT_SHA}",
   "{major}.{minor}.{patch}"
 ]
 
