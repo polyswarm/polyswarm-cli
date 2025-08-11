@@ -76,8 +76,9 @@ optional_value = "0"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
-search = 'version = "{current_version}"'
+search = '^version = ".*"$'
 replace = 'version = "{new_version}"'
+regex = true
 
 [[tool.bumpversion.files]]
 filename = "src/polyswarm/__init__.py"
