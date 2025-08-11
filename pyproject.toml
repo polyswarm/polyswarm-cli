@@ -76,7 +76,7 @@ optional_value = "0"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
-search = '^version = ".*"$'
+search = '^version = "[^"]*"$'
 replace = 'version = "{new_version}"'
 regex = true
 
