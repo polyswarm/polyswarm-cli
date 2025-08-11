@@ -46,8 +46,7 @@ test-run37:
     - pip install --upgrade pip
   script:
     - pip install $POLYSWARM_API_ARCHIVE/$CI_COMMIT_BRANCH.zip || pip install $POLYSWARM_API_ARCHIVE/develop.zip
-    - pip install -r requirements.txt
-    - pip install .
+    - pip install .[tests]
     - pytest -s -v
 
 test-run310:
@@ -59,8 +58,7 @@ test-run310:
     - pip install --upgrade pip
   script:
     - pip install $POLYSWARM_API_ARCHIVE/$CI_COMMIT_BRANCH.zip || pip install $POLYSWARM_API_ARCHIVE/develop.zip
-    - pip install -r requirements.txt
-    - pip install .
+    - pip install .[tests]
     - pytest -s -v
 
 test-run312:
@@ -72,8 +70,7 @@ test-run312:
     - pip install --upgrade pip setuptools
   script:
     - pip install $POLYSWARM_API_ARCHIVE/$CI_COMMIT_BRANCH.zip || pip install $POLYSWARM_API_ARCHIVE/develop.zip
-    - pip install -r requirements.txt
-    - pip install .
+    - pip install .[tests]
     - pytest -s -v
 
 ###############################################################
