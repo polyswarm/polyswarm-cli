@@ -35,10 +35,7 @@ tests = [
     "pytest~=8.4",
     "pytest-cov~=6.2",
     "PyYAML~=6.0",
-    'vcrpy~=4.4; python_version == "3.7"',
-    'vcrpy~=5.1; python_version == "3.8"',
-    'vcrpy~=7.0; python_version > "3.8"',
-    'importlib-resources>=5; python_version < "3.9"',
+    'vcrpy~=7.0',
 ]
 
 [project.scripts]
