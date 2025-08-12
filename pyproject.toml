@@ -76,12 +76,13 @@ optional_value = "0"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
-search = '^version = "[^"]*"$'
+search = 'version = "{current_version}"'
 replace = 'version = "{new_version}"'
-regex = true
 
 [[tool.bumpversion.files]]
 filename = "src/polyswarm/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'
 
 [tool.pytest.ini_options]
 log_cli = true
