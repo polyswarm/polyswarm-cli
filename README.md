@@ -15,10 +15,6 @@ From source:
 
     python setup.py install
 
-If you want yara validation (optional):
-
-    pip install -e .[yara]
-
 ## Usage
 
 ### Command line client
