@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "polyswarm"
-version = "3.12.1"
+version = "3.12.1.dev1+e8f4c8a"
 description = "CLI for using the PolySwarm Customer APIs"
 readme = "README.md"
 authors = [{ name = "PolySwarm Developers", email = "info@polyswarm.io" }]
@@ -59,7 +59,7 @@ include-package-data = true
 where = ["src"]
 
 [tool.bumpversion]
-current_version = "3.12.1"
+current_version = "3.12.1.dev1+e8f4c8a"
 commit = true
 tag = false
 sign_tags = true
@@ -81,8 +81,8 @@ replace = 'version = "{new_version}"'
 
 [[tool.bumpversion.files]]
 filename = "src/polyswarm/__init__.py"
-search = '__version__ = "{current_version}"'
-replace = '__version__ = "{new_version}"'
+search = "__version__ = '{current_version}'"
+replace = "__version__ = '{new_version}'"
 
 [tool.pytest.ini_options]
 log_cli = true
