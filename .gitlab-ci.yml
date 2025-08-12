@@ -37,10 +37,10 @@ dev-pypi:
 # Test Stage
 ###############################################################
 
-test-run37:
+test-run310:
   tags:
     - kube-new
-  image: python:3.7
+  image: python:3.10
   stage: test
   before_script:
     - pip install --upgrade pip
@@ -49,10 +49,10 @@ test-run37:
     - pip install .[tests]
     - pytest -s -v
 
-test-run310:
+test-run311:
   tags:
     - kube-new
-  image: python:3.10
+  image: python:3.11
   stage: test
   before_script:
     - pip install --upgrade pip
