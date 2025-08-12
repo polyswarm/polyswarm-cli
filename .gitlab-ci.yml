@@ -29,7 +29,7 @@ dev-pypi:
   before_script:
     - pip3 install -q --upgrade pip build twine bump-my-version
   script:
-    - SHORT_SHA=$(git rev-parse --short HEAD) bump-my-version bump --no-commit --no-tag dev
+    - bump-my-version bump --no-commit --no-tag dev
     - python -m build
     - twine upload --skip-existing --disable-progress-bar --non-interactive dist/*
 
