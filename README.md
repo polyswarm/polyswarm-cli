@@ -3,7 +3,7 @@
 
 A CLI tool for interacting with the PolySwarm Customer APIs.
 
-Supports Python 3.7 and greater.
+Supports Python 3.10 and greater.
 
 ## Installation
 
@@ -18,11 +18,6 @@ From source:
 If you want yara validation (optional):
 
     pip install -e .[yara]
-
-> If you get an error about a missing package named `wheel`, that means your version of pip or setuptools is too old.
-> You need pip >= 19.0 and setuptools >= 40.8.0. 
-> To update pip, run `pip install -U pip`.
-> To update setuptools, run `pip install -U setuptools`
 
 ## Usage
 
@@ -47,7 +42,7 @@ for result in results:
 ```
 
 Each hash lookup is done in a different thread using a `ThreadPoolExecutor` and results are yielded
-as they come in in the same order as in the input. All functionality that is available in the command
+as they come in the same order as in the input. All functionality that is available in the command
 line tool is also available for developers through this class.
 
 ## Automated Tests
