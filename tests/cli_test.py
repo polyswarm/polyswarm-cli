@@ -1,14 +1,13 @@
 import tempfile
 import os
 import json
-import pytest
 import yaml
-from unittest import TestCase
 import traceback
+from unittest import TestCase
+from pathlib import Path
 
 import vcr as vcr_
 from click.testing import CliRunner
-from pkg_resources import resource_filename
 
 from polyswarm.client import polyswarm as client
 
@@ -67,8 +66,7 @@ class BaseTestCase(TestCase):
         current_results = self._replace(replace, results.output)
         result_lines = current_results.splitlines()
         expected_lines = expected_results.splitlines()
-        if len(result_lines) != len(expected_lines):
-            raise AssertionError('Number of json lines does not match')
+        assert len(result_lines) == len(expected_lines), 'Number of json lines does not match'
         self.assertEqual(expected_return_code, results.exit_code, msg=traceback.format_tb(results.exc_info[2]))
         for result, expected_result in zip(result_lines, expected_lines):
             result = json.loads(result)
@@ -77,7 +75,7 @@ class BaseTestCase(TestCase):
 
     @staticmethod
     def resource(filename):
-        return resource_filename('tests', filename)
+        return str(Path(__file__).resolve().parent / filename)
 
 
 class DownloadTest(BaseTestCase):
@@ -346,7 +344,6 @@ class SearchTest(BaseTestCase):
         self._assert_text_result(result, self.click_vcr(result), expected_return_code=1)
 
 class IOCTest(BaseTestCase):
-
     @vcr.use_cassette()
     def test_ioc_by_hash(self):
         result = self._run_cli([

@@ -19,3 +19,6 @@ _build
 _static
 _templates
 .vscode
+
+e2e.yaml
+docker-compose.yaml
