@@ -27,15 +27,21 @@ def scan():
               help='Will handle the provided file as a zip and decompress server-side.')
 @click.option('-p', '--zip-password', type=click.STRING,
               help='Will use this password to decompress the zip file. If provided, will handle the file as a zip.')
+@click.option('-b', '--is-base64', type=click.BOOL, is_flag=True,
+              help='Will handle the provided file as containing base64-encoded content to decode server-side.')
 @click.argument('path', nargs=-1, type=click.Path(exists=True), required=True)
 @click.pass_context
-def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_password):
+def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_password, is_base64):
     """
     Scan files or directories via PolySwarm
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    if is_zip or zip_password:
+    if is_base64 and (is_zip or zip_password):
+        raise click.BadArgumentUsage('--is-base64 cannot be used with --is-zip or --zip-password.')
+    if is_base64:
+        preprocessing = {'type': 'base64'}
+    elif is_zip or zip_password:
         preprocessing = {'type': 'zip'}
         if zip_password:
             preprocessing['password'] = zip_password
