@@ -28,10 +28,12 @@ dev-pypi:
   stage: build
   before_script:
     - pip3 install -q --upgrade pip build twine bump-my-version
+    - pip install -q $END_TO_END_LIB@$CI_COMMIT_REF_NAME || pip install -q $END_TO_END_LIB
+    - e2e init
   script:
     - bump-my-version bump --no-commit --no-tag dev
     - python -m build
-    - twine upload --skip-existing --disable-progress-bar --non-interactive dist/*
+    - e2e release --dev --skip-tag
 
 ###############################################################
 # Test Stage
@@ -83,7 +85,7 @@ release-pypi:
   stage: release
   script:
     # release to internal pypi but do not tag yet
-    - e2e release --skip-tag --remote "https://github.com/polyswarm/$CI_PROJECT_NAME.git"
+    - e2e release --skip-tag --remote https://github.com/polyswarm/$CI_PROJECT_NAME.git
     # release to public pypi and tag
     - e2e release
       -u "$PUBLIC_TWINE_USERNAME"

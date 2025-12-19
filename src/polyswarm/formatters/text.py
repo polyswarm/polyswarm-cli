@@ -97,7 +97,7 @@ class TextOutput(base.BaseOutput):
             if assertion.verdict is False:
                 output.append(f'{self._green(assertion.engine_name)}: {"Clean"}')
             elif assertion.verdict is None or assertion.mask is False:
-                output.append(f"{self._blue(assertion.engine_name)}: Engine chose not respond to this bounty.")
+                output.append(f"{self._blue(assertion.engine_name)}: Engine chose not to respond to this bounty.")
             else:
                 value = 'Malicious'
                 if assertion.metadata:

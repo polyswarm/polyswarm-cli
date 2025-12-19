@@ -27,15 +27,32 @@ def scan():
               help='Will handle the provided file as a zip and decompress server-side.')
 @click.option('-p', '--zip-password', type=click.STRING,
               help='Will use this password to decompress the zip file. If provided, will handle the file as a zip.')
+@click.option('-b', '--is-base64', type=click.BOOL, is_flag=True,
+              help='Will handle the provided file as containing base64-encoded content to decode server-side.')
+@click.option('--is-7zip', type=click.BOOL, is_flag=True,
+              help='Will handle the provided file as a 7zip archive and decompress server-side.')
+@click.option('--sevenzip-password', type=click.STRING,
+              help='Will use this password to decompress the 7zip file. If provided, will handle the file as a 7zip.')
 @click.argument('path', nargs=-1, type=click.Path(exists=True), required=True)
 @click.pass_context
-def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_password):
+def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_password, is_base64, is_7zip, sevenzip_password):
     """
     Scan files or directories via PolySwarm
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    if is_zip or zip_password:
+    # Validate mutually exclusive options
+    active_flags = sum([bool(is_base64), bool(is_zip or zip_password), bool(is_7zip or sevenzip_password)])
+    if active_flags > 1:
+        raise click.BadArgumentUsage('Only one of --is-base64, --is-zip/--zip-password, or --is-7zip/--7zip-password can be used at a time.')
+    
+    if is_base64:
+        preprocessing = {'type': 'base64'}
+    elif is_7zip or sevenzip_password:
+        preprocessing = {'type': '7zip'}
+        if sevenzip_password:
+            preprocessing['password'] = sevenzip_password
+    elif is_zip or zip_password:
         preprocessing = {'type': 'zip'}
         if zip_password:
             preprocessing['password'] = zip_password
