@@ -92,3 +92,38 @@ def download(ctx, report_id, destination):
 
     report_object = api.report_download(report_id, destination)
     out.local_artifact(report_object)
+
+
+@report.command('llm-create', short_help='Create an LLM report for an instance or sandbox id.')
+@click.option('-i', '--instance-id', type=click.STRING, help='Instance ID to include in the report.')
+@click.option('-s', '--sandbox-task-id', type=click.STRING, help='Sandbox Task ID to include in the report.')
+@click.pass_context
+def llm_create(ctx, instance_id, sandbox_task_id):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    if not instance_id and not sandbox_task_id:
+         raise click.BadOptionUsage('instance_id', 'Either --instance-id or --sandbox-task-id must be provided.')
+
+    result = api.llm_report_create(instance_id=instance_id, sandbox_task_id=sandbox_task_id)
+    output.report_task(result)
+
+
+@report.command('llm-get', short_help='Fetch an LLM report task.')
+@click.argument('report-id', callback=utils.validate_id)
+@click.pass_context
+def llm_get(ctx, report_id):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    output.report_task(api.llm_report_get(report_task_id=report_id))
+
+
+@report.command('llm-download', short_help='Download an LLM report.')
+@click.argument('report-id', callback=utils.validate_id)
+@click.option('-d', '--destination', type=click.Path(file_okay=False),
+              help='Path where to store the downloaded file.', default=os.getcwd())
+@click.pass_context
+def llm_download(ctx, report_id, destination):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    report_object = api.llm_report_download(report_task_id=report_id, folder=destination)
+    output.local_artifact(report_object)
