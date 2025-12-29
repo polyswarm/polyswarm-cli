@@ -105,7 +105,7 @@ def llm_create(ctx, instance_id, sandbox_task_id):
          raise click.BadOptionUsage('instance_id', 'Either --instance-id or --sandbox-task-id must be provided.')
 
     result = api.llm_report_create(instance_id=instance_id, sandbox_task_id=sandbox_task_id)
-    output.report_task(result)
+    output.llm_report_task(result)
 
 
 @report.command('llm-get', short_help='Fetch an LLM report task.')
@@ -114,7 +114,7 @@ def llm_create(ctx, instance_id, sandbox_task_id):
 def llm_get(ctx, report_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    output.report_task(api.llm_report_get(report_task_id=report_id))
+    output.llm_report_task(api.llm_report_get(report_task_id=report_id))
 
 
 @report.command('llm-download', short_help='Download an LLM report.')

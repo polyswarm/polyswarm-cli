@@ -567,6 +567,9 @@ class TextOutput(base.BaseOutput):
             output.append(self._blue(f'Sandbox Task ID: {report.sandbox_task_id}'))
         if report.instance_id:
             output.append(self._blue(f'Instance ID: {report.instance_id}'))
+        if report.url:
+            output.append(self._white(f'URL: {report.url}'))
+        return self._output(output, write)
 
     def report_template(self, template, write=True):
         output = []
