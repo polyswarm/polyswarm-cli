@@ -556,6 +556,21 @@ class TextOutput(base.BaseOutput):
             output.append(self._white(f'URL: {report.url}'))
         return self._output(output, write)
 
+    def llm_report_task(self, report, write=True):
+        output = []
+        output.append(self._white('============================= LLM Report ============================='))
+        output.append(self._blue(f'ID: {report.id}'))
+        output.append(self._white(f'Community: {report.community}'))
+        output.append(self._blue(f'Created: {report.created}'))
+        output.append(self._white(f'State: {report.state}'))
+        if report.sandbox_task_id:
+            output.append(self._blue(f'Sandbox Task ID: {report.sandbox_task_id}'))
+        if report.instance_id:
+            output.append(self._blue(f'Instance ID: {report.instance_id}'))
+        if report.url:
+            output.append(self._white(f'URL: {report.url}'))
+        return self._output(output, write)
+
     def report_template(self, template, write=True):
         output = []
         output.append(self._white('============================= Report Template ============================='))
