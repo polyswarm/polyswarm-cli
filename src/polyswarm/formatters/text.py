@@ -659,6 +659,23 @@ class TextOutput(base.BaseOutput):
             output.append(self._white("---"))
         return self._output(output, write)
 
+    def llm_prompt_config(self, config, write=True):
+        output = []
+        output.append(self._white('============================= LLM Prompt Config ============================='))
+        output.append(self._blue(f'ID: {config.id}'))
+        output.append(self._white(f'Name: {config.name}'))
+        output.append(self._white(f'Is Active: {config.is_active}'))
+        if config.created:
+            output.append(self._white(f'Created: {config.created}'))
+        output.append(self._white(f'System Prompt: {config.system_prompt}'))
+        if config.cape_only_prompt:
+            output.append(self._white(f'Cape-Only Prompt: {config.cape_only_prompt}'))
+        if config.triage_only_prompt:
+            output.append(self._white(f'Triage-Only Prompt: {config.triage_only_prompt}'))
+        if config.scan_only_prompt:
+            output.append(self._white(f'Scan-Only Prompt: {config.scan_only_prompt}'))
+        return self._output(output, write)
+
     @is_grouped
     def _white(self, text):
         return click.style(text, fg='white')
