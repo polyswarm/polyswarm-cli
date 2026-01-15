@@ -166,6 +166,8 @@ class JSONOutput(base.BaseOutput):
     def llm_prompt_config(self, result, write=True):
         click.echo(self._to_json(result.json), file=self.out)
 
+    def webhook(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
 
 class PrettyJSONOutput(JSONOutput):
     name = 'pretty-json'

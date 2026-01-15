@@ -676,6 +676,21 @@ class TextOutput(base.BaseOutput):
             output.append(self._white(f'Scan-Only Prompt: {config.scan_only_prompt}'))
         return self._output(output, write)
 
+    def webhook(self, webhook, write=True):
+        output = []
+        output.append(self._white('============================= Webhook ============================='))
+        output.append(self._blue(f'ID: {webhook.id}'))
+        output.append(self._white(f'Webhook URI: {webhook.webhook_uri}'))
+        output.append(self._white(f'Account Number: {webhook.account_number}'))
+        if webhook.team_account_number:
+            output.append(self._white(f'Team Account Number: {webhook.team_account_number}'))
+        output.append(self._white(f'Secret SHA256: {webhook.secret_sha256}'))
+        status_writer = self._green if webhook.status == 'enabled' else self._yellow
+        output.append(status_writer(f'Status: {webhook.status}'))
+        if webhook.events:
+            output.append(self._white(f'Events: {json.dumps(webhook.events, indent=2)}'))
+        return self._output(output, write)
+
     @is_grouped
     def _white(self, text):
         return click.style(text, fg='white')
