@@ -17,7 +17,8 @@ def webhook():
 @click.argument('secret', type=click.STRING, required=True)
 @click.option('--status', type=click.Choice(['enabled', 'disabled']), default='enabled',
               help='Webhook status (default: enabled).')
-@click.option('--events', type=click.STRING, help='JSON string specifying which events to subscribe to.')
+@click.option('--events', type=click.STRING, multiple=True, 
+              help='Event types to subscribe to (can be specified multiple times).')
 @click.pass_context
 def create(ctx, webhook_uri, secret, status, events):
     """
@@ -29,15 +30,7 @@ def create(ctx, webhook_uri, secret, status, events):
     api = ctx.obj['api']
     output = ctx.obj['output']
     
-    import json
-    events_dict = None
-    if events:
-        try:
-            events_dict = json.loads(events)
-        except json.JSONDecodeError as e:
-            raise click.BadParameter(f'Invalid JSON for events: {e}')
-    
-    result = api.webhook_create(webhook_uri=webhook_uri, secret=secret, status=status, events=events_dict)
+    result = api.webhook_create(webhook_uri=webhook_uri, secret=secret, status=status, events=events)
     output.webhook(result)
 
 
@@ -58,7 +51,8 @@ def get(ctx, webhook_id):
 @click.option('--webhook-uri', type=click.STRING, help='The new webhook URI.')
 @click.option('--secret', type=click.STRING, help='The new secret for HMAC signing.')
 @click.option('--status', type=click.Choice(['enabled', 'disabled']), help='The new status.')
-@click.option('--events', type=click.STRING, help='JSON string specifying which events to subscribe to.')
+@click.option('--events', type=click.STRING, multiple=True,
+              help='Event types to subscribe to (can be specified multiple times).')
 @click.pass_context
 @utils.any_provided('webhook_uri', 'secret', 'status', 'events')
 def update(ctx, webhook_id, webhook_uri, secret, status, events):
@@ -68,20 +62,12 @@ def update(ctx, webhook_id, webhook_uri, secret, status, events):
     api = ctx.obj['api']
     output = ctx.obj['output']
     
-    import json
-    events_dict = None
-    if events:
-        try:
-            events_dict = json.loads(events)
-        except json.JSONDecodeError as e:
-            raise click.BadParameter(f'Invalid JSON for events: {e}')
-    
     result = api.webhook_update(
         webhook_id=webhook_id,
         webhook_uri=webhook_uri,
         secret=secret,
         status=status,
-        events=events_dict
+        events=events
     )
     output.webhook(result)
 
