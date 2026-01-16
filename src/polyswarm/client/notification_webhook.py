@@ -7,7 +7,7 @@ from polyswarm.client import utils
 logger = logging.getLogger(__name__)
 
 
-@click.group(short_help='Interact with Webhooks in Polyswarm.')
+@click.group(short_help='Interact with Notification Webhooks in Polyswarm.')
 def webhook():
     pass
 
@@ -23,7 +23,7 @@ def create(ctx, webhook_uri, secret, status, events):
     """
     Create a new webhook.
     
-    WEBHOOK_URI: The URI where webhook events should be sent
+    WEBHOOK_URI: The URI where notification webhook events should be sent
     SECRET: The secret key used for HMAC signature verification
     """
     api = ctx.obj['api']
@@ -46,7 +46,7 @@ def create(ctx, webhook_uri, secret, status, events):
 @click.pass_context
 def get(ctx, webhook_id):
     """
-    Get a webhook by ID.
+    Get a notification webhook by ID.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -63,7 +63,7 @@ def get(ctx, webhook_id):
 @utils.any_provided('webhook_uri', 'secret', 'status', 'events')
 def update(ctx, webhook_id, webhook_uri, secret, status, events):
     """
-    Update an existing webhook.
+    Update an existing notification webhook.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -91,7 +91,7 @@ def update(ctx, webhook_id, webhook_uri, secret, status, events):
 @click.pass_context
 def delete(ctx, webhook_id):
     """
-    Delete a webhook.
+    Delete a notification webhook.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -103,7 +103,7 @@ def delete(ctx, webhook_id):
 @click.pass_context
 def list_webhooks(ctx):
     """
-    List all webhooks for the current account.
+    List all notification webhooks for the current account.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -116,7 +116,7 @@ def list_webhooks(ctx):
 @click.pass_context
 def test(ctx, webhook_id):
     """
-    Test a webhook by sending a test payload.
+    Test a notification webhook by sending a test payload.
     """
     api = ctx.obj['api']
     api.webhook_test(webhook_id)

@@ -4,7 +4,6 @@ import click
 
 
 from polyswarm.client import utils
-from polyswarm.client.webhook import webhook
 from polyswarm.utils import is_url
 
 logger = logging.getLogger(__name__)
@@ -181,7 +180,3 @@ def my_task_list(ctx, sandbox_, start_date, end_date, sha256, user_account_id):
             sha256=sha256,
             user_account_id=user_account_id):
         output.sandbox_task(task)
-
-
-# Add webhook as a subcommand of sandbox
-sandbox.add_command(webhook)

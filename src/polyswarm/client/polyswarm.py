@@ -30,6 +30,7 @@ from polyswarm.client.report import report
 from polyswarm.client.bundle import bundle
 from polyswarm.client.report_template import report_template
 from polyswarm.client.account import account
+from polyswarm.client.notification import notification
 
 logger = logging.getLogger(__name__)
 
@@ -156,7 +157,7 @@ commands = [
     cat, stream, rescan, rescan_id,
     rules, link, tag, family, metadata,
     engine, known, sandbox, sandbox_list,
-    activity, report, report_template, account, bundle,
+    activity, report, report_template, account, bundle, notification,
 ]
 
 for command in commands:
