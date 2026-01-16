@@ -684,7 +684,6 @@ class TextOutput(base.BaseOutput):
         output.append(self._white(f'Account Number: {webhook.account_number}'))
         if webhook.team_account_number:
             output.append(self._white(f'Team Account Number: {webhook.team_account_number}'))
-        output.append(self._white(f'Secret SHA256: {webhook.secret_sha256}'))
         status_writer = self._green if webhook.status == 'enabled' else self._yellow
         output.append(status_writer(f'Status: {webhook.status}'))
         if webhook.events:
