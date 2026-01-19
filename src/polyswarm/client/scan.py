@@ -33,9 +33,11 @@ def scan():
               help='Will handle the provided file as a 7zip archive and decompress server-side.')
 @click.option('--sevenzip-password', type=click.STRING,
               help='Will use this password to decompress the 7zip file. If provided, will handle the file as a 7zip.')
+@click.option('-e', '--expiration-window', type=click.Choice(['7', '30', '180']), default=None,
+              help='Expiration window in days. Only valid for private communities.')
 @click.argument('path', nargs=-1, type=click.Path(exists=True), required=True)
 @click.pass_context
-def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_password, is_base64, is_7zip, sevenzip_password):
+def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_password, is_base64, is_7zip, sevenzip_password, expiration_window):
     """
     Scan files or directories via PolySwarm
     """
@@ -58,7 +60,9 @@ def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_passwor
             preprocessing['password'] = zip_password
     else:
         preprocessing = None
-    for instance in api.scan_file(path, recursive, timeout, nowait, scan_config, preprocessing):
+    # Convert expiration_window from string to int if provided
+    exp_window = int(expiration_window) if expiration_window else None
+    for instance in api.scan_file(path, recursive, timeout, nowait, scan_config, preprocessing, exp_window):
         output.artifact_instance(instance)
 
 
@@ -72,10 +76,12 @@ def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_passwor
               help='Does not wait for the scan window to close, just create it and return right away.')
 @click.option('-s', '--scan-config', type=click.STRING, default='more-time',
               help='Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".')
+@click.option('-e', '--expiration-window', type=click.Choice(['7', '30', '180']), default=None,
+              help='Expiration window in days. Only valid for private communities.')
 @click.argument('url', nargs=-1, type=click.STRING)
 @click.pass_context
 @utils.any_provided('url', 'url_file', 'qrcode_file')
-def url_(ctx, qrcode_file, url_file, timeout, nowait, url, scan_config):
+def url_(ctx, qrcode_file, url_file, timeout, nowait, url, scan_config, expiration_window):
     """
     Scan files or directories via PolySwarm
     """
@@ -95,7 +101,9 @@ def url_(ctx, qrcode_file, url_file, timeout, nowait, url, scan_config):
                 raise click.BadArgumentUsage(f'URL "{_url}" is not valid. '
                                              'Make sure the protocol "https://" or "http://" is set.')
         preprocessing = None
-    for instance in api.scan_url(urls, timeout, nowait, scan_config, preprocessing):
+    # Convert expiration_window from string to int if provided
+    exp_window = int(expiration_window) if expiration_window else None
+    for instance in api.scan_url(urls, timeout, nowait, scan_config, preprocessing, exp_window):
         output.artifact_instance(instance)
 
 
