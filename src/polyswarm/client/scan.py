@@ -33,7 +33,7 @@ def scan():
               help='Will handle the provided file as a 7zip archive and decompress server-side.')
 @click.option('--sevenzip-password', type=click.STRING,
               help='Will use this password to decompress the 7zip file. If provided, will handle the file as a 7zip.')
-@click.option('-e', '--expiration-window', type=click.Choice(['7', '30', '180']), default=None,
+@click.option('-e', '--expiration-window', type=click.INT, default=None,
               help='Expiration window in days. Only valid for private communities.')
 @click.argument('path', nargs=-1, type=click.Path(exists=True), required=True)
 @click.pass_context
@@ -61,8 +61,7 @@ def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_passwor
     else:
         preprocessing = None
     # Convert expiration_window from string to int if provided
-    exp_window = int(expiration_window) if expiration_window else None
-    for instance in api.scan_file(path, recursive, timeout, nowait, scan_config, preprocessing, exp_window):
+    for instance in api.scan_file(path, recursive, timeout, nowait, scan_config, preprocessing, expiration_window):
         output.artifact_instance(instance)
 
 
