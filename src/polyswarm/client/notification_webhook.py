@@ -30,7 +30,7 @@ def create(ctx, webhook_uri, secret, status, events):
     api = ctx.obj['api']
     output = ctx.obj['output']
     
-    result = api.webhook_create(webhook_uri=webhook_uri, secret=secret, status=status, events=events)
+    result = api.notification_webhook_create(webhook_uri=webhook_uri, secret=secret, status=status, events=events)
     output.webhook(result)
 
 
@@ -43,7 +43,7 @@ def get(ctx, webhook_id):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    output.webhook(api.webhook_get(webhook_id))
+    output.webhook(api.notification_webhook_get(webhook_id))
 
 
 @webhook.command('update', short_help='Update an existing webhook.')
@@ -62,7 +62,7 @@ def update(ctx, webhook_id, webhook_uri, secret, status, events):
     api = ctx.obj['api']
     output = ctx.obj['output']
     
-    result = api.webhook_update(
+    result = api.notification_webhook_update(
         webhook_id=webhook_id,
         webhook_uri=webhook_uri,
         secret=secret,
@@ -81,7 +81,7 @@ def delete(ctx, webhook_id):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    api.webhook_delete(webhook_id)
+    api.notification_webhook_delete(webhook_id)
     click.echo(f'Webhook {webhook_id} deleted successfully')
 
 
@@ -93,7 +93,7 @@ def list_webhooks(ctx):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    for webhook_obj in api.webhook_list():
+    for webhook_obj in api.notification_webhook_list():
         output.webhook(webhook_obj)
 
 
@@ -105,5 +105,5 @@ def test(ctx, webhook_id):
     Test a notification webhook by sending a test payload.
     """
     api = ctx.obj['api']
-    api.webhook_test(webhook_id)
+    api.notification_webhook_test(webhook_id)
     click.echo(f'Test payload sent to webhook {webhook_id}')
