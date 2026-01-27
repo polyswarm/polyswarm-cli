@@ -75,7 +75,7 @@ def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_passwor
               help='Does not wait for the scan window to close, just create it and return right away.')
 @click.option('-s', '--scan-config', type=click.STRING, default='more-time',
               help='Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".')
-@click.option('-e', '--expiration-window', type=click.Choice(['7', '30', '180']), default=None,
+@click.option('-e', '--expiration-window', type=click.INT, default=None,
               help='Expiration window in days. Only valid for private communities.')
 @click.argument('url', nargs=-1, type=click.STRING)
 @click.pass_context
@@ -100,9 +100,7 @@ def url_(ctx, qrcode_file, url_file, timeout, nowait, url, scan_config, expirati
                 raise click.BadArgumentUsage(f'URL "{_url}" is not valid. '
                                              'Make sure the protocol "https://" or "http://" is set.')
         preprocessing = None
-    # Convert expiration_window from string to int if provided
-    exp_window = int(expiration_window) if expiration_window else None
-    for instance in api.scan_url(urls, timeout, nowait, scan_config, preprocessing, exp_window):
+    for instance in api.scan_url(urls, timeout, nowait, scan_config, preprocessing, expiration_window):
         output.artifact_instance(instance)
 
 
