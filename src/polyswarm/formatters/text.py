@@ -556,6 +556,21 @@ class TextOutput(base.BaseOutput):
             output.append(self._white(f'URL: {report.url}'))
         return self._output(output, write)
 
+    def llm_report_task(self, report, write=True):
+        output = []
+        output.append(self._white('============================= LLM Report ============================='))
+        output.append(self._blue(f'ID: {report.id}'))
+        output.append(self._white(f'Community: {report.community}'))
+        output.append(self._blue(f'Created: {report.created}'))
+        output.append(self._white(f'State: {report.state}'))
+        if report.sandbox_task_id:
+            output.append(self._blue(f'Sandbox Task ID: {report.sandbox_task_id}'))
+        if report.instance_id:
+            output.append(self._blue(f'Instance ID: {report.instance_id}'))
+        if report.url:
+            output.append(self._white(f'URL: {report.url}'))
+        return self._output(output, write)
+
     def report_template(self, template, write=True):
         output = []
         output.append(self._white('============================= Report Template ============================='))
@@ -642,6 +657,37 @@ class TextOutput(base.BaseOutput):
                 if feature["overage"]:
                     output.append(self._white(f'Overage: {feature["overage"]}'))
             output.append(self._white("---"))
+        return self._output(output, write)
+
+    def llm_prompt_config(self, config, write=True):
+        output = []
+        output.append(self._white('============================= LLM Prompt Config ============================='))
+        output.append(self._blue(f'ID: {config.id}'))
+        output.append(self._white(f'Name: {config.name}'))
+        output.append(self._white(f'Is Active: {config.is_active}'))
+        if config.created:
+            output.append(self._white(f'Created: {config.created}'))
+        output.append(self._white(f'System Prompt: {config.system_prompt}'))
+        if config.cape_only_prompt:
+            output.append(self._white(f'Cape-Only Prompt: {config.cape_only_prompt}'))
+        if config.triage_only_prompt:
+            output.append(self._white(f'Triage-Only Prompt: {config.triage_only_prompt}'))
+        if config.scan_only_prompt:
+            output.append(self._white(f'Scan-Only Prompt: {config.scan_only_prompt}'))
+        return self._output(output, write)
+
+    def webhook(self, webhook, write=True):
+        output = []
+        output.append(self._white('============================= Webhook ============================='))
+        output.append(self._blue(f'ID: {webhook.id}'))
+        output.append(self._white(f'Webhook URI: {webhook.webhook_uri}'))
+        output.append(self._white(f'Account Number: {webhook.account_number}'))
+        if webhook.team_account_number:
+            output.append(self._white(f'Team Account Number: {webhook.team_account_number}'))
+        status_writer = self._green if webhook.status == 'enabled' else self._yellow
+        output.append(status_writer(f'Status: {webhook.status}'))
+        if webhook.events:
+            output.append(self._white(f'Events: {json.dumps(webhook.events, indent=2)}'))
         return self._output(output, write)
 
     @is_grouped

@@ -39,7 +39,7 @@ class Polyswarm(PolyswarmAPI):
 
     def scan_file(self, path, recursive=False,
                   timeout=settings.DEFAULT_SCAN_TIMEOUT, nowait=False, scan_config=None,
-                  preprocessing=None):
+                  preprocessing=None, expiration_window=None):
         """
         Scan files or directories via PolySwarm.
 
@@ -55,6 +55,7 @@ class Polyswarm(PolyswarmAPI):
                                 "qrcode" means the file is a QR Code image with a URL as payload, and you want
                                 to scan the URL, not the actual file (artifact_type has to be "URL").
                               - password (string, optional): will use this password to decompress the zip file.
+        :param expiration_window: The expiration window in days (7, 30, or 180). Only valid for private communities.
         :return: An iterator of artifact instances.
         """
         args = [(self, timeout, nowait, file) for file in utils.collect_files(path, recursive=recursive)]
@@ -63,6 +64,7 @@ class Polyswarm(PolyswarmAPI):
                                                 kwargs_list=[{
                                                     'scan_config': scan_config,
                                                     'preprocessing': preprocessing,
+                                                    'expiration_window': expiration_window,
                                                 }]*len(args)):
             yield instance
 
@@ -71,7 +73,8 @@ class Polyswarm(PolyswarmAPI):
                  timeout=settings.DEFAULT_SCAN_TIMEOUT,
                  nowait=False,
                  scan_config='more-time',
-                 preprocessing=None):
+                 preprocessing=None,
+                 expiration_window=None):
         """
         Scan files or directories via PolySwarm
 
@@ -86,10 +89,12 @@ class Polyswarm(PolyswarmAPI):
                                 "qrcode" means the file is a QR Code image with a URL as payload, and you want
                                 to scan the URL, not the actual file (artifact_type has to be "URL").
                               - password (string, optional): will use this password to decompress the zip file.
+        :param expiration_window: The expiration window in days (7, 30, or 180). Only valid for private communities.
         :return: An iterator of artifact instances.
         """
         args = [(self, timeout, nowait, url) for url in urls]
-        kwargs = [dict(artifact_type='url', scan_config=scan_config, preprocessing=preprocessing) for _ in urls]
+        kwargs = [dict(artifact_type='url', scan_config=scan_config, preprocessing=preprocessing,
+                       expiration_window=expiration_window) for _ in urls]
 
         for instance in utils.parallel_executor(submit_and_wait, args_list=args, kwargs_list=kwargs):
             yield instance

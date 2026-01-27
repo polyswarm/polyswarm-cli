@@ -92,3 +92,108 @@ def download(ctx, report_id, destination):
 
     report_object = api.report_download(report_id, destination)
     out.local_artifact(report_object)
+
+
+@report.command('llm-create', short_help='Create an LLM report for an instance or sandbox id.')
+@click.option('-i', '--instance-id', type=click.STRING, help='Instance ID to include in the report.')
+@click.option('-s', '--sandbox-task-id', type=click.STRING, help='Sandbox Task ID to include in the report.')
+@click.pass_context
+def llm_create(ctx, instance_id, sandbox_task_id):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    if not instance_id and not sandbox_task_id:
+         raise click.BadOptionUsage('instance_id', 'Either --instance-id or --sandbox-task-id must be provided.')
+
+    result = api.llm_report_create(instance_id=instance_id, sandbox_task_id=sandbox_task_id)
+    output.llm_report_task(result)
+
+
+@report.command('llm-get', short_help='Fetch an LLM report task.')
+@click.argument('report-id', callback=utils.validate_id)
+@click.pass_context
+def llm_get(ctx, report_id):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    output.llm_report_task(api.llm_report_get(report_task_id=report_id))
+
+
+@report.command('llm-download', short_help='Download an LLM report.')
+@click.argument('report-id', callback=utils.validate_id)
+@click.option('-d', '--destination', type=click.Path(file_okay=False),
+              help='Path where to store the downloaded file.', default=os.getcwd())
+@click.pass_context
+def llm_download(ctx, report_id, destination):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    report_object = api.llm_report_download(report_task_id=report_id, folder=destination)
+    output.local_artifact(report_object)
+
+
+@report.command('prompt-config-create', short_help='Create a new LLM prompt configuration.')
+@click.argument('name', type=click.STRING)
+@click.option('--system-prompt', required=True, type=click.STRING, help='The system prompt text.')
+@click.option('--is-active', is_flag=True, default=False, help='Whether this should be the active prompt configuration.')
+@click.option('--cape-only-prompt', type=click.STRING, help='Optional Cape-specific prompt text.')
+@click.option('--triage-only-prompt', type=click.STRING, help='Optional Triage-specific prompt text.')
+@click.option('--scan-only-prompt', type=click.STRING, help='Optional Scan-specific prompt text.')
+@click.pass_context
+def prompt_config_create(ctx, name, system_prompt, is_active, cape_only_prompt, triage_only_prompt, scan_only_prompt):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    
+    result = api.prompt_config_create(
+        name=name,
+        system_prompt=system_prompt,
+        is_active=is_active,
+        cape_only_prompt=cape_only_prompt,
+        triage_only_prompt=triage_only_prompt,
+        scan_only_prompt=scan_only_prompt
+    )
+    output.llm_prompt_config(result)
+
+
+@report.command('prompt-config-get', short_help='Fetch an LLM prompt configuration by ID.')
+@click.argument('prompt-config-id', callback=utils.validate_id)
+@click.pass_context
+def prompt_config_get(ctx, prompt_config_id):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    
+    result = api.prompt_config_get(prompt_config_id=prompt_config_id)
+    output.llm_prompt_config(result)
+
+
+@report.command('prompt-config-update', short_help='Update an existing LLM prompt configuration.')
+@click.argument('prompt-config-id', callback=utils.validate_id)
+@click.option('--name', type=click.STRING, help='The new name.')
+@click.option('--system-prompt', type=click.STRING, help='The new system prompt text.')
+@click.option('--is-active', type=bool, help='Whether this should be the active prompt configuration.')
+@click.option('--cape-only-prompt', type=click.STRING, help='Optional Cape-specific prompt text.')
+@click.option('--triage-only-prompt', type=click.STRING, help='Optional Triage-specific prompt text.')
+@click.option('--scan-only-prompt', type=click.STRING, help='Optional Scan-specific prompt text.')
+@click.pass_context
+def prompt_config_update(ctx, prompt_config_id, name, system_prompt, is_active, cape_only_prompt, triage_only_prompt, scan_only_prompt):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    
+    result = api.prompt_config_update(
+        prompt_config_id=prompt_config_id,
+        name=name,
+        system_prompt=system_prompt,
+        is_active=is_active,
+        cape_only_prompt=cape_only_prompt,
+        triage_only_prompt=triage_only_prompt,
+        scan_only_prompt=scan_only_prompt
+    )
+    output.llm_prompt_config(result)
+
+
+@report.command('prompt-config-list', short_help='List all LLM prompt configurations.')
+@click.pass_context
+def prompt_config_list(ctx):
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    
+    results = api.prompt_config_list()
+    for result in results:
+        output.llm_prompt_config(result)
