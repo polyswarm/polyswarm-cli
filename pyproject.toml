@@ -22,7 +22,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "polyswarm_api>=3.16",
+    "polyswarm_api>=3.17",
     "click>=7.1",
     "colorama>=0.4.6",
     "click-log>=0.4.0",
