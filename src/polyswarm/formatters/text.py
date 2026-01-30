@@ -690,6 +690,81 @@ class TextOutput(base.BaseOutput):
             output.append(self._white(f'Events: {json.dumps(webhook.events, indent=2)}'))
         return self._output(output, write)
 
+    def sample(self, result, write=True):
+        output = []
+        output.append(self._white('============================= Sample ============================='))
+
+        # Artifact Instance section
+        artifact_instance = result.artifact_instance
+        if artifact_instance:
+            output.append(self._blue('--- Artifact Instance ---'))
+            if artifact_instance.get('sha256'):
+                output.append(self._white(f'SHA256: {artifact_instance.get("sha256")}'))
+            if artifact_instance.get('id'):
+                output.append(self._white(f'Instance ID: {artifact_instance.get("id")}'))
+            if artifact_instance.get('sha1'):
+                output.append(self._white(f'SHA1: {artifact_instance.get("sha1")}'))
+            if artifact_instance.get('md5'):
+                output.append(self._white(f'MD5: {artifact_instance.get("md5")}'))
+            if artifact_instance.get('mimetype'):
+                output.append(self._white(f'Mimetype: {artifact_instance.get("mimetype")}'))
+            if artifact_instance.get('extended_type'):
+                output.append(self._white(f'Extended Type: {artifact_instance.get("extended_type")}'))
+            if artifact_instance.get('size'):
+                output.append(self._white(f'Size: {artifact_instance.get("size")}'))
+            if artifact_instance.get('first_seen'):
+                output.append(self._white(f'First Seen: {artifact_instance.get("first_seen")}'))
+            if artifact_instance.get('polyscore') is not None:
+                formatter = self._get_score_format(artifact_instance.get('polyscore'))
+                output.append(formatter(f'PolyScore: {artifact_instance.get("polyscore"):.20f}'))
+        else:
+            output.append(self._yellow('--- Artifact Instance: Not found ---'))
+
+        # Sandbox section
+        sandbox = result.sandbox
+        if sandbox:
+            output.append(self._blue('--- Sandbox ---'))
+            # Cape
+            cape = sandbox.get('cape', {})
+            if cape:
+                output.append(self._white('  Cape:'))
+                self._open_group()
+                output.append(self._white(f'ID: {cape.get("id")}'))
+                output.append(self._white(f'Status: {cape.get("status")}'))
+                output.append(self._white(f'Created: {cape.get("created")}'))
+                self._close_group()
+            else:
+                output.append(self._yellow('  Cape: Not found'))
+            # Triage
+            triage = sandbox.get('triage', {})
+            if triage:
+                output.append(self._white('  Triage:'))
+                self._open_group()
+                output.append(self._white(f'ID: {triage.get("id")}'))
+                output.append(self._white(f'Status: {triage.get("status")}'))
+                output.append(self._white(f'Created: {triage.get("created")}'))
+                self._close_group()
+            else:
+                output.append(self._yellow('  Triage: Not found'))
+        else:
+            output.append(self._yellow('--- Sandbox: Not found ---'))
+
+        # Metadata section
+        metadata = result.metadata
+        if metadata:
+            output.append(self._blue('--- Metadata ---'))
+            if metadata.get('artifact', {}).get('id'):
+                output.append(self._white(f'Artifact ID: {metadata.get("artifact", {}).get("id")}'))
+            if metadata.get('artifact', {}).get('sha256'):
+                output.append(self._white(f'SHA256: {metadata.get("artifact", {}).get("sha256")}'))
+            if metadata.get('scan', {}).get('detections'):
+                detections = metadata.get('scan', {}).get('detections', {})
+                output.append(self._white(f'Detections: {detections.get("malicious", 0)}/{detections.get("total", 0)} malicious'))
+        else:
+            output.append(self._yellow('--- Metadata: Not found ---'))
+
+        return self._output(output, write)
+
     @is_grouped
     def _white(self, text):
         return click.style(text, fg='white')
