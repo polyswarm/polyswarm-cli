@@ -260,7 +260,7 @@ class TextOutput(base.BaseOutput):
     def _dfs_mapping_render(self, output, path, tree, depth=0):
         tree_string = (' | ' * (depth - 1)) + ' +-' if depth > 0 else ''
         current_path = '.'.join(path)
-        if not tree:
+        if not tree or tree.keys() == {'type'} or 'example' in tree.keys():
             output.append(self._white(tree_string + current_path))
         else:
             if path:
