@@ -763,6 +763,27 @@ class TextOutput(base.BaseOutput):
         else:
             output.append(self._yellow('--- Metadata: Not found ---'))
 
+        # Pending section
+        pending = result.pending
+        if pending:
+            has_pending = any(v is not None for v in pending.values())
+            if has_pending:
+                output.append(self._yellow('--- Pending Tasks ---'))
+                self._open_group()
+                pending_items = [
+                    ('Artifact Instance', 'artifact_instance_id'),
+                    ('Sandbox Cape', 'sandbox_task_id_cape'),
+                    ('Sandbox Triage', 'sandbox_task_id_triage'),
+                    ('Metadata', 'artifact_metadata_id'),
+                ]
+                for label, key in pending_items:
+                    pending_id = pending.get(key)
+                    if pending_id:
+                        output.append(self._yellow(f'{label}: ID {pending_id} (processing)'))
+                    else:
+                        output.append(self._green(f'{label}: ready'))
+                self._close_group()
+
         return self._output(output, write)
 
     @is_grouped
