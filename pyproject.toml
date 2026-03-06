@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "polyswarm"
-version = "3.16.0"
+version = "3.16.1"
 description = "CLI for using the PolySwarm Customer APIs"
 readme = "README.md"
 authors = [{ name = "PolySwarm Developers", email = "info@polyswarm.io" }]
@@ -51,7 +51,7 @@ include-package-data = true
 where = ["src"]
 
 [tool.bumpversion]
-current_version = "3.16.0"
+current_version = "3.16.1"
 commit = true
 tag = false
 sign_tags = true
