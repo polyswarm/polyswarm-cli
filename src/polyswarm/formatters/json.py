@@ -169,6 +169,9 @@ class JSONOutput(base.BaseOutput):
     def webhook(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 
+    def sample(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
+
 class PrettyJSONOutput(JSONOutput):
     name = 'pretty-json'
 

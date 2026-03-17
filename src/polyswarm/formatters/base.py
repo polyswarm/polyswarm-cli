@@ -57,3 +57,6 @@ class BaseOutput:
 
     def bundle_task(self, result):
         raise NotImplementedError
+
+    def sample(self, result):
+        raise NotImplementedError
