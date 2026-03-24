@@ -563,8 +563,10 @@ class TextOutput(base.BaseOutput):
         output.append(self._white(f'Community: {report.community}'))
         output.append(self._blue(f'Created: {report.created}'))
         output.append(self._white(f'State: {report.state}'))
-        if report.sandbox_task_id:
-            output.append(self._blue(f'Sandbox Task ID: {report.sandbox_task_id}'))
+        if report.cape_sandbox_task_id:
+            output.append(self._blue(f'Cape Sandbox Task ID: {report.cape_sandbox_task_id}'))
+        if report.triage_sandbox_task_id:
+            output.append(self._blue(f'Triage Sandbox Task ID: {report.triage_sandbox_task_id}'))
         if report.instance_id:
             output.append(self._blue(f'Instance ID: {report.instance_id}'))
         if report.url:
@@ -763,26 +765,57 @@ class TextOutput(base.BaseOutput):
         else:
             output.append(self._yellow('--- Metadata: Not found ---'))
 
-        # Pending section
-        pending = result.pending
-        if pending:
-            has_pending = any(v is not None for v in pending.values())
-            if has_pending:
-                output.append(self._yellow('--- Pending Tasks ---'))
-                self._open_group()
-                pending_items = [
-                    ('Artifact Instance', 'artifact_instance_id'),
-                    ('Sandbox Cape', 'sandbox_task_id_cape'),
-                    ('Sandbox Triage', 'sandbox_task_id_triage'),
-                    ('Metadata', 'artifact_metadata_id'),
-                ]
-                for label, key in pending_items:
-                    pending_id = pending.get(key)
-                    if pending_id:
-                        output.append(self._yellow(f'{label}: ID {pending_id} (processing)'))
+        # LLM Report Task section
+        llm_report_task = result.llm_report_task
+        if llm_report_task:
+            output.append(self._blue('--- LLM Report Task ---'))
+            self._open_group()
+            if llm_report_task.get('id'):
+                output.append(self._white(f'ID: {llm_report_task.get("id")}'))
+            if llm_report_task.get('model'):
+                output.append(self._white(f'Model: {llm_report_task.get("model")}'))
+            state = llm_report_task.get('state')
+            if state:
+                state_writer = self._green if state == 'SUCCEEDED' else (self._red if state == 'FAILED' else self._yellow)
+                output.append(state_writer(f'State: {state}'))
+            if llm_report_task.get('created'):
+                output.append(self._white(f'Created: {llm_report_task.get("created")}'))
+            if llm_report_task.get('community'):
+                output.append(self._white(f'Community: {llm_report_task.get("community")}'))
+            if llm_report_task.get('instance_id'):
+                output.append(self._white(f'Instance ID: {llm_report_task.get("instance_id")}'))
+            if llm_report_task.get('cape_sandbox_task_id'):
+                output.append(self._white(f'Cape Sandbox Task ID: {llm_report_task.get("cape_sandbox_task_id")}'))
+            if llm_report_task.get('triage_sandbox_task_id'):
+                output.append(self._white(f'Triage Sandbox Task ID: {llm_report_task.get("triage_sandbox_task_id")}'))
+            if llm_report_task.get('url'):
+                output.append(self._white(f'URL: {llm_report_task.get("url")}'))
+            self._close_group()
+
+        # Tasks section
+        tasks = result.tasks
+        if tasks:
+            output.append(self._blue('--- Tasks ---'))
+            self._open_group()
+            task_items = [
+                ('Artifact Instance', 'artifact_instance'),
+                ('LLM Report',        'llm_report'),
+                ('Sandbox Cape',      'sandbox_cape'),
+                ('Sandbox Triage',    'sandbox_triage'),
+            ]
+            for label, key in task_items:
+                task = tasks.get(key)
+                if task is not None:
+                    rendered_id = task.get('rendered_id')
+                    requested_id = task.get('requested_id')
+                    requested_status = task.get('requested_status')
+                    if requested_id and requested_status:
+                        output.append(self._yellow(f'{label}: ID {requested_id} ({requested_status})'))
+                    elif rendered_id:
+                        output.append(self._green(f'{label}: ID {rendered_id} (ready)'))
                     else:
-                        output.append(self._green(f'{label}: ready'))
-                self._close_group()
+                        output.append(self._white(f'{label}: not available'))
+            self._close_group()
 
         return self._output(output, write)
 
