@@ -19,7 +19,7 @@ dev-pypi:
 
 test-run310:
   tags:
-    - kube-new
+    - stage-kube-newer
   image: python:3.10
   stage: test
   before_script:
@@ -31,7 +31,7 @@ test-run310:
 
 test-run311:
   tags:
-    - kube-new
+    - stage-kube-newer
   image: python:3.11
   stage: test
   before_script:
@@ -43,7 +43,7 @@ test-run311:
 
 test-run312:
   tags:
-    - kube-new
+    - stage-kube-newer
   image: python:3.12
   stage: test
   before_script:

@@ -96,15 +96,19 @@ def download(ctx, report_id, destination):
 
 @report.command('llm-create', short_help='Create an LLM report for an instance or sandbox id.')
 @click.option('-i', '--instance-id', type=click.STRING, help='Instance ID to include in the report.')
-@click.option('-s', '--sandbox-task-id', type=click.STRING, help='Sandbox Task ID to include in the report.')
+@click.option('-s', '--cape-sandbox-task-id', type=click.STRING, help='Sandbox Task ID to include in the report.')
+@click.option('-ss', '--triage-sandbox-task-id', type=click.STRING,
+              help='Second Sandbox Task ID to include in the report.')
 @click.pass_context
-def llm_create(ctx, instance_id, sandbox_task_id):
+def llm_create(ctx, instance_id, cape_sandbox_task_id, triage_sandbox_task_id):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    if not instance_id and not sandbox_task_id:
-         raise click.BadOptionUsage('instance_id', 'Either --instance-id or --sandbox-task-id must be provided.')
+    if not instance_id and not triage_sandbox_task_id and not cape_sandbox_task_id:
+         raise click.BadOptionUsage('instance_id','Either --instance-id or --triage-sandbox-task-id or'
+                                                  ' --cape-sandbox-task-id must be provided.')
 
-    result = api.llm_report_create(instance_id=instance_id, sandbox_task_id=sandbox_task_id)
+    result = api.llm_report_create(
+        instance_id=instance_id, cape_sandbox_task_id=cape_sandbox_task_id, triage_sandbox_task_id=triage_sandbox_task_id)
     output.llm_report_task(result)
 
 
