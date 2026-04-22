@@ -37,3 +37,22 @@ def status(ctx, scan_id):
 
     for instance in api.scan_lookup(scan_ids):
         output.artifact_metadata(instance)
+
+
+@metadata.command('analyze-ip', short_help='Submit a URL or IP address for IP analysis.')
+@click.argument('url', nargs=-1, type=click.STRING, required=True)
+@click.pass_context
+def analyze_ip(ctx, url):
+    """
+    Submit a URL or IP address for IP analysis.
+
+    Creates an ArtifactInstance immediately (no S3 upload), triggers only
+    the IP analyzer, and consumes no quota.
+
+    URL is the URL or IP address to submit for analysis.
+    """
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    for u in url:
+        instance = api.submit_url(u)
+        output.artifact_instance(instance)
