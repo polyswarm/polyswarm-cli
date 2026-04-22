@@ -273,3 +273,28 @@ class Polyswarm(PolyswarmAPI):
         kwargs = [kwargs] * len(args)
         for result in utils.parallel_executor(self.sandbox, args_list=args, kwargs_list=kwargs):
             yield result
+
+    def submit_url(self, url):
+        """
+        Submit a URL or IP address for IP analysis (no quota consumed).
+
+        Creates an ArtifactInstance immediately without S3 upload, triggers only
+        the IP analyzer. No quota is consumed.
+
+        :param url: The URL or IP address to submit.
+        :return: An ArtifactInstance resource.
+        """
+        from polyswarm_api.core import PolyswarmRequest
+        from polyswarm_api import resources
+        logger.info('Submitting URL for IP analysis: %s', url)
+        request = PolyswarmRequest(
+            self,
+            {
+                'method': 'POST',
+                'url': f'{self.uri}/instance/url',
+                'params': {'community': self.community},
+                'json': {'url': url},
+            },
+            result_parser=resources.ArtifactInstance,
+        )
+        return request.execute().result()
