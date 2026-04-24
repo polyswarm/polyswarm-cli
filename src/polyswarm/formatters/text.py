@@ -87,6 +87,8 @@ class TextOutput(base.BaseOutput):
                 output.append(self._red(malicious))
             else:
                 output.append(self._white(malicious))
+        elif instance.json.get('bounty_state') == 6 and not instance.failed:
+            output.append(self._white('Detections: This artifact was stored but not submitted for scanning.'))
         elif not instance.window_closed and not instance.failed:
             output.append(self._white('Detections: This scan has not finished running yet.'))
         else:
@@ -116,6 +118,8 @@ class TextOutput(base.BaseOutput):
             output.append(self._white('Status: This artifact has not been scanned. You can trigger a scan now.'))
         elif timeout:
             output.append(self._yellow('Status: Lookup timed-out, please retry'))
+        elif instance.json.get('bounty_state') == 6:
+            output.append(self._white('Status: Stored'))
         else:
             output.append(self._white('Status: Running'))
         if instance.type == 'URL':
