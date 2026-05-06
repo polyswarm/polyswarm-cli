@@ -803,6 +803,7 @@ class TextOutput(base.BaseOutput):
             self._open_group()
             task_items = [
                 ('Artifact Instance', 'artifact_instance'),
+                ('IP Analyzer',       'ip_analyzer'),
                 ('LLM Report',        'llm_report'),
                 ('Sandbox Cape',      'sandbox_cape'),
                 ('Sandbox Triage',    'sandbox_triage'),
