@@ -803,22 +803,28 @@ class TextOutput(base.BaseOutput):
             self._open_group()
             task_items = [
                 ('Artifact Instance', 'artifact_instance'),
+                ('IP Analyzer',       'ip_analyzer'),
                 ('LLM Report',        'llm_report'),
+                ('Metadata',          'metadata'),
                 ('Sandbox Cape',      'sandbox_cape'),
                 ('Sandbox Triage',    'sandbox_triage'),
             ]
             for label, key in task_items:
                 task = tasks.get(key)
-                if task is not None:
-                    rendered_id = task.get('rendered_id')
-                    requested_id = task.get('requested_id')
-                    requested_status = task.get('requested_status')
-                    if requested_id and requested_status:
-                        output.append(self._yellow(f'{label}: ID {requested_id} ({requested_status})'))
-                    elif rendered_id:
-                        output.append(self._green(f'{label}: ID {rendered_id} (ready)'))
-                    else:
-                        output.append(self._white(f'{label}: not available'))
+                if task is None:
+                    continue
+                rendered_id = task.get('rendered_id')
+                requested_id = task.get('requested_id')
+                requested_status = task.get('requested_status')
+                id_to_show = requested_id or rendered_id
+                if requested_status and id_to_show:
+                    output.append(self._yellow(f'{label}: ID {id_to_show} ({requested_status})'))
+                elif requested_status:
+                    output.append(self._yellow(f'{label}: {requested_status}'))
+                elif id_to_show:
+                    output.append(self._green(f'{label}: ID {id_to_show} (ready)'))
+                else:
+                    output.append(self._white(f'{label}: not available'))
             self._close_group()
 
         return self._output(output, write)

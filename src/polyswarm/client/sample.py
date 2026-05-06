@@ -16,11 +16,14 @@ logger = logging.getLogger(__name__)
               help='Specific Triage sandbox task ID to retrieve.')
 @click.option('--artifact-metadata-id', type=int, default=None,
               help='Specific artifact metadata ID to retrieve.')
+@click.option('--llm-report-id', type=int, default=None,
+              help='Specific LLM report task ID to retrieve.')
 @click.pass_context
 def sample(ctx, sha256, artifact_instance_id, sandbox_task_id_cape,
-           sandbox_task_id_triage, artifact_metadata_id):
+           sandbox_task_id_triage, artifact_metadata_id, llm_report_id):
     """
-    Get aggregated sample information including artifact instance, sandbox tasks, and metadata.
+    Get aggregated sample information including artifact instance, sandbox tasks, metadata,
+    and LLM report.
 
     SHA256 is the SHA256 hash of the artifact to retrieve information for.
     """
@@ -32,5 +35,6 @@ def sample(ctx, sha256, artifact_instance_id, sandbox_task_id_cape,
         sandbox_task_id_cape=sandbox_task_id_cape,
         sandbox_task_id_triage=sandbox_task_id_triage,
         artifact_metadata_id=artifact_metadata_id,
+        llm_report_id=llm_report_id,
     )
     output.sample(result)
