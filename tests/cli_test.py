@@ -438,3 +438,16 @@ class SandboxTaskTest(BaseTestCase):
         result = self._run_cli([
             '--output-format', 'json', 'sandbox', 'lookup', 'triage', 'a709f37b3a50608f2e9830f92ea25da04bfa4f34d2efecfd061de9f29af02427'])
         self._assert_text_result(result, self.click_vcr(result))
+
+
+class SampleTest(BaseTestCase):
+    @vcr.use_cassette()
+    def test_sample_text(self):
+        result = self._run_cli(['sample', self.eicar_hash])
+        self._assert_text_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_sample_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'sample', self.eicar_hash])
+        self._assert_json_result(result, self.click_vcr(result))
