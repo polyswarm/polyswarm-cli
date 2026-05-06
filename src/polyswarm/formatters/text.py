@@ -818,6 +818,8 @@ class TextOutput(base.BaseOutput):
                         output.append(self._yellow(f'{label}: ID {requested_id} ({requested_status})'))
                     elif rendered_id:
                         output.append(self._green(f'{label}: ID {rendered_id} (ready)'))
+                    elif requested_status:
+                        output.append(self._yellow(f'{label}: {requested_status}'))
                     else:
                         output.append(self._white(f'{label}: not available'))
             self._close_group()
