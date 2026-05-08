@@ -32,6 +32,35 @@ def submit(ctx, provider_slug, artifact_id, vm_slug, internet_disabled):
         output.sandbox_task(tasks)
 
 
+@sandbox.command('hash', short_help='Submit by hash (sha256/sha1/md5) to be sandboxed.')
+@click.argument('provider_slug', type=click.STRING)
+@click.argument('hash_value', nargs=-1, required=True)
+@click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
+@click.option('--hash-type', help='Hash type [default:autodetect, sha256|sha1|md5].', default=None)
+@click.option('--vm_slug', 'vm_slug', type=click.STRING)
+@click.option('--internet-disabled', 'internet_disabled', type=click.BOOL, is_flag=True, default=False)
+@click.pass_context
+def hash_(ctx, provider_slug, hash_value, hash_file, hash_type, vm_slug, internet_disabled):
+    """
+    Submit a sample to the sandbox by hash. Resolves the hash to its latest
+    known artifact instance and sandboxes that instance.
+    """
+    api = ctx.obj['api']
+    output = ctx.obj['output']
+    hashes = utils.parse_hashes(hash_value, hash_file=hash_file)
+
+    instance_ids = []
+    for h in hashes:
+        instance = next(iter(api.search_hashes([h], hash_type=hash_type)), None)
+        if instance is None:
+            raise click.ClickException(f'No artifact instances found for hash {h}')
+        instance_ids.append(instance.id)
+
+    for task in api.sandbox_instances(
+            instance_ids, provider_slug=provider_slug, vm_slug=vm_slug, network_enabled=not internet_disabled):
+        output.sandbox_task(task)
+
+
 @sandbox.command('file', short_help='Submit a local file to be sandboxed.')
 @click.argument('provider', type=click.STRING)
 @click.argument('path', type=click.Path(exists=True), required=True)
