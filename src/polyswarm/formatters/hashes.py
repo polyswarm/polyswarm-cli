@@ -45,6 +45,18 @@ class SHA1Output(base.BaseOutput):
     def artifact_instance(self, result, timeout=False):
         click.echo(result.sha1, file=self.out)
 
+    def historical_result(self, result):
+        if result.sha1:
+            click.echo(result.sha1, file=self.out)
+        else:
+            logger.warning('Could not render historical result as sha1, value is %s', result.sha1)
+
+    def live_result(self, result):
+        if result.sha1:
+            click.echo(result.sha1, file=self.out)
+        else:
+            logger.warning('Could not render live result as sha1, value is %s', result.sha1)
+
     def metadata(self, result):
         if result.sha1:
             click.echo(result.sha1, file=self.out)
@@ -61,6 +73,18 @@ class MD5Output(base.BaseOutput):
 
     def artifact_instance(self, result, timeout=False):
         click.echo(result.md5, file=self.out)
+
+    def historical_result(self, result):
+        if result.md5:
+            click.echo(result.md5, file=self.out)
+        else:
+            logger.warning('Could not render historical result as md5, value is %s', result.md5)
+
+    def live_result(self, result):
+        if result.md5:
+            click.echo(result.md5, file=self.out)
+        else:
+            logger.warning('Could not render live result as md5, value is %s', result.md5)
 
     def metadata(self, result):
         if result.md5:

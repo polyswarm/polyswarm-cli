@@ -174,6 +174,10 @@ class TextOutput(base.BaseOutput):
         output.append(self._blue(f'Instance Id: {result.instance_id}'))
         output.append(self._white(f'Created at: {result.created}'))
         output.append(self._white(f'SHA256: {result.sha256}'))
+        if result.sha1:
+            output.append(self._white(f'SHA1: {result.sha1}'))
+        if result.md5:
+            output.append(self._white(f'MD5: {result.md5}'))
         output.append(self._white(f'Rule: {result.rule_name}'))
         if result.malware_family:
             output.append(self._red(f'Malware Family: {result.malware_family}'))
@@ -201,6 +205,10 @@ class TextOutput(base.BaseOutput):
         output.append(self._blue(f'Instance Id: {result.instance_id}'))
         output.append(self._white(f'Created at: {result.created}'))
         output.append(self._white(f'SHA256: {result.sha256}'))
+        if result.sha1:
+            output.append(self._white(f'SHA1: {result.sha1}'))
+        if result.md5:
+            output.append(self._white(f'MD5: {result.md5}'))
         output.append(self._white(f'Rule: {result.rule_name}'))
         if result.malware_family:
             output.append(self._red(f'Malware Family: {result.malware_family}'))
