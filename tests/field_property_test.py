@@ -53,7 +53,7 @@ class FieldPropertyCliTest(TestCase):
     def test_field_property_create(self):
         with mock.patch('polyswarm_api.api.PolyswarmAPI.metadata_field_properties_create',
                         return_value=_fake_resource()) as m:
-            result = self._run('search', 'field-property-create',
+            result = self._run('search', 'field-property', 'create',
                                'polyunite.malware_family',
                                '--description', 'Identified malware family',
                                '--example', 'polyunite.malware_family:lockbit',
@@ -71,7 +71,7 @@ class FieldPropertyCliTest(TestCase):
     def test_field_property_create_with_aliases(self):
         with mock.patch('polyswarm_api.api.PolyswarmAPI.metadata_field_properties_create',
                         return_value=_fake_resource(aliases=['family', 'malware'])) as m:
-            result = self._run('search', 'field-property-create',
+            result = self._run('search', 'field-property', 'create',
                                'polyunite.malware_family',
                                '--description', 'd',
                                '--alias', 'family',
@@ -83,7 +83,7 @@ class FieldPropertyCliTest(TestCase):
     def test_field_property_get(self):
         with mock.patch('polyswarm_api.api.PolyswarmAPI.metadata_field_properties_get',
                         return_value=_fake_resource()) as m:
-            result = self._run('search', 'field-property-get',
+            result = self._run('search', 'field-property', 'get',
                                'polyunite.malware_family')
         assert result.exit_code == 0, result.output
         m.assert_called_once_with(field_path='polyunite.malware_family')
@@ -92,7 +92,7 @@ class FieldPropertyCliTest(TestCase):
     def test_field_property_update(self):
         with mock.patch('polyswarm_api.api.PolyswarmAPI.metadata_field_properties_update',
                         return_value=_fake_resource(description='new desc')) as m:
-            result = self._run('search', 'field-property-update',
+            result = self._run('search', 'field-property', 'update',
                                'polyunite.malware_family',
                                '--description', 'new desc')
         assert result.exit_code == 0, result.output
@@ -107,7 +107,7 @@ class FieldPropertyCliTest(TestCase):
     def test_field_property_delete(self):
         with mock.patch('polyswarm_api.api.PolyswarmAPI.metadata_field_properties_delete',
                         return_value=_fake_resource()) as m:
-            result = self._run('search', 'field-property-delete',
+            result = self._run('search', 'field-property', 'delete',
                                'polyunite.malware_family')
         assert result.exit_code == 0, result.output
         m.assert_called_once_with(field_path='polyunite.malware_family')
@@ -119,7 +119,7 @@ class FieldPropertyCliTest(TestCase):
         ]
         with mock.patch('polyswarm_api.api.PolyswarmAPI.metadata_field_properties_list',
                         return_value=iter(rows)) as m:
-            result = self._run('search', 'field-property-list')
+            result = self._run('search', 'field-property', 'list')
         assert result.exit_code == 0, result.output
         m.assert_called_once_with()
         assert 'apkid.files.filename' in result.output

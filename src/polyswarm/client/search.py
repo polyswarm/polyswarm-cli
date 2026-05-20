@@ -168,7 +168,12 @@ def mapping(ctx):
     output.mapping(api.metadata_mapping())
 
 
-@search.command('field-property-create', short_help='Create a metadata field property entry.')
+@search.group('field-property', short_help='Manage metadata field property entries.')
+def field_property():
+    pass
+
+
+@field_property.command('create', short_help='Create a metadata field property entry.')
 @click.argument('field_path', type=click.STRING)
 @click.option('--description', required=True, type=click.STRING, help='Human-readable description of the field.')
 @click.option('--example', type=click.STRING, help='Optional example search string.')
@@ -189,7 +194,7 @@ def field_property_create(ctx, field_path, description, example, category, alias
     output.metadata_field_properties(result)
 
 
-@search.command('field-property-get', short_help='Fetch a metadata field property entry by field_path.')
+@field_property.command('get', short_help='Fetch a metadata field property entry by field_path.')
 @click.argument('field_path', type=click.STRING)
 @click.pass_context
 def field_property_get(ctx, field_path):
@@ -199,7 +204,7 @@ def field_property_get(ctx, field_path):
     output.metadata_field_properties(result)
 
 
-@search.command('field-property-update', short_help='Update a metadata field property entry.')
+@field_property.command('update', short_help='Update a metadata field property entry.')
 @click.argument('field_path', type=click.STRING)
 @click.option('--description', type=click.STRING, help='New description.')
 @click.option('--example', type=click.STRING, help='New example.')
@@ -220,7 +225,7 @@ def field_property_update(ctx, field_path, description, example, category, alias
     output.metadata_field_properties(result)
 
 
-@search.command('field-property-delete', short_help='Delete a metadata field property entry.')
+@field_property.command('delete', short_help='Delete a metadata field property entry.')
 @click.argument('field_path', type=click.STRING)
 @click.pass_context
 def field_property_delete(ctx, field_path):
@@ -230,7 +235,7 @@ def field_property_delete(ctx, field_path):
     output.metadata_field_properties(result)
 
 
-@search.command('field-property-list', short_help='List all metadata field property entries.')
+@field_property.command('list', short_help='List all metadata field property entries.')
 @click.pass_context
 def field_property_list(ctx):
     api = ctx.obj['api']
