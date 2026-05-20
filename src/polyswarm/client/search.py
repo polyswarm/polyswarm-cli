@@ -173,7 +173,7 @@ def field_property():
     pass
 
 
-@field_property.command('create', short_help='Create a metadata field property entry.')
+@field_property.command('write', short_help='Upsert a metadata field property entry.')
 @click.argument('field_path', type=click.STRING)
 @click.option('--description', required=True, type=click.STRING, help='Human-readable description of the field.')
 @click.option('--example', type=click.STRING, help='Optional example search string.')
@@ -181,10 +181,12 @@ def field_property():
 @click.option('--alias', 'aliases', type=click.STRING, multiple=True,
               help='Friendly-name alias for this field (may be passed multiple times).')
 @click.pass_context
-def field_property_create(ctx, field_path, description, example, category, aliases):
+def field_property_write(ctx, field_path, description, example, category, aliases):
+    """Insert or update a metadata field property entry. The server upserts
+    by field_path — a missing entry is created, an existing one is updated."""
     api = ctx.obj['api']
     output = ctx.obj['output']
-    result = api.metadata_field_properties_create(
+    result = api.metadata_field_properties_write(
         field_path=field_path,
         description=description,
         example=example,
@@ -201,27 +203,6 @@ def field_property_get(ctx, field_path):
     api = ctx.obj['api']
     output = ctx.obj['output']
     result = api.metadata_field_properties_get(field_path=field_path)
-    output.metadata_field_properties(result)
-
-
-@field_property.command('update', short_help='Update a metadata field property entry.')
-@click.argument('field_path', type=click.STRING)
-@click.option('--description', type=click.STRING, help='New description.')
-@click.option('--example', type=click.STRING, help='New example.')
-@click.option('--category', type=click.STRING, help='New category.')
-@click.option('--alias', 'aliases', type=click.STRING, multiple=True,
-              help='Replacement alias list (passed multiple times). Pass none to leave aliases unchanged.')
-@click.pass_context
-def field_property_update(ctx, field_path, description, example, category, aliases):
-    api = ctx.obj['api']
-    output = ctx.obj['output']
-    result = api.metadata_field_properties_update(
-        field_path=field_path,
-        description=description,
-        example=example,
-        category=category,
-        aliases=list(aliases) if aliases else None,
-    )
     output.metadata_field_properties(result)
 
 

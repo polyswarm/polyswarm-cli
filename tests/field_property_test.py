@@ -50,10 +50,10 @@ class FieldPropertyCliTest(TestCase):
             catch_exceptions=False,
         )
 
-    def test_field_property_create(self):
-        with mock.patch('polyswarm_api.api.PolyswarmAPI.metadata_field_properties_create',
+    def test_field_property_write(self):
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.metadata_field_properties_write',
                         return_value=_fake_resource()) as m:
-            result = self._run('search', 'field-property', 'create',
+            result = self._run('search', 'field-property', 'write',
                                'polyunite.malware_family',
                                '--description', 'Identified malware family',
                                '--example', 'polyunite.malware_family:lockbit',
@@ -68,10 +68,10 @@ class FieldPropertyCliTest(TestCase):
         assert kwargs['aliases'] is None
         assert 'polyunite.malware_family' in result.output
 
-    def test_field_property_create_with_aliases(self):
-        with mock.patch('polyswarm_api.api.PolyswarmAPI.metadata_field_properties_create',
+    def test_field_property_write_with_aliases(self):
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.metadata_field_properties_write',
                         return_value=_fake_resource(aliases=['family', 'malware'])) as m:
-            result = self._run('search', 'field-property', 'create',
+            result = self._run('search', 'field-property', 'write',
                                'polyunite.malware_family',
                                '--description', 'd',
                                '--alias', 'family',
@@ -88,21 +88,6 @@ class FieldPropertyCliTest(TestCase):
         assert result.exit_code == 0, result.output
         m.assert_called_once_with(field_path='polyunite.malware_family')
         assert 'Identified malware family' in result.output
-
-    def test_field_property_update(self):
-        with mock.patch('polyswarm_api.api.PolyswarmAPI.metadata_field_properties_update',
-                        return_value=_fake_resource(description='new desc')) as m:
-            result = self._run('search', 'field-property', 'update',
-                               'polyunite.malware_family',
-                               '--description', 'new desc')
-        assert result.exit_code == 0, result.output
-        kwargs = m.call_args.kwargs
-        assert kwargs['field_path'] == 'polyunite.malware_family'
-        assert kwargs['description'] == 'new desc'
-        assert kwargs['example'] is None
-        assert kwargs['category'] is None
-        assert kwargs['aliases'] is None
-        assert 'new desc' in result.output
 
     def test_field_property_delete(self):
         with mock.patch('polyswarm_api.api.PolyswarmAPI.metadata_field_properties_delete',
