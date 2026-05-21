@@ -168,63 +168,6 @@ def mapping(ctx):
     output.mapping(api.metadata_mapping())
 
 
-@search.group('field-property', short_help='Manage metadata field property entries.')
-def field_property():
-    pass
-
-
-@field_property.command('write', short_help='Upsert a metadata field property entry.')
-@click.argument('field_path', type=click.STRING)
-@click.option('--description', required=True, type=click.STRING, help='Human-readable description of the field.')
-@click.option('--example', type=click.STRING, help='Optional example search string.')
-@click.option('--category', type=click.STRING, help='Optional category grouping the field belongs to.')
-@click.option('--alias', 'aliases', type=click.STRING, multiple=True,
-              help='Friendly-name alias for this field (may be passed multiple times).')
-@click.pass_context
-def field_property_write(ctx, field_path, description, example, category, aliases):
-    """Insert or update a metadata field property entry. The server upserts
-    by field_path — a missing entry is created, an existing one is updated."""
-    api = ctx.obj['api']
-    output = ctx.obj['output']
-    result = api.metadata_field_properties_write(
-        field_path=field_path,
-        description=description,
-        example=example,
-        category=category,
-        aliases=list(aliases) if aliases else None,
-    )
-    output.metadata_field_properties(result)
-
-
-@field_property.command('get', short_help='Fetch a metadata field property entry by field_path.')
-@click.argument('field_path', type=click.STRING)
-@click.pass_context
-def field_property_get(ctx, field_path):
-    api = ctx.obj['api']
-    output = ctx.obj['output']
-    result = api.metadata_field_properties_get(field_path=field_path)
-    output.metadata_field_properties(result)
-
-
-@field_property.command('delete', short_help='Delete a metadata field property entry.')
-@click.argument('field_path', type=click.STRING)
-@click.pass_context
-def field_property_delete(ctx, field_path):
-    api = ctx.obj['api']
-    output = ctx.obj['output']
-    result = api.metadata_field_properties_delete(field_path=field_path)
-    output.metadata_field_properties(result)
-
-
-@field_property.command('list', short_help='List all metadata field property entries.')
-@click.pass_context
-def field_property_list(ctx):
-    api = ctx.obj['api']
-    output = ctx.obj['output']
-    for result in api.metadata_field_properties_list():
-        output.metadata_field_properties(result)
-
-
 @search.command('scans', short_help='Search for all scans or a particular artifact.')
 @click.argument('hash_value', required=True)
 @click.pass_context
