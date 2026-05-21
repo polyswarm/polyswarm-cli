@@ -690,6 +690,23 @@ class TextOutput(base.BaseOutput):
             output.append(self._white(f'Scan-Only Prompt: {config.scan_only_prompt}'))
         return self._output(output, write)
 
+    def metadata_field_properties(self, props, write=True):
+        output = []
+        output.append(self._white('========================= Metadata Field Properties ========================='))
+        output.append(self._blue(f'Field Path: {props.field_path}'))
+        output.append(self._white(f'Description: {props.description}'))
+        if props.example:
+            output.append(self._white(f'Example: {props.example}'))
+        if props.category:
+            output.append(self._white(f'Category: {props.category}'))
+        if props.aliases:
+            output.append(self._white(f'Aliases: {", ".join(props.aliases)}'))
+        if props.created:
+            output.append(self._white(f'Created: {props.created}'))
+        if props.updated:
+            output.append(self._white(f'Updated: {props.updated}'))
+        return self._output(output, write)
+
     def webhook(self, webhook, write=True):
         output = []
         output.append(self._white('============================= Webhook ============================='))
