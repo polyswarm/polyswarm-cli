@@ -1,3 +1,4 @@
+import functools
 import ipaddress
 import logging
 import os
@@ -62,7 +63,17 @@ def parallel_executor(function, args_list=(), kwargs_list=(), **kwargs):
 
 
 def parallel_executor_iterable_results(search_method, args_list=(), kwargs_list=(), **kwargs):
-    for results in parallel_executor(search_method, args_list=args_list, kwargs_list=kwargs_list, **kwargs):
+    # The SDK's search methods are lazy generators: calling them does no I/O and
+    # raises nothing until iterated. parallel_executor catches NoResultsException
+    # (and friends) per item around `future.result()`, so we must materialise each
+    # generator *inside* the worker — otherwise the exception surfaces here, during
+    # consumption, bypassing the per-item aggregation. functools.wraps preserves the
+    # wrapped method's __name__ for parallel_executor's log message.
+    @functools.wraps(search_method)
+    def _materialized(*method_args, **method_kwargs):
+        return list(search_method(*method_args, **method_kwargs))
+
+    for results in parallel_executor(_materialized, args_list=args_list, kwargs_list=kwargs_list, **kwargs):
         for result in results:
             yield result
 
