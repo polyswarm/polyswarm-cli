@@ -66,8 +66,7 @@ def create(ctx, format, type, object_id, template_id, includes, sandbox_artifact
     else:
         _report = api.report_wait_for(result.id, timeout)
         if destination:
-            result = _report.download_report(folder=destination).result()
-            result.handle.close()
+            result = api.report_download(_report.id, destination)
             output.local_artifact(result)
 
 
