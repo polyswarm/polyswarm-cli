@@ -104,8 +104,12 @@ class ExceptionHandlingGroup(click.Group):
         except (Exit, ClickException):
             raise
         except Exception as e:
-            if e.__class__.__name__ in ('HTTPError', 'ConnectionError', 'SSLError'):
-                # import these exception classes cannot be done because they come from third-party dependencies
+            if e.__class__.__name__ in ('HTTPError', 'ConnectionError', 'SSLError',
+                                        'ConnectError', 'ConnectTimeout', 'ReadTimeout',
+                                        'WriteTimeout', 'PoolTimeout', 'HTTPStatusError',
+                                        'TransportError', 'RequestError'):
+                # match transport-error classes by name: they come from third-party
+                # dependencies (the SDK's httpx; legacy requests names kept for safety)
                 logger.error(e)
                 logger.error('Unhandled exception happened. Please contact support if the error persists.')
                 raise Exit(1)
