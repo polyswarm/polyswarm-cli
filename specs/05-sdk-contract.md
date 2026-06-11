@@ -77,6 +77,6 @@ The SDK's move to an `httpx`-based, three-layer architecture (pure-dataclass `Po
 - `PolyswarmRequest(api, dict).execute().result()` → `self._single({...}, result_parser=…)`.
 - `ReportTask.download_report(...).result()` → `api.report_download(id, folder)`.
 - `output.ioc(api.iocs_by_hash(...))` (singular) → iterate the generator.
-- requests' exception names in the error handler → add the `httpx` leaf names.
+- requests' exception names in the error handler → match the `httpx` `HTTPError` root by **ancestry** (MRO class names), so leaf classes never need enumerating.
 
 That migration is the canonical example of this spec's rules: consume generators by iteration, execute through `_single`/`session`, and ship the CLI change paired with the SDK release. (Tracked in the internal tracker; not named here because this repo is public.)
