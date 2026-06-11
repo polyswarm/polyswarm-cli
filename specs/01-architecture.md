@@ -31,10 +31,10 @@ The console-script entry (`__main__.py`) calls `polyswarm_cli(prog_name='polyswa
 | `NoResultsException`, `NotFoundException`, `FailedInstanceException` (SDK) | `1` |
 | `PartialResultsException` (CLI) | `3` |
 | `InternalFailureException`, `PolyswarmException`, `JSONDecodeError`, `UnicodeDecodeError` | `2` |
-| Transport errors matched by class name (`httpx` leaf names + legacy `requests` names) | `1` |
+| Transport errors matched by ancestry class name (`httpx`'s `HTTPError` root, legacy `requests`' `RequestException`, builtin `ConnectionError`/`SSLError`) | `1` |
 | Any other `Exception` | `2` |
 
-The transport-error branch matches by `e.__class__.__name__` because those classes come from the SDK's HTTP dependency (`httpx`) and shouldn't be imported here directly.
+The transport-error branch matches by **ancestry class name** — it intersects `{c.__name__ for c in type(e).__mro__}` with `{'HTTPError', 'RequestException', 'ConnectionError', 'SSLError'}` — because those classes come from the SDK's HTTP dependency (`httpx`; `requests` historically) and shouldn't be imported here directly. `httpx` roots every request/transport/status error at `HTTPError`, so ancestry matching covers all its leaf classes (`ConnectError`, `ReadTimeout`, `RemoteProtocolError`, `ProxyError`, …) without enumerating them.
 
 ## The SDK wrapper — `polyswarm.py`
 
