@@ -104,8 +104,13 @@ class ExceptionHandlingGroup(click.Group):
         except (Exit, ClickException):
             raise
         except Exception as e:
-            if e.__class__.__name__ in ('HTTPError', 'ConnectionError', 'SSLError'):
-                # import these exception classes cannot be done because they come from third-party dependencies
+            # Transport errors come from the SDK's HTTP dependency (httpx; requests
+            # historically), so match by ancestry name instead of importing those
+            # libraries here. httpx roots every request/transport/status error at
+            # HTTPError; requests rooted everything at RequestException; the builtin
+            # ConnectionError and ssl.SSLError cover raw socket/TLS failures.
+            if {'HTTPError', 'RequestException', 'ConnectionError', 'SSLError'} \
+                    & {c.__name__ for c in type(e).__mro__}:
                 logger.error(e)
                 logger.error('Unhandled exception happened. Please contact support if the error persists.')
                 raise Exit(1)
