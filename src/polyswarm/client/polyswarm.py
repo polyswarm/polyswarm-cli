@@ -32,6 +32,7 @@ from polyswarm.client.report_template import report_template
 from polyswarm.client.account import account
 from polyswarm.client.notification import notification
 from polyswarm.client.sample import sample
+from polyswarm.client.kgb import kgb
 
 logger = logging.getLogger(__name__)
 
@@ -164,6 +165,7 @@ commands = [
     rules, link, tag, family, metadata,
     engine, known, sandbox, sandbox_list,
     activity, report, report_template, account, bundle, notification, sample,
+    kgb,
 ]
 
 for command in commands:
