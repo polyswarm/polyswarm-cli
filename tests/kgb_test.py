@@ -16,7 +16,7 @@ SHA_C = 'c3' * 32  # get-after-delete
 class KgbTest(BaseTestCase):
     @vcr.use_cassette()
     def test_kgb_create_get_delete_text(self):
-        created = self._run_cli(['--no-color', 'kgb', 'create', SHA_A, 'nsrl'])
+        created = self._run_cli(['--no-color', 'kgb', 'create', 'nsrl', SHA_A])
         self.assertEqual(0, created.exit_code, created.output)
         assert SHA_A in created.output
         assert 'nsrl' in created.output
@@ -33,7 +33,7 @@ class KgbTest(BaseTestCase):
 
     @vcr.use_cassette()
     def test_kgb_create_get_json(self):
-        created = self._run_cli(['--fmt', 'json', 'kgb', 'create', SHA_B, 'winget'])
+        created = self._run_cli(['--fmt', 'json', 'kgb', 'create', 'winget', SHA_B])
         self.assertEqual(0, created.exit_code, created.output)
         payload = json.loads(created.output.strip().splitlines()[-1])
         assert payload['sha256'] == SHA_B
@@ -47,7 +47,7 @@ class KgbTest(BaseTestCase):
 
     @vcr.use_cassette()
     def test_kgb_get_after_delete_not_found(self):
-        created = self._run_cli(['--no-color', 'kgb', 'create', SHA_C, 'nsrl'])
+        created = self._run_cli(['--no-color', 'kgb', 'create', 'nsrl', SHA_C])
         self.assertEqual(0, created.exit_code, created.output)
 
         deleted = self._run_cli(['--no-color', 'kgb', 'delete', SHA_C])

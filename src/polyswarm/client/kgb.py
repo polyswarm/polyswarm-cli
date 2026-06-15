@@ -16,8 +16,8 @@ def kgb():
 
 
 @kgb.command('create', short_help='Record a sha256 as a known-good binary.')
-@click.argument('sha256', type=click.STRING, required=True)
 @click.argument('source', type=click.STRING, required=True)
+@click.argument('sha256', type=click.STRING, required=True)
 @click.option('--sha1', type=click.STRING, default=None, help='Optional sha1.')
 @click.option('--md5', type=click.STRING, default=None, help='Optional md5.')
 @click.option('--filename', type=click.STRING, default=None, help='Optional filename.')
