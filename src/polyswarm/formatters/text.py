@@ -264,6 +264,20 @@ class TextOutput(base.BaseOutput):
         output.append(self._blue(f'Tag: {result.name}'))
         return self._output(output, write)
 
+    def known_good(self, result, write=True):
+        output = []
+        output.append(self._blue(f'Known Good SHA256: {result.sha256}'))
+        if result.sources:
+            output.append(self._white(f'Sources: {", ".join(result.sources)}'))
+        if result.artifact_instance_id:
+            output.append(self._white(f'Artifact Instance ID: {result.artifact_instance_id}'))
+        if result.created:
+            output.append(self._white(f'Created: {pretty_print_datetime(result.created)}'))
+        # The delete response is minimal ({sha256, deleted}); surface it.
+        if result.json.get('deleted'):
+            output.append(self._white('Deleted: True'))
+        return self._output(output, write)
+
     def local_artifact(self, artifact, write=True):
         output = []
         output.append(self._white(f'Successfully downloaded artifact {artifact.artifact_name} to {artifact.name}'))
