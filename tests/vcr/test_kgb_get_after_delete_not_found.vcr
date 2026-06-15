@@ -22,7 +22,7 @@ interactions:
     uri: http://artifact-index-e2e:9696/v3/known-good
   response:
     body:
-      string: '{"result":{"artifact_instance_id":"91133803487197123","created":"2026-06-15T18:51:09.920527+00:00","id":"3773259258957966","sha256":"c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3","sources":["nsrl"]},"status":"OK"}
+      string: '{"result":{"artifact_instance_id":"63167445066447867","created":"2026-06-15T19:14:34.901141+00:00","id":"98847782191364277","sha256":"c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3","sources":["nsrl"]},"status":"OK"}
 
         '
     headers:
@@ -33,11 +33,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '234'
+      - '235'
       Content-Type:
       - application/json
       Date:
-      - Mon, 15 Jun 2026 18:51:09 GMT
+      - Mon, 15 Jun 2026 19:14:34 GMT
       Server:
       - gunicorn
       X-Billing-ID:
@@ -79,7 +79,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Mon, 15 Jun 2026 18:51:09 GMT
+      - Mon, 15 Jun 2026 19:14:34 GMT
       Server:
       - gunicorn
       X-Billing-ID:
@@ -121,7 +121,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Mon, 15 Jun 2026 18:51:10 GMT
+      - Mon, 15 Jun 2026 19:14:34 GMT
       Server:
       - gunicorn
     status:
