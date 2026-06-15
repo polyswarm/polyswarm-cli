@@ -17,23 +17,26 @@ def kgb():
 
 @kgb.command('create', short_help='Record a sha256 as a known-good binary.')
 @click.argument('sha256', type=click.STRING, required=True)
-@click.option('-s', '--source', type=click.STRING, required=True,
-              help='Feed/source flagging this hash (recorded as a metadata tool).')
+@click.argument('source', type=click.STRING, required=True)
 @click.option('--sha1', type=click.STRING, default=None, help='Optional sha1.')
 @click.option('--md5', type=click.STRING, default=None, help='Optional md5.')
 @click.option('--filename', type=click.STRING, default=None, help='Optional filename.')
 @click.option('--mimetype', type=click.STRING, default=None, help='Optional mimetype.')
 @click.option('--metadata', type=click.STRING, default=None,
-              help='Optional extra feed metadata as a JSON object.')
+              help='Optional extra feed metadata as JSON (the server enforces the shape).')
 @click.pass_context
 def create(ctx, sha256, source, sha1, md5, filename, mimetype, metadata):
+    """Record SHA256 as a known-good binary, flagged by SOURCE."""
     api = ctx.obj['api']
     output = ctx.obj['output']
     if metadata is not None:
+        # Parse into JSON so it's sent as structured data; the server validates
+        # the value (e.g. that it's an object) so the rule stays consistent
+        # across every client.
         try:
             metadata = json.loads(metadata)
         except ValueError as e:
-            raise click.BadParameter(f'must be a JSON object: {e}', param_hint='--metadata')
+            raise click.BadParameter(f'must be valid JSON: {e}', param_hint='--metadata')
     output.known_good(api.known_good_create(
         sha256,
         source=source,
