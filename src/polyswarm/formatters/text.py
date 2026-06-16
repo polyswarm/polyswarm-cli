@@ -77,7 +77,15 @@ class TextOutput(base.BaseOutput):
         if not instance.failed:
             output.append(self._white(f'Scan permalink: {instance.permalink}'))
 
-        if instance.community == 'stream':
+        # Defensive getattr: this attribute ships in the paired SDK release, but a
+        # CLI running against an older installed SDK won't have it (no AttributeError).
+        known_good_sources = getattr(instance, 'known_good_sources', None) or []
+
+        if known_good_sources and not instance.failed:
+            feeds = ', '.join(known_good_sources)
+            output.append(self._white(
+                f'Detections: This artifact is a known-good binary (flagged by: {feeds}); it is not scanned.'))
+        elif instance.community == 'stream':
             output.append(self._white('Detections: This artifact has not been scanned. You can trigger a scan now.'))
         elif len(instance.valid_assertions) == 0 and instance.window_closed and not instance.failed:
             output.append(self._white('Detections: No engines responded to this scan. You can trigger a rescan now.'))
@@ -112,6 +120,8 @@ class TextOutput(base.BaseOutput):
             output.append(self._red('Status: Failed'))
             if instance.failed_reason:
                 output.append(self._red(f'Failure Reason: {instance.failed_reason}'))
+        elif known_good_sources:
+            output.append(self._white('Status: Known good'))
         elif instance.window_closed:
             output.append(self._white('Status: Assertion window closed'))
         elif instance.community == 'stream':
