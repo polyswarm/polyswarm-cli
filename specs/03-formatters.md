@@ -38,3 +38,16 @@ Formatters don't set exit codes — that's `ExceptionHandlingGroup`'s job, by ex
 2. Implement it in `TextOutput` and `JSONOutput` (and the hash formatters if it carries hashes).
 3. Match the style of the existing labelled blocks for text output.
 4. Call it from the command (`output.<resource>(...)`), iterating if the SDK method returns a generator.
+
+## Known-good artifact instances
+
+`TextOutput.artifact_instance` special-cases a known-good binary: when the SDK
+resource exposes `known_good_sources` (the sorted flagging-feed names — see the
+SDK's `ArtifactInstance.known_good`), the **Detections** line reads
+"This artifact is a known-good binary (flagged by: …); it is not scanned." and
+the **Status** line reads "Known good", instead of the misleading
+"no engines responded — rescan now" a window-closed/no-assertion instance would
+otherwise get. The attribute is read with `getattr(..., None)` so a CLI running
+against an older SDK (without the field) renders exactly as before. `JSONOutput`
+needs no change — it dumps the resource's `.json`, which already carries the raw
+`known_good` array.
