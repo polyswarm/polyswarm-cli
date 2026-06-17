@@ -47,6 +47,7 @@ PROD_API_URI = 'https://api.polyswarm.network/v3'
 # `--api-uri https://api.stage-v3.polyswarm.network/v3`. Keys are the click
 # parameter names (click maps `--prod-eu` -> `prod_eu`).
 API_URI_SHORTCUTS = {
+    'prod': PROD_API_URI,
     'stage': 'https://api.stage-v3.polyswarm.network/v3',
     'local': 'http://localhost:9696/v3',
     'prod_eu': 'https://api.prod-eu-v3.polyswarm.network/v3',
@@ -54,7 +55,7 @@ API_URI_SHORTCUTS = {
 }
 
 _SHORTCUT_FLAGS = {
-    'stage': '--stage', 'local': '--local',
+    'prod': '--prod', 'stage': '--stage', 'local': '--local',
     'prod_eu': '--prod-eu', 'stage_eu': '--stage-eu',
 }
 
@@ -179,7 +180,9 @@ class ExceptionHandlingGroup(click.Group):
 @click.option('-u', '--api-uri', default=None,
               envvar='POLYSWARM_API_URI', show_envvar=True,
               help='The API endpoint (ADVANCED). Defaults to the production API. '
-                   'Mutually exclusive with --stage/--local/--prod-eu/--stage-eu.')
+                   'Mutually exclusive with --prod/--stage/--local/--prod-eu/--stage-eu.')
+@click.option('--prod', is_flag=True, default=False,
+              help='Target the production API (https://api.polyswarm.network/v3) — same as the default.')
 @click.option('--stage', is_flag=True, default=False,
               help='Target the US staging API (https://api.stage-v3.polyswarm.network/v3).')
 @click.option('--local', is_flag=True, default=False,
@@ -201,7 +204,7 @@ class ExceptionHandlingGroup(click.Group):
 @click.version_option(polyswarm_api.__version__, '--api-version', prog_name='polyswarm-api')
 @click.pass_context
 def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verbose, community, parallel, verify,
-                  stage, local, prod_eu, stage_eu):
+                  prod, stage, local, prod_eu, stage_eu):
     """
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
@@ -219,7 +222,7 @@ def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verb
 
     api_uri_from_cli = ctx.get_parameter_source('api_uri') == ParameterSource.COMMANDLINE
     api_uri = resolve_api_uri(api_uri, api_uri_from_cli,
-                              {'stage': stage, 'local': local,
+                              {'prod': prod, 'stage': stage, 'local': local,
                                'prod_eu': prod_eu, 'stage_eu': stage_eu})
 
     ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community, parallel=parallel, verify=verify)
