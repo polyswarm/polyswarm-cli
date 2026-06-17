@@ -16,7 +16,9 @@ The components of the CLI and how a command flows from `argv` to rendered output
 
 `polyswarm_cli` is the top-level `click.Group`, constructed with `cls=ExceptionHandlingGroup`. It:
 
-1. Declares the **global options** — `--api-key` (env `POLYSWARM_API_KEY`), `--api-uri` (env `POLYSWARM_API_URI`), `--output-file`, `--output-format`/`--fmt` (`text`|`json`|…), `--color/--no-color`, `--verbose`, `--community` (env `POLYSWARM_COMMUNITY`), `--parallel`, `--verify/--no-verify`, plus `--version` / `--api-version`.
+1. Declares the **global options** — `--api-key` (env `POLYSWARM_API_KEY`), `--api-uri` (env `POLYSWARM_API_URI`), the **endpoint shortcuts** `--stage` / `--local` / `--prod-eu` / `--stage-eu`, `--output-file`, `--output-format`/`--fmt` (`text`|`json`|…), `--color/--no-color`, `--verbose`, `--community` (env `POLYSWARM_COMMUNITY`), `--parallel`, `--verify/--no-verify`, plus `--version` / `--api-version`.
+
+   **Endpoint resolution** (`resolve_api_uri`): the four shortcuts are convenience aliases for known public endpoints (`API_URI_SHORTCUTS`). Precedence is **explicit command-line flag → `POLYSWARM_API_URI` env var → production default** (`PROD_API_URI` = `https://api.polyswarm.network/v3`). Specifically: a shortcut and an explicit *command-line* `--api-uri` are mutually exclusive (conflict → `click.UsageError`, exit 2), as are two shortcuts; a shortcut **wins over** an ambient `POLYSWARM_API_URI` (the env var is consulted only when no shortcut is given); and a command-line `--api-uri` wins over the env var (click's own source precedence). The command-line-vs-env distinction uses `ctx.get_parameter_source('api_uri') == ParameterSource.COMMANDLINE`.
 2. **Seeds `ctx.obj`** — constructs a `Polyswarm(...)` client (the SDK wrapper) as `ctx.obj['api']` and the selected formatter as `ctx.obj['output']`.
 3. **Wires the command groups** — each `client/<family>.py` group/command is imported and `add_command`-ed onto `polyswarm_cli`.
 
