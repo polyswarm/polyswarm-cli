@@ -38,6 +38,49 @@ logger = logging.getLogger(__name__)
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
+# Default production endpoint, used when neither --api-uri nor an environment
+# shortcut is given.
+PROD_API_URI = 'https://api.polyswarm.network/v3'
+
+# Convenience environment shortcuts so callers can write `--stage` instead of
+# `--api-uri https://api.stage-v3.polyswarm.network/v3`. Keys are the click
+# parameter names (click maps `--prod-eu` -> `prod_eu`).
+API_URI_SHORTCUTS = {
+    'stage': 'https://api.stage-v3.polyswarm.network/v3',
+    'local': 'http://localhost:9696/v3',
+    'prod_eu': 'https://api.prod-eu-v3.polyswarm.network/v3',
+    'stage_eu': 'https://api.stage-eu-v3.polyswarm.network/v3',
+}
+
+_SHORTCUT_FLAGS = {
+    'stage': '--stage', 'local': '--local',
+    'prod_eu': '--prod-eu', 'stage_eu': '--stage-eu',
+}
+
+
+def resolve_api_uri(api_uri, shortcuts):
+    """Resolve the effective API endpoint.
+
+    ``api_uri`` is the explicit --api-uri value (or its POLYSWARM_API_URI env
+    var), or ``None`` when neither was provided. ``shortcuts`` maps each
+    shortcut parameter name to whether its flag was passed.
+
+    The shortcuts are mutually exclusive with each other and with an explicit
+    --api-uri; with nothing provided, default to the production endpoint.
+    """
+    selected = [name for name, enabled in shortcuts.items() if enabled]
+    if len(selected) > 1:
+        flags = ', '.join(_SHORTCUT_FLAGS[name] for name in selected)
+        raise click.UsageError(f'Environment shortcuts are mutually exclusive; got {flags}.')
+    if selected and api_uri is not None:
+        raise click.UsageError(
+            f'{_SHORTCUT_FLAGS[selected[0]]} cannot be combined with --api-uri / POLYSWARM_API_URI.')
+    if selected:
+        return API_URI_SHORTCUTS[selected[0]]
+    if api_uri is not None:
+        return api_uri
+    return PROD_API_URI
+
 
 def setup_logging(verbosity):
     # explicitly set to stderr just in case
@@ -124,8 +167,18 @@ class ExceptionHandlingGroup(click.Group):
 @click.group(cls=ExceptionHandlingGroup, context_settings=CONTEXT_SETTINGS)
 @click.option('-a', '--api-key', help='Your API key for polyswarm.network (required).',
               default='', callback=validate_key, envvar='POLYSWARM_API_KEY', show_envvar=True)
-@click.option('-u', '--api-uri', default='https://api.polyswarm.network/v3',
-              envvar='POLYSWARM_API_URI', help='The API endpoint (ADVANCED).', show_envvar=True)
+@click.option('-u', '--api-uri', default=None,
+              envvar='POLYSWARM_API_URI', show_envvar=True,
+              help='The API endpoint (ADVANCED). Defaults to the production API. '
+                   'Mutually exclusive with --stage/--local/--prod-eu/--stage-eu.')
+@click.option('--stage', is_flag=True, default=False,
+              help='Target the US staging API (https://api.stage-v3.polyswarm.network/v3).')
+@click.option('--local', is_flag=True, default=False,
+              help='Target a local API (http://localhost:9696/v3).')
+@click.option('--prod-eu', 'prod_eu', is_flag=True, default=False,
+              help='Target the EU production API (https://api.prod-eu-v3.polyswarm.network/v3).')
+@click.option('--stage-eu', 'stage_eu', is_flag=True, default=False,
+              help='Target the EU staging API (https://api.stage-eu-v3.polyswarm.network/v3).')
 @click.option('-o', '--output-file', type=click.File('w', encoding='utf8'), help='Path to output file.')
 @click.option('--output-format', '--fmt', default='text', type=click.Choice(formatters.keys()),
               help='Output format. Human-readable text or JSON.')
@@ -138,7 +191,8 @@ class ExceptionHandlingGroup(click.Group):
 @click.version_option(polyswarm.__version__, '--version', prog_name='polyswarm-cli')
 @click.version_option(polyswarm_api.__version__, '--api-version', prog_name='polyswarm-api')
 @click.pass_context
-def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verbose, community, parallel, verify):
+def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verbose, community, parallel, verify,
+                  stage, local, prod_eu, stage_eu):
     """
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
@@ -153,6 +207,9 @@ def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verb
         return
 
     output_file = output_file or click.get_text_stream('stdout')
+
+    api_uri = resolve_api_uri(api_uri, {'stage': stage, 'local': local,
+                                        'prod_eu': prod_eu, 'stage_eu': stage_eu})
 
     ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community, parallel=parallel, verify=verify)
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
