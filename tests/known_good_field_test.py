@@ -51,3 +51,30 @@ class TestKnownGoodTextRendering:
         assert 'Status: Known good' not in text
         # The pre-existing window-closed rendering still applies.
         assert 'Status: Assertion window closed' in text
+
+
+class TestKnownGoodStateRendering:
+    """A known-good-bypassed scan is signalled by state == 'KNOWN_GOOD' even when
+    the instance carries no flagging-feed metadata (no matching KnownGood)."""
+
+    def test_state_known_good_without_feeds(self):
+        text = _render(_instance(state='KNOWN_GOOD'))
+        # Rendered as known-good even with no feeds to attribute it to...
+        assert 'This artifact is a known-good binary; it is not scanned.' in text
+        assert 'Status: Known good' in text
+        # ...and never told to rescan / that no engines responded.
+        assert 'trigger a rescan' not in text
+        assert 'No engines responded' not in text
+
+    def test_state_known_good_with_feeds_lists_them(self):
+        feeds = [{'tool': 'winget', 'tool_metadata': {},
+                  'created': '2026-06-11T00:00:00', 'updated': '2026-06-11T00:00:00'}]
+        text = _render(_instance(state='KNOWN_GOOD', known_good=feeds))
+        # When feeds are present the richer message still lists them.
+        assert 'known-good binary (flagged by: winget); it is not scanned.' in text
+        assert 'Status: Known good' in text
+
+    def test_non_known_good_state_unchanged(self):
+        text = _render(_instance(state='SETTLED'))
+        assert 'known-good' not in text.lower()
+        assert 'Status: Known good' not in text
