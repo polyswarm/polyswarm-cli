@@ -6,6 +6,7 @@ import click_log
 import polyswarm_api
 from click_log import core
 from click.exceptions import Exit, ClickException
+from click.core import ParameterSource
 from polyswarm_api import exceptions as api_exceptions
 
 import polyswarm
@@ -58,23 +59,31 @@ _SHORTCUT_FLAGS = {
 }
 
 
-def resolve_api_uri(api_uri, shortcuts):
-    """Resolve the effective API endpoint.
+def resolve_api_uri(api_uri, api_uri_from_cli, shortcuts):
+    """Resolve the effective API endpoint, honouring the precedence:
 
-    ``api_uri`` is the explicit --api-uri value (or its POLYSWARM_API_URI env
-    var), or ``None`` when neither was provided. ``shortcuts`` maps each
-    shortcut parameter name to whether its flag was passed.
+        explicit command-line flag  >  POLYSWARM_API_URI env var  >  production
+
+    ``api_uri`` is the value click resolved for --api-uri (from the command
+    line, the ``POLYSWARM_API_URI`` env var, or ``None`` when neither was
+    given). ``api_uri_from_cli`` is True only when --api-uri was passed
+    explicitly on the command line (parameter source ``COMMANDLINE``), not via
+    the env var. ``shortcuts`` maps each shortcut parameter name to whether its
+    flag was set.
 
     The shortcuts are mutually exclusive with each other and with an explicit
-    --api-uri; with nothing provided, default to the production endpoint.
+    command-line --api-uri. An ambient ``POLYSWARM_API_URI`` does **not**
+    conflict with a shortcut — the explicit flag wins. With no shortcut, an
+    explicit --api-uri or the env var is used; with nothing at all, default to
+    production.
     """
     selected = [name for name, enabled in shortcuts.items() if enabled]
     if len(selected) > 1:
         flags = ', '.join(_SHORTCUT_FLAGS[name] for name in selected)
         raise click.UsageError(f'Environment shortcuts are mutually exclusive; got {flags}.')
-    if selected and api_uri is not None:
+    if selected and api_uri_from_cli:
         raise click.UsageError(
-            f'{_SHORTCUT_FLAGS[selected[0]]} cannot be combined with --api-uri / POLYSWARM_API_URI.')
+            f'{_SHORTCUT_FLAGS[selected[0]]} cannot be combined with an explicit --api-uri.')
     if selected:
         return API_URI_SHORTCUTS[selected[0]]
     if api_uri is not None:
@@ -208,8 +217,10 @@ def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verb
 
     output_file = output_file or click.get_text_stream('stdout')
 
-    api_uri = resolve_api_uri(api_uri, {'stage': stage, 'local': local,
-                                        'prod_eu': prod_eu, 'stage_eu': stage_eu})
+    api_uri_from_cli = ctx.get_parameter_source('api_uri') == ParameterSource.COMMANDLINE
+    api_uri = resolve_api_uri(api_uri, api_uri_from_cli,
+                              {'stage': stage, 'local': local,
+                               'prod_eu': prod_eu, 'stage_eu': stage_eu})
 
     ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community, parallel=parallel, verify=verify)
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
