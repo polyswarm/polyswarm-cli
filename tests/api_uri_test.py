@@ -29,8 +29,8 @@ _ENV_URI = 'http://env.example.test/v3'
 _CLI_URI = 'http://cli.example.test/v3'
 
 
-def _shortcuts(stage=False, local=False, prod_eu=False, stage_eu=False):
-    return {'stage': stage, 'local': local, 'prod_eu': prod_eu, 'stage_eu': stage_eu}
+def _shortcuts(prod=False, stage=False, local=False, prod_eu=False, stage_eu=False):
+    return {'prod': prod, 'stage': stage, 'local': local, 'prod_eu': prod_eu, 'stage_eu': stage_eu}
 
 
 class ResolveApiUriTest(TestCase):
@@ -47,6 +47,7 @@ class ResolveApiUriTest(TestCase):
 
     def test_each_shortcut_resolves(self):
         expected = {
+            'prod': 'https://api.polyswarm.network/v3',
             'stage': 'https://api.stage-v3.polyswarm.network/v3',
             'local': 'http://localhost:9696/v3',
             'prod_eu': 'https://api.prod-eu-v3.polyswarm.network/v3',
@@ -56,6 +57,11 @@ class ResolveApiUriTest(TestCase):
         assert API_URI_SHORTCUTS == expected
         for name, url in expected.items():
             assert resolve_api_uri(None, False, _shortcuts(**{name: True})) == url, name
+
+    def test_prod_shortcut_equals_default(self):
+        # --prod is an explicit alias for the default production endpoint.
+        assert resolve_api_uri(None, False, _shortcuts(prod=True)) == PROD_API_URI
+        assert API_URI_SHORTCUTS['prod'] == PROD_API_URI
 
     def test_shortcut_wins_over_env_var(self):
         # env-derived api_uri present, but the shortcut flag is explicit -> flag wins.
@@ -128,6 +134,25 @@ class ApiUriCliTest(TestCase):
 
     def test_stage_eu_shortcut(self):
         assert self._resolved_base('--stage-eu') == 'https://api.stage-eu-v3.polyswarm.network/v3'
+
+    def test_prod_shortcut_matches_default(self):
+        assert self._resolved_base('--prod') == 'https://api.polyswarm.network/v3'
+        assert self._resolved_base('--prod') == self._resolved_base()
+
+    def test_prod_shortcut_beats_env_var(self):
+        # --prod is explicit, so it forces production even when the env var is set.
+        assert self._resolved_base('--prod',
+                                   env={'POLYSWARM_API_URI': _ENV_URI}) == 'https://api.polyswarm.network/v3'
+
+    def test_prod_with_other_shortcut_errors(self):
+        result = self._error('--prod', '--stage')
+        assert result.exit_code == 2
+        assert 'mutually exclusive' in result.output
+
+    def test_prod_with_cli_api_uri_errors(self):
+        result = self._error('--prod', '--api-uri', _CLI_URI)
+        assert result.exit_code == 2
+        assert 'api-uri' in result.output
 
     def test_explicit_cli_api_uri(self):
         assert self._resolved_base('--api-uri', _CLI_URI) == _CLI_URI
