@@ -284,11 +284,9 @@ class Polyswarm(PolyswarmAPI):
         :param url: The URL or IP address to submit.
         :return: An ArtifactInstance resource.
         """
-        from polyswarm_api.core import PolyswarmRequest
         from polyswarm_api import resources
         logger.info('Submitting URL for IP analysis: %s', url)
-        request = PolyswarmRequest(
-            self,
+        return self._single(
             {
                 'method': 'POST',
                 'url': f'{self.uri}/instance/url',
@@ -297,4 +295,3 @@ class Polyswarm(PolyswarmAPI):
             },
             result_parser=resources.ArtifactInstance,
         )
-        return request.execute().result()

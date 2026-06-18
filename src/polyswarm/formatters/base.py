@@ -43,6 +43,9 @@ class BaseOutput:
     def tag(self, result):
         raise NotImplementedError
 
+    def known_good(self, result):
+        raise NotImplementedError
+
     def artifact_metadata(self, result, only=None):
         raise NotImplementedError
 

@@ -77,7 +77,24 @@ class TextOutput(base.BaseOutput):
         if not instance.failed:
             output.append(self._white(f'Scan permalink: {instance.permalink}'))
 
-        if instance.community == 'stream':
+        # Defensive getattr: these attributes ship in the paired SDK release, but a
+        # CLI running against an older installed SDK won't have them (no AttributeError).
+        known_good_sources = getattr(instance, 'known_good_sources', None) or []
+        # A known-good binary is signalled by the bounty state (KNOWN_GOOD) — reliable
+        # even for a scan-bypassed instance with no feed metadata. known_good_sources
+        # (the flagging feeds) is the richer signal when present, and also covers an
+        # older SDK that lacks .state but still carries the feed list.
+        is_known_good = getattr(instance, 'state', None) == 'KNOWN_GOOD' or bool(known_good_sources)
+
+        if is_known_good and not instance.failed:
+            if known_good_sources:
+                feeds = ', '.join(known_good_sources)
+                output.append(self._green(
+                    f'Detections: This artifact is a known-good binary (flagged by: {feeds}); it is not scanned.'))
+            else:
+                output.append(self._green(
+                    'Detections: This artifact is a known-good binary; it is not scanned.'))
+        elif instance.community == 'stream':
             output.append(self._white('Detections: This artifact has not been scanned. You can trigger a scan now.'))
         elif len(instance.valid_assertions) == 0 and instance.window_closed and not instance.failed:
             output.append(self._white('Detections: No engines responded to this scan. You can trigger a rescan now.'))
@@ -112,6 +129,8 @@ class TextOutput(base.BaseOutput):
             output.append(self._red('Status: Failed'))
             if instance.failed_reason:
                 output.append(self._red(f'Failure Reason: {instance.failed_reason}'))
+        elif is_known_good:
+            output.append(self._green('Status: Known good'))
         elif instance.window_closed:
             output.append(self._white('Status: Assertion window closed'))
         elif instance.community == 'stream':
@@ -262,6 +281,20 @@ class TextOutput(base.BaseOutput):
     def tag(self, result, write=True):
         output = []
         output.append(self._blue(f'Tag: {result.name}'))
+        return self._output(output, write)
+
+    def known_good(self, result, write=True):
+        output = []
+        output.append(self._blue(f'Known Good SHA256: {result.sha256}'))
+        if result.sources:
+            output.append(self._white(f'Sources: {", ".join(result.sources)}'))
+        if result.artifact_instance_id:
+            output.append(self._white(f'Artifact Instance ID: {result.artifact_instance_id}'))
+        if result.created:
+            output.append(self._white(f'Created: {pretty_print_datetime(result.created)}'))
+        # The delete response is minimal ({sha256, deleted}); surface it.
+        if result.json.get('deleted'):
+            output.append(self._white('Deleted: True'))
         return self._output(output, write)
 
     def local_artifact(self, artifact, write=True):
