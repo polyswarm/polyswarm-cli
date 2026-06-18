@@ -71,9 +71,9 @@ def hash_(ctx, provider_slug, hash_value, hash_file, hash_type, vm_slug, interne
 @click.option('-p', '--zip-password', type=click.STRING,
               help='Will use this password to decompress the zip file. If provided, will handle the file as a zip.')
 @click.option('--is-pdf', type=click.BOOL, is_flag=True,
-              help='Will handle the provided file as an ecrypted PDF.')
+              help='Will handle the provided file as an encrypted PDF.')
 @click.option('--pdf-password', type=click.STRING,
-              help='Will use this password to decrypt the PDF file. If provided, will handle the file as a encrypted PDF.')
+              help='Will use this password to decrypt the PDF file. If provided, will handle the file as an encrypted PDF.')
 @click.option('--arguments', type=click.STRING, help='Arguments to be passed to the sample when sandboxed.')
 @click.pass_context
 def file(ctx, path, provider, vm_slug, internet_disabled, is_zip, zip_password, is_pdf, pdf_password, arguments):
