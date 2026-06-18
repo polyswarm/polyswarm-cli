@@ -82,6 +82,11 @@ def file(ctx, path, provider, vm_slug, internet_disabled, is_zip, zip_password, 
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
+    # Validate mutually exclusive options
+    active_flags = sum([bool(is_zip or zip_password), bool(is_pdf or pdf_password)])
+    if active_flags > 1:
+        raise click.BadArgumentUsage('Only one of --is-zip/--zip-password or --is-pdf/--pdf-password can be used at a time.')
+
     if is_zip or zip_password:
         preprocessing = {'type': 'zip'}
         if zip_password:

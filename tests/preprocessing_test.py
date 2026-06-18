@@ -95,3 +95,14 @@ class PreprocessingCliTest(TestCase):
                 result = self._run('sandbox', 'file', 'cape', 'sample.pdf', '--pdf-password', 's3cret')
         assert result.exit_code == 0, result.output
         assert m.call_args.kwargs['preprocessing'] == {'type': 'pdf', 'password': 's3cret'}
+
+    def test_sandbox_file_pdf_and_zip_mutually_exclusive(self):
+        with mock.patch('polyswarm.polyswarm.Polyswarm.sandbox_file') as m:
+            with self.cli.isolated_filesystem():
+                with open('sample.pdf', 'w') as fh:
+                    fh.write('x')
+                result = self._run('sandbox', 'file', 'cape', 'sample.pdf', '--is-pdf', '--is-zip')
+        assert result.exit_code != 0
+        m.assert_not_called()
+        message = result.output + (str(result.exception) if result.exception else '')
+        assert '--is-pdf/--pdf-password' in message
