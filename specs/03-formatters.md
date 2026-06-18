@@ -41,13 +41,23 @@ Formatters don't set exit codes — that's `ExceptionHandlingGroup`'s job, by ex
 
 ## Known-good artifact instances
 
-`TextOutput.artifact_instance` special-cases a known-good binary: when the SDK
-resource exposes `known_good_sources` (the sorted flagging-feed names — see the
-SDK's `ArtifactInstance.known_good`), the **Detections** line reads
-"This artifact is a known-good binary (flagged by: …); it is not scanned." and
-the **Status** line reads "Known good", instead of the misleading
-"no engines responded — rescan now" a window-closed/no-assertion instance would
-otherwise get. The attribute is read with `getattr(..., None)` so a CLI running
-against an older SDK (without the field) renders exactly as before. `JSONOutput`
-needs no change — it dumps the resource's `.json`, which already carries the raw
-`known_good` array.
+`TextOutput.artifact_instance` special-cases a known-good binary, rendering a
+**green** "Known Good" signal (a stronger benign signal than "clean") instead of
+the misleading "no engines responded — rescan now" a window-closed/no-assertion
+instance would otherwise get. It is gated by a single
+`is_known_good = (state == 'KNOWN_GOOD') or known_good_sources` flag:
+
+- **`state == 'KNOWN_GOOD'`** (the SDK's `ArtifactInstance.state`, the friendly
+  bounty-state name) is the reliable signal — it fires even for a scan-bypassed
+  instance that carries **no** feed metadata.
+- **`known_good_sources`** (the sorted flagging-feed names, from
+  `ArtifactInstance.known_good`) is the richer signal: when present, the
+  **Detections** line names the feeds ("…known-good binary (flagged by: …); it is
+  not scanned."); otherwise it reads "…is a known-good binary; it is not scanned."
+  It also keeps known-good rendering working against an older SDK that has the feed
+  list but not `.state`.
+
+The **Status** line reads "Known good" whenever `is_known_good`. Both attributes are
+read with `getattr(..., None)` so a CLI on an older SDK (missing either field)
+renders exactly as before. `JSONOutput` needs no change — it dumps the resource's
+`.json`, which already carries the raw `state` and `known_good` keys.

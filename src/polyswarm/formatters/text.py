@@ -77,14 +77,23 @@ class TextOutput(base.BaseOutput):
         if not instance.failed:
             output.append(self._white(f'Scan permalink: {instance.permalink}'))
 
-        # Defensive getattr: this attribute ships in the paired SDK release, but a
-        # CLI running against an older installed SDK won't have it (no AttributeError).
+        # Defensive getattr: these attributes ship in the paired SDK release, but a
+        # CLI running against an older installed SDK won't have them (no AttributeError).
         known_good_sources = getattr(instance, 'known_good_sources', None) or []
+        # A known-good binary is signalled by the bounty state (KNOWN_GOOD) — reliable
+        # even for a scan-bypassed instance with no feed metadata. known_good_sources
+        # (the flagging feeds) is the richer signal when present, and also covers an
+        # older SDK that lacks .state but still carries the feed list.
+        is_known_good = getattr(instance, 'state', None) == 'KNOWN_GOOD' or bool(known_good_sources)
 
-        if known_good_sources and not instance.failed:
-            feeds = ', '.join(known_good_sources)
-            output.append(self._white(
-                f'Detections: This artifact is a known-good binary (flagged by: {feeds}); it is not scanned.'))
+        if is_known_good and not instance.failed:
+            if known_good_sources:
+                feeds = ', '.join(known_good_sources)
+                output.append(self._green(
+                    f'Detections: This artifact is a known-good binary (flagged by: {feeds}); it is not scanned.'))
+            else:
+                output.append(self._green(
+                    'Detections: This artifact is a known-good binary; it is not scanned.'))
         elif instance.community == 'stream':
             output.append(self._white('Detections: This artifact has not been scanned. You can trigger a scan now.'))
         elif len(instance.valid_assertions) == 0 and instance.window_closed and not instance.failed:
@@ -120,8 +129,8 @@ class TextOutput(base.BaseOutput):
             output.append(self._red('Status: Failed'))
             if instance.failed_reason:
                 output.append(self._red(f'Failure Reason: {instance.failed_reason}'))
-        elif known_good_sources:
-            output.append(self._white('Status: Known good'))
+        elif is_known_good:
+            output.append(self._green('Status: Known good'))
         elif instance.window_closed:
             output.append(self._white('Status: Assertion window closed'))
         elif instance.community == 'stream':
