@@ -33,20 +33,24 @@ def scan():
               help='Will handle the provided file as a 7zip archive and decompress server-side.')
 @click.option('--sevenzip-password', type=click.STRING,
               help='Will use this password to decompress the 7zip file. If provided, will handle the file as a 7zip.')
+@click.option('--is-pdf', type=click.BOOL, is_flag=True,
+              help='Will handle the provided file as an encrypted PDF.')
+@click.option('--pdf-password', type=click.STRING,
+              help='Will use this password to decrypt the PDF file. If provided, will handle the file as an encrypted PDF.')
 @click.option('-e', '--expiration-window', type=click.INT, default=None,
               help='Expiration window in days. Only valid for private communities.')
 @click.argument('path', nargs=-1, type=click.Path(exists=True), required=True)
 @click.pass_context
-def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_password, is_base64, is_7zip, sevenzip_password, expiration_window):
+def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_password, is_base64, is_7zip, sevenzip_password, is_pdf, pdf_password, expiration_window):
     """
     Scan files or directories via PolySwarm
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
     # Validate mutually exclusive options
-    active_flags = sum([bool(is_base64), bool(is_zip or zip_password), bool(is_7zip or sevenzip_password)])
+    active_flags = sum([bool(is_base64), bool(is_zip or zip_password), bool(is_7zip or sevenzip_password), bool(is_pdf or pdf_password)])
     if active_flags > 1:
-        raise click.BadArgumentUsage('Only one of --is-base64, --is-zip/--zip-password, or --is-7zip/--7zip-password can be used at a time.')
+        raise click.BadArgumentUsage('Only one of --is-base64, --is-zip/--zip-password, --is-7zip/--7zip-password, or --is-pdf/--pdf-password can be used at a time.')
     
     if is_base64:
         preprocessing = {'type': 'base64'}
@@ -58,6 +62,10 @@ def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_passwor
         preprocessing = {'type': 'zip'}
         if zip_password:
             preprocessing['password'] = zip_password
+    elif is_pdf or pdf_password:
+        preprocessing = {'type': 'pdf'}
+        if pdf_password:
+            preprocessing['password'] = pdf_password
     else:
         preprocessing = None
     # Convert expiration_window from string to int if provided

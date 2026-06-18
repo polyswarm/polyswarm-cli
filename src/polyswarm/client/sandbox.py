@@ -70,18 +70,31 @@ def hash_(ctx, provider_slug, hash_value, hash_file, hash_type, vm_slug, interne
               help='Will handle the provided file as a zip and decompress server-side.')
 @click.option('-p', '--zip-password', type=click.STRING,
               help='Will use this password to decompress the zip file. If provided, will handle the file as a zip.')
+@click.option('--is-pdf', type=click.BOOL, is_flag=True,
+              help='Will handle the provided file as an encrypted PDF.')
+@click.option('--pdf-password', type=click.STRING,
+              help='Will use this password to decrypt the PDF file. If provided, will handle the file as an encrypted PDF.')
 @click.option('--arguments', type=click.STRING, help='Arguments to be passed to the sample when sandboxed.')
 @click.pass_context
-def file(ctx, path, provider, vm_slug, internet_disabled, is_zip, zip_password, arguments):
+def file(ctx, path, provider, vm_slug, internet_disabled, is_zip, zip_password, is_pdf, pdf_password, arguments):
     """
     Submit a local file to be sandboxed.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
+    # Validate mutually exclusive options
+    active_flags = sum([bool(is_zip or zip_password), bool(is_pdf or pdf_password)])
+    if active_flags > 1:
+        raise click.BadArgumentUsage('Only one of --is-zip/--zip-password or --is-pdf/--pdf-password can be used at a time.')
+
     if is_zip or zip_password:
         preprocessing = {'type': 'zip'}
         if zip_password:
             preprocessing['password'] = zip_password
+    elif is_pdf or pdf_password:
+        preprocessing = {'type': 'pdf'}
+        if pdf_password:
+            preprocessing['password'] = pdf_password
     else:
         preprocessing = None
     output.sandbox_task(api.sandbox_file(path, provider, vm_slug, network_enabled=not internet_disabled,
