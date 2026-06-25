@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"sha256":"b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2","source":"winget","community":"gamma"}'
+    body: '{"sha256":"b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2","source":"commercial","community":"gamma"}'
     headers:
       accept:
       - '*/*'
@@ -22,7 +22,7 @@ interactions:
     uri: http://artifact-index-e2e:9696/v3/known-good
   response:
     body:
-      string: '{"result":{"artifact_instance_id":"2369287781010758","created":"2026-06-15T18:51:09.785317+00:00","id":"28878017864712926","sha256":"b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2","sources":["winget"]},"status":"OK"}
+      string: '{"result":{"artifact_instance_id":"2369287781010758","created":"2026-06-15T18:51:09.785317+00:00","id":"28878017864712926","sha256":"b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2","sources":["commercial"]},"status":"OK"}
 
         '
     headers:
@@ -64,7 +64,7 @@ interactions:
     uri: http://artifact-index-e2e:9696/v3/known-good?sha256=b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2&community=gamma
   response:
     body:
-      string: '{"result":{"artifact_instance_id":"2369287781010758","created":"2026-06-15T18:51:09.785317+00:00","id":"28878017864712926","sha256":"b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2","sources":["winget"]},"status":"OK"}
+      string: '{"result":{"artifact_instance_id":"2369287781010758","created":"2026-06-15T18:51:09.785317+00:00","id":"28878017864712926","sha256":"b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2","sources":["commercial"]},"status":"OK"}
 
         '
     headers:
