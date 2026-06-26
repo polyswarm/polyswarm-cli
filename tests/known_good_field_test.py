@@ -40,7 +40,7 @@ class TestKnownGoodTextRendering:
         ]
         text = _render(_instance(known_good=feeds))
         # Feeds are listed (sorted) and the status reflects known-good.
-        assert 'known-good binary (flagged by: nsrl, commercial); it is not scanned.' in text
+        assert 'known-good binary (flagged by: commercial, nsrl); it is not scanned.' in text
         assert 'Status: Known good' in text
         # A known-good binary must NOT be told to rescan / that no engines responded.
         assert 'trigger a rescan' not in text
