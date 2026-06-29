@@ -33,17 +33,17 @@ class KgbTest(BaseTestCase):
 
     @vcr.use_cassette()
     def test_kgb_create_get_json(self):
-        created = self._run_cli(['--fmt', 'json', 'kgb', 'create', 'winget', SHA_B])
+        created = self._run_cli(['--fmt', 'json', 'kgb', 'create', 'commercial', SHA_B])
         self.assertEqual(0, created.exit_code, created.output)
         payload = json.loads(created.output.strip().splitlines()[-1])
         assert payload['sha256'] == SHA_B
-        assert 'winget' in payload.get('sources', [])
+        assert 'commercial' in payload.get('sources', [])
 
         got = self._run_cli(['--fmt', 'json', 'kgb', 'get', SHA_B])
         self.assertEqual(0, got.exit_code, got.output)
         payload = json.loads(got.output.strip().splitlines()[-1])
         assert payload['sha256'] == SHA_B
-        assert 'winget' in payload.get('sources', [])
+        assert 'commercial' in payload.get('sources', [])
 
     @vcr.use_cassette()
     def test_kgb_get_after_delete_not_found(self):
