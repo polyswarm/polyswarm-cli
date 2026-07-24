@@ -48,10 +48,10 @@ class ResolveApiUriTest(TestCase):
     def test_each_shortcut_resolves(self):
         expected = {
             'prod': 'https://api.polyswarm.network/v3',
-            'stage': 'https://api.stage-v3.polyswarm.network/v3',
+            'stage': 'https://api.stage-blue.polyswarm.network/v3',
             'local': 'http://localhost:9696/v3',
             'prod_eu': 'https://api.prod-eu-v3.polyswarm.network/v3',
-            'stage_eu': 'https://api.stage-eu-v3.polyswarm.network/v3',
+            'stage_eu': 'https://api.stage-eu-blue.polyswarm.network/v3',
         }
         # guard against the constant drifting from the verified ingress hosts
         assert API_URI_SHORTCUTS == expected
@@ -124,7 +124,7 @@ class ApiUriCliTest(TestCase):
 
     # --- each shortcut ---
     def test_stage_shortcut(self):
-        assert self._resolved_base('--stage') == 'https://api.stage-v3.polyswarm.network/v3'
+        assert self._resolved_base('--stage') == 'https://api.stage-blue.polyswarm.network/v3'
 
     def test_local_shortcut(self):
         assert self._resolved_base('--local') == 'http://localhost:9696/v3'
