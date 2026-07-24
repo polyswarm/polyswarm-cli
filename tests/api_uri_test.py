@@ -133,7 +133,7 @@ class ApiUriCliTest(TestCase):
         assert self._resolved_base('--prod-eu') == 'https://api.prod-eu-v3.polyswarm.network/v3'
 
     def test_stage_eu_shortcut(self):
-        assert self._resolved_base('--stage-eu') == 'https://api.stage-eu-v3.polyswarm.network/v3'
+        assert self._resolved_base('--stage-eu') == 'https://api.stage-eu-blue.polyswarm.network/v3'
 
     def test_prod_shortcut_matches_default(self):
         assert self._resolved_base('--prod') == 'https://api.polyswarm.network/v3'
