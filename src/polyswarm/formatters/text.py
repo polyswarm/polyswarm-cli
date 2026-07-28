@@ -79,12 +79,13 @@ class TextOutput(base.BaseOutput):
 
         # Defensive getattr: these attributes ship in the paired SDK release, but a
         # CLI running against an older installed SDK won't have them (no AttributeError).
-        known_good_sources = getattr(instance, 'known_good_sources', None) or []
-        # A known-good binary is signalled by the bounty state (KNOWN_GOOD) — reliable
-        # even for a scan-bypassed instance with no feed metadata. known_good_sources
-        # (the flagging feeds) is the richer signal when present, and also covers an
-        # older SDK that lacks .state but still carries the feed list.
-        is_known_good = getattr(instance, 'state', None) == 'KNOWN_GOOD' or bool(known_good_sources)
+        # The bounty state (KNOWN_GOOD) is the only reliable signal that this artifact is
+        # a known-good binary whose bytes are withheld — it alone decides. known_good_sources
+        # (the flagging feeds) is emitted for any instance whose sha256 matches a known-good
+        # record, including a fully scanned one carrying real detections, so it only shapes
+        # the message; reading it as the signal would render a scanned artifact "not scanned".
+        is_known_good = getattr(instance, 'state', None) == 'KNOWN_GOOD'
+        known_good_sources = (getattr(instance, 'known_good_sources', None) or []) if is_known_good else []
 
         if is_known_good and not instance.failed:
             if known_good_sources:

@@ -45,19 +45,26 @@ Formatters don't set exit codes — that's `ExceptionHandlingGroup`'s job, by ex
 **green** "Known Good" signal (a stronger benign signal than "clean") instead of
 the misleading "no engines responded — rescan now" a window-closed/no-assertion
 instance would otherwise get. It is gated by a single
-`is_known_good = (state == 'KNOWN_GOOD') or known_good_sources` flag:
+`is_known_good = (state == 'KNOWN_GOOD')` flag:
 
 - **`state == 'KNOWN_GOOD'`** (the SDK's `ArtifactInstance.state`, the friendly
-  bounty-state name) is the reliable signal — it fires even for a scan-bypassed
-  instance that carries **no** feed metadata.
+  bounty-state name) is **the** signal, and the only one — it is the server's single
+  reliable statement that this artifact is known-good and its bytes are withheld, and
+  it fires even for a scan-bypassed instance that carries **no** feed metadata. There
+  is deliberately no separate "bytes withheld" field to consult.
 - **`known_good_sources`** (the sorted flagging-feed names, from
-  `ArtifactInstance.known_good`) is the richer signal: when present, the
-  **Detections** line names the feeds ("…known-good binary (flagged by: …); it is
-  not scanned."); otherwise it reads "…is a known-good binary; it is not scanned."
-  It also keeps known-good rendering working against an older SDK that has the feed
-  list but not `.state`.
+  `ArtifactInstance.known_good`) only **shapes the message** for an instance already
+  known-good by state: when present, the **Detections** line names the feeds
+  ("…known-good binary (flagged by: …); it is not scanned."); otherwise it reads
+  "…is a known-good binary; it is not scanned." It must **never** decide
+  known-goodness — the server emits the feed list for *any* instance whose sha256
+  matches a known-good record, including a fully scanned one with real
+  detections/PolyScore, so treating it as the signal would render a scanned artifact
+  as "known-good … not scanned". It is therefore read as `[]` unless `is_known_good`.
 
 The **Status** line reads "Known good" whenever `is_known_good`. Both attributes are
-read with `getattr(..., None)` so a CLI on an older SDK (missing either field)
-renders exactly as before. `JSONOutput` needs no change — it dumps the resource's
-`.json`, which already carries the raw `state` and `known_good` keys.
+read with `getattr(..., None)` so a CLI on an older SDK (missing either field) never
+raises `AttributeError`; an SDK without `.state` simply never takes the known-good
+branch, which is the safe fallback — the pre-known-good rendering. `JSONOutput` needs
+no change — it dumps the resource's `.json`, which already carries the raw `state` and
+`known_good` keys.
