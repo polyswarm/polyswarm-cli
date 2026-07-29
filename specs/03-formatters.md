@@ -52,6 +52,16 @@ instance would otherwise get. It is gated by a single
   reliable statement that this artifact is known-good and its bytes are withheld, and
   it fires even for a scan-bypassed instance that carries **no** feed metadata. There
   is deliberately no separate "bytes withheld" field to consult.
+
+**The wire dependency, and where it is actually pinned.** `state` is load-bearing with no
+fallback, and a Style-3 test cannot see the transport boundary — it compares against a dict the
+test wrote itself. So the key and the label were **read off the server's serializer**, not
+inferred: `ArtifactInstanceSerializer` emits `'state': instance.state.name`, and
+`BountyState.KNOWN_GOOD.name` is the exact string `'KNOWN_GOOD'`. What would catch a *future*
+rename is the server's own suite (which asserts that field and the `/v3/sample` status), not a
+cassette here: this repo's CI replays frozen recordings with no VCR-off e2e job, so a recorded
+body would keep replaying the old shape after a rename. If a live-e2e job is ever added here, a
+`cli_test.py` cassette over a known-good hash becomes the right place to pin it.
 - **`known_good_sources`** (the sorted flagging-feed names, from
   `ArtifactInstance.known_good`) only **shapes the message** for an instance already
   known-good by state: when present, the **Detections** line names the feeds
@@ -82,10 +92,14 @@ therefore switches on `instance.valid_assertions`:
 - **valid assertions, window still open** → "…is a known-good binary; its scan has not
   finished running yet." Every other **Detections** branch guards its counts on
   `window_closed`, because an open window's numbers are not final. Unreachable through the
-  server's reconciliation (it moves only `STORED` rows, which carry no assertions, and
-  `SETTLED` ones, which have a closed window), so this is a guard against a future state
-  rather than a case seen in practice — stated here so the parity with the other branches
-  reads as intentional.
+  server's reconciliation — verified against its `RECONCILABLE_STATES`, which is `STORED`
+  (a row that was never submitted, so it carries no assertions) plus `SETTLED` **and only
+  when `window_closed`**; the ingest gate's own path sets `window_closed = True`. So this is
+  a guard against a future state rather than a case seen in practice, stated here so the
+  parity with the other branches reads as intentional. If a reconciled row ever *can* carry
+  an open window alongside preserved malicious assertions, redden on `malicious_assertions`
+  alone and keep only the *text* guarded on the window — the sentence would still be
+  accurate, and green on a malicious detection is the mis-signal this rule exists to fix.
 
 The flagging-feed attribution ("(flagged by: …)") is orthogonal and applies to all three. In
 every branch the per-engine verdict list, the PolyScore line and "Status: Known good"
