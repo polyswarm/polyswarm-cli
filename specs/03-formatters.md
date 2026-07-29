@@ -76,16 +76,31 @@ therefore switches on `instance.valid_assertions`:
 
 - **no valid assertions** → "…is a known-good binary; it is not scanned." — the withheld,
   never-scanned case.
-- **valid assertions** → "…is a known-good binary; N/M engines reported malicious." — the
-  same count the ordinary window-closed branch renders, folded into the known-good
-  sentence.
+- **valid assertions, window closed** → "…is a known-good binary; N/M engines reported
+  malicious." — the same count the ordinary window-closed branch renders, folded into the
+  known-good sentence.
+- **valid assertions, window still open** → "…is a known-good binary; its scan has not
+  finished running yet." Every other **Detections** branch guards its counts on
+  `window_closed`, because an open window's numbers are not final. Unreachable through the
+  server's reconciliation (it moves only `STORED` rows, which carry no assertions, and
+  `SETTLED` ones, which have a closed window), so this is a guard against a future state
+  rather than a case seen in practice — stated here so the parity with the other branches
+  reads as intentional.
 
-The flagging-feed attribution ("(flagged by: …)") is orthogonal and applies to both. In
-either branch the per-engine verdict list, the PolyScore line and "Status: Known good"
+The flagging-feed attribution ("(flagged by: …)") is orthogonal and applies to all three. In
+every branch the per-engine verdict list, the PolyScore line and "Status: Known good"
 render as usual; the switch exists so "it is not scanned" is never printed directly above a
-list of engine verdicts. The line stays **green** both ways — known-goodness is the
-dominant signal (the bytes are withheld whatever the preserved assertions say), and the
-detections are reported rather than suppressed.
+list of engine verdicts.
+
+**Colour: a majority-malicious verdict outranks the withheld-bytes signal.** The line is
+**green** except when the instance has malicious assertions and a closed window, where it is
+**red** — the same colour the ordinary branch gives that count. Known-goodness is the
+dominant *fact*, but it is not a stronger *warning*: rendering "40/50 engines reported
+malicious" in green would be a weaker signal than the very same instance produced before it
+was reconciled, which is the class of mis-signal this rendering exists to fix. "Status: Known
+good" stays green in both cases — it labels the catalogue status (the counterpart of "Status:
+Assertion window closed"), not the verdict. The colour decision is invisible to a test that
+unstyles its output, so it is pinned directly against `TextOutput(color=True)`.
 
 The **Status** line reads "Known good" whenever `is_known_good`, except on a **failed**
 instance — "Status: Failed" is ordered first and the known-good **Detections** branch is

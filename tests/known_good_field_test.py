@@ -47,6 +47,17 @@ def _render(instance):
     return click.unstyle('\n'.join(TextOutput(color=False).artifact_instance(instance, write=False)))
 
 
+def _render_styled(instance):
+    """Keeps the ANSI wrapper, so the green/red decision itself is observable — every other
+    test here unstyles, which makes the colour (the whole point of the known-good rendering)
+    invisible."""
+    return '\n'.join(TextOutput(color=True).artifact_instance(instance, write=False))
+
+
+def _detections_line(styled_text):
+    return next(line for line in styled_text.split('\n') if 'Detections:' in line)
+
+
 class TestKnownGoodTextRendering:
     def test_normal_instance_unchanged(self):
         text = _render(_instance())
@@ -93,6 +104,37 @@ class TestKnownGoodStateRendering:
         assert 'engine-b: Clean' in text
         assert 'Status: Known good' in text
         assert 'PolyScore: 0.9' in text
+
+    def test_malicious_detections_outrank_the_known_good_colour(self):
+        # The colour is the signal here, and no other test can see it (they all unstyle).
+        # Rendering "1/2 engines reported malicious" in green — as this branch first did,
+        # replacing code that rendered the identical count in red — is a weaker warning
+        # than the same instance gave before it was reconciled.
+        assertions = [_assertion('engine-a', True), _assertion('engine-b', False)]
+        line = _detections_line(_render_styled(
+            _instance(state='KNOWN_GOOD', known_good=FEEDS, assertions=assertions)))
+        assert line == click.style(
+            'Detections: This artifact is a known-good binary (flagged by: commercial, nsrl); '
+            '1/2 engines reported malicious.', fg='red')
+
+    def test_clean_known_good_stays_green(self):
+        # The other side of the same decision: nothing reported malicious, so the benign
+        # colouring is right and the red must not leak into it.
+        line = _detections_line(_render_styled(
+            _instance(state='KNOWN_GOOD', known_good=FEEDS,
+                      assertions=[_assertion('engine-a', False)])))
+        assert line == click.style(
+            'Detections: This artifact is a known-good binary (flagged by: commercial, nsrl); '
+            '0/1 engines reported malicious.', fg='green')
+
+    def test_open_window_does_not_present_counts_as_final(self):
+        # Every other Detections branch guards its counts on window_closed. Not reachable
+        # through reconciliation (a STORED row carries no assertions, a SETTLED one has a
+        # closed window), pinned so the missing guard cannot come back by accident.
+        text = _render(_instance(state='KNOWN_GOOD', known_good=FEEDS, window_closed=False,
+                                 assertions=[_assertion('engine-a', True)]))
+        assert 'its scan has not finished running yet.' in text
+        assert 'engines reported malicious' not in text
 
     def test_known_good_with_results_and_no_feeds(self):
         # Same reconciliation without a flagging-feed attribution: the feed clause is
@@ -144,20 +186,19 @@ class TestKnownGoodFeedsAreNotTheSignal:
         assert 'Status: Assertion window closed' in text
 
     def test_feeds_without_any_state_render_as_an_ordinary_instance(self):
-        # The no-state path: an older server omits `state` (parses to None) and an SDK
-        # predating `.state` has no such attribute at all. Both leave the feed list as
-        # the only known-good hint, and it must not be used — this is the assertion that
-        # catches the removed feed-list fallback being reintroduced.
-        no_state = _instance(known_good=FEEDS)
-        older_sdk = _instance(known_good=FEEDS)
-        del older_sdk.state
-        for instance in (no_state, older_sdk):
-            text = _render(instance)
-            assert 'known-good' not in text.lower()
-            assert 'Status: Known good' not in text
-            # Rendered exactly like any other window-closed instance with no assertions.
-            assert 'Detections: No engines responded to this scan. You can trigger a rescan now.' in text
-            assert 'Status: Assertion window closed' in text
+        # The no-state path: an older server omits `state`, which parses to None, leaving the
+        # feed list as the only known-good hint — and it must not be used. This is the
+        # assertion that catches the removed feed-list fallback being reintroduced.
+        # (`getattr(instance, 'state', None)` also tolerates an SDK with no such attribute at
+        # all, but that is belt-and-braces rather than a supported configuration, and pinning
+        # it would mean deleting an attribute off a parsed SDK resource — reverse-engineering
+        # internals the CLI is not allowed to depend on. See specs/05.)
+        text = _render(_instance(known_good=FEEDS))
+        assert 'known-good' not in text.lower()
+        assert 'Status: Known good' not in text
+        # Rendered exactly like any other window-closed instance with no assertions.
+        assert 'Detections: No engines responded to this scan. You can trigger a rescan now.' in text
+        assert 'Status: Assertion window closed' in text
 
     def test_scanned_instance_with_feeds_reports_its_detections(self):
         assertions = [_assertion('engine-a', True), _assertion('engine-b', False)]

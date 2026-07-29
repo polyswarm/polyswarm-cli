@@ -93,12 +93,25 @@ class TextOutput(base.BaseOutput):
             # detections and PolyScore preserved. Report those instead of the "not scanned"
             # clause, which would contradict the per-engine verdicts printed just below.
             attribution = f' (flagged by: {", ".join(known_good_sources)})' if known_good_sources else ''
-            if len(instance.valid_assertions) > 0:
+            if len(instance.valid_assertions) > 0 and instance.window_closed:
                 detections = f'{len(instance.malicious_assertions)}/{len(instance.valid_assertions)} engines reported malicious'
+            elif len(instance.valid_assertions) > 0:
+                # Every other branch guards its counts on window_closed, because an open
+                # window's numbers are not final. Not reachable through reconciliation today
+                # (a STORED row carries no assertions and a SETTLED one has a closed window),
+                # stated rather than left implied.
+                detections = 'its scan has not finished running yet'
             else:
                 detections = 'it is not scanned'
-            output.append(self._green(
-                f'Detections: This artifact is a known-good binary{attribution}; {detections}.'))
+            line = f'Detections: This artifact is a known-good binary{attribution}; {detections}.'
+            # A majority-malicious verdict outranks the withheld-bytes signal for colour: this
+            # branch replaced one that rendered the very same count in red, and green on
+            # "40/50 engines reported malicious" is a weaker warning than the instance had
+            # before it was reconciled. The preserved results still mean what they meant.
+            if instance.malicious_assertions and instance.window_closed:
+                output.append(self._red(line))
+            else:
+                output.append(self._green(line))
         elif instance.community == 'stream':
             output.append(self._white('Detections: This artifact has not been scanned. You can trigger a scan now.'))
         elif len(instance.valid_assertions) == 0 and instance.window_closed and not instance.failed:

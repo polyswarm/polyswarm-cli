@@ -69,7 +69,8 @@ When a CLI feature needs an SDK surface that doesn't exist yet:
 - The pin lives in `pyproject.toml` `dependencies` (`polyswarm_api>=…`). Floor it at the lowest SDK version exposing everything the CLI uses; cap it below the next known-incompatible major when one is anticipated.
 - The CLI is **sync-only** — it imports `polyswarm_api.api.PolyswarmAPI`, never `polyswarm_api.aio`. Don't add the `polyswarm_api[async]` extra.
 - Bumping the pin is a normal code change; bumping the CLI's *own* version is a release step (`AGENTS.md` §Gitflow). They're unrelated.
-- There is **no lock file / compiled requirements** to keep in step: `pyproject.toml` is the only place the SDK version is expressed, and CI installs the SDK straight from the SDK repo's branch archive (see §Coordinated changes). A pin change is a one-file change.
+- There is **no lock file / compiled requirements** to keep in step: `pyproject.toml` is the only place the SDK version is expressed, and CI installs the SDK straight from the SDK repo's branch archive (see §Coordinated changes). A pin change is a one-file change *in this repo*, but it is not free of interactions — see below.
+- **The floor must be satisfied by the SDK archive CI installs, and by PyPI.** CI installs the archive build and *then* runs `pip install .[tests]`; if the archive's declared version is below the floor, that second install silently pulls a newer SDK from PyPI **over** the archive build, and CI stops testing the SDK branch at all — the mechanism §Coordinated changes rests on, defeated with no error. Symmetrically, a floor above the newest **published** version breaks `pip install polyswarm-cli` for every consumer the moment it reaches `master`. So a floor bump has two preconditions: the version is on PyPI, and the SDK's `develop` declares at least that version.
 
 ### Current floor — `polyswarm_api>=4.2.0`
 
