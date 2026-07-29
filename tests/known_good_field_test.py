@@ -104,7 +104,10 @@ class TestKnownGoodStateRendering:
         assert 'engine-a: Malicious' in text
         assert 'engine-b: Clean' in text
         assert 'Status: Known good' in text
-        assert 'PolyScore: 0.9' in text
+        # Anchored on the line, not on a prefix: `PolyScore: 0.9` also matches 0.95, and the
+        # renderer's :.20f means the line is not the literal '0.9' either.
+        polyscore_line = next(line for line in text.split('\n') if line.startswith('PolyScore:'))
+        assert float(polyscore_line.removeprefix('PolyScore:').strip()) == 0.9
 
     def test_malicious_detections_outrank_the_known_good_colour(self):
         # The colour is the signal here, and no other test can see it (they all unstyle).

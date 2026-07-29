@@ -7,6 +7,7 @@ from unittest import TestCase
 from pathlib import Path
 
 import vcr as vcr_
+import click
 from click.testing import CliRunner
 
 from polyswarm.client import polyswarm as client
@@ -53,9 +54,12 @@ class BaseTestCase(TestCase):
                 yaml.dump(data, f)
         return entry
 
-    def _run_cli(self, commands):
+    def _run_cli(self, commands, color=False):
         commands = ['-a', self.api_key, '-u', self.api_url, '-c', self.community] + commands
-        return self.cli.invoke(client.polyswarm_cli, commands, catch_exceptions=False)
+        # color=False is CliRunner's default and strips ANSI, which is what every cassette
+        # expectation was recorded against. Pass color=True only to assert the styling itself.
+        return self.cli.invoke(client.polyswarm_cli, commands, catch_exceptions=False,
+                               color=color)
 
     def _assert_text_result(self, result, expected_result, expected_return_code=0, replace=None):
         current_result = self._replace(replace, result.output)
@@ -318,6 +322,30 @@ class SearchTest(BaseTestCase):
         result = self._run_cli([
             '--output-format', 'text', 'search', 'hash', self.eicar_hash])
         self._assert_text_result(result, self.click_vcr(result))
+
+    # Rides the text-output cassette rather than recording its own — the subject is the flag,
+    # not the response. Two identical GETs replay from the one recorded interaction, hence
+    # allow_playback_repeats.
+    @vcr.use_cassette('test_search_hash_with_text_output', allow_playback_repeats=True)
+    def test_color_flag_reaches_the_text_formatter(self):
+        # The bug was that `--color/--no-color` never reached the rendering: TextOutput
+        # assigned `self.color` and read it nowhere. A formatter unit test cannot see this —
+        # the flag travels through `formatters[output_format](color=color, …)` in the command
+        # group, and specs/04 says argument parsing and ctx.obj wiring need Style 1 or 2.
+        # CliRunner's color=True stops click stripping ANSI off the non-tty capture, so the
+        # two runs differ only in the flag.
+        colored = self._run_cli(
+            ['--color', '--output-format', 'text', 'search', 'hash', self.eicar_hash],
+            color=True)
+        plain = self._run_cli(
+            ['--no-color', '--output-format', 'text', 'search', 'hash', self.eicar_hash],
+            color=True)
+        assert colored.exit_code == 0, colored.output
+        assert plain.exit_code == 0, plain.output
+        assert '\x1b[' in colored.output
+        assert '\x1b[' not in plain.output
+        # Same content either way — the flag drops the wrapper, never the text.
+        assert click.unstyle(colored.output) == plain.output
 
     @vcr.use_cassette()
     def test_search_hash_with_no_results(self):

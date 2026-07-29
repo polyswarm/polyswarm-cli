@@ -92,7 +92,7 @@ def resolve_api_uri(api_uri, api_uri_from_cli, shortcuts):
     return PROD_API_URI
 
 
-def setup_logging(verbosity):
+def setup_logging(verbosity, color=True):
     # explicitly set to stderr just in case
     # this is the new default for click_log it seems
     core.ClickHandler._use_stderr = True
@@ -105,8 +105,12 @@ def setup_logging(verbosity):
                 level = record.levelname.lower()
                 msg = record.getMessage()
                 if level in self.colors:
-                    prefix = click.style(f'{level} [{record.name}]: ',
-                                         **self.colors[level])
+                    # `--no-color` governs the log prefix too. Without the flag here it
+                    # styled unconditionally, so `polyswarm --no-color -v …` still emitted a
+                    # green prefix on a tty — the same half-honoured flag the formatters had.
+                    prefix = f'{level} [{record.name}]: '
+                    if color:
+                        prefix = click.style(prefix, **self.colors[level])
                     msg = '\n'.join(prefix + x for x in msg.splitlines())
                 return msg
             return logging.Formatter.format(self, record)
@@ -209,7 +213,7 @@ def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verb
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
     """
-    setup_logging(verbose)
+    setup_logging(verbose, color=color)
     logger.info('Running polyswarm-cli version %s with polyswarm-api version %s',
                 polyswarm.__version__, polyswarm_api.__version__)
 

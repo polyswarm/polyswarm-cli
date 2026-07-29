@@ -20,7 +20,7 @@ How command output is rendered: the `BaseOutput` interface, the concrete formatt
 
 | Formatter | Module | Output |
 |---|---|---|
-| `TextOutput` | `text.py` | Human-readable, labelled blocks; honours `--color/--no-color` (through `_paint`, the single place `self.color` is read — the five `_white`/`_red`/… helpers go through it, so a new one cannot style unconditionally). Dates via `polyswarm_api.core.parse_isoformat`. |
+| `TextOutput` | `text.py` | Human-readable, labelled blocks; honours `--color/--no-color` through `_paint`, the single place `self.color` is read. The five `_white`/`_red`/… helpers all route through it — a convention, not an enforcement point: a new helper calling `click.style` directly would re-break the flag, so add colours by adding a `_paint` caller. Dates via `polyswarm_api.core.parse_isoformat`. |
 | `JSONOutput` | `json.py` | Machine-readable JSON (typically the resource's `.json` plus derived fields). |
 | `SHA256Output` / `SHA1Output` / `MD5Output` | `hashes.py` | Hash-only output — prints the relevant digest per result. |
 
@@ -116,7 +116,15 @@ was reconciled, which is the class of mis-signal this rendering exists to fix. "
 good" stays green in both cases — it labels the catalogue status (the counterpart of "Status:
 Assertion window closed"), not the verdict. The colour decision is invisible to a test that unstyles its
 output, so it is pinned against the **styled** render — `TextOutput` output read without `click.unstyle`,
-which is what `_render_styled` in `known_good_field_test.py` exists for.
+which is what `_render_styled` in `known_good_field_test.py` exists for. Whether the
+`--color/--no-color` **flag** reaches that rendering at all is a separate question a formatter
+unit test cannot answer; `test_color_flag_reaches_the_text_formatter` (`cli_test.py`) covers it
+through `CliRunner(… color=True)`.
+
+**Scope of `--no-color`.** It governs the text formatter (via `_paint`), `JSONOutput`, and the
+log prefix (`setup_logging(verbosity, color=…)` — the `NamedColorFormatter` used to style
+unconditionally, so `polyswarm --no-color -v …` still emitted a green prefix on a tty). It does
+not attempt to suppress colour inside third-party output.
 
 The **Status** line reads "Known good" whenever `is_known_good`, except on a **failed**
 instance — "Status: Failed" is ordered first and the known-good **Detections** branch is
