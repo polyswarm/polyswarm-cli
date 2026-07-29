@@ -909,9 +909,10 @@ class TextOutput(base.BaseOutput):
         """Apply a colour, or don't — the one place `self.color` is honoured.
 
         It used to be assigned and never read, so every one of these helpers styled
-        unconditionally and `--no-color` was a no-op for text output (invisible in practice
-        because click strips ANSI when stdout is not a tty, and because JSONOutput does
-        honour the flag). Not decorated with `is_grouped`: the callers already are, and the
+        unconditionally and `--no-color` was a no-op for text output — invisible in practice
+        because click strips ANSI when stdout is not a tty. (`PrettyJSONOutput` did honour it,
+        which is why the flag looked wired up; plain `JSONOutput` emits unstyled JSON and has
+        nothing to honour.) Not decorated with `is_grouped`: the callers already are, and the
         indent must be applied exactly once.
         """
         return click.style(text, fg=fg) if self.color else text

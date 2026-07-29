@@ -327,12 +327,17 @@ class SearchTest(BaseTestCase):
 
     @staticmethod
     def _one_instance():
-        """A minimal parsed instance for the colour tests. They mock at the SDK boundary
-        (specs/04 Style 2) rather than replaying a cassette: the response content is
+        """A minimal parsed instance for the colour tests.
+
+        They mock at the **SDK boundary** — `polyswarm_api.api.PolyswarmAPI.search`, which is
+        what specs/04 Style 2 means — rather than replaying a cassette: the response content is
         irrelevant to whether `--color` reaches the renderer, a cassette would have to be
-        recorded against a live stack for a test that never exercises the server, and
-        borrowing another test's cassette couples the two through the re-record path
-        (unittest orders methods alphabetically, so this one would end up authoring it).
+        recorded against a live stack for a test that never exercises the server, and borrowing
+        another test's cassette couples the two through the re-record path (unittest orders
+        methods alphabetically, so this one would end up authoring it).
+
+        Patching `Polyswarm.search_hashes` instead would be the wrong seam: that is CLI code,
+        so it would cut `utils.parallel_executor_iterable_results` out of the run.
         """
         return resources.ArtifactInstance({
             'sha256': 'a' * 64, 'md5': 'c' * 32, 'sha1': 'b' * 40,
@@ -346,7 +351,7 @@ class SearchTest(BaseTestCase):
         """The same command twice, differing only in the colour flag."""
         outputs = []
         for flag in ('--color', '--no-color'):
-            with mock.patch('polyswarm.polyswarm.Polyswarm.search_hashes',
+            with mock.patch('polyswarm_api.api.PolyswarmAPI.search',
                             return_value=iter([self._one_instance()])):
                 result = self._run_cli(
                     [*extra_args, flag, '--output-format', 'text',

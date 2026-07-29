@@ -122,10 +122,12 @@ halves matter: the flag makes it paint, the missing `unstyle` keeps the codes). 
 unit test cannot answer; `test_color_flag_reaches_the_text_formatter` (`cli_test.py`) covers it
 through `CliRunner(… color=True)`.
 
-**Scope of `--no-color`.** It governs the text formatter (via `_paint`), `JSONOutput`, and the
-log prefix (`setup_logging(verbosity, color=…)` — the `NamedColorFormatter` used to style
-unconditionally, so `polyswarm --no-color -v …` still emitted a green prefix on a tty). It does
-not attempt to suppress colour inside third-party output.
+**Scope of `--no-color`.** It governs the text formatter (via `_paint`), `PrettyJSONOutput`
+(whose `_to_json` skips the pygments `ClickFormatter` when the flag is off — plain `JSONOutput`
+emits unstyled JSON and has nothing to honour), and the log prefix
+(`setup_logging(verbosity, color=…)` — the `NamedColorFormatter` used to style unconditionally,
+so `polyswarm --no-color -v …` still emitted a green prefix on a tty). It does not attempt to
+suppress colour inside third-party output.
 
 The **Status** line reads "Known good" whenever `is_known_good`, except on a **failed**
 instance — "Status: Failed" is ordered first and the known-good **Detections** branch is
