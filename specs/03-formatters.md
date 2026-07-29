@@ -65,6 +65,28 @@ instance would otherwise get. It is gated by a single
   known-good branch, so the ternary can't change what renders today. Keep it, and keep
   reading the feeds through it if a second call site ever appears.
 
+### A known-good instance that also carries results
+
+Known-goodness and collected results are **not** mutually exclusive. An instance that was
+scanned before its artifact was catalogued gets reconciled to `KNOWN_GOOD` with its
+assertions, detections and PolyScore deliberately preserved, so that pairing is something
+a client really receives — the rendering must state both facts without claiming the
+artifact was never scanned. The trailing clause of the known-good **Detections** line
+therefore switches on `instance.valid_assertions`:
+
+- **no valid assertions** → "…is a known-good binary; it is not scanned." — the withheld,
+  never-scanned case.
+- **valid assertions** → "…is a known-good binary; N/M engines reported malicious." — the
+  same count the ordinary window-closed branch renders, folded into the known-good
+  sentence.
+
+The flagging-feed attribution ("(flagged by: …)") is orthogonal and applies to both. In
+either branch the per-engine verdict list, the PolyScore line and "Status: Known good"
+render as usual; the switch exists so "it is not scanned" is never printed directly above a
+list of engine verdicts. The line stays **green** both ways — known-goodness is the
+dominant signal (the bytes are withheld whatever the preserved assertions say), and the
+detections are reported rather than suppressed.
+
 The **Status** line reads "Known good" whenever `is_known_good`, except on a **failed**
 instance — "Status: Failed" is ordered first and the known-good **Detections** branch is
 gated on `not instance.failed`, so a failure is reported as a failure and never as
@@ -74,7 +96,8 @@ Both attributes are read with `getattr(..., None)` so a CLI on an older SDK (mis
 either field) never raises `AttributeError`; an SDK without `.state` simply never takes
 the known-good branch, which is the safe fallback — the pre-known-good rendering. That
 degradation is belt-and-braces, not a supported configuration: `.state` is load-bearing
-here with no substitute, so the dependency floor is `polyswarm_api>=4.1.0` — the release
-that exposes it (see [`05-sdk-contract.md`](./05-sdk-contract.md) §Version pin).
-`JSONOutput` needs no change — it dumps the resource's `.json`, which already carries the
-raw `state` and `known_good` keys.
+here with no substitute. Both attributes ship in SDK **4.1.0**, but the dependency floor is
+`polyswarm_api>=4.2.0` — set by two *other* behaviours the CLI depends on, both of which
+fail silently on 4.1.0 (see [`05-sdk-contract.md`](./05-sdk-contract.md) §Version pin) — so
+every supported install has them. `JSONOutput` needs no change — it dumps the resource's
+`.json`, which already carries the raw `state` and `known_good` keys.

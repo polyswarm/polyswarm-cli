@@ -69,6 +69,16 @@ When a CLI feature needs an SDK surface that doesn't exist yet:
 - The pin lives in `pyproject.toml` `dependencies` (`polyswarm_api>=…`). Floor it at the lowest SDK version exposing everything the CLI uses; cap it below the next known-incompatible major when one is anticipated.
 - The CLI is **sync-only** — it imports `polyswarm_api.api.PolyswarmAPI`, never `polyswarm_api.aio`. Don't add the `polyswarm_api[async]` extra.
 - Bumping the pin is a normal code change; bumping the CLI's *own* version is a release step (`AGENTS.md` §Gitflow). They're unrelated.
+- There is **no lock file / compiled requirements** to keep in step: `pyproject.toml` is the only place the SDK version is expressed, and CI installs the SDK straight from the SDK repo's branch archive (see §Coordinated changes). A pin change is a one-file change.
+
+### Current floor — `polyswarm_api>=4.2.0`
+
+Two behaviours the CLI relies on only exist from **4.2.0**; on 4.1.0 both fail *silently*, which is why the floor is a hard requirement rather than a preference:
+
+1. **`llm_report_create` sends the client's community.** 4.2.0 passes `community=self.community` when it builds the report resource; 4.1.0 omits it. `report llm-create` (`client/report.py`) supplies no community of its own — it relies entirely on the client's — so on 4.1.0 a report requested for a sample in a private community is created without one. No error, wrong resource.
+2. **A streaming download answered `204 No Content` raises `NoResultsException`.** The streaming path bypasses `parse_response`, so the 204 has to be raised by the session itself; 4.2.0 does that, 4.1.0 has no such raise anywhere in its session. The CLI's `download` commands depend on it for the no-results **exit code `1`** (§No-results signalling); against 4.1.0 an empty response reads as a successful download and exits `0`.
+
+The known-good rendering attributes (`ArtifactInstance.state`, `.known_good`/`.known_good_sources`, read by `formatters/text.py` — see [`03-formatters.md`](./03-formatters.md) §Known-good artifact instances) ship in **4.1.0**, so they are *not* what sets the floor; they are simply covered by it.
 
 ## Worked example — the httpx SDK migration
 

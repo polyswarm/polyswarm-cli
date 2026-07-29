@@ -88,13 +88,17 @@ class TextOutput(base.BaseOutput):
         known_good_sources = (getattr(instance, 'known_good_sources', None) or []) if is_known_good else []
 
         if is_known_good and not instance.failed:
-            if known_good_sources:
-                feeds = ', '.join(known_good_sources)
-                output.append(self._green(
-                    f'Detections: This artifact is a known-good binary (flagged by: {feeds}); it is not scanned.'))
+            # A known-good binary can still carry results: an instance scanned before the
+            # artifact was catalogued is reconciled to KNOWN_GOOD with its assertions,
+            # detections and PolyScore preserved. Report those instead of the "not scanned"
+            # clause, which would contradict the per-engine verdicts printed just below.
+            attribution = f' (flagged by: {", ".join(known_good_sources)})' if known_good_sources else ''
+            if len(instance.valid_assertions) > 0:
+                detections = f'{len(instance.malicious_assertions)}/{len(instance.valid_assertions)} engines reported malicious'
             else:
-                output.append(self._green(
-                    'Detections: This artifact is a known-good binary; it is not scanned.'))
+                detections = 'it is not scanned'
+            output.append(self._green(
+                f'Detections: This artifact is a known-good binary{attribution}; {detections}.'))
         elif instance.community == 'stream':
             output.append(self._white('Detections: This artifact has not been scanned. You can trigger a scan now.'))
         elif len(instance.valid_assertions) == 0 and instance.window_closed and not instance.failed:

@@ -5,8 +5,9 @@ ArtifactInstance (the SDK resource), asserting that a known-good binary — sign
 by its state, the only reliable signal — renders its flagging feeds and a
 "Known good" status instead of the misleading "no engines responded — rescan now"
 message, that the flagging feeds on their own never make an instance known-good,
-that a failure outranks the known-good signal, and that a normal instance is
-unchanged.
+that a failure outranks the known-good signal, that a known-good instance which
+also carries preserved results reports them instead of claiming it was not
+scanned, and that a normal instance is unchanged.
 """
 import click
 from polyswarm_api import resources
@@ -73,6 +74,44 @@ class TestKnownGoodStateRendering:
         # When feeds are present the richer message still lists them (sorted).
         assert 'known-good binary (flagged by: commercial, nsrl); it is not scanned.' in text
         assert 'Status: Known good' in text
+
+    def test_known_good_with_results_reports_them_instead_of_not_scanned(self):
+        # A previously scanned instance reconciled to KNOWN_GOOD keeps its assertions,
+        # detections and PolyScore. The assertion loop is not gated on the known-good
+        # branch, so the old copy printed "it is not scanned." immediately above the
+        # per-engine verdicts — a self-contradiction. The Detections line must state
+        # both facts: still a known-good binary, and here is what the engines found.
+        assertions = [_assertion('engine-a', True), _assertion('engine-b', False)]
+        text = _render(_instance(state='KNOWN_GOOD', known_good=FEEDS, assertions=assertions,
+                                 polyscore=0.9))
+        assert ('Detections: This artifact is a known-good binary (flagged by: commercial, nsrl); '
+                '1/2 engines reported malicious.') in text
+        assert 'it is not scanned' not in text
+        # The verdicts that made the old phrasing contradictory still render, as does the
+        # known-good status and the preserved PolyScore.
+        assert 'engine-a: Malicious' in text
+        assert 'engine-b: Clean' in text
+        assert 'Status: Known good' in text
+        assert 'PolyScore: 0.9' in text
+
+    def test_known_good_with_results_and_no_feeds(self):
+        # Same reconciliation without a flagging-feed attribution: the feed clause is
+        # orthogonal to the results clause, so dropping one must not drop the other.
+        assertions = [_assertion('engine-a', False)]
+        text = _render(_instance(state='KNOWN_GOOD', assertions=assertions))
+        assert 'Detections: This artifact is a known-good binary; 0/1 engines reported malicious.' in text
+        assert 'it is not scanned' not in text
+        assert 'Status: Known good' in text
+
+    def test_known_good_with_only_non_responding_engines_is_still_not_scanned(self):
+        # Assertions that all declined (mask False) are not results — valid_assertions is
+        # empty — so the withheld/never-scanned clause is still the accurate one. Keying
+        # the switch on `instance.assertions` instead would render "0/0 engines".
+        declined = _assertion('engine-a', None)
+        declined['mask'] = False
+        text = _render(_instance(state='KNOWN_GOOD', assertions=[declined]))
+        assert 'Detections: This artifact is a known-good binary; it is not scanned.' in text
+        assert 'engines reported malicious' not in text
 
     def test_non_known_good_state_unchanged(self):
         text = _render(_instance(state='SETTLED'))
