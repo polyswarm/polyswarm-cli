@@ -20,7 +20,7 @@ How command output is rendered: the `BaseOutput` interface, the concrete formatt
 
 | Formatter | Module | Output |
 |---|---|---|
-| `TextOutput` | `text.py` | Human-readable, labelled blocks; honours `--color/--no-color`. Dates via `polyswarm_api.core.parse_isoformat`. |
+| `TextOutput` | `text.py` | Human-readable, labelled blocks; honours `--color/--no-color` (through `_paint`, the single place `self.color` is read — the five `_white`/`_red`/… helpers go through it, so a new one cannot style unconditionally). Dates via `polyswarm_api.core.parse_isoformat`. |
 | `JSONOutput` | `json.py` | Machine-readable JSON (typically the resource's `.json` plus derived fields). |
 | `SHA256Output` / `SHA1Output` / `MD5Output` | `hashes.py` | Hash-only output — prints the relevant digest per result. |
 
@@ -92,15 +92,17 @@ every branch the per-engine verdict list, the PolyScore line and "Status: Known 
 render as usual; the switch exists so "it is not scanned" is never printed directly above a
 list of engine verdicts.
 
-**Colour: a majority-malicious verdict outranks the withheld-bytes signal.** The line is
-**green** except when the instance has malicious assertions and a closed window, where it is
-**red** — the same colour the ordinary branch gives that count. Known-goodness is the
+**Colour: any malicious verdict outranks the withheld-bytes signal.** The line is
+**green** except when the instance has **at least one** malicious assertion and a closed
+window, where it is **red** — the same threshold and the same colour the ordinary branch
+gives that count (1/50 reddens there too). Known-goodness is the
 dominant *fact*, but it is not a stronger *warning*: rendering "40/50 engines reported
 malicious" in green would be a weaker signal than the very same instance produced before it
 was reconciled, which is the class of mis-signal this rendering exists to fix. "Status: Known
 good" stays green in both cases — it labels the catalogue status (the counterpart of "Status:
-Assertion window closed"), not the verdict. The colour decision is invisible to a test that
-unstyles its output, so it is pinned directly against `TextOutput(color=True)`.
+Assertion window closed"), not the verdict. The colour decision is invisible to a test that unstyles its
+output, so it is pinned against the **styled** render — `TextOutput` output read without `click.unstyle`,
+which is what `_render_styled` in `known_good_field_test.py` exists for.
 
 The **Status** line reads "Known good" whenever `is_known_good`, except on a **failed**
 instance — "Status: Failed" is ordered first and the known-good **Detections** branch is

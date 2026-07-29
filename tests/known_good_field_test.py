@@ -50,7 +50,8 @@ def _render(instance):
 def _render_styled(instance):
     """Keeps the ANSI wrapper, so the green/red decision itself is observable — every other
     test here unstyles, which makes the colour (the whole point of the known-good rendering)
-    invisible."""
+    invisible. It is the absent `click.unstyle`, not the `color=` argument, that makes the
+    difference; `color=True` is the default and is passed only for emphasis."""
     return '\n'.join(TextOutput(color=True).artifact_instance(instance, write=False))
 
 
@@ -135,10 +136,17 @@ class TestKnownGoodStateRendering:
         # Every other Detections branch guards its counts on window_closed. Not reachable
         # through reconciliation (a STORED row carries no assertions, a SETTLED one has a
         # closed window), pinned so the missing guard cannot come back by accident.
-        text = _render(_instance(state='KNOWN_GOOD', known_good=FEEDS, window_closed=False,
-                                 assertions=[_assertion('engine-a', True)]))
+        instance = _instance(state='KNOWN_GOOD', known_good=FEEDS, window_closed=False,
+                             assertions=[_assertion('engine-a', True)])
+        text = _render(instance)
         assert 'its scan has not finished running yet.' in text
         assert 'engines reported malicious' not in text
+        # ...and it stays GREEN. This is the one combination where the `and window_closed`
+        # conjunct in the colour check is load-bearing: the instance has a malicious
+        # assertion, so without it the line reddens while saying the scan is unfinished.
+        assert _detections_line(_render_styled(instance)) == click.style(
+            'Detections: This artifact is a known-good binary (flagged by: commercial, nsrl); '
+            'its scan has not finished running yet.', fg='green')
 
     def test_known_good_with_results_and_no_feeds(self):
         # Same reconciliation without a flagging-feed attribution: the feed clause is
@@ -176,6 +184,21 @@ class TestKnownGoodStateRendering:
         # Never claim the artifact is a known-good binary that was not scanned.
         assert 'it is not scanned' not in text
         assert 'Status: Known good' not in text
+
+
+class TestColorFlag:
+    """`--no-color` reaches the formatter as `TextOutput(color=False)`. It used to be
+    assigned and never read, so text output styled unconditionally and the flag did
+    nothing — masked in practice by click stripping ANSI off a non-tty."""
+
+    def test_no_color_emits_no_ansi(self):
+        assertions = [_assertion('engine-a', True), _assertion('engine-b', False)]
+        instance = _instance(state='KNOWN_GOOD', known_good=FEEDS, assertions=assertions)
+        plain = '\n'.join(TextOutput(color=False).artifact_instance(instance, write=False))
+        assert '\x1b[' not in plain
+        # Same text, just unpainted — the flag drops the wrapper, never the content.
+        assert plain == click.unstyle('\n'.join(
+            TextOutput(color=True).artifact_instance(instance, write=False)))
 
 
 class TestKnownGoodFeedsAreNotTheSignal:

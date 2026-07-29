@@ -32,7 +32,6 @@ class TextOutput(base.BaseOutput):
         super().__init__(output)
         self.color = color
         self._depth = 0
-        self.color = color
 
     def _get_score_format(self, score):
         if score < 0.3:
@@ -104,10 +103,11 @@ class TextOutput(base.BaseOutput):
             else:
                 detections = 'it is not scanned'
             line = f'Detections: This artifact is a known-good binary{attribution}; {detections}.'
-            # A majority-malicious verdict outranks the withheld-bytes signal for colour: this
-            # branch replaced one that rendered the very same count in red, and green on
-            # "40/50 engines reported malicious" is a weaker warning than the instance had
-            # before it was reconciled. The preserved results still mean what they meant.
+            # ANY malicious verdict outranks the withheld-bytes signal for colour (the same
+            # threshold the ordinary branch uses): this branch replaced one that rendered the
+            # very same count in red, and green on "40/50 engines reported malicious" is a
+            # weaker warning than the instance had before it was reconciled. The preserved
+            # results still mean what they meant.
             if instance.malicious_assertions and instance.window_closed:
                 output.append(self._red(line))
             else:
@@ -905,25 +905,36 @@ class TextOutput(base.BaseOutput):
 
         return self._output(output, write)
 
+    def _paint(self, text, fg):
+        """Apply a colour, or don't — the one place `self.color` is honoured.
+
+        It used to be assigned and never read, so every one of these helpers styled
+        unconditionally and `--no-color` was a no-op for text output (invisible in practice
+        because click strips ANSI when stdout is not a tty, and because JSONOutput does
+        honour the flag). Not decorated with `is_grouped`: the callers already are, and the
+        indent must be applied exactly once.
+        """
+        return click.style(text, fg=fg) if self.color else text
+
     @is_grouped
     def _white(self, text):
-        return click.style(text, fg='white')
+        return self._paint(text, 'white')
 
     @is_grouped
     def _yellow(self, text):
-        return click.style(text, fg='yellow')
+        return self._paint(text, 'yellow')
 
     @is_grouped
     def _red(self, text):
-        return click.style(text, fg='red')
+        return self._paint(text, 'red')
 
     @is_grouped
     def _blue(self, text):
-        return click.style(text, fg='blue')
+        return self._paint(text, 'blue')
 
     @is_grouped
     def _green(self, text):
-        return click.style(text, fg='green')
+        return self._paint(text, 'green')
 
     def _open_group(self):
         self._depth += 1
