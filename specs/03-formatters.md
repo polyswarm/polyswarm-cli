@@ -60,11 +60,21 @@ instance would otherwise get. It is gated by a single
   known-goodness — the server emits the feed list for *any* instance whose sha256
   matches a known-good record, including a fully scanned one with real
   detections/PolyScore, so treating it as the signal would render a scanned artifact
-  as "known-good … not scanned". It is therefore read as `[]` unless `is_known_good`.
+  as "known-good … not scanned". It is therefore read as `[]` unless `is_known_good` —
+  a statement of that coupling, not a guard: the list is only ever read inside the
+  known-good branch, so the ternary can't change what renders today. Keep it, and keep
+  reading the feeds through it if a second call site ever appears.
 
-The **Status** line reads "Known good" whenever `is_known_good`. Both attributes are
-read with `getattr(..., None)` so a CLI on an older SDK (missing either field) never
-raises `AttributeError`; an SDK without `.state` simply never takes the known-good
-branch, which is the safe fallback — the pre-known-good rendering. `JSONOutput` needs
-no change — it dumps the resource's `.json`, which already carries the raw `state` and
-`known_good` keys.
+The **Status** line reads "Known good" whenever `is_known_good`, except on a **failed**
+instance — "Status: Failed" is ordered first and the known-good **Detections** branch is
+gated on `not instance.failed`, so a failure is reported as a failure and never as
+"…it is not scanned".
+
+Both attributes are read with `getattr(..., None)` so a CLI on an older SDK (missing
+either field) never raises `AttributeError`; an SDK without `.state` simply never takes
+the known-good branch, which is the safe fallback — the pre-known-good rendering. That
+degradation is belt-and-braces, not a supported configuration: `.state` is load-bearing
+here with no substitute, so the dependency floor is `polyswarm_api>=4.1.0` — the release
+that exposes it (see [`05-sdk-contract.md`](./05-sdk-contract.md) §Version pin).
+`JSONOutput` needs no change — it dumps the resource's `.json`, which already carries the
+raw `state` and `known_good` keys.

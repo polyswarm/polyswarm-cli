@@ -5,7 +5,8 @@ ArtifactInstance (the SDK resource), asserting that a known-good binary — sign
 by its state, the only reliable signal — renders its flagging feeds and a
 "Known good" status instead of the misleading "no engines responded — rescan now"
 message, that the flagging feeds on their own never make an instance known-good,
-and that a normal instance is unchanged.
+that a failure outranks the known-good signal, and that a normal instance is
+unchanged.
 """
 import click
 from polyswarm_api import resources
@@ -78,6 +79,19 @@ class TestKnownGoodStateRendering:
         assert 'known-good' not in text.lower()
         assert 'Status: Known good' not in text
 
+    def test_failed_instance_reports_the_failure_not_known_good(self):
+        # A failure outranks the known-good signal: the Detections branch is gated on
+        # `not instance.failed` and 'Status: Failed' is ordered ahead of 'Status: Known
+        # good'. Dropping either would tell the user a failed lookup is a benign binary.
+        text = _render(_instance(state='KNOWN_GOOD', known_good=FEEDS, failed=True,
+                                 failed_reason='artifact storage unavailable'))
+        assert 'Detections: This scan has failed. Please try again.' in text
+        assert 'Status: Failed' in text
+        assert 'Failure Reason: artifact storage unavailable' in text
+        # Never claim the artifact is a known-good binary that was not scanned.
+        assert 'it is not scanned' not in text
+        assert 'Status: Known good' not in text
+
 
 class TestKnownGoodFeedsAreNotTheSignal:
     """The flagging-feed list is served for every instance whose sha256 matches a
@@ -89,6 +103,22 @@ class TestKnownGoodFeedsAreNotTheSignal:
         assert 'known-good' not in text.lower()
         assert 'Status: Known good' not in text
         assert 'Status: Assertion window closed' in text
+
+    def test_feeds_without_any_state_render_as_an_ordinary_instance(self):
+        # The no-state path: an older server omits `state` (parses to None) and an SDK
+        # predating `.state` has no such attribute at all. Both leave the feed list as
+        # the only known-good hint, and it must not be used — this is the assertion that
+        # catches the removed feed-list fallback being reintroduced.
+        no_state = _instance(known_good=FEEDS)
+        older_sdk = _instance(known_good=FEEDS)
+        del older_sdk.state
+        for instance in (no_state, older_sdk):
+            text = _render(instance)
+            assert 'known-good' not in text.lower()
+            assert 'Status: Known good' not in text
+            # Rendered exactly like any other window-closed instance with no assertions.
+            assert 'Detections: No engines responded to this scan. You can trigger a rescan now.' in text
+            assert 'Status: Assertion window closed' in text
 
     def test_scanned_instance_with_feeds_reports_its_detections(self):
         assertions = [_assertion('engine-a', True), _assertion('engine-b', False)]
