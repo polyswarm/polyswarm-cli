@@ -92,26 +92,33 @@ class TextOutput(base.BaseOutput):
             # detections and PolyScore preserved. Report those instead of the "not scanned"
             # clause, which would contradict the per-engine verdicts printed just below.
             attribution = f' (flagged by: {", ".join(known_good_sources)})' if known_good_sources else ''
+            # The clause and its colour are decided in the SAME branch, deliberately. They
+            # were two differently-shaped conditions that had to agree — the text keyed on
+            # `valid_assertions and window_closed`, the colour on `malicious_assertions and
+            # window_closed` — and only the SDK's guarantee that malicious_assertions is a
+            # subset of valid_assertions (both filter on `mask`, one additionally on `verdict`)
+            # kept them in step. That is a fact about another repo holding this rendering
+            # together; deciding both at once removes the dependency.
             if len(instance.valid_assertions) > 0 and instance.window_closed:
                 detections = f'{len(instance.malicious_assertions)}/{len(instance.valid_assertions)} engines reported malicious'
+                # ANY malicious verdict outranks the withheld-bytes signal, which is the same
+                # threshold the ordinary branch applies to this same count: green on "40/50
+                # engines reported malicious" is a weaker warning than the instance gave before
+                # it was reconciled. Red only here, because this is the only branch that renders
+                # a final count.
+                paint = self._red if instance.malicious_assertions else self._green
             elif len(instance.valid_assertions) > 0:
                 # Every other branch guards its counts on window_closed, because an open
                 # window's numbers are not final. Not reachable through reconciliation today
                 # (a STORED row carries no assertions and a SETTLED one has a closed window),
                 # stated rather than left implied.
                 detections = 'its scan has not finished running yet'
+                paint = self._green
             else:
                 detections = 'it is not scanned'
-            line = f'Detections: This artifact is a known-good binary{attribution}; {detections}.'
-            # ANY malicious verdict outranks the withheld-bytes signal for colour (the same
-            # threshold the ordinary branch uses): this branch replaced one that rendered the
-            # very same count in red, and green on "40/50 engines reported malicious" is a
-            # weaker warning than the instance had before it was reconciled. The preserved
-            # results still mean what they meant.
-            if instance.malicious_assertions and instance.window_closed:
-                output.append(self._red(line))
-            else:
-                output.append(self._green(line))
+                paint = self._green
+            output.append(paint(
+                f'Detections: This artifact is a known-good binary{attribution}; {detections}.'))
         elif instance.community == 'stream':
             output.append(self._white('Detections: This artifact has not been scanned. You can trigger a scan now.'))
         elif len(instance.valid_assertions) == 0 and instance.window_closed and not instance.failed:

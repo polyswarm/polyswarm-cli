@@ -106,10 +106,13 @@ every branch the per-engine verdict list, the PolyScore line and "Status: Known 
 render as usual; the switch exists so "it is not scanned" is never printed directly above a
 list of engine verdicts.
 
-**Colour: any malicious verdict outranks the withheld-bytes signal.** The line is
-**green** except when the instance has **at least one** malicious assertion and a closed
-window, where it is **red** — the same threshold and the same colour the ordinary branch
-gives that count (1/50 reddens there too). Known-goodness is the
+**Colour: any malicious verdict outranks the withheld-bytes signal.** The line is **green**
+except on the *count* branch (valid assertions, window closed) when at least one of them is
+malicious, where it is **red** — the same threshold and the same colour the ordinary branch
+applies to that same count (1/50 reddens there too). The clause and its colour are chosen in
+the **same** `if`/`elif`, not by a second condition: written separately they had to agree by
+coincidence, and only the SDK's guarantee that `malicious_assertions ⊆ valid_assertions` (both
+filter on `mask`) kept them in step — a fact about another repo propping up this rendering. Known-goodness is the
 dominant *fact*, but it is not a stronger *warning*: rendering "40/50 engines reported
 malicious" in green would be a weaker signal than the very same instance produced before it
 was reconciled, which is the class of mis-signal this rendering exists to fix. "Status: Known
