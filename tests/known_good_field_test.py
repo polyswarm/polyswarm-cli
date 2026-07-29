@@ -111,11 +111,15 @@ class TestKnownGoodStateRendering:
         # replacing code that rendered the identical count in red — is a weaker warning
         # than the same instance gave before it was reconciled.
         assertions = [_assertion('engine-a', True), _assertion('engine-b', False)]
-        line = _detections_line(_render_styled(
-            _instance(state='KNOWN_GOOD', known_good=FEEDS, assertions=assertions)))
-        assert line == click.style(
+        styled = _render_styled(
+            _instance(state='KNOWN_GOOD', known_good=FEEDS, assertions=assertions))
+        assert _detections_line(styled) == click.style(
             'Detections: This artifact is a known-good binary (flagged by: commercial, nsrl); '
             '1/2 engines reported malicious.', fg='red')
+        # The Status line is the counterpart of "Assertion window closed": it labels the
+        # catalogue status, not the verdict, so it stays green while the verdict goes red.
+        # Stated as a rule in specs/03 — pinned here so the two can't drift.
+        assert click.style('Status: Known good', fg='green') in styled
 
     def test_clean_known_good_stays_green(self):
         # The other side of the same decision: nothing reported malicious, so the benign
