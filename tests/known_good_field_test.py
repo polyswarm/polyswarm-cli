@@ -50,8 +50,9 @@ def _render(instance):
 def _render_styled(instance):
     """Keeps the ANSI wrapper, so the green/red decision itself is observable — every other
     test here unstyles, which makes the colour (the whole point of the known-good rendering)
-    invisible. It is the absent `click.unstyle`, not the `color=` argument, that makes the
-    difference; `color=True` is the default and is passed only for emphasis."""
+    invisible. **Both** halves are load-bearing: `color=True` is what makes TextOutput paint
+    at all (see `_paint`), and the absent `click.unstyle` is what keeps the codes in the
+    string. Flip either and every colour assertion below stops asserting anything."""
     return '\n'.join(TextOutput(color=True).artifact_instance(instance, write=False))
 
 

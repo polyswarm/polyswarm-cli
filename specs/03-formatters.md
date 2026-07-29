@@ -115,8 +115,9 @@ malicious" in green would be a weaker signal than the very same instance produce
 was reconciled, which is the class of mis-signal this rendering exists to fix. "Status: Known
 good" stays green in both cases — it labels the catalogue status (the counterpart of "Status:
 Assertion window closed"), not the verdict. The colour decision is invisible to a test that unstyles its
-output, so it is pinned against the **styled** render — `TextOutput` output read without `click.unstyle`,
-which is what `_render_styled` in `known_good_field_test.py` exists for. Whether the
+output, so it is pinned against the **styled** render — `TextOutput(color=True)` read without
+`click.unstyle`, which is what `_render_styled` in `known_good_field_test.py` exists for (both
+halves matter: the flag makes it paint, the missing `unstyle` keeps the codes). Whether the
 `--color/--no-color` **flag** reaches that rendering at all is a separate question a formatter
 unit test cannot answer; `test_color_flag_reaches_the_text_formatter` (`cli_test.py`) covers it
 through `CliRunner(… color=True)`.
