@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"sha256":"b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2","source":"winget","community":"gamma"}'
+    body: '{"sha256":"b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2","source":"commercial","community":"gamma"}'
     headers:
       accept:
       - '*/*'
@@ -11,18 +11,18 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '115'
+      - '119'
       content-type:
       - application/json
       host:
       - artifact-index-e2e:9696
       user-agent:
-      - polyswarm_api/4.0.0 (x86_64-Linux-CPython-3.14.4)
+      - polyswarm_api/4.1.0 (x86_64-Linux-CPython-3.12.3)
     method: POST
     uri: http://artifact-index-e2e:9696/v3/known-good
   response:
     body:
-      string: '{"result":{"artifact_instance_id":"2369287781010758","created":"2026-06-15T18:51:09.785317+00:00","id":"28878017864712926","sha256":"b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2","sources":["winget"]},"status":"OK"}
+      string: '{"result":{"artifact_instance_id":"94148575775325033","created":"2026-06-29T18:31:04.436511+00:00","id":"94927448183592703","sha256":"b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2","sources":["commercial"]},"status":"OK"}
 
         '
     headers:
@@ -33,11 +33,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '236'
+      - '241'
       Content-Type:
       - application/json
       Date:
-      - Mon, 15 Jun 2026 19:14:34 GMT
+      - Mon, 29 Jun 2026 18:31:04 GMT
       Server:
       - gunicorn
       X-Billing-ID:
@@ -59,12 +59,12 @@ interactions:
       host:
       - artifact-index-e2e:9696
       user-agent:
-      - polyswarm_api/4.0.0 (x86_64-Linux-CPython-3.14.4)
+      - polyswarm_api/4.1.0 (x86_64-Linux-CPython-3.12.3)
     method: GET
     uri: http://artifact-index-e2e:9696/v3/known-good?sha256=b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2&community=gamma
   response:
     body:
-      string: '{"result":{"artifact_instance_id":"2369287781010758","created":"2026-06-15T18:51:09.785317+00:00","id":"28878017864712926","sha256":"b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2","sources":["winget"]},"status":"OK"}
+      string: '{"result":{"artifact_instance_id":"94148575775325033","created":"2026-06-29T18:31:04.436511+00:00","id":"94927448183592703","sha256":"b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2","sources":["commercial"]},"status":"OK"}
 
         '
     headers:
@@ -75,11 +75,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '236'
+      - '241'
       Content-Type:
       - application/json
       Date:
-      - Mon, 15 Jun 2026 19:14:34 GMT
+      - Mon, 29 Jun 2026 18:31:04 GMT
       Server:
       - gunicorn
       X-Billing-ID:

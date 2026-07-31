@@ -33,14 +33,14 @@ def _render(instance):
 class TestKnownGoodTextRendering:
     def test_known_good_instance_renders_feeds_and_status(self):
         feeds = [
-            {'tool': 'winget', 'tool_metadata': {}, 'created': '2026-06-11T00:00:00',
+            {'tool': 'commercial', 'tool_metadata': {}, 'created': '2026-06-11T00:00:00',
              'updated': '2026-06-11T00:00:00'},
             {'tool': 'nsrl', 'tool_metadata': {}, 'created': '2026-06-11T00:00:00',
              'updated': '2026-06-11T00:00:00'},
         ]
         text = _render(_instance(known_good=feeds))
         # Feeds are listed (sorted) and the status reflects known-good.
-        assert 'known-good binary (flagged by: nsrl, winget); it is not scanned.' in text
+        assert 'known-good binary (flagged by: commercial, nsrl); it is not scanned.' in text
         assert 'Status: Known good' in text
         # A known-good binary must NOT be told to rescan / that no engines responded.
         assert 'trigger a rescan' not in text
@@ -67,11 +67,11 @@ class TestKnownGoodStateRendering:
         assert 'No engines responded' not in text
 
     def test_state_known_good_with_feeds_lists_them(self):
-        feeds = [{'tool': 'winget', 'tool_metadata': {},
+        feeds = [{'tool': 'commercial', 'tool_metadata': {},
                   'created': '2026-06-11T00:00:00', 'updated': '2026-06-11T00:00:00'}]
         text = _render(_instance(state='KNOWN_GOOD', known_good=feeds))
         # When feeds are present the richer message still lists them.
-        assert 'known-good binary (flagged by: winget); it is not scanned.' in text
+        assert 'known-good binary (flagged by: commercial); it is not scanned.' in text
         assert 'Status: Known good' in text
 
     def test_non_known_good_state_unchanged(self):

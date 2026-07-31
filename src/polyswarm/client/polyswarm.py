@@ -44,14 +44,14 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 PROD_API_URI = 'https://api.polyswarm.network/v3'
 
 # Convenience environment shortcuts so callers can write `--stage` instead of
-# `--api-uri https://api.stage-v3.polyswarm.network/v3`. Keys are the click
+# `--api-uri https://api.stage-blue.polyswarm.network/v3`. Keys are the click
 # parameter names (click maps `--prod-eu` -> `prod_eu`).
 API_URI_SHORTCUTS = {
     'prod': PROD_API_URI,
-    'stage': 'https://api.stage-v3.polyswarm.network/v3',
+    'stage': 'https://api.stage-blue.polyswarm.network/v3',
     'local': 'http://localhost:9696/v3',
     'prod_eu': 'https://api.prod-eu-v3.polyswarm.network/v3',
-    'stage_eu': 'https://api.stage-eu-v3.polyswarm.network/v3',
+    'stage_eu': 'https://api.stage-eu-blue.polyswarm.network/v3',
 }
 
 _SHORTCUT_FLAGS = {
@@ -184,13 +184,13 @@ class ExceptionHandlingGroup(click.Group):
 @click.option('--prod', is_flag=True, default=False,
               help='Target the production API (https://api.polyswarm.network/v3) — same as the default.')
 @click.option('--stage', is_flag=True, default=False,
-              help='Target the US staging API (https://api.stage-v3.polyswarm.network/v3).')
+              help='Target the US staging API (https://api.stage-blue.polyswarm.network/v3).')
 @click.option('--local', is_flag=True, default=False,
               help='Target a local API (http://localhost:9696/v3).')
 @click.option('--prod-eu', 'prod_eu', is_flag=True, default=False,
               help='Target the EU production API (https://api.prod-eu-v3.polyswarm.network/v3).')
 @click.option('--stage-eu', 'stage_eu', is_flag=True, default=False,
-              help='Target the EU staging API (https://api.stage-eu-v3.polyswarm.network/v3).')
+              help='Target the EU staging API (https://api.stage-eu-blue.polyswarm.network/v3).')
 @click.option('-o', '--output-file', type=click.File('w', encoding='utf8'), help='Path to output file.')
 @click.option('--output-format', '--fmt', default='text', type=click.Choice(formatters.keys()),
               help='Output format. Human-readable text or JSON.')
