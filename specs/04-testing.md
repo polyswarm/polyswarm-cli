@@ -2,11 +2,11 @@
 
 ## Scope
 
-How the CLI is tested: the `CliRunner` harness, the two mocking styles (SDK-boundary mocks vs VCR cassettes), the cassette layout and record workflow, and how to run the suite. Files: `tests/`, `tests/vcr/`, `src/conftest.py`, `pyproject.toml` (`[project.optional-dependencies].tests`, `[tool.pytest.ini_options]`).
+How the CLI is tested: the `CliRunner` harness, the two mocking styles (SDK-boundary mocks vs VCR cassettes), the formatter-unit style for pure rendering, the cassette layout and record workflow, and how to run the suite. Files: `tests/`, `tests/vcr/`, `src/conftest.py`, `pyproject.toml` (`[project.optional-dependencies].tests`, `[tool.pytest.ini_options]`).
 
 ## Invariants
 
-- **Tests drive the CLI through `click.testing.CliRunner`** — they invoke the real command tree, not internal functions. No live PolySwarm stack is required.
+- **Anything that is command behaviour is driven through `click.testing.CliRunner`** — argument parsing, the SDK call, the wiring, the exit code: exercise the real command tree, never an internal function standing in for it. No live PolySwarm stack is required. The one sanctioned exception is pure rendering logic — see [Style 3](#style-3--formatter-unit-tests).
 - **Mock at the SDK boundary, or replay HTTP with VCR — never both for the same path.** A test either patches `polyswarm_api.api.PolyswarmAPI.<method>` (unit-style) or lets VCR replay recorded HTTP (end-to-end). The CLI's own code is exercised either way.
 - **VCR is an efficiency cache, not a load-bearing requirement.** The suite must pass against a live e2e stack with VCR off. Don't hardcode `record_mode='none'`; if a test only works against its recorded cassette, that's a bug in the test.
 - **Never `cp` a cassette from a sibling test, never hand-edit cassette bytes.** Re-record against a live stack.
@@ -45,6 +45,12 @@ pytest tests/cli_test.py::<Class>::<test>   # records against whatever stack you
 ```
 
 Point your environment at a live e2e stack, run the test, and commit the freshly recorded `.vcr` (+ updated `.click`). The deletion is what makes VCR record.
+
+## Style 3 — formatter unit tests
+
+For **rendering logic with no command-tree behaviour** — which labelled line a given field set produces — construct the formatter directly (`TextOutput(color=False)`) and call the resource method with an SDK resource built from a literal dict, asserting on the returned lines (`write=False`, no stream, no cassette). Example: `tests/known_good_field_test.py` renders `ArtifactInstance`s that differ only in `state` / `known_good` and asserts which Detections/Status line comes out. This is the right choice when the branch matrix is wide and every branch is a function of the resource's fields — a cassette per branch would mean recording a server state that only the formatter cares about.
+
+Use it **only** for that. Argument parsing, SDK calls, generator consumption, `ctx.obj` wiring and exit codes are command behaviour: a formatter unit test can't observe them, so those need Style 1 or Style 2. A command whose rendering is covered by Style 3 still needs at least one `CliRunner` test proving the command reaches the formatter at all.
 
 ## What to test for a new command
 

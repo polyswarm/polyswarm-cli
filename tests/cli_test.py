@@ -3,10 +3,13 @@ import os
 import json
 import yaml
 import traceback
-from unittest import TestCase
+from unittest import TestCase, mock
+
+from polyswarm_api import resources
 from pathlib import Path
 
 import vcr as vcr_
+import click
 from click.testing import CliRunner
 
 from polyswarm.client import polyswarm as client
@@ -53,9 +56,12 @@ class BaseTestCase(TestCase):
                 yaml.dump(data, f)
         return entry
 
-    def _run_cli(self, commands):
+    def _run_cli(self, commands, color=False):
         commands = ['-a', self.api_key, '-u', self.api_url, '-c', self.community] + commands
-        return self.cli.invoke(client.polyswarm_cli, commands, catch_exceptions=False)
+        # color=False is CliRunner's default and strips ANSI, which is what every cassette
+        # expectation was recorded against. Pass color=True only to assert the styling itself.
+        return self.cli.invoke(client.polyswarm_cli, commands, catch_exceptions=False,
+                               color=color)
 
     def _assert_text_result(self, result, expected_result, expected_return_code=0, replace=None):
         current_result = self._replace(replace, result.output)
@@ -318,6 +324,74 @@ class SearchTest(BaseTestCase):
         result = self._run_cli([
             '--output-format', 'text', 'search', 'hash', self.eicar_hash])
         self._assert_text_result(result, self.click_vcr(result))
+
+    @staticmethod
+    def _one_instance():
+        """A minimal parsed instance for the colour tests.
+
+        They mock at the **SDK boundary** — `polyswarm_api.api.PolyswarmAPI.search`, which is
+        what specs/04 Style 2 means — rather than replaying a cassette: the response content is
+        irrelevant to whether `--color` reaches the renderer, a cassette would have to be
+        recorded against a live stack for a test that never exercises the server, and borrowing
+        another test's cassette couples the two through the re-record path (unittest orders
+        methods alphabetically, so this one would end up authoring it).
+
+        Patching `Polyswarm.search_hashes` instead would be the wrong seam: that is CLI code,
+        so it would cut `utils.parallel_executor_iterable_results` out of the run.
+        """
+        return resources.ArtifactInstance({
+            'sha256': 'a' * 64, 'md5': 'c' * 32, 'sha1': 'b' * 40,
+            'mimetype': 'text/plain', 'size': 68, 'extended_type': '',
+            'first_seen': '2020-01-01T00:00:00', 'upload_url': '', 'metadata': [],
+            'id': '111', 'community': 'gamma', 'assertions': [], 'votes': [],
+            'failed': False, 'window_closed': True, 'polyscore': None,
+        })
+
+    def _run_color_pair(self, extra_args=()):
+        """The same command twice, differing only in the colour flag."""
+        outputs = []
+        for flag in ('--color', '--no-color'):
+            with mock.patch('polyswarm_api.api.PolyswarmAPI.search',
+                            return_value=iter([self._one_instance()])):
+                result = self._run_cli(
+                    [*extra_args, flag, '--output-format', 'text',
+                     'search', 'hash', 'a' * 64],
+                    color=True)
+            assert result.exit_code == 0, result.output
+            outputs.append(result)
+        return outputs
+
+    def test_color_flag_reaches_the_text_formatter(self):
+        # The bug was that `--color/--no-color` never reached the rendering: TextOutput
+        # assigned `self.color` and read it nowhere. A formatter unit test cannot see this —
+        # the flag travels through `formatters[output_format](color=color, …)` in the command
+        # group, and specs/04 says argument parsing and ctx.obj wiring need Style 1 or 2.
+        # CliRunner's color=True stops click stripping ANSI off the non-tty capture, so the
+        # two runs differ only in the flag.
+        colored, plain = self._run_color_pair()
+
+        assert '\x1b[' in colored.output
+        assert '\x1b[' not in plain.output
+        # Same content either way — the flag drops the wrapper, never the text.
+        assert click.unstyle(colored.output) == plain.output
+
+    def test_color_flag_reaches_the_log_prefix(self):
+        # The other half of the flag, and it needs -v: at the default verbosity the level is
+        # WARNING, so no record ever reaches NamedColorFormatter and the formatter-only test
+        # above cannot observe this branch. The prefix used to be styled unconditionally, so
+        # `--no-color -v` still emitted a green `info [polyswarm]: ` on a tty.
+        colored, plain = self._run_color_pair(extra_args=('-v',))
+
+        # The version line is logged at INFO by the group itself, so it is always present.
+        assert 'Running polyswarm-cli version' in click.unstyle(colored.output)
+        assert 'Running polyswarm-cli version' in plain.output
+        # The prefix names the emitting logger, e.g. `info [polyswarm.client.polyswarm]: `.
+        assert 'info [polyswarm' in click.unstyle(colored.output)
+        assert 'info [polyswarm' in plain.output
+        # Styled only under --color: the prefix is what carries the ANSI here, and the
+        # formatter output alongside it is white-styled the same way.
+        assert '\x1b[32minfo [polyswarm' in colored.output
+        assert '\x1b[' not in plain.output
 
     @vcr.use_cassette()
     def test_search_hash_with_no_results(self):

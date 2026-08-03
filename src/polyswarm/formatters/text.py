@@ -32,7 +32,6 @@ class TextOutput(base.BaseOutput):
         super().__init__(output)
         self.color = color
         self._depth = 0
-        self.color = color
 
     def _get_score_format(self, score):
         if score < 0.3:
@@ -79,21 +78,47 @@ class TextOutput(base.BaseOutput):
 
         # Defensive getattr: these attributes ship in the paired SDK release, but a
         # CLI running against an older installed SDK won't have them (no AttributeError).
-        known_good_sources = getattr(instance, 'known_good_sources', None) or []
-        # A known-good binary is signalled by the bounty state (KNOWN_GOOD) — reliable
-        # even for a scan-bypassed instance with no feed metadata. known_good_sources
-        # (the flagging feeds) is the richer signal when present, and also covers an
-        # older SDK that lacks .state but still carries the feed list.
-        is_known_good = getattr(instance, 'state', None) == 'KNOWN_GOOD' or bool(known_good_sources)
+        # The bounty state (KNOWN_GOOD) is the only reliable signal that this artifact is
+        # a known-good binary whose bytes are withheld — it alone decides. known_good_sources
+        # (the flagging feeds) is emitted for any instance whose sha256 matches a known-good
+        # record, including a fully scanned one carrying real detections, so it only shapes
+        # the message; reading it as the signal would render a scanned artifact "not scanned".
+        is_known_good = getattr(instance, 'state', None) == 'KNOWN_GOOD'
+        known_good_sources = (getattr(instance, 'known_good_sources', None) or []) if is_known_good else []
 
         if is_known_good and not instance.failed:
-            if known_good_sources:
-                feeds = ', '.join(known_good_sources)
-                output.append(self._green(
-                    f'Detections: This artifact is a known-good binary (flagged by: {feeds}); it is not scanned.'))
+            # A known-good binary can still carry results: an instance scanned before the
+            # artifact was catalogued is reconciled to KNOWN_GOOD with its assertions,
+            # detections and PolyScore preserved. Report those instead of the "not scanned"
+            # clause, which would contradict the per-engine verdicts printed just below.
+            attribution = f' (flagged by: {", ".join(known_good_sources)})' if known_good_sources else ''
+            # The clause and its colour are decided in the SAME branch, deliberately. They
+            # were two differently-shaped conditions that had to agree — the text keyed on
+            # `valid_assertions and window_closed`, the colour on `malicious_assertions and
+            # window_closed` — and only the SDK's guarantee that malicious_assertions is a
+            # subset of valid_assertions (both filter on `mask`, one additionally on `verdict`)
+            # kept them in step. That is a fact about another repo holding this rendering
+            # together; deciding both at once removes the dependency.
+            if len(instance.valid_assertions) > 0 and instance.window_closed:
+                detections = f'{len(instance.malicious_assertions)}/{len(instance.valid_assertions)} engines reported malicious'
+                # ANY malicious verdict outranks the withheld-bytes signal, which is the same
+                # threshold the ordinary branch applies to this same count: green on "40/50
+                # engines reported malicious" is a weaker warning than the instance gave before
+                # it was reconciled. Red only here, because this is the only branch that renders
+                # a final count.
+                paint = self._red if instance.malicious_assertions else self._green
+            elif len(instance.valid_assertions) > 0:
+                # Every other branch guards its counts on window_closed, because an open
+                # window's numbers are not final. Not reachable through reconciliation today
+                # (a STORED row carries no assertions and a SETTLED one has a closed window),
+                # stated rather than left implied.
+                detections = 'its scan has not finished running yet'
+                paint = self._green
             else:
-                output.append(self._green(
-                    'Detections: This artifact is a known-good binary; it is not scanned.'))
+                detections = 'it is not scanned'
+                paint = self._green
+            output.append(paint(
+                f'Detections: This artifact is a known-good binary{attribution}; {detections}.'))
         elif instance.community == 'stream':
             output.append(self._white('Detections: This artifact has not been scanned. You can trigger a scan now.'))
         elif len(instance.valid_assertions) == 0 and instance.window_closed and not instance.failed:
@@ -887,25 +912,37 @@ class TextOutput(base.BaseOutput):
 
         return self._output(output, write)
 
+    def _paint(self, text, fg):
+        """Apply a colour, or don't — the one place `self.color` is honoured.
+
+        It used to be assigned and never read, so every one of these helpers styled
+        unconditionally and `--no-color` was a no-op for text output — invisible in practice
+        because click strips ANSI when stdout is not a tty. (`PrettyJSONOutput` did honour it,
+        which is why the flag looked wired up; plain `JSONOutput` emits unstyled JSON and has
+        nothing to honour.) Not decorated with `is_grouped`: the callers already are, and the
+        indent must be applied exactly once.
+        """
+        return click.style(text, fg=fg) if self.color else text
+
     @is_grouped
     def _white(self, text):
-        return click.style(text, fg='white')
+        return self._paint(text, 'white')
 
     @is_grouped
     def _yellow(self, text):
-        return click.style(text, fg='yellow')
+        return self._paint(text, 'yellow')
 
     @is_grouped
     def _red(self, text):
-        return click.style(text, fg='red')
+        return self._paint(text, 'red')
 
     @is_grouped
     def _blue(self, text):
-        return click.style(text, fg='blue')
+        return self._paint(text, 'blue')
 
     @is_grouped
     def _green(self, text):
-        return click.style(text, fg='green')
+        return self._paint(text, 'green')
 
     def _open_group(self):
         self._depth += 1
