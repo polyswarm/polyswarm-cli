@@ -69,6 +69,19 @@ When a CLI feature needs an SDK surface that doesn't exist yet:
 - The pin lives in `pyproject.toml` `dependencies` (`polyswarm_api>=…`). Floor it at the lowest SDK version exposing everything the CLI uses; cap it below the next known-incompatible major when one is anticipated.
 - The CLI is **sync-only** — it imports `polyswarm_api.api.PolyswarmAPI`, never `polyswarm_api.aio`. Don't add the `polyswarm_api[async]` extra.
 - Bumping the pin is a normal code change; bumping the CLI's *own* version is a release step (`AGENTS.md` §Gitflow). They're unrelated.
+- There is **no lock file / compiled requirements** to keep in step: `pyproject.toml` is the only place the SDK version is expressed, and CI installs the SDK straight from the SDK repo's branch archive (see §Coordinated changes). A pin change is a one-file change *in this repo*, but it is not free of interactions — see below.
+- **The floor must be satisfied by the SDK archive CI installs, and by PyPI.** CI installs the archive build and *then* runs `pip install .[tests]`; if the archive's declared version is below the floor, that second install silently pulls a newer SDK from PyPI **over** the archive build, and CI stops testing the SDK branch at all — the mechanism §Coordinated changes rests on, defeated with no error. Symmetrically, a floor above the newest **published** version breaks `pip install polyswarm-cli` for every consumer the moment it reaches `master`. So a floor bump has two preconditions: the version is on PyPI, and the SDK's `develop` declares at least that version.
+
+  **Read the declared version off the archive's own tree, and mind pre-release suffixes.** PEP 440 orders `4.2.0.dev1 < 4.2.0`, so a `develop` head carrying a dev suffix (the SDK's `pyproject.toml` has a `[tool.bumpversion.parts.dev]`) would *not* satisfy a `>=4.2.0` floor even though it looks like 4.2.0 — and the archive build would be silently replaced from PyPI. Check the version string in the SDK branch's `pyproject.toml` / `__init__.py`, not the last release tag. For the current floor both were read from `origin/develop`: `version = "4.2.0"` and `__version__ = '4.2.0'`, no suffix.
+
+### Current floor — `polyswarm_api>=4.2.0`
+
+Two behaviours the CLI relies on only exist from **4.2.0**; on 4.1.0 both fail *silently*, which is why the floor is a hard requirement rather than a preference:
+
+1. **`llm_report_create` sends the client's community.** 4.2.0 passes `community=self.community` when it builds the report resource; 4.1.0 omits it. `report llm-create` (`client/report.py`) supplies no community of its own — it relies entirely on the client's — so on 4.1.0 a report requested for a sample in a private community is created without one. No error, wrong resource.
+2. **A streaming download answered `204 No Content` raises `NoResultsException`.** The streaming path bypasses `parse_response`, so the 204 has to be raised by the session itself; 4.2.0 does that, 4.1.0 has no such raise anywhere in its session. The CLI's `download` commands depend on it for the no-results **exit code `1`** (§No-results signalling); against 4.1.0 an empty response reads as a successful download and exits `0`.
+
+The known-good rendering attributes (`ArtifactInstance.state`, `.known_good`/`.known_good_sources`, read by `formatters/text.py` — see [`03-formatters.md`](./03-formatters.md) §Known-good artifact instances) ship in **4.1.0**, so they are *not* what sets the floor; they are simply covered by it.
 
 ## Worked example — the httpx SDK migration
 
