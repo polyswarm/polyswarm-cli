@@ -29,11 +29,16 @@ def delete(ctx, rule_id):
 
 
 @rules.command('list', short_help='List all rulesets.')
+@click.option('--include-counts', is_flag=True,
+              help='Attach each live-hunting ruleset\'s new-results count for the '
+                   'last 24 hours.')
 @click.pass_context
-def list_rules(ctx):
+def list_rules(ctx, include_counts):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    for ruleset in api.ruleset_list():
+    # Omit the param entirely unless asked — the flag maps to the server's
+    # include_counts and only rulesets with a running live hunt carry a count.
+    for ruleset in api.ruleset_list(include_counts=include_counts or None):
         output.ruleset(ruleset)
 
 
