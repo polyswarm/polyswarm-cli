@@ -146,3 +146,41 @@ here with no substitute. Both attributes ship in SDK **4.1.0**, but the dependen
 fail silently on 4.1.0 (see [`05-sdk-contract.md`](./05-sdk-contract.md) §Version pin) — so
 every supported install has them. `JSONOutput` needs no change — it dumps the resource's
 `.json`, which already carries the raw `state` and `known_good` keys.
+
+## Matched strings on hunt results
+
+`TextOutput.historical_result` / `TextOutput.live_result` render `result.matched_strings`
+— the yara strings behind a hit — between `Tags:` and `Download Url:`, via the shared
+`TextOutput._matched_strings` helper.
+
+The attribute is **three-state** (the SDK's `05-downstream-contract.md` is authoritative)
+and each state gets its own line. Rendering `None` as *silence* is the one thing this
+section exists to forbid: the feature exists to answer "why did this rule hit", and an
+absent line is indistinguishable from a rule that matched with nothing to show.
+
+| `matched_strings` | Rendered |
+|---|---|
+| `None` | `Matched Strings: unavailable — match data was not recorded for this result, or it was omitted from a list view` |
+| `[]` | `Matched Strings: none — the rule matched without byte evidence (a structural or negative match, or private strings)` |
+| `[…]` | `Matched Strings:` followed by one indented `  $ident @ 0xOFFSET (N bytes[, truncated]): DATA` line per entry |
+
+Two constraints on the `None` line:
+
+- **It names causes, not a command.** `try \`polyswarm live result <id>\`` is tempting,
+  because the dominant `None` case is the list route omitting the evidence rather than
+  fetching a blob per row. But `live feed` loops over this *same* method, and nothing on
+  the resource tells the two apart — `live_feed` and `live_result` both yield a
+  `LiveHuntResult`. So on a detail fetch the hint would tell you to re-run the command you
+  just ran, and fixing that means threading a route flag from the command layer into a new
+  parameter on **every** `BaseOutput` implementation (`text`, `json`, all three `hashes`
+  subclasses). Naming the causes is true on both routes at no such cost.
+- **`truncated` is not a byte count.** The stored length is capped server-side, so the
+  marker means "there was more than this" and over-reports at exactly the cap. Never
+  render it as an exact size.
+
+`JSONOutput` needs no change — it dumps the resource's `.json`, which already carries the
+raw `matched_strings` key.
+
+Coverage is `tests/hunt_matched_strings_test.py` (Style 3 — the formatter driven directly
+with constructed SDK resources). The `cli_test.py` cassettes predate the field, so they
+exercise only the `None` line; they are not a substitute for those unit tests.
