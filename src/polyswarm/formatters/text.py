@@ -41,6 +41,40 @@ class TextOutput(base.BaseOutput):
         else:
             return self._red
 
+    # `matched_strings` is three-state -- see the SDK's specs/05-downstream-contract.md.
+    # None is deliberately NOT rendered as silence. The whole point of the feature is
+    # answering "why did this rule hit", and an absent line answers nothing: the user
+    # cannot tell it apart from a rule that matched on structure alone. Each state gets
+    # a line that says which it is.
+    #
+    # The None line names its CAUSES rather than the command that would carry the
+    # evidence. Tempting as `try \`polyswarm live result <id>\`` is -- the dominant None
+    # case is the list route, which omits the strings rather than fetch a blob per row --
+    # this method renders both routes (`live feed` loops over it), and nothing on the
+    # resource distinguishes them: `live_feed` and `live_result` both yield a
+    # LiveHuntResult. Without that distinction the hint is wrong on the detail route --
+    # it would tell you to re-run the command you just ran -- and getting it right means
+    # threading a flag down from the command layer into a new parameter on every
+    # BaseOutput implementation (text, json, and all three hashes subclasses). Naming the
+    # causes is true on both routes and costs none of that.
+    def _matched_strings(self, strings):
+        if strings is None:
+            return [self._white('Matched Strings: unavailable — match data was not recorded '
+                                'for this result, or it was omitted from a list view')]
+        if not strings:
+            return [self._white('Matched Strings: none — the rule matched without byte '
+                                'evidence (a structural or negative match, or private strings)')]
+        lines = [self._white('Matched Strings:')]
+        for string in strings:
+            size = f'{string["length"]} bytes'
+            if string.get('truncated'):
+                # The stored length is capped, so this is "there was more than this" --
+                # never report it as an exact byte count.
+                size += ', truncated'
+            lines.append(self._white(
+                f'  {string["identifier"]} @ 0x{string["offset"]:x} ({size}): {string["data"]}'))
+        return lines
+
     def _output(self, output, write):
         if write:
             click.echo('\n'.join(output) + '\n', file=self.out)
@@ -239,6 +273,7 @@ class TextOutput(base.BaseOutput):
                     output.append(self._white(malicious))
         if result.tags:
             output.append(self._white(f'Tags: {result.tags}'))
+        output.extend(self._matched_strings(result.matched_strings))
         if result.download_url:
             output.append(self._white(f'Download Url: {result.download_url}'))
         return self._output(output, write)
@@ -270,6 +305,7 @@ class TextOutput(base.BaseOutput):
                     output.append(self._white(malicious))
         if result.tags:
             output.append(self._white(f'Tags: {result.tags}'))
+        output.extend(self._matched_strings(result.matched_strings))
         if result.download_url:
             output.append(self._white(f'Download Url: {result.download_url}'))
         return self._output(output, write)
