@@ -201,6 +201,17 @@ class TextOutput(base.BaseOutput):
             self._close_group()
         if result.ruleset_name is not None:
             output.append(self._white(f'Ruleset Name: {result.ruleset_name}'))
+        # Source-rule provenance — getattr-guarded so the formatter also
+        # renders results parsed by an SDK release that predates the fields.
+        if getattr(result, 'rule_id', None) is not None:
+            output.append(self._white(f'Source Ruleset Id: {result.rule_id}'))
+        if getattr(result, 'rule_modified', None) is not None:
+            output.append(self._white(f'Source ruleset last modified at freeze: {result.rule_modified}'))
+        if getattr(result, 'source_rule_changed', None) is not None:
+            # Tri-state upstream: None (unknown) prints nothing; the label
+            # names the reference point so it can't read as "edited recently".
+            changed = 'yes' if result.source_rule_changed else 'no'
+            output.append(self._white(f'Source ruleset changed since this hunt froze it: {changed}'))
         if result.yara:
             output.append(self._white(f'Ruleset Contents:\n{result.yara}'))
         return self._output(output, write)
@@ -284,6 +295,18 @@ class TextOutput(base.BaseOutput):
         output.append(self._white(f'Description: {result.description}'))
         output.append(self._white(f'Created at: {result.created}'))
         output.append(self._white(f'Modified at: {result.modified}'))
+        # Tracking fields are guarded with getattr so this formatter also
+        # renders results parsed by an SDK release that predates them.
+        if getattr(result, 'favorite', None) is not None and result.favorite:
+            output.append(self._yellow('Favorite: yes'))
+            if getattr(result, 'favorited_at', None) is not None:
+                output.append(self._white(f'Favorited at: {result.favorited_at}'))
+        if getattr(result, 'rule_count', None) is not None:
+            output.append(self._white(f'Rules in ruleset: {result.rule_count}'))
+        if getattr(result, 'historical_hunt_count', None) is not None:
+            output.append(self._white(f'Historical hunts triggered: {result.historical_hunt_count}'))
+        if getattr(result, 'new_results_count', None) is not None:
+            output.append(self._white(f'New live results in window: {result.new_results_count}'))
         if contents:
             output.append(self._white(f'Ruleset Contents:\n{result.yara}'))
         return self._output(output, write)
