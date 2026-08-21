@@ -1,36 +1,62 @@
-"""The hunt-page tracking legs of the text formatter.
+"""The hunt-page tracking legs of the text formatter, and the flag that
+reaches them.
 
-Pins two contracts:
+Pins three contracts:
 
-* the getattr guards — the formatter renders results parsed by an SDK release
-  that predates the fields (attributes absent entirely) without raising, and
-  simply omits the new lines; and
-* the None/False/0 semantics — ``rule_count=0`` and ``historical_hunt_count=0``
-  render as real zeros (distinct from an omitted None), ``favorite=False``
-  prints nothing (truthy-only leg), and ``source_rule_changed``'s label names
-  its reference point ("since this hunt froze it") so it can't read as
-  "edited recently".
+* the rendering legs against REAL SDK resources built from literal dicts (not
+  hand-built namespaces): the getattr guards convert an attribute-name
+  mismatch into silent omission, so only real resources couple these tests to
+  the SDK's actual attribute names — and they additionally pin that
+  ``favorited_at`` / ``rule_modified`` arrive as parsed datetimes;
+* the old-SDK degradation path — a result object without the attributes at
+  all (SimpleNamespace on purpose: an installed SDK predating the fields has
+  no such attributes to build from) renders without raising and simply omits
+  the new lines; and
+* the ``--include-counts`` wire plumbing: the kwarg is passed ONLY when
+  flagged (an SDK at the pin's floor has a zero-argument ``ruleset_list``, so
+  the unflagged path must not send it), asserted through an autospec'd mock so
+  the call is signature-checked against the installed SDK.
 """
 import io
 import types
-from unittest import TestCase
+from unittest import TestCase, mock
 
+from click.testing import CliRunner
+
+from polyswarm.client import polyswarm as client
 from polyswarm.formatters import text
+from polyswarm_api import resources
 
 
 def _ruleset(**overrides):
-    base = dict(id='5', livescan_id=None, livescan_created=None, name='n',
-                description='d', created='c', modified='m', yara=None)
-    base.update(overrides)
-    return types.SimpleNamespace(**base)
+    content = dict(id='5', livescan_id=None, livescan_created=None, name='n',
+                   description='d', created='2026-08-20T00:00:00+00:00',
+                   modified='2026-08-20T00:00:00+00:00', deleted=False, yara=None)
+    content.update(overrides)
+    return resources.YaraRuleset(content, api=None)
 
 
 def _hunt(**overrides):
-    base = dict(id='9', status='PENDING', progress=None, active=None,
-                created='c', summary=None, results_csv_uri=None,
-                ruleset_name='n', yara=None)
-    base.update(overrides)
-    return types.SimpleNamespace(**base)
+    content = dict(id='9', status='PENDING', progress=0.0, active=None,
+                   created='2026-08-20T00:00:00+00:00', summary=None,
+                   results_csv_uri=None, ruleset_name='n', yara=None)
+    content.update(overrides)
+    return resources.HistoricalHunt(content, api=None)
+
+
+def _old_sdk_ruleset():
+    """A result parsed by an SDK release that predates the tracking fields:
+    the attributes are ABSENT, not None — SimpleNamespace is deliberate, since
+    the installed (new) SDK cannot build such an object."""
+    return types.SimpleNamespace(
+        id='5', livescan_id=None, livescan_created=None, name='n',
+        description='d', created='c', modified='m', yara=None)
+
+
+def _old_sdk_hunt():
+    return types.SimpleNamespace(
+        id='9', status='PENDING', progress=None, active=None, created='c',
+        summary=None, results_csv_uri=None, ruleset_name='n', yara=None)
 
 
 class FormatterHuntFieldsTest(TestCase):
@@ -41,10 +67,11 @@ class FormatterHuntFieldsTest(TestCase):
 
     def test_ruleset_tracking_fields_render_with_zero_distinct_from_absent(self):
         rendered = self._render('ruleset', _ruleset(
-            favorite=True, favorited_at='2026-08-20', rule_count=0,
+            favorite=True, favorited_at='2026-08-20T12:00:00+00:00', rule_count=0,
             historical_hunt_count=0, new_results_count=3))
         assert 'Favorite: yes' in rendered
-        assert 'Favorited at: 2026-08-20' in rendered
+        # parse_isoformat: the SDK hands the formatter a datetime, not the wire string
+        assert 'Favorited at: 2026-08-20 12:00:00+00:00' in rendered
         assert 'Rules in ruleset: 0' in rendered
         assert 'Historical hunts triggered: 0' in rendered
         assert 'New live results in window: 3' in rendered
@@ -59,15 +86,16 @@ class FormatterHuntFieldsTest(TestCase):
         assert 'New live results' not in rendered
 
     def test_old_sdk_ruleset_without_the_attributes_renders(self):
-        rendered = self._render('ruleset', _ruleset())
+        rendered = self._render('ruleset', _old_sdk_ruleset())
         assert 'Ruleset Id: 5' in rendered
         assert 'Favorite' not in rendered
 
     def test_hunt_provenance_fields_render_with_the_reference_point(self):
         rendered = self._render('hunt', _hunt(
-            rule_id='5', rule_modified='2026-08-20', source_rule_changed=False))
+            rule_id='5', rule_modified='2026-08-20T12:00:00+00:00',
+            source_rule_changed=False))
         assert 'Source Ruleset Id: 5' in rendered
-        assert 'Source ruleset last modified at freeze: 2026-08-20' in rendered
+        assert 'Source ruleset last modified at freeze: 2026-08-20 12:00:00+00:00' in rendered
         assert 'Source ruleset changed since this hunt froze it: no' in rendered
 
     def test_hunt_unknown_tri_state_prints_nothing(self):
@@ -76,23 +104,21 @@ class FormatterHuntFieldsTest(TestCase):
         assert 'Source' not in rendered
 
     def test_old_sdk_hunt_without_the_attributes_renders(self):
-        rendered = self._render('hunt', _hunt())
+        rendered = self._render('hunt', _old_sdk_hunt())
         assert 'Hunt Id: 9' in rendered
         assert 'Source' not in rendered
 
 
 class RulesListIncludeCountsFlagTest(TestCase):
-    """`rules list --include-counts` plumbs to ``ruleset_list(include_counts=True)``
-    and the unflagged run omits the param entirely (``None`` is dropped by the
-    SDK's request builder — the server only accepts '0'/'1'/'false'/'true', so
-    the exact wire value is load-bearing)."""
+    """`rules list --include-counts` passes ``include_counts=True``; the
+    UNFLAGGED run passes nothing at all — an installed SDK at the pin's floor
+    (4.3.0) has a zero-argument ``ruleset_list``, so plain `rules list` must
+    keep working there and only the flag may require the new SDK. autospec
+    makes both assertions signature checks against the installed SDK."""
 
     def _run(self, args):
-        from unittest import mock
-        from click.testing import CliRunner
-        from polyswarm.client import polyswarm as client
         with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
-                        return_value=iter(())) as ruleset_list:
+                        autospec=True, return_value=iter(())) as ruleset_list:
             result = CliRunner().invoke(
                 client.polyswarm_cli,
                 ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
@@ -103,8 +129,8 @@ class RulesListIncludeCountsFlagTest(TestCase):
 
     def test_flag_sends_include_counts_true(self):
         ruleset_list = self._run(['--include-counts'])
-        ruleset_list.assert_called_once_with(include_counts=True)
+        ruleset_list.assert_called_once_with(mock.ANY, include_counts=True)
 
-    def test_no_flag_omits_the_param(self):
+    def test_no_flag_passes_no_kwargs_at_all(self):
         ruleset_list = self._run([])
-        ruleset_list.assert_called_once_with(include_counts=None)
+        ruleset_list.assert_called_once_with(mock.ANY)

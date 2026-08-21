@@ -297,7 +297,7 @@ class TextOutput(base.BaseOutput):
         output.append(self._white(f'Modified at: {result.modified}'))
         # Tracking fields are guarded with getattr so this formatter also
         # renders results parsed by an SDK release that predates them.
-        if getattr(result, 'favorite', None) is not None and result.favorite:
+        if getattr(result, 'favorite', None):
             output.append(self._yellow('Favorite: yes'))
             if getattr(result, 'favorited_at', None) is not None:
                 output.append(self._white(f'Favorited at: {result.favorited_at}'))

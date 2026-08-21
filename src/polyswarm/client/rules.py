@@ -36,9 +36,13 @@ def delete(ctx, rule_id):
 def list_rules(ctx, include_counts):
     api = ctx.obj['api']
     output = ctx.obj['output']
-    # Omit the param entirely unless asked — the flag maps to the server's
-    # include_counts and only rulesets with a running live hunt carry a count.
-    for ruleset in api.ruleset_list(include_counts=include_counts or None):
+    # The kwarg is only passed when the flag is given: an installed SDK at the
+    # pin's floor (4.3.0) has a zero-argument ruleset_list, so an unconditional
+    # include_counts= would break plain `rules list` for everyone — only the
+    # new flag may require the new SDK. Only rulesets with a running live hunt
+    # carry a count.
+    kwargs = {'include_counts': True} if include_counts else {}
+    for ruleset in api.ruleset_list(**kwargs):
         output.ruleset(ruleset)
 
 

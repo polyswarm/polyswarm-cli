@@ -146,3 +146,19 @@ here with no substitute. Both attributes ship in SDK **4.1.0**, but the dependen
 fail silently on 4.1.0 (see [`05-sdk-contract.md`](./05-sdk-contract.md) §Version pin) — so
 every supported install has them. `JSONOutput` needs no change — it dumps the resource's
 `.json`, which already carries the raw `state` and `known_good` keys.
+
+## Hunt-page tracking fields (rulesets + historical hunts)
+
+Rendering rules that are deliberate, not incidental — all getattr-guarded so
+an SDK release predating the fields renders without the lines:
+
+- `rule_count` / `historical_hunt_count`: `0` renders as a real zero;
+  `None` (the server had no answer) omits the line — never shown as 0.
+- `favorite` is truthy-only ("Favorite: yes"): False and old-SDK-absent both
+  print nothing, deliberately indistinguishable.
+- `new_results_count` renders only when the caller asked the list to include
+  counts (the server sends `None` otherwise, and only live-hunting rulesets
+  carry a number).
+- `source_rule_changed` is tri-state: `None` means UNKNOWN, not "unchanged",
+  and prints nothing; the label names its reference point — "changed since
+  this hunt froze it" — so it cannot read as "edited recently".

@@ -30,7 +30,7 @@ The top-level command groups, what each is for, and the primary `polyswarm-api` 
 | `tag` (`tags.py`) | Tag CRUD | `tag_{create,delete,get,list}` |
 | `link` (`links.py`) | Tag/family links on artifacts | `tag_link_multiple`, `tag_link_get`, `tag_link_list` |
 | `family` (`families.py`) | Malware-family CRUD | `family_{create,update,delete,get,list}` |
-| `rules` (`rules.py`) | YARA ruleset CRUD | `ruleset_{create,delete,update,get,list}` |
+| `rules` (`rules.py`) | YARA ruleset CRUD; `list --include-counts` attaches each live-hunting ruleset's 24h new-results count (the flag is the ONLY path that passes `include_counts=` — plain `rules list` sends no kwargs so it keeps working on the pin's floor SDK) | `ruleset_{create,delete,update,get,list}` |
 | `metadata` (`metadata.py`) | Rerun metadata; scan lookup; IP/URL analysis | `rerun_metadata`, `scan_lookup`, `submit_url` |
 | `activity` (`event.py`) | List account activity/events | `event_list` |
 | `account` (`account.py`) | Account whois / features | `account_whois`, `account_features` |
