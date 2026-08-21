@@ -79,3 +79,32 @@ class FormatterHuntFieldsTest(TestCase):
         rendered = self._render('hunt', _hunt())
         assert 'Hunt Id: 9' in rendered
         assert 'Source' not in rendered
+
+
+class RulesListIncludeCountsFlagTest(TestCase):
+    """`rules list --include-counts` plumbs to ``ruleset_list(include_counts=True)``
+    and the unflagged run omits the param entirely (``None`` is dropped by the
+    SDK's request builder — the server only accepts '0'/'1'/'false'/'true', so
+    the exact wire value is load-bearing)."""
+
+    def _run(self, args):
+        from unittest import mock
+        from click.testing import CliRunner
+        from polyswarm.client import polyswarm as client
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        return_value=iter(())) as ruleset_list:
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list'] + args,
+                catch_exceptions=False)
+        assert result.exit_code == 0, result.output
+        return ruleset_list
+
+    def test_flag_sends_include_counts_true(self):
+        ruleset_list = self._run(['--include-counts'])
+        ruleset_list.assert_called_once_with(include_counts=True)
+
+    def test_no_flag_omits_the_param(self):
+        ruleset_list = self._run([])
+        ruleset_list.assert_called_once_with(include_counts=None)
