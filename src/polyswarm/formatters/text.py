@@ -41,24 +41,13 @@ class TextOutput(base.BaseOutput):
         else:
             return self._red
 
-    # `matched_strings` is three-state -- see the SDK's specs/05-downstream-contract.md.
+    # Three-state -- see the SDK's specs/05-downstream-contract.md.
     #
-    # None renders NOTHING, and that is a deliberate reversal of the obvious instinct
-    # ("say why the evidence is missing"). None overwhelmingly means "you are looking at
-    # a list route", which omits the strings rather than fetch a blob per row -- and a
-    # list route can NEVER carry them, so an explanation there is a permanent false alarm
-    # on every row rather than information. This method renders both routes (`live feed`
-    # loops over it) and nothing on the resource tells them apart: `live_feed` and
-    # `live_result` both yield a LiveHuntResult. Silence is the honest default.
-    #
-    # The case worth explaining survives: [] means the analyzer looked and the rule
-    # matched with no byte evidence -- a structural or negative match, or private strings.
-    # That only ever reaches a detail route, so its line is never noise, and collapsing it
-    # into the silent branch would throw away the distinction the server keeps.
-    #
-    # After this feature shipped the analyzer always sends `strings`, so None on a DETAIL
-    # route means a result predating it (or, eventually, removed evidence) -- genuinely
-    # nothing to say.
+    # None renders NOTHING, reversing the instinct to explain the absence: None almost
+    # always means "list route", which can never carry strings, so a line there is a false
+    # alarm on every row. `live feed` loops over this same method and nothing on the
+    # resource tells the routes apart. [] keeps its line -- it only reaches a detail route,
+    # where "matched, no byte evidence" is a real answer.
     def _matched_strings(self, strings):
         if strings is None:
             return []
