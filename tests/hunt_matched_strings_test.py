@@ -6,9 +6,12 @@ field value produces, not command-tree behaviour.
 
 The contract under test is three-state (specs/05-downstream-contract.md in the SDK):
 `None` is "not reported", `[]` is "matched with no byte evidence", `[...]` is the
-evidence. All three must produce a DIFFERENT, self-explaining line — the feature
-exists to answer "why did this rule hit", and rendering `None` as silence answers
-nothing while looking identical to a rule that had nothing to show.
+evidence, and the three must stay distinguishable in the output.
+
+`None` renders as silence on purpose: it is dominated by the list route, which can
+never carry strings, so a per-row explanation there is a false alarm rather than
+information. `[]` keeps its line — that one only ever reaches a detail route, where
+"the rule matched with nothing to show" is a real answer to "why did this hit".
 """
 import click
 import pytest
@@ -51,9 +54,11 @@ def _render(cls, method, **extra):
 
 
 def _matched_lines(text):
-    """Just the matched-strings block: its header line plus the indented entries."""
+    """The matched-strings block -- header plus indented entries -- or [] if absent."""
     lines = text.splitlines()
-    start = next(i for i, line in enumerate(lines) if line.startswith('Matched Strings:'))
+    start = next((i for i, line in enumerate(lines) if line.startswith('Matched Strings:')), None)
+    if start is None:
+        return []
     end = start + 1
     while end < len(lines) and lines[end].startswith('  '):
         end += 1
@@ -61,17 +66,12 @@ def _matched_lines(text):
 
 
 @pytest.mark.parametrize('cls,method', PATHS)
-def test_absent_names_its_causes(cls, method):
-    """A silent omission is indistinguishable from a rule that had nothing to show, so
-    the line must appear and must say WHY. It names causes rather than a command to run:
-    this same method renders `live feed` rows and single-result fetches alike."""
-    line, = _matched_lines(_render(cls, method))
-    # Substrings, not the whole sentence: the line must keep saying "unavailable" and
-    # must keep naming BOTH causes, but the prose around them is free to be reworded
-    # without this test turning into a spelling check.
-    assert 'unavailable' in line
-    assert 'not recorded' in line   # the legacy-result / removed-data cause
-    assert 'list view' in line      # the list-route cause
+def test_absent_renders_nothing(cls, method):
+    """None is dominated by the list route, which can never carry strings -- `live feed`
+    loops over this same method -- so an explanation there would be a permanent false
+    alarm on every row. Silence, not a message."""
+    assert _matched_lines(_render(cls, method)) == []
+    assert 'Matched Strings' not in _render(cls, method)
 
 
 @pytest.mark.parametrize('cls,method', PATHS)
@@ -86,14 +86,15 @@ def test_empty_says_the_rule_matched_without_evidence(cls, method):
     line, = _matched_lines(_render(cls, method, matched_strings=[]))
     assert 'none' in line
     assert 'without byte evidence' in line
-    assert 'unavailable' not in line
 
 
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_empty_and_absent_are_distinguishable(cls, method):
-    """The whole reason the server keeps them apart; collapsing them here wastes that."""
-    assert _matched_lines(_render(cls, method)) != \
-        _matched_lines(_render(cls, method, matched_strings=[])) 
+    """The whole reason the server keeps them apart; collapsing them here wastes that.
+    Absent is silent, empty says the rule matched with nothing to show -- and it is the
+    EMPTY side that must never go silent, since it only ever reaches a detail route."""
+    assert _matched_lines(_render(cls, method)) == []
+    assert len(_matched_lines(_render(cls, method, matched_strings=[]))) == 1
 
 
 @pytest.mark.parametrize('cls,method', PATHS)

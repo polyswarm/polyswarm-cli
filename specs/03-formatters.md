@@ -154,26 +154,29 @@ every supported install has them. `JSONOutput` needs no change — it dumps the 
 `TextOutput._matched_strings` helper.
 
 The attribute is **three-state** (the SDK's `05-downstream-contract.md` is authoritative)
-and each state gets its own line. Rendering `None` as *silence* is the one thing this
-section exists to forbid: the feature exists to answer "why did this rule hit", and an
-absent line is indistinguishable from a rule that matched with nothing to show.
+and the three must stay distinguishable in the output — but they do **not** each get a
+line.
 
 | `matched_strings` | Rendered |
 |---|---|
-| `None` | `Matched Strings: unavailable — match data was not recorded for this result, or it was omitted from a list view` |
+| `None` | *nothing* — no line is emitted |
 | `[]` | `Matched Strings: none — the rule matched without byte evidence (a structural or negative match, or private strings)` |
 | `[…]` | `Matched Strings:` followed by one indented `  $ident @ 0xOFFSET (N bytes[, truncated]): DATA` line per entry |
 
-Two constraints on the `None` line:
+Two constraints, both counter-intuitive enough to be worth stating:
 
-- **It names causes, not a command.** `try \`polyswarm live result <id>\`` is tempting,
-  because the dominant `None` case is the list route omitting the evidence rather than
-  fetching a blob per row. But `live feed` loops over this *same* method, and nothing on
-  the resource tells the two apart — `live_feed` and `live_result` both yield a
-  `LiveHuntResult`. So on a detail fetch the hint would tell you to re-run the command you
-  just ran, and fixing that means threading a route flag from the command layer into a new
-  parameter on **every** `BaseOutput` implementation (`text`, `json`, all three `hashes`
-  subclasses). Naming the causes is true on both routes at no such cost.
+- **`None` emits nothing, and `[]` must not follow it into silence.** The instinct is to
+  explain the absence. Resist it: `None` overwhelmingly means "this is a list route",
+  which *can never* carry strings, so a line there is a permanent false alarm on every
+  row rather than information — and `live feed` loops over this same method, with nothing
+  on the resource to tell the routes apart (`live_feed` and `live_result` both yield a
+  `LiveHuntResult`). Route-awareness would mean threading a flag from the command layer
+  into a new parameter on **every** `BaseOutput` implementation (`text`, `json`, all three
+  `hashes` subclasses), which buys too little. `[]` is the opposite case and keeps its
+  line: it only ever reaches a detail route, and "the rule matched with no byte evidence"
+  is a real answer to "why did this hit". Since the analyzer always sends `strings` once
+  this feature ships, `None` on a detail route means a result predating it — nothing to
+  say.
 - **`truncated` is not a byte count.** The stored length is capped server-side, so the
   marker means "there was more than this" and over-reports at exactly the cap. Never
   render it as an exact size.
@@ -182,5 +185,6 @@ Two constraints on the `None` line:
 raw `matched_strings` key.
 
 Coverage is `tests/hunt_matched_strings_test.py` (Style 3 — the formatter driven directly
-with constructed SDK resources). The `cli_test.py` cassettes predate the field, so they
-exercise only the `None` line; they are not a substitute for those unit tests.
+with constructed SDK resources). The `cli_test.py` cassettes predate the field, so every result they
+render takes the silent `None` branch — they pin that no stray line appears, and nothing
+more. They are not a substitute for those unit tests.
