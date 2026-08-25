@@ -74,7 +74,14 @@ When a CLI feature needs an SDK surface that doesn't exist yet:
 
   **Read the declared version off the archive's own tree, and mind pre-release suffixes.** PEP 440 orders `4.2.0.dev1 < 4.2.0`, so a `develop` head carrying a dev suffix (the SDK's `pyproject.toml` has a `[tool.bumpversion.parts.dev]`) would *not* satisfy a `>=4.2.0` floor even though it looks like 4.2.0 — and the archive build would be silently replaced from PyPI. Check the version string in the SDK branch's `pyproject.toml` / `__init__.py`, not the last release tag. For the current floor both were read from `origin/develop`: `version = "4.2.0"` and `__version__ = '4.2.0'`, no suffix.
 
-### Current floor — `polyswarm_api>=4.2.0`
+### Current floor — `polyswarm_api>=4.3.0`
+
+`pyproject.toml` floors at **4.3.0**, raised from 4.2.0 by `cdb7926` for the typed
+known-good refusal (`KnownGoodWithheldException`, absent in 4.2.0) and the probe fixes.
+That commit touched no spec, so the per-behaviour writeup below is still the **4.2.0**
+one; it remains accurate about why 4.2.0 was needed, it is simply no longer the binding
+constraint. Anyone raising the floor again should extend this section rather than
+replace it.
 
 Two behaviours the CLI relies on only exist from **4.2.0**; on 4.1.0 both fail *silently*, which is why the floor is a hard requirement rather than a preference:
 

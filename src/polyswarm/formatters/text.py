@@ -57,9 +57,9 @@ class TextOutput(base.BaseOutput):
         lines = [self._white('Matched Strings:')]
         for string in strings:
             size = f'{string["length"]} bytes'
-            if string.get('truncated'):
-                # The stored length is capped, so this is "there was more than this" --
-                # never report it as an exact byte count.
+            if string['truncated']:
+                # Subscripted like the other four: fail loudly on a partial entry
+                # rather than render half-right.
                 size += ', truncated'
             lines.append(self._white(
                 f'  {string["identifier"]} @ 0x{string["offset"]:x} ({size}): {string["data"]}'))
@@ -263,7 +263,9 @@ class TextOutput(base.BaseOutput):
                     output.append(self._white(malicious))
         if result.tags:
             output.append(self._white(f'Tags: {result.tags}'))
-        output.extend(self._matched_strings(result.matched_strings))
+        # getattr: the pin admits SDKs predating this attribute -- same defence as the
+        # known-good reads below. Missing lands on the silent None branch.
+        output.extend(self._matched_strings(getattr(result, 'matched_strings', None)))
         if result.download_url:
             output.append(self._white(f'Download Url: {result.download_url}'))
         return self._output(output, write)
@@ -295,7 +297,9 @@ class TextOutput(base.BaseOutput):
                     output.append(self._white(malicious))
         if result.tags:
             output.append(self._white(f'Tags: {result.tags}'))
-        output.extend(self._matched_strings(result.matched_strings))
+        # getattr: the pin admits SDKs predating this attribute -- same defence as the
+        # known-good reads below. Missing lands on the silent None branch.
+        output.extend(self._matched_strings(getattr(result, 'matched_strings', None)))
         if result.download_url:
             output.append(self._white(f'Download Url: {result.download_url}'))
         return self._output(output, write)

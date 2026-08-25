@@ -121,3 +121,22 @@ def test_block_sits_between_tags_and_download_url(cls, method):
     matched = next(i for i, line in enumerate(lines) if line.startswith('Matched Strings:'))
     download = next(i for i, line in enumerate(lines) if line.startswith('Download Url:'))
     assert tags < matched < download
+
+
+@pytest.mark.parametrize('cls,method', PATHS)
+def test_an_sdk_without_the_attribute_does_not_raise(cls, method):
+    """The dependency pin admits SDKs predating `matched_strings`, and nothing else here
+    would catch a bare `result.matched_strings`.
+
+    Every other test in this file builds resources from the INSTALLED SDK, so with a
+    paired SDK on the path a bare attribute read passes all of them and then
+    AttributeErrors in the field -- on every text-mode hunt command, not just the new
+    output. Deleting the attribute is what an older SDK's resource looks like.
+    """
+    content = dict(_COMMON)
+    content['livescan_id' if cls is resources.LiveHuntResult else 'historicalscan_id'] = 3
+    result = cls(content)
+    del result.matched_strings
+    rendered = click.unstyle('\n'.join(getattr(TextOutput(color=False), method)(result, write=False)))
+    assert 'Matched Strings' not in rendered
+    assert 'Rule: dos_stub_message' in rendered   # the rest of the row still renders

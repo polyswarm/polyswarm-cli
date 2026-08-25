@@ -141,10 +141,9 @@ Both attributes are read with `getattr(..., None)` so a CLI on an older SDK (mis
 either field) never raises `AttributeError`; an SDK without `.state` simply never takes
 the known-good branch, which is the safe fallback — the pre-known-good rendering. That
 degradation is belt-and-braces, not a supported configuration: `.state` is load-bearing
-here with no substitute. Both attributes ship in SDK **4.1.0**, but the dependency floor is
-`polyswarm_api>=4.2.0` — set by two *other* behaviours the CLI depends on, both of which
-fail silently on 4.1.0 (see [`05-sdk-contract.md`](./05-sdk-contract.md) §Version pin) — so
-every supported install has them. `JSONOutput` needs no change — it dumps the resource's
+here with no substitute. Both attributes ship in SDK **4.1.0**, well under the dependency floor
+(`polyswarm_api>=4.3.0`; see [`05-sdk-contract.md`](./05-sdk-contract.md) §Current floor),
+so every supported install has them. `JSONOutput` needs no change — it dumps the resource's
 `.json`, which already carries the raw `state` and `known_good` keys.
 
 ## Matched strings on hunt results
@@ -180,6 +179,20 @@ Two constraints, both counter-intuitive enough to be worth stating:
 - **`truncated` is not a byte count.** The stored length is capped server-side, so the
   marker means "there was more than this" and over-reports at exactly the cap. Never
   render it as an exact size.
+
+**Read with `getattr(result, 'matched_strings', None)`, never a bare attribute access** —
+the same defence, for the same reason, as the known-good attributes above. The attribute
+ships in the paired SDK release, but the dependency floor admits older SDKs whose
+resources lack it entirely, and a bare read would `AttributeError` on *every* text-mode
+hunt command, not just the new output: `live result` / `live feed` / `live results-delete`
+and the three `historical` equivalents all funnel through these two methods. A missing
+attribute degrades to the silent `None` branch, which is also the honest reading — an SDK
+that cannot see the field genuinely does not know.
+
+Nothing else can catch this. The rendering tests build resources from the *installed*
+SDK, so with a paired SDK on the path a bare read passes every one of them;
+`test_an_sdk_without_the_attribute_does_not_raise` deletes the attribute to stand in for
+an older SDK, and is the only guard.
 
 `JSONOutput` needs no change — it dumps the resource's `.json`, which already carries the
 raw `matched_strings` key.
