@@ -1,37 +1,43 @@
 interactions:
 - request:
-    body: null
+    body: ''
     headers:
-      Accept:
+      accept:
       - '*/*'
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate
-      Authorization:
+      authorization:
       - '11111111111111111111111111111111'
-      Connection:
+      connection:
       - keep-alive
-      User-Agent:
-      - polyswarm-api/3.4.2 (x86_64-Linux-CPython-3.10.7)
+      host:
+      - artifact-index-e2e:9696
+      user-agent:
+      - polyswarm_api/4.3.0 (x86_64-Darwin-CPython-3.11.3)
     method: GET
     uri: http://artifact-index-e2e:9696/v3/hunt/rule/list?community=gamma
   response:
     body:
-      string: '{"has_more":false,"limit":2,"result":[{"created":"2023-08-23T15:16:04.148857","deleted":false,"description":null,"id":"27214252780064715","livescan_created":null,"livescan_id":null,"modified":"2023-08-23T15:16:04.148857","name":"eicar2","yara":null},{"created":"2023-08-23T15:16:01.359801","deleted":false,"description":null,"id":"1023947781069864","livescan_created":null,"livescan_id":null,"modified":"2023-08-23T15:16:01.359801","name":"eicar1","yara":null}],"status":"OK"}
+      string: '{"has_more":false,"limit":50,"result":[{"created":"2026-08-25T18:26:22.498052+00:00","deleted":false,"description":null,"favorite":false,"favorited_at":null,"historical_hunt_count":0,"id":"77454540525125655","livescan_created":null,"livescan_id":null,"modified":"2026-08-25T18:26:22.498052+00:00","name":"test","new_results_count":null,"new_results_counted_at":null,"rule_count":2,"yara":null},{"created":"2026-08-25T18:25:52.247009+00:00","deleted":false,"description":null,"favorite":false,"favorited_at":null,"historical_hunt_count":0,"id":"44051669277897879","livescan_created":null,"livescan_id":null,"modified":"2026-08-25T18:25:52.247009+00:00","name":"recording-live","new_results_count":null,"new_results_counted_at":null,"rule_count":2,"yara":null},{"created":"2026-08-25T18:25:51.613644+00:00","deleted":false,"description":null,"favorite":false,"favorited_at":null,"historical_hunt_count":0,"id":"78562964231669682","livescan_created":null,"livescan_id":null,"modified":"2026-08-25T18:25:51.613644+00:00","name":"recording-view","new_results_count":null,"new_results_counted_at":null,"rule_count":2,"yara":null}],"status":"OK"}
 
         '
     headers:
-      Connection:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Authorization
+      connection:
       - keep-alive
-      Content-Length:
-      - '477'
-      Content-Type:
+      content-length:
+      - '1140'
+      content-type:
       - application/json
-      Date:
-      - Wed, 23 Aug 2023 15:16:24 GMT
-      Server:
+      date:
+      - Tue, 25 Aug 2026 18:26:38 GMT
+      server:
       - gunicorn
-      X-Billing-ID:
-      - '1'
+      x-billing-id:
+      - '111'
     status:
       code: 200
       message: OK

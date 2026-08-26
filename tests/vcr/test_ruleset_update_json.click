@@ -1,15 +1,16 @@
-result: '{"created": "2022-05-26T19:08:31.291890", "deleted": false, "description":
-  null, "id": "71213140536342873", "livescan_created": null, "livescan_id": null,
-  "modified": "2022-05-26T19:59:46.678724", "name": "test2", "yara": "rule eicar_av_test
-  {\n    /*\n       Per standard, match only if entire file is EICAR string plus optional
-  trailing whitespace.\n       The raw EICAR string to be matched is:\n       X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\n    */\n\n    meta:\n        description
+result: '{"created": "2026-08-25T18:25:51.926590+00:00", "deleted": false, "description":
+  null, "favorite": false, "favorited_at": null, "historical_hunt_count": 0, "id":
+  "4202182245812695", "livescan_created": null, "livescan_id": null, "modified": "2026-08-25T18:26:35.087131+00:00",
+  "name": "test2", "rule_count": 2, "yara": "rule eicar_av_test : eicar match {\n    /*\n       Per
+  standard, match only if entire file is EICAR string plus optional trailing whitespace.\n       The
+  raw EICAR string to be matched is:\n       X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\n    */\n\n    meta:\n        description
   = \"This is a standard AV test, intended to verify that BinaryAlert is working correctly.\"\n        author
   = \"Austin Byers | Airbnb CSIRT\"\n        reference = \"http://www.eicar.org/86-0-Intended-use.html\"\n\n    strings:\n        $eicar_regex
   = /^X5O!P%@AP\\[4\\\\PZX54\\(P\\^\\)7CC\\)7\\}\\$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!\\$H\\+H\\*\\s*$/\n\n    condition:\n        all
-  of them\n}\n\nrule eicar_substring_test {\n    /*\n       More generic - match just
-  the embedded EICAR string (e.g. in packed executables, PDFs, etc)\n    */\n\n    meta:\n        description
-  = \"Standard AV test, checking for an EICAR substring\"\n        author = \"Austin
-  Byers | Airbnb CSIRT\"\n\n    strings:\n        $eicar_substring = \"$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!\"\n\n    condition:\n        all
-  of them\n}"}
+  of them\n}\n\nrule eicar_substring_test : eicar substring {\n    /*\n       More
+  generic - match just the embedded EICAR string (e.g. in packed executables, PDFs,
+  etc)\n    */\n\n    meta:\n        description = \"Standard AV test, checking for
+  an EICAR substring\"\n        author = \"Austin Byers | Airbnb CSIRT\"\n\n    strings:\n        $eicar_substring
+  = \"$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!\"\n\n    condition:\n        all of them\n}"}
 
   '

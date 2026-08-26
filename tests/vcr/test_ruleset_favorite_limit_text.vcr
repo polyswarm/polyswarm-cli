@@ -1,0 +1,47 @@
+interactions:
+- request:
+    body: '{"id":"45874884769561543","favorite":1}'
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      authorization:
+      - '11111111111111111111111111111111'
+      connection:
+      - keep-alive
+      content-length:
+      - '39'
+      content-type:
+      - application/json
+      host:
+      - artifact-index-e2e:9696
+      user-agent:
+      - polyswarm_api/4.3.0 (x86_64-Darwin-CPython-3.11.3)
+    method: PUT
+    uri: http://artifact-index-e2e:9696/v3/hunt/rule/favorite?community=gamma
+  response:
+    body:
+      string: '{"errors":{"code":"FAVORITE_LIMIT","favorites_limit":5,"favorites_used":5},"result":"Favorite
+        limit reached (5 of 5 used).","status":"error"}
+
+        '
+    headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Authorization
+      connection:
+      - keep-alive
+      content-length:
+      - '142'
+      content-type:
+      - application/json
+      date:
+      - Wed, 26 Aug 2026 15:02:21 GMT
+      server:
+      - gunicorn
+    status:
+      code: 400
+      message: BAD REQUEST
+version: 1
