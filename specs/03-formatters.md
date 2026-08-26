@@ -156,9 +156,14 @@ an SDK release predating the fields renders without the lines:
   `None` (the server had no answer) omits the line — never shown as 0.
 - `favorite` is truthy-only ("Favorite: yes"): False and old-SDK-absent both
   print nothing, deliberately indistinguishable.
-- `new_results_count` renders only when the caller asked the list to include
-  counts (the server sends `None` otherwise, and only live-hunting rulesets
-  carry a number).
+- `new_results_count` is the server's STORED badge (refreshed by its
+  scheduled job — the window is the fixed 24 h product window, which the
+  label names, since a caller cannot choose it): a number renders with its
+  `new_results_counted_at` staleness marker beside it; `None` (never
+  refreshed / no live hunt / old SDK) omits both lines.
+- `ruleset_favorite` renders the toggle response: `Favorite: yes/no`, the
+  `favorited_at` timestamp when starred, and the server-owned budget as
+  "Favorites used: N of M" — the client never counts.
 - `source_rule_changed` is tri-state: `None` means UNKNOWN, not "unchanged",
   and prints nothing; the label names its reference point — "changed since
   this hunt froze it" — so it cannot read as "edited recently".

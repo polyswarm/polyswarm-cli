@@ -19,6 +19,7 @@ How the CLI depends on the `polyswarm-api` SDK: which parts of the SDK's public 
 | `from polyswarm_api import settings` | Defaults: `DEFAULT_SCAN_TIMEOUT`, `DEFAULT_REPORT_TIMEOUT`, etc. |
 | `from polyswarm_api import resources` | Result-parser classes for power-user calls (e.g. `resources.ArtifactInstance`); resource attributes the formatters read. |
 | `from polyswarm_api import exceptions as api_exceptions` | Caught in `ExceptionHandlingGroup` and `utils.parallel_executor` (`NoResultsException`, `NotFoundException`, `FailedInstanceException`, `PolyswarmException`). |
+| `from polyswarm_api import exceptions` (bare, not aliased) | `RequestException` — caught by `rules favorite` (`client/rules.py`) to read the machine-readable `FAVORITE_LIMIT` refusal off `exc.request.errors['code']`. The SDK does not raise a typed exception for this refusal by design (specs/05 on the server side): `.request.errors` is a plain dict the server's error envelope populates, pinned end-to-end by `tests/cli_test.py::test_ruleset_favorite_limit_text` against a real recorded 400 (not a hand-built mock), so a rename on either side fails that cassette. |
 | `from polyswarm_api.core import parse_isoformat` | Date rendering in `formatters/text.py`. |
 | `import polyswarm_api` (`__version__`) | `--api-version`. |
 
@@ -74,14 +75,16 @@ When a CLI feature needs an SDK surface that doesn't exist yet:
 
   **Read the declared version off the archive's own tree, and mind pre-release suffixes.** PEP 440 orders `4.2.0.dev1 < 4.2.0`, so a `develop` head carrying a dev suffix (the SDK's `pyproject.toml` has a `[tool.bumpversion.parts.dev]`) would *not* satisfy a `>=4.2.0` floor even though it looks like 4.2.0 — and the archive build would be silently replaced from PyPI. Check the version string in the SDK branch's `pyproject.toml` / `__init__.py`, not the last release tag. For the current floor both were read from `origin/develop`: `version = "4.2.0"` and `__version__ = '4.2.0'`, no suffix.
 
-### Current floor — `polyswarm_api>=4.2.0`
+### Current floor — `polyswarm_api>=4.3.0`
 
-Two behaviours the CLI relies on only exist from **4.2.0**; on 4.1.0 both fail *silently*, which is why the floor is a hard requirement rather than a preference:
+The floor moved to **4.3.0** with #264 (`pyproject.toml` has said `>=4.3.0` since then; this header lagged at 4.2.0 — the drift itself is why the floor lives in ONE authoritative place, the pin, and this doc must follow it). The 4.2.0 rationale below still holds transitively; on 4.1.0 both behaviours fail *silently*, which is why the floor is a hard requirement rather than a preference:
 
 1. **`llm_report_create` sends the client's community.** 4.2.0 passes `community=self.community` when it builds the report resource; 4.1.0 omits it. `report llm-create` (`client/report.py`) supplies no community of its own — it relies entirely on the client's — so on 4.1.0 a report requested for a sample in a private community is created without one. No error, wrong resource.
 2. **A streaming download answered `204 No Content` raises `NoResultsException`.** The streaming path bypasses `parse_response`, so the 204 has to be raised by the session itself; 4.2.0 does that, 4.1.0 has no such raise anywhere in its session. The CLI's `download` commands depend on it for the no-results **exit code `1`** (§No-results signalling); against 4.1.0 an empty response reads as a successful download and exits `0`.
 
 The known-good rendering attributes (`ArtifactInstance.state`, `.known_good`/`.known_good_sources`, read by `formatters/text.py` — see [`03-formatters.md`](./03-formatters.md) §Known-good artifact instances) ship in **4.1.0**, so they are *not* what sets the floor; they are simply covered by it.
+
+**One command exceeds the floor, by design, with a guarded degradation:** `rules favorite` wraps `ruleset_favorite`, which does not exist on published 4.3.0 — it ships in the paired SDK change and reaches PyPI with the next SDK release. The command guards with `getattr` and fails with a clean upgrade message (exit 2) on a floor install; every other command works unchanged there, which is why the floor itself does not move (moving it has the two preconditions above, and neither holds until the SDK releases). When the SDK release lands on PyPI, bumping the floor and dropping the guard is the follow-up.
 
 ## Worked example — the httpx SDK migration
 

@@ -109,6 +109,9 @@ class JSONOutput(base.BaseOutput):
     def ruleset(self, result, contents=False):
         click.echo(self._to_json(result.json), file=self.out)
 
+    def ruleset_favorite(self, result):
+        click.echo(self._to_json(result.json), file=self.out)
+
     def metadata(self, result):
         click.echo(self._to_json(result.json), file=self.out)
 

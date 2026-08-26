@@ -12,20 +12,41 @@ Pins three contracts:
   all (SimpleNamespace on purpose: an installed SDK predating the fields has
   no such attributes to build from) renders without raising and simply omits
   the new lines; and
-* the ``--include-counts`` wire plumbing: the kwarg is passed ONLY when
-  flagged (an SDK at the pin's floor has a zero-argument ``ruleset_list``, so
-  the unflagged path must not send it), asserted through an autospec'd mock so
-  the call is signature-checked against the installed SDK.
+* the command plumbing: ``rules list`` calls a ZERO-argument
+  ``ruleset_list()`` (the pin's floor, 4.3.0, has exactly that signature —
+  no new SDK behaviour is required anywhere in this change), and
+  ``rules favorite`` renders the toggle response and converts the
+  machine-readable FAVORITE_LIMIT refusal into a clean message. Both are
+  asserted through autospec'd mocks so every call is signature-checked
+  against the installed SDK.
 """
 import io
 import types
+import unittest
 from unittest import TestCase, mock
 
 from click.testing import CliRunner
 
 from polyswarm.client import polyswarm as client
 from polyswarm.formatters import text
-from polyswarm_api import resources
+from polyswarm_api import exceptions, resources
+from polyswarm_api.api import PolyswarmAPI
+
+# The favorite surface ships in the paired SDK change; the pin's floor
+# (published 4.3.0) has neither the method nor the resource. These tests must
+# stay honest on BOTH installs: everything that needs the new surface skips
+# on the floor (where `rules favorite` itself degrades to the clean upgrade
+# message its own floor test pins with create=True).
+# Two guards, deliberately as NARROW as each dependency: the command tests
+# need only the METHOD (keying them on the resource too would let a resource
+# rename silently skip the whole command suite while CI stays green), and the
+# formatter fixture tests need only the RESOURCE class they instantiate.
+_needs_favorite_method = unittest.skipUnless(
+    hasattr(PolyswarmAPI, 'ruleset_favorite'),
+    'paired SDK method (ruleset_favorite) not installed')
+_needs_favorite_resource = unittest.skipUnless(
+    hasattr(resources, 'YaraRulesetFavorite'),
+    'paired SDK resource (YaraRulesetFavorite) not installed')
 
 
 def _ruleset(**overrides):
@@ -74,7 +95,36 @@ class FormatterHuntFieldsTest(TestCase):
         assert 'Favorited at: 2026-08-20 12:00:00+00:00' in rendered
         assert 'Rules in ruleset: 0' in rendered
         assert 'Historical hunts triggered: 0' in rendered
-        assert 'New live results in window: 3' in rendered
+        assert 'New live results (last 24h): 3' in rendered
+
+    def test_ruleset_staleness_marker_renders_beside_the_count(self):
+        # The stored badge's marker: how fresh the number is. Rendered only
+        # with a count (the server sends them together).
+        rendered = self._render('ruleset', _ruleset(
+            new_results_count=0,
+            new_results_counted_at='2026-08-25T12:00:00+00:00'))
+        assert 'New live results (last 24h): 0' in rendered
+        assert 'New-results count refreshed at: 2026-08-25 12:00:00+00:00' in rendered
+
+    @_needs_favorite_resource
+    def test_ruleset_favorite_response_renders_state_and_budget(self):
+        rendered = self._render('ruleset_favorite', resources.YaraRulesetFavorite(
+            {'id': '5', 'favorite': True,
+             'favorited_at': '2026-08-25T12:00:00+00:00',
+             'favorites_used': 3, 'favorites_limit': 5}, api=None))
+        assert 'Ruleset Id: 5' in rendered
+        assert 'Favorite: yes' in rendered
+        assert 'Favorited at: 2026-08-25 12:00:00+00:00' in rendered
+        assert 'Favorites used: 3 of 5' in rendered
+
+    @_needs_favorite_resource
+    def test_ruleset_unfavorite_response_renders_no_state(self):
+        rendered = self._render('ruleset_favorite', resources.YaraRulesetFavorite(
+            {'id': '5', 'favorite': False, 'favorited_at': None,
+             'favorites_used': 2, 'favorites_limit': 5}, api=None))
+        assert 'Favorite: no' in rendered
+        assert 'Favorited at' not in rendered
+        assert 'Favorites used: 2 of 5' in rendered
 
     def test_ruleset_none_and_false_fields_are_omitted(self):
         rendered = self._render('ruleset', _ruleset(
@@ -109,28 +159,111 @@ class FormatterHuntFieldsTest(TestCase):
         assert 'Source' not in rendered
 
 
-class RulesListIncludeCountsFlagTest(TestCase):
-    """`rules list --include-counts` passes ``include_counts=True``; the
-    UNFLAGGED run passes nothing at all — an installed SDK at the pin's floor
-    (4.3.0) has a zero-argument ``ruleset_list``, so plain `rules list` must
-    keep working there and only the flag may require the new SDK. autospec
-    makes both assertions signature checks against the installed SDK."""
+class RulesListZeroArgTest(TestCase):
+    """`rules list` calls a zero-argument ``ruleset_list()`` — the pin's
+    floor (4.3.0) has exactly that signature, so the command needs no new SDK
+    behaviour at all. autospec makes the assertion a signature check against
+    the installed SDK."""
 
-    def _run(self, args):
+    def test_list_passes_no_kwargs_at_all(self):
         with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
                         autospec=True, return_value=iter(())) as ruleset_list:
             result = CliRunner().invoke(
                 client.polyswarm_cli,
                 ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
-                 'rules', 'list'] + args,
+                 'rules', 'list'],
                 catch_exceptions=False)
         assert result.exit_code == 0, result.output
-        return ruleset_list
-
-    def test_flag_sends_include_counts_true(self):
-        ruleset_list = self._run(['--include-counts'])
-        ruleset_list.assert_called_once_with(mock.ANY, include_counts=True)
-
-    def test_no_flag_passes_no_kwargs_at_all(self):
-        ruleset_list = self._run([])
         ruleset_list.assert_called_once_with(mock.ANY)
+
+
+class RulesFavoriteCommandTest(TestCase):
+    """`rules favorite` — the CLI leg of the favorite capability: renders the
+    toggle response (state + server-owned budget counters), passes the right
+    boolean for --unfavorite, and converts the machine-readable FAVORITE_LIMIT
+    refusal into a clean actionable message instead of a traceback."""
+
+    def _invoke(self, args, side_effect=None, return_value=None):
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_favorite',
+                        autospec=True, side_effect=side_effect,
+                        return_value=return_value) as toggle:
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'favorite'] + args,
+                catch_exceptions=False)
+        return result, toggle
+
+    @staticmethod
+    def _response(favorite):
+        return resources.YaraRulesetFavorite(
+            {'id': '5', 'favorite': favorite,
+             'favorited_at': '2026-08-25T12:00:00+00:00' if favorite else None,
+             'favorites_used': 1, 'favorites_limit': 5}, api=None)
+
+    @_needs_favorite_method
+    @_needs_favorite_resource
+    def test_favorite_calls_the_sdk_and_renders_the_budget(self):
+        result, toggle = self._invoke(['5'], return_value=self._response(True))
+        assert result.exit_code == 0, result.output
+        toggle.assert_called_once_with(mock.ANY, 5, True)
+        assert 'Favorite: yes' in result.output
+        assert 'Favorites used: 1 of 5' in result.output
+
+    @_needs_favorite_method
+    @_needs_favorite_resource
+    def test_unfavorite_flag_flips_the_boolean(self):
+        result, toggle = self._invoke(['5', '--unfavorite'],
+                                      return_value=self._response(False))
+        assert result.exit_code == 0, result.output
+        toggle.assert_called_once_with(mock.ANY, 5, False)
+        assert 'Favorite: no' in result.output
+
+    @_needs_favorite_method
+    def test_favorite_limit_refusal_is_a_clean_message_at_exit_2(self):
+        # Exit 2 is the central mapping's server-refusal code; exit 1 is
+        # reserved for no-results/not-found. The friendly message rides a CLI
+        # PolyswarmException so ExceptionHandlingGroup logs it cleanly.
+        request = mock.Mock()
+        request.errors = {'code': 'FAVORITE_LIMIT',
+                          'favorites_used': 5, 'favorites_limit': 5}
+        refusal = exceptions.RequestException(request)
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_favorite',
+                        autospec=True, side_effect=refusal):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'favorite', '5'])
+        assert result.exit_code == 2, result.output
+        assert 'Favorite limit reached (5 of 5 used)' in result.output
+        assert '--unfavorite' in result.output            # names the way out
+        assert 'Traceback' not in result.output
+
+    def test_favorite_on_the_floor_sdk_degrades_cleanly(self):
+        # The declared floor (published 4.3.0) has no ruleset_favorite: the
+        # command must fail with a clean upgrade message at exit 2, never an
+        # AttributeError traceback — CI's branch-name SDK install can never
+        # surface this, so the test simulates the floor by nulling the method.
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_favorite',
+                        new=None, create=True):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'favorite', '5'])
+        assert result.exit_code == 2, result.output
+        assert 'requires a polyswarm-api release newer than 4.3.0' in result.output
+        assert 'AttributeError' not in result.output
+
+    @_needs_favorite_method
+    def test_other_refusals_still_raise(self):
+        request = mock.Mock()
+        request.errors = None
+        refusal = exceptions.RequestException(request)
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_favorite',
+                        autospec=True, side_effect=refusal):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'favorite', '5'])
+        assert result.exit_code == 2                      # PolyswarmException family
+        assert 'FAVORITE_LIMIT' not in result.output

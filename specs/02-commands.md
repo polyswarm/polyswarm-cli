@@ -30,7 +30,7 @@ The top-level command groups, what each is for, and the primary `polyswarm-api` 
 | `tag` (`tags.py`) | Tag CRUD | `tag_{create,delete,get,list}` |
 | `link` (`links.py`) | Tag/family links on artifacts | `tag_link_multiple`, `tag_link_get`, `tag_link_list` |
 | `family` (`families.py`) | Malware-family CRUD | `family_{create,update,delete,get,list}` |
-| `rules` (`rules.py`) | YARA ruleset CRUD; `list --include-counts` attaches each live-hunting ruleset's 24h new-results count (the flag is the ONLY path that passes `include_counts=` — plain `rules list` sends no kwargs so it keeps working on the pin's floor SDK) | `ruleset_{create,delete,update,get,list}` |
+| `rules` (`rules.py`) | YARA ruleset CRUD plus `favorite <id> [--unfavorite]` (the star toggle: renders the new state + the server-owned "N of M used" budget, and converts the machine-readable `FAVORITE_LIMIT` refusal into a clean actionable message at exit 2 — the server-refusal code, never 1). Every PRE-EXISTING command works unchanged on the pin's floor: `rules list` calls a zero-argument `ruleset_list()`, and the hunt-page fields arrive as plain response fields the formatters getattr-guard. `rules favorite` is the one command that needs the paired SDK's `ruleset_favorite`; on the floor it degrades to a clean upgrade message (see [05-sdk-contract.md](./05-sdk-contract.md) §Current floor) | `ruleset_{create,delete,update,get,list,favorite}` |
 | `metadata` (`metadata.py`) | Rerun metadata; scan lookup; IP/URL analysis | `rerun_metadata`, `scan_lookup`, `submit_url` |
 | `activity` (`event.py`) | List account activity/events | `event_list` |
 | `account` (`account.py`) | Account whois / features | `account_whois`, `account_features` |

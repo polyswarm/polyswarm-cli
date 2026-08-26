@@ -306,9 +306,30 @@ class TextOutput(base.BaseOutput):
         if getattr(result, 'historical_hunt_count', None) is not None:
             output.append(self._white(f'Historical hunts triggered: {result.historical_hunt_count}'))
         if getattr(result, 'new_results_count', None) is not None:
-            output.append(self._white(f'New live results in window: {result.new_results_count}'))
+            # The window is the server's fixed 24 h product window (the badge
+            # is a stored counter its scheduled refresh maintains — a caller
+            # cannot choose the window, so the label must not imply one), and
+            # the marker says how fresh the stored number is.
+            output.append(self._white(f'New live results (last 24h): {result.new_results_count}'))
+            if getattr(result, 'new_results_counted_at', None) is not None:
+                output.append(self._white(f'New-results count refreshed at: {result.new_results_counted_at}'))
         if contents:
             output.append(self._white(f'Ruleset Contents:\n{result.yara}'))
+        return self._output(output, write)
+
+    def ruleset_favorite(self, result, write=True):
+        output = []
+        output.append(self._blue(f'Ruleset Id: {result.id}'))
+        starred = getattr(result, 'favorite', None)
+        output.append(self._yellow('Favorite: yes') if starred
+                      else self._white('Favorite: no'))
+        if getattr(result, 'favorited_at', None) is not None:
+            output.append(self._white(f'Favorited at: {result.favorited_at}'))
+        used = getattr(result, 'favorites_used', None)
+        limit = getattr(result, 'favorites_limit', None)
+        if used is not None and limit is not None:
+            # server-owned budget counters — the client never counts
+            output.append(self._white(f'Favorites used: {used} of {limit}'))
         return self._output(output, write)
 
     def tag_link(self, result, write=True):

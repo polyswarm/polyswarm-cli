@@ -8,7 +8,10 @@ from unittest import TestCase, mock
 from polyswarm_api import resources
 from pathlib import Path
 
+import unittest
+
 import vcr as vcr_
+from polyswarm_api.api import PolyswarmAPI
 import click
 from click.testing import CliRunner
 
@@ -17,6 +20,14 @@ from polyswarm.client import polyswarm as client
 
 vcr = vcr_.VCR(cassette_library_dir='tests/vcr',
                path_transformer=vcr_.VCR.ensure_suffix('.vcr'))
+
+# The favorite surface ships in the paired SDK change; on the declared floor
+# (published polyswarm_api 4.3.0) `rules favorite` deliberately degrades to
+# the upgrade message, so its cassette tests must skip there — the suite has
+# to stay honest on both installs the pin permits.
+_needs_favorite_method = unittest.skipUnless(
+    hasattr(PolyswarmAPI, 'ruleset_favorite'),
+    'paired SDK method (ruleset_favorite) not installed')
 
 
 class BaseTestCase(TestCase):
@@ -174,23 +185,23 @@ class LiveHuntTest(BaseTestCase):
     @vcr.use_cassette()
     def test_live_hunt_start_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'live', 'start', '17388152480558505'])
+            '--output-format', 'json', 'live', 'start', '44051669277897879'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_live_hunt_start_text(self):
         result = self._run_cli([
-            '--output-format', 'text', 'live', 'start', '17388152480558505'])
+            '--output-format', 'text', 'live', 'start', '44051669277897879'])
         self._assert_text_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_live_hunt_stop_json(self):
-        result = self._run_cli(['--output-format', 'json', 'live', 'stop', '17388152480558505'])
+        result = self._run_cli(['--output-format', 'json', 'live', 'stop', '44051669277897879'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_live_hunt_stop_text(self):
-        result = self._run_cli(['--output-format', 'text', 'live', 'stop', '17388152480558505'])
+        result = self._run_cli(['--output-format', 'text', 'live', 'stop', '44051669277897879'])
         self._assert_text_result(result, self.click_vcr(result))
 
 
@@ -210,13 +221,13 @@ class HistoricalHuntTest(BaseTestCase):
     @vcr.use_cassette()
     def test_historical_hunt_delete_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'historical', 'delete', '75914219779430298'])
+            '--output-format', 'json', 'historical', 'delete', '32808041501095355'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_historical_hunt_delete_text(self):
         result = self._run_cli([
-            '--output-format', 'text', 'historical', 'delete', '96916002705221564'])
+            '--output-format', 'text', 'historical', 'delete', '3220090199138422'])
         self._assert_text_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
@@ -240,19 +251,19 @@ class RulesetTest(BaseTestCase):
     @vcr.use_cassette()
     def test_ruleset_view_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'rules', 'view', '27214252780064715'])
+            '--output-format', 'json', 'rules', 'view', '78562964231669682'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_ruleset_update_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'rules', 'update', '71213140536342873', '--name', 'test2'])
+            '--output-format', 'json', 'rules', 'update', '4202182245812695', '--name', 'test2'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
     def test_ruleset_delete_json(self):
         result = self._run_cli([
-            '--output-format', 'json', 'rules', 'delete', '71213140536342873'])
+            '--output-format', 'json', 'rules', 'delete', '4202182245812695'])
         self._assert_json_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
@@ -260,6 +271,44 @@ class RulesetTest(BaseTestCase):
         result = self._run_cli([
             '--output-format', 'json', 'rules', 'list'])
         self._assert_json_result(result, self.click_vcr(result))
+
+    @_needs_favorite_method
+    @vcr.use_cassette()
+    def test_ruleset_favorite_text(self):
+        result = self._run_cli([
+            '--output-format', 'text', 'rules', 'favorite', '96652060989160147'])
+        self._assert_text_result(result, self.click_vcr(result))
+
+    @_needs_favorite_method
+    @vcr.use_cassette()
+    def test_ruleset_unfavorite_text(self):
+        result = self._run_cli([
+            '--output-format', 'text', 'rules', 'favorite', '96652060989160147',
+            '--unfavorite'])
+        self._assert_text_result(result, self.click_vcr(result))
+
+    @_needs_favorite_method
+    @vcr.use_cassette()
+    def test_ruleset_favorite_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'rules', 'favorite', '14883307518120680'])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @_needs_favorite_method
+    @vcr.use_cassette()
+    def test_ruleset_favorite_limit_text(self):
+        # The server's machine-readable FAVORITE_LIMIT refusal, recorded off
+        # the real wire (a stack with all five team slots held): pins where
+        # the error body actually lives (exc.request.errors, code string
+        # included) — the unit test's hand-built mock cannot notice either
+        # side renaming it — and the clean actionable message at exit 2, the
+        # central mapping's server-refusal code.
+        result = self._run_cli([
+            '--output-format', 'text', 'rules', 'favorite', '45874884769561543'])
+        expected = self.click_vcr(result)
+        self._assert_text_result(result, expected, expected_return_code=2)
+        assert 'Favorite limit reached (5 of 5 used)' in expected
+        assert '--unfavorite' in expected
 
 
 class SubmissionTest(BaseTestCase):
