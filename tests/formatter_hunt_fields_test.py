@@ -50,6 +50,28 @@ _needs_favorite_method = unittest.skipUnless(
 _needs_favorite_resource = unittest.skipUnless(
     hasattr(resources, 'YaraRulesetFavorite'),
     'paired SDK resource (YaraRulesetFavorite) not installed')
+# The tracking/provenance fixtures need a NARROWER guard still. YaraRuleset and
+# HistoricalHunt exist on the floor — they simply do not PARSE the new keys, and
+# resources declare their attributes explicitly, so on a floor install the
+# formatter's getattr guards return None: the render tests FAIL rather than skip,
+# and the absence-only test passes VACUOUSLY, which looks like coverage while
+# pinning nothing. Key them on the attribute the fixture actually needs.
+_needs_tracking_fields = unittest.skipUnless(
+    hasattr(resources.YaraRuleset({'id': '0', 'livescan_id': None,
+                                   'livescan_created': None, 'name': 'n',
+                                   'description': 'd', 'deleted': False,
+                                   'created': '2026-08-20T00:00:00+00:00',
+                                   'modified': '2026-08-20T00:00:00+00:00',
+                                   'yara': None}, api=None), 'rule_count'),
+    'paired SDK does not parse the ruleset tracking fields')
+_needs_provenance_fields = unittest.skipUnless(
+    hasattr(resources.HistoricalHunt({'id': '0', 'status': 'PENDING',
+                                      'progress': 0.0, 'active': None,
+                                      'created': '2026-08-20T00:00:00+00:00',
+                                      'summary': None, 'results_csv_uri': None,
+                                      'ruleset_name': 'n', 'yara': None},
+                                     api=None), 'source_rule_changed'),
+    'paired SDK does not parse the hunt provenance fields')
 
 
 def _ruleset(**overrides):
@@ -89,6 +111,7 @@ class FormatterHuntFieldsTest(TestCase):
         getattr(text.TextOutput(color=False, output=out), method)(result, **kwargs)
         return out.getvalue()
 
+    @_needs_tracking_fields
     def test_ruleset_tracking_fields_render_with_zero_distinct_from_absent(self):
         rendered = self._render('ruleset', _ruleset(
             favorite=True, favorited_at='2026-08-20T12:00:00+00:00', rule_count=0,
@@ -100,6 +123,7 @@ class FormatterHuntFieldsTest(TestCase):
         assert 'Historical hunts triggered: 0' in rendered
         assert 'New live results (last 24h): 3' in rendered
 
+    @_needs_tracking_fields
     def test_ruleset_staleness_marker_renders_beside_the_count(self):
         # The stored badge's marker: how fresh the number is. Rendered only
         # with a count (the server sends them together).
@@ -129,6 +153,7 @@ class FormatterHuntFieldsTest(TestCase):
         assert 'Favorited at' not in rendered
         assert 'Favorites used: 2 of 5' in rendered
 
+    @_needs_tracking_fields
     def test_ruleset_none_and_false_fields_are_omitted(self):
         rendered = self._render('ruleset', _ruleset(
             favorite=False, favorited_at=None, rule_count=None,
@@ -143,6 +168,7 @@ class FormatterHuntFieldsTest(TestCase):
         assert 'Ruleset Id: 5' in rendered
         assert 'Favorite' not in rendered
 
+    @_needs_provenance_fields
     def test_hunt_provenance_fields_render_with_the_reference_point(self):
         rendered = self._render('hunt', _hunt(
             rule_id='5', rule_modified='2026-08-20T12:00:00+00:00',
