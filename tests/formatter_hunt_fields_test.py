@@ -274,6 +274,15 @@ class LiveFeedOptionsTest(TestCase):
         _, kwargs = live_feed.call_args
         assert 'max_results' not in kwargs
 
+    def test_zero_since_IS_forwarded_unlike_zero_max_results(self):
+        """Both zeros mean "no bound" to the user and take OPPOSITE paths:
+        --max-results 0 is dropped before the SDK (above), while --since 0 must
+        reach it, because 0 is how the server is told to apply no time filter.
+        Fold `since` into the conditional-kwargs block and this breaks."""
+        result, live_feed = self._invoke('--since', '0')
+        assert result.exit_code == 0, result.output
+        assert live_feed.call_args[0][1] == 0
+
     def test_zero_max_results_does_not_trip_the_floor_guard(self):
         def floor_live_feed(self, since=None, rule_name=None, family=None,
                             polyscore_lower=None, polyscore_upper=None,

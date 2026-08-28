@@ -37,17 +37,16 @@ def live_stop(ctx, ruleset_id):
               help='How far back in SECONDS to request results '
                    '(default: 86400 — 24h, the window the ruleset badge counts). '
                    'Pass 0 for no time filter at all.')
+# click.INT matches every other id option in the CLI and rejects a typo before
+# it reaches the server; IntRange(min=0) refuses a negative here rather than
+# letting it silently mean unbounded.
 @click.option('-i', '--livescan-id', type=click.INT,
-              help="Scope the feed to one live hunt (a ruleset's Live Hunt Id). "
-                   'Shows one community at a time, while the badge counts all '
-                   'of them, so the counts need not match. '
-                   'Ids are 17-digit numbers; click.INT matches every other id '
-                   'option in the CLI and rejects a typo before it reaches the '
-                   'server.')
+              help="Scope the feed to one live hunt (a ruleset's Live Hunt Id, "
+                   'a 17-digit number). Shows one community at a time, while '
+                   'the badge counts all of them, so the counts need not match.')
 @click.option('-m', '--max-results', type=click.IntRange(min=0),
               help='Stop after this many results. Unset or 0 means no bound — '
-                   'every page, as before. A negative is refused here rather '
-                   'than silently meaning unbounded.')
+                   'every page, as before.')
 @click.option('-r', '--rule-name', help='Filter results on this rule name.')
 @click.option('-f', '--family', help='Filter hunt results based on the family name.')
 @click.option('-l', '--polyscore-lower', help='Polyscore lower bound for the hunt results.')
