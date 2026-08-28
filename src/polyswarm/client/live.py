@@ -39,6 +39,8 @@ def live_stop(ctx, ruleset_id):
                    'Pass 0 for no time filter at all.')
 @click.option('-i', '--livescan-id', type=click.INT,
               help="Scope the feed to one live hunt (a ruleset's Live Hunt Id). "
+                   'Shows one community at a time, while the badge counts all '
+                   'of them, so the counts need not match. '
                    'Ids are 17-digit numbers; click.INT matches every other id '
                    'option in the CLI and rejects a typo before it reaches the '
                    'server.')
@@ -56,10 +58,15 @@ def live_results(ctx, since, livescan_id, max_results, rule_name, family,
                  polyscore_lower, polyscore_upper, private):
     """Show live-hunt results.
 
-    `--livescan-id` is the drill-down for the per-ruleset new-results badge
-    that `rules list` renders (the detail view deliberately does not carry
-    it): the badge counts a hunt's recent results, and this is how you list
-    them.
+    `--livescan-id` scopes the feed to one live hunt — the drill-down for the
+    per-ruleset new-results badge that `rules list` renders (the detail view
+    deliberately does not carry it).
+
+    The two do not have to agree, and a smaller feed is not a bug. The badge
+    counts the hunt across EVERY community it runs in, public and private
+    together; the feed shows one community at a time (this command always
+    sends one — `--private` selects it). A hunt spanning both will show fewer
+    rows here than the badge reports.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
