@@ -26,7 +26,6 @@ Pins three contracts:
 import io
 import pathlib
 import types
-import unittest
 from unittest import TestCase, mock
 
 from click.testing import CliRunner
@@ -35,7 +34,6 @@ from polyswarm.client import polyswarm as client
 from polyswarm.client import utils
 from polyswarm.formatters import text
 from polyswarm_api import exceptions, resources
-from polyswarm_api.api import PolyswarmAPI
 
 # The favorite surface ships in the paired SDK change; the pin's floor
 # (published 4.3.0) has neither the method nor the resource. These tests must
@@ -49,7 +47,9 @@ from polyswarm_api.api import PolyswarmAPI
 from tests._sdk_guards import (                      # noqa: E402
     needs_favorite_method as _needs_favorite_method,
     needs_favorite_resource as _needs_favorite_resource,
+    needs_live_feed_options as _needs_live_feed_options,
     needs_provenance_fields as _needs_provenance_fields,
+    needs_ruleset_list_filters as _needs_ruleset_list_filters,
     needs_tracking_fields as _needs_tracking_fields,
 )
 
@@ -185,6 +185,7 @@ class RulesListZeroArgTest(TestCase):
         assert result.exit_code == 0, result.output
         ruleset_list.assert_called_once_with(mock.ANY)
 
+    @_needs_ruleset_list_filters
     def test_filters_are_forwarded_only_when_given(self):
         """A filtered list forwards exactly the filters passed and nothing
         else — the flags default to False, and a False flag must not become
@@ -252,6 +253,7 @@ class LiveFeedOptionsTest(TestCase):
         # wire is seconds and stays seconds, so the CLI default carries the 24h
         assert live_feed.call_args[0][1] == 86400
 
+    @_needs_live_feed_options
     def test_livescan_id_and_max_results_are_forwarded(self):
         result, live_feed = self._invoke(
             '--livescan-id', '72927285313305230', '--max-results', '5')

@@ -9,6 +9,7 @@ convention, including why the guard is keyed on the narrowest dependency, is in
 Shared because two modules need the same guards: the formatter unit tests build
 resources directly, and the cassette tests render CLI output whose lines only
 appear when the SDK parses the underlying attribute."""
+import inspect
 import unittest
 
 from polyswarm_api import resources
@@ -45,3 +46,20 @@ needs_tracking_fields = unittest.skipUnless(
 needs_provenance_fields = unittest.skipUnless(
     hasattr(resources.HistoricalHunt(_HUNT, api=None), 'source_rule_changed'),
     'paired SDK does not parse the hunt provenance fields')
+
+
+def _accepts(method, param):
+    return param in inspect.signature(method).parameters
+
+
+# Keyed on the PARAMETER, not the method: both methods exist on the floor and
+# simply reject the keyword, so `require_sdk_kwargs` refuses and the command
+# exits 2 — a test passing the option would FAIL there rather than skip. Only
+# the option-passing tests take these; the plain-invocation ones must stay
+# unguarded, since the floor supports them.
+needs_ruleset_list_filters = unittest.skipUnless(
+    _accepts(PolyswarmAPI.ruleset_list, 'name'),
+    'paired SDK ruleset_list does not accept the filter keywords')
+needs_live_feed_options = unittest.skipUnless(
+    _accepts(PolyswarmAPI.live_feed, 'max_results'),
+    'paired SDK live_feed does not accept livescan_id/max_results')
