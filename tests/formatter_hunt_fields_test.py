@@ -311,6 +311,23 @@ class LiveFeedOptionsTest(TestCase):
              'live', 'feed', '--livescan-id', 'not-an-id'])
         assert result.exit_code != 0
 
+    def test_a_kwargs_sdk_fails_open_rather_than_false_refusing(self):
+        """The guard cannot see through **kwargs, so it forwards rather than
+        refusing an SDK that may well accept the name. Published 4.3.0 declares
+        no **kwargs (specs/05 §Current floor records the signatures), so this
+        branch is unreachable today — but it is product code, and an SDK that
+        grew one would take it."""
+        def kwargs_ruleset_list(self, **kwargs):
+            return iter(())
+
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        kwargs_ruleset_list):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list', '--favorites-only'])
+        assert result.exit_code == 0, result.output
+
     def test_new_options_on_a_floor_sdk_are_a_clean_message(self):
         def floor_live_feed(self, since=None, rule_name=None, family=None,
                             polyscore_lower=None, polyscore_upper=None,
