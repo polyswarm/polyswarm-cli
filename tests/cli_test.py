@@ -11,6 +11,8 @@ from pathlib import Path
 import unittest
 
 import vcr as vcr_
+
+from tests._sdk_guards import needs_tracking_fields as _needs_tracking_fields
 from polyswarm_api.api import PolyswarmAPI
 import click
 from click.testing import CliRunner
@@ -188,6 +190,11 @@ class LiveHuntTest(BaseTestCase):
             '--output-format', 'json', 'live', 'start', '44051669277897879'])
         self._assert_json_result(result, self.click_vcr(result))
 
+    # The re-recorded .click expects 'Rules in ruleset' / 'Historical hunts
+    # triggered', which render only when the SDK PARSES those attributes —
+    # on the floor the formatter's getattr guard omits them and this fails
+    # rather than skips (specs/04 §Staying honest on both installs).
+    @_needs_tracking_fields
     @vcr.use_cassette()
     def test_live_hunt_start_text(self):
         result = self._run_cli([
@@ -199,6 +206,11 @@ class LiveHuntTest(BaseTestCase):
         result = self._run_cli(['--output-format', 'json', 'live', 'stop', '44051669277897879'])
         self._assert_json_result(result, self.click_vcr(result))
 
+    # The re-recorded .click expects 'Rules in ruleset' / 'Historical hunts
+    # triggered', which render only when the SDK PARSES those attributes —
+    # on the floor the formatter's getattr guard omits them and this fails
+    # rather than skips (specs/04 §Staying honest on both installs).
+    @_needs_tracking_fields
     @vcr.use_cassette()
     def test_live_hunt_stop_text(self):
         result = self._run_cli(['--output-format', 'text', 'live', 'stop', '44051669277897879'])

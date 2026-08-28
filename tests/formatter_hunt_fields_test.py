@@ -46,34 +46,12 @@ from polyswarm_api.api import PolyswarmAPI
 # need only the METHOD (keying them on the resource too would let a resource
 # rename silently skip the whole command suite while CI stays green), and the
 # formatter fixture tests need only the RESOURCE class they instantiate.
-_needs_favorite_method = unittest.skipUnless(
-    hasattr(PolyswarmAPI, 'ruleset_favorite'),
-    'paired SDK method (ruleset_favorite) not installed')
-_needs_favorite_resource = unittest.skipUnless(
-    hasattr(resources, 'YaraRulesetFavorite'),
-    'paired SDK resource (YaraRulesetFavorite) not installed')
-# The tracking/provenance fixtures need a NARROWER guard still. YaraRuleset and
-# HistoricalHunt exist on the floor — they simply do not PARSE the new keys, and
-# resources declare their attributes explicitly, so on a floor install the
-# formatter's getattr guards return None: the render tests FAIL rather than skip,
-# and the absence-only test passes VACUOUSLY, which looks like coverage while
-# pinning nothing. Key them on the attribute the fixture actually needs.
-_needs_tracking_fields = unittest.skipUnless(
-    hasattr(resources.YaraRuleset({'id': '0', 'livescan_id': None,
-                                   'livescan_created': None, 'name': 'n',
-                                   'description': 'd', 'deleted': False,
-                                   'created': '2026-08-20T00:00:00+00:00',
-                                   'modified': '2026-08-20T00:00:00+00:00',
-                                   'yara': None}, api=None), 'rule_count'),
-    'paired SDK does not parse the ruleset tracking fields')
-_needs_provenance_fields = unittest.skipUnless(
-    hasattr(resources.HistoricalHunt({'id': '0', 'status': 'PENDING',
-                                      'progress': 0.0, 'active': None,
-                                      'created': '2026-08-20T00:00:00+00:00',
-                                      'summary': None, 'results_csv_uri': None,
-                                      'ruleset_name': 'n', 'yara': None},
-                                     api=None), 'source_rule_changed'),
-    'paired SDK does not parse the hunt provenance fields')
+from tests._sdk_guards import (                      # noqa: E402
+    needs_favorite_method as _needs_favorite_method,
+    needs_favorite_resource as _needs_favorite_resource,
+    needs_provenance_fields as _needs_provenance_fields,
+    needs_tracking_fields as _needs_tracking_fields,
+)
 
 
 def _ruleset(**overrides):
