@@ -105,7 +105,18 @@ server and pinned there rather than here:
   to `is not None`, `live feed --since 0` would silently return nothing while the
   help says it returns everything.
 
-The distinction that keeps the floor where it is: a new **option** may require the newer SDK, but an existing **invocation** may not. So the guards fire only when the caller actually uses the new surface — an unfiltered `rules list` and a plain `live feed` still reach the floor's own signatures untouched — and a floor install gets a clean upgrade message at exit 2 rather than the `TypeError`/`AttributeError` traceback a bare call would raise. That is why the floor itself does not move; moving it has the two preconditions above, and neither holds until the SDK releases. `require_sdk_kwargs` inspects the installed signature rather than catching `TypeError`, so a genuine argument error inside the SDK is never mistaken for a version mismatch. When the SDK release lands on PyPI, bumping the floor and dropping all three guards is the follow-up.
+The distinction that keeps the floor where it is: a new **option** may require the newer SDK, but an existing **invocation** may not. So the guards fire only when the caller actually uses the new surface — an unfiltered `rules list` and a plain `live feed` still reach the floor's own signatures untouched — and a floor install gets a clean upgrade message at exit 2 rather than the `TypeError`/`AttributeError` traceback a bare call would raise. That is why the floor itself does not move; moving it has the two preconditions above, and neither holds until the SDK releases. `require_sdk_kwargs` inspects the installed signature rather than catching `TypeError`, so a genuine argument error inside the SDK is never mistaken for a version mismatch.
+
+**The floor's real signatures, read off the published 4.3.0 wheel** (not inferred — the guard fails *open* on `**kwargs`, so a floor that declared one would silently forward the new options to an SDK that drops them, and the caller would get an unfiltered list at exit 0):
+
+```python
+def ruleset_list(self)                      # no filters, no **kwargs
+def live_feed(self, since=None, rule_name=None, family=None,
+              polyscore_lower=None, polyscore_upper=None,
+              community=None)               # no livescan_id, no max_results, no **kwargs
+```
+
+Neither declares `VAR_KEYWORD`, so the fail-open branch is unreachable against the real floor and the guards refuse as designed. The stand-ins in the floor tests match these exactly. Re-read them off the wheel — `pip download polyswarm_api==<floor> --no-deps` — whenever the floor moves; a signature is not something to take on trust from the branch you happen to have checked out. When the SDK release lands on PyPI, bumping the floor and dropping all three guards is the follow-up.
 
 ## Worked example — the httpx SDK migration
 

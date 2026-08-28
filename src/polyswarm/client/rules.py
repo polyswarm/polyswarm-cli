@@ -91,7 +91,7 @@ def favorite(ctx, rule_id, unfavorite):
         output.ruleset_favorite(toggle(rule_id, not unfavorite))
     except api_exceptions.RequestException as exc:
         # `exc.request` needs no guard: __init__ always assigns it, and a None
-        # request flows safely through the getattr. (Raised twice in review.)
+        # request flows safely through the getattr.
         errors = getattr(exc.request, 'errors', None) or {}
         if isinstance(errors, dict) and errors.get('code') == 'FAVORITE_LIMIT':
             used = errors.get('favorites_used')

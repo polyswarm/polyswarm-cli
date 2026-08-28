@@ -13,6 +13,7 @@ import vcr as vcr_
 
 from tests._sdk_guards import (
     needs_favorite_method as _needs_favorite_method,
+    needs_favorite_resource as _needs_favorite_resource,
     needs_tracking_fields as _needs_tracking_fields,
 )
 import click
@@ -279,6 +280,7 @@ class RulesetTest(BaseTestCase):
         self._assert_json_result(result, self.click_vcr(result))
 
     @_needs_favorite_method
+    @_needs_favorite_resource
     @vcr.use_cassette()
     def test_ruleset_favorite_text(self):
         result = self._run_cli([
@@ -286,6 +288,7 @@ class RulesetTest(BaseTestCase):
         self._assert_text_result(result, self.click_vcr(result))
 
     @_needs_favorite_method
+    @_needs_favorite_resource
     @vcr.use_cassette()
     def test_ruleset_unfavorite_text(self):
         result = self._run_cli([

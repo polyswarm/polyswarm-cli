@@ -45,7 +45,14 @@ The top-level command groups, what each is for, and the primary `polyswarm-api` 
 > hours. The fix is here rather than on the wire: the endpoint takes ~197k
 > requests per 30 days carrying `since` from clients outside our control, and
 > re-basing the server to minutes would widen every one of them 60x with no
-> error. `historical list --since` is seconds too — the two agree.
+> error. `historical list --since` is seconds too — those two agree.
+>
+> **A third `--since` is genuinely MINUTES and must stay that way:**
+> `download stream --since` (`client/download.py`, `IntRange(1, 2880)`,
+> default `1440`) hits a different endpoint that really does read minutes. That
+> `1440` is the same literal `live feed` is being corrected away from, and is the
+> likeliest origin of the original mistake — check which endpoint you are on
+> before copying a default between them.
 
 ## Adding to the catalogue
 
