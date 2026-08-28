@@ -12,13 +12,16 @@ Pins three contracts:
   all (SimpleNamespace on purpose: an installed SDK predating the fields has
   no such attributes to build from) renders without raising and simply omits
   the new lines; and
-* the command plumbing: ``rules list`` calls a ZERO-argument
-  ``ruleset_list()`` (the pin's floor, 4.3.0, has exactly that signature —
-  no new SDK behaviour is required anywhere in this change), and
+* the command plumbing: an UNFILTERED ``rules list`` still calls a
+  zero-argument ``ruleset_list()`` (the pin's floor, 4.3.0, has exactly
+  that signature, so the common invocation needs no new SDK behaviour),
+  a FILTERED one forwards exactly the filters given, ``live feed``
+  forwards ``--livescan-id`` / ``--max-results`` only when passed, and
   ``rules favorite`` renders the toggle response and converts the
-  machine-readable FAVORITE_LIMIT refusal into a clean message. Both are
+  machine-readable FAVORITE_LIMIT refusal into a clean message. All are
   asserted through autospec'd mocks so every call is signature-checked
-  against the installed SDK.
+  against the installed SDK; the options that DO need the paired SDK are
+  pinned to degrade with a clean upgrade message on the floor.
 """
 import io
 import types
@@ -175,6 +178,90 @@ class RulesListZeroArgTest(TestCase):
                 catch_exceptions=False)
         assert result.exit_code == 0, result.output
         ruleset_list.assert_called_once_with(mock.ANY)
+
+    def test_filters_are_forwarded_only_when_given(self):
+        """A filtered list forwards exactly the filters passed and nothing
+        else — the flags default to False, and a False flag must not become
+        `favorites_only=False`, which would be a filter the caller never
+        asked for."""
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        autospec=True, return_value=iter(())) as ruleset_list:
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list', '--name', 'alpha', '--favorites-only'],
+                catch_exceptions=False)
+        assert result.exit_code == 0, result.output
+        ruleset_list.assert_called_once_with(
+            mock.ANY, name='alpha', favorites_only=True)
+
+    def test_filtering_on_a_floor_sdk_is_a_clean_message_not_a_traceback(self):
+        """The published floor's ``ruleset_list()`` takes no filters. Using one
+        there must produce the upgrade message at exit 2 (the server-refusal
+        code), never the TypeError traceback a bare kwarg would raise.
+
+        The floor is simulated by a stand-in with the FLOOR signature, which is
+        what the guard inspects."""
+        def floor_ruleset_list(self):
+            return iter(())
+
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        floor_ruleset_list):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list', '--name', 'alpha'])
+        assert result.exit_code == 2, result.output
+        assert 'newer than 4.3.0' in result.output
+        assert 'Traceback' not in result.output
+
+
+class LiveFeedOptionsTest(TestCase):
+    """`live feed` — the badge's drill-down (--livescan-id) and its bound
+    (--max-results). Both are forwarded only when passed, so every existing
+    invocation reaches the SDK exactly as it did before."""
+
+    def _invoke(self, *extra):
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.live_feed',
+                        autospec=True, return_value=iter(())) as live_feed:
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'live', 'feed', *extra],
+                catch_exceptions=False)
+        return result, live_feed
+
+    def test_plain_feed_forwards_neither_new_kwarg(self):
+        result, live_feed = self._invoke()
+        assert result.exit_code == 0, result.output
+        _, kwargs = live_feed.call_args
+        assert 'livescan_id' not in kwargs and 'max_results' not in kwargs
+        # the default window is 1440 MINUTES (24h), passed positionally
+        assert live_feed.call_args[0][1] == 1440
+
+    def test_livescan_id_and_max_results_are_forwarded(self):
+        result, live_feed = self._invoke(
+            '--livescan-id', '72927285313305230', '--max-results', '5')
+        assert result.exit_code == 0, result.output
+        _, kwargs = live_feed.call_args
+        assert kwargs['livescan_id'] == '72927285313305230'
+        assert kwargs['max_results'] == 5
+
+    def test_new_options_on_a_floor_sdk_are_a_clean_message(self):
+        def floor_live_feed(self, since=None, rule_name=None, family=None,
+                            polyscore_lower=None, polyscore_upper=None,
+                            community=None):
+            return iter(())
+
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.live_feed',
+                        floor_live_feed):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'live', 'feed', '--livescan-id', '7'])
+        assert result.exit_code == 2, result.output
+        assert 'newer than 4.3.0' in result.output
+        assert 'Traceback' not in result.output
 
 
 class RulesFavoriteCommandTest(TestCase):
