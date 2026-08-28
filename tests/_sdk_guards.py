@@ -48,8 +48,16 @@ needs_provenance_fields = unittest.skipUnless(
     'paired SDK does not parse the hunt provenance fields')
 
 
-def _accepts(method, param):
-    return param in inspect.signature(method).parameters
+def _accepts(method, *params):
+    """True only when the installed signature takes EVERY named parameter.
+
+    All of them, because a guard protects one test and that test passes every
+    option it names: keying on a subset lets a partial SDK satisfy the guard
+    while the invocation still refuses at exit 2, which is the fail-instead-of-
+    skip this whole module exists to prevent.
+    """
+    sig = inspect.signature(method).parameters
+    return all(param in sig for param in params)
 
 
 # Keyed on the PARAMETER, not the method: both methods exist on the floor and
@@ -58,8 +66,9 @@ def _accepts(method, param):
 # the option-passing tests take these; the plain-invocation ones must stay
 # unguarded, since the floor supports them.
 needs_ruleset_list_filters = unittest.skipUnless(
-    _accepts(PolyswarmAPI.ruleset_list, 'name'),
+    _accepts(PolyswarmAPI.ruleset_list, 'name', 'status', 'favorites_only',
+             'has_new_results'),
     'paired SDK ruleset_list does not accept the filter keywords')
 needs_live_feed_options = unittest.skipUnless(
-    _accepts(PolyswarmAPI.live_feed, 'max_results'),
+    _accepts(PolyswarmAPI.live_feed, 'livescan_id', 'max_results'),
     'paired SDK live_feed does not accept livescan_id/max_results')
