@@ -65,7 +65,11 @@ def live_results(ctx, since, livescan_id, max_results, rule_name, family,
     kwargs = {}
     if livescan_id is not None:
         kwargs['livescan_id'] = livescan_id
-    if max_results is not None:
+    # Truthiness, not `is not None`: --max-results 0 IS the pre-existing
+    # unbounded behaviour, so it must not reach the SDK and must not trip the
+    # floor guard. A new option may require the newer SDK; an invocation that
+    # asks for what the floor already does may not (specs/05 Current floor).
+    if max_results:
         kwargs['max_results'] = max_results
     if kwargs:
         utils.require_sdk_kwargs(api.live_feed, sorted(kwargs), 'live feed ' +

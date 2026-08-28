@@ -142,7 +142,7 @@ either field) never raises `AttributeError`; an SDK without `.state` simply neve
 the known-good branch, which is the safe fallback — the pre-known-good rendering. That
 degradation is belt-and-braces, not a supported configuration: `.state` is load-bearing
 here with no substitute. Both attributes ship in SDK **4.1.0**, but the dependency floor is
-`polyswarm_api>=4.2.0` — set by two *other* behaviours the CLI depends on, both of which
+`polyswarm_api>=4.3.0` — set by two *other* behaviours the CLI depends on, both of which
 fail silently on 4.1.0 (see [`05-sdk-contract.md`](./05-sdk-contract.md) §Version pin) — so
 every supported install has them. `JSONOutput` needs no change — it dumps the resource's
 `.json`, which already carries the raw `state` and `known_good` keys.

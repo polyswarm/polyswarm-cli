@@ -24,6 +24,7 @@ Pins three contracts:
   pinned to degrade with a clean upgrade message on the floor.
 """
 import io
+import pathlib
 import types
 import unittest
 from unittest import TestCase, mock
@@ -31,6 +32,7 @@ from unittest import TestCase, mock
 from click.testing import CliRunner
 
 from polyswarm.client import polyswarm as client
+from polyswarm.client import utils
 from polyswarm.formatters import text
 from polyswarm_api import exceptions, resources
 from polyswarm_api.api import PolyswarmAPI
@@ -238,7 +240,7 @@ class RulesListZeroArgTest(TestCase):
                 ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
                  'rules', 'list', '--name', 'alpha'])
         assert result.exit_code == 2, result.output
-        assert 'newer than 4.3.0' in result.output
+        assert f'newer than {utils.SDK_FLOOR}' in result.output
         assert 'Traceback' not in result.output
 
 
@@ -273,6 +275,36 @@ class LiveFeedOptionsTest(TestCase):
         assert kwargs['livescan_id'] == '72927285313305230'
         assert kwargs['max_results'] == 5
 
+    def test_zero_max_results_is_unbounded_and_never_reaches_the_sdk(self):
+        """--max-results 0 is documented as the pre-existing unbounded
+        behaviour, so it must not be forwarded — and therefore must not trip the
+        floor guard for an invocation the floor already serves."""
+        result, live_feed = self._invoke('--max-results', '0')
+        assert result.exit_code == 0, result.output
+        _, kwargs = live_feed.call_args
+        assert 'max_results' not in kwargs
+
+    def test_zero_max_results_does_not_trip_the_floor_guard(self):
+        def floor_live_feed(self, since=None, rule_name=None, family=None,
+                            polyscore_lower=None, polyscore_upper=None,
+                            community=None):
+            return iter(())
+
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.live_feed',
+                        floor_live_feed):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'live', 'feed', '--max-results', '0'])
+        assert result.exit_code == 0, result.output
+
+    def test_a_negative_max_results_is_refused_at_the_interface(self):
+        result = CliRunner().invoke(
+            client.polyswarm_cli,
+            ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+             'live', 'feed', '--max-results', '-1'])
+        assert result.exit_code != 0
+
     def test_new_options_on_a_floor_sdk_are_a_clean_message(self):
         def floor_live_feed(self, since=None, rule_name=None, family=None,
                             polyscore_lower=None, polyscore_upper=None,
@@ -286,7 +318,7 @@ class LiveFeedOptionsTest(TestCase):
                 ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
                  'live', 'feed', '--livescan-id', '7'])
         assert result.exit_code == 2, result.output
-        assert 'newer than 4.3.0' in result.output
+        assert f'newer than {utils.SDK_FLOOR}' in result.output
         assert 'Traceback' not in result.output
 
 
@@ -352,6 +384,25 @@ class RulesFavoriteCommandTest(TestCase):
         assert '--unfavorite' in result.output            # names the way out
         assert 'Traceback' not in result.output
 
+    def test_favorite_limit_without_counters_uses_the_server_message(self):
+        # The counters are advisory; an envelope can carry the code without
+        # them. Interpolating them unguarded rendered "(None of None used)" at
+        # the user, so the server's own message is the fallback.
+        request = mock.Mock()
+        request.errors = {'code': 'FAVORITE_LIMIT'}
+        request.result = 'Favorite limit reached (5 of 5 used).'
+        refusal = exceptions.RequestException(request)
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_favorite',
+                        autospec=True, side_effect=refusal):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'favorite', '5'])
+        assert result.exit_code == 2, result.output
+        assert 'None of None' not in result.output
+        assert 'Favorite limit reached (5 of 5 used).' in result.output
+        assert '--unfavorite' in result.output
+
     def test_favorite_on_the_floor_sdk_degrades_cleanly(self):
         # The declared floor (published 4.3.0) has no ruleset_favorite: the
         # command must fail with a clean upgrade message at exit 2, never an
@@ -380,3 +431,20 @@ class RulesFavoriteCommandTest(TestCase):
                  'rules', 'favorite', '5'])
         assert result.exit_code == 2                      # PolyswarmException family
         assert 'FAVORITE_LIMIT' not in result.output
+
+class SdkFloorConstantTest(TestCase):
+    """``utils.SDK_FLOOR`` must equal the lower bound in ``pyproject.toml``.
+
+    specs/05-sdk-contract.md makes the pin the one authoritative floor, and the
+    constant only exists so the guard messages can name it. Nothing else ties
+    the two together: the follow-up bump edits the pin, and a stale constant
+    would leave every upgrade message naming the wrong version while the suite
+    stayed green — the exact drift specs/05 says the pin exists to prevent."""
+
+    def test_the_constant_matches_the_pin(self):
+        import re
+        pyproject = (pathlib.Path(__file__).resolve().parent.parent
+                     / 'pyproject.toml').read_text()
+        match = re.search(r'polyswarm_api>=([0-9]+\.[0-9]+\.[0-9]+)', pyproject)
+        assert match, 'polyswarm_api pin not found in pyproject.toml'
+        assert utils.SDK_FLOOR == match.group(1)

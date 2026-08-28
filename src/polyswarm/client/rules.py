@@ -99,10 +99,18 @@ def favorite(ctx, rule_id, unfavorite):
             # say so cleanly. A CLI PolyswarmException keeps the central
             # exit-code mapping's 2 (server refusal) — a ClickException
             # would exit 1, the code reserved for no-results/not-found.
+            used = errors.get('favorites_used')
+            limit = errors.get('favorites_limit')
+            if used is None or limit is None:
+                # The counters are advisory and the envelope may carry only the
+                # code. Fall back to the server's own message rather than
+                # rendering "(None of None used)" at the user.
+                budget = str(exc.request.result or 'Favorite limit reached.')
+            else:
+                budget = f'Favorite limit reached ({used} of {limit} used).'
             raise exceptions.PolyswarmException(
-                f"Favorite limit reached ({errors.get('favorites_used')} of "
-                f"{errors.get('favorites_limit')} used). Unfavorite another "
-                f'ruleset first: `polyswarm rules favorite <id> --unfavorite`.'
+                f'{budget} Unfavorite another ruleset first: '
+                f'`polyswarm rules favorite <id> --unfavorite`.'
             ) from exc
         raise
 
