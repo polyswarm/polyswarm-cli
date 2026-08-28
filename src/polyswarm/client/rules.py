@@ -72,8 +72,8 @@ def favorite(ctx, rule_id, unfavorite):
     Stars are shared by the team and capped server-side; the response renders
     the new state plus the budget ("N of M favorites used"). When the budget
     is full the server refuses with a machine-readable FAVORITE_LIMIT error,
-    rendered here as a clean message rather than a traceback (still exit 2 —
-    the central mapping's server-refusal code; exit 1 means no-results).
+    rendered here as a clean message rather than a traceback (exit 2, not 1 —
+    1 is reserved for no-results/not-found).
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -81,11 +81,11 @@ def favorite(ctx, rule_id, unfavorite):
     if toggle is None:
         # The declared floor (published polyswarm-api 4.3.0) predates the
         # favorite surface — it ships in the paired SDK change. Every OTHER
-        # command keeps working on the floor (list is zero-argument again);
+        # command keeps working on the floor (an unfiltered list still is);
         # only this command needs the newer SDK, and on the floor it must
         # fail with a clean upgrade message, never an AttributeError
-        # traceback. (Same principle as the withdrawn --include-counts flag:
-        # a new surface may require the new SDK; existing surfaces may not.)
+        # traceback. The principle: a new OPTION may require the newer SDK; an
+        # existing INVOCATION may not.
         raise exceptions.PolyswarmException(
             f'rules favorite requires a polyswarm-api release newer than '
             f'{utils.SDK_FLOOR} (the paired SDK change adds ruleset_favorite). '
@@ -93,6 +93,11 @@ def favorite(ctx, rule_id, unfavorite):
     try:
         output.ruleset_favorite(toggle(rule_id, not unfavorite))
     except api_exceptions.RequestException as exc:
+        # `exc.request` is read directly on purpose: RequestException.__init__
+        # assigns self.request unconditionally, so the attribute always exists,
+        # and a None request flows safely through the getattr below. Guarding it
+        # too would be dead code. (Raised in review more than once; recorded so
+        # it stays settled.)
         errors = getattr(exc.request, 'errors', None) or {}
         if isinstance(errors, dict) and errors.get('code') == 'FAVORITE_LIMIT':
             # The one refusal a user fixes themselves (unstar something):

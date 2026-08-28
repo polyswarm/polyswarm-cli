@@ -74,7 +74,7 @@ modes differ by level:
 | The test needs | Guard on | Why not something broader |
 |---|---|---|
 | an API **method** (`rules favorite` → `ruleset_favorite`) | `hasattr(PolyswarmAPI, '<method>')` | keying it on the resource class too would let a resource rename silently skip the whole command suite while CI stays green |
-| a **keyword** on an existing method (`rules list --name`, `live feed --livescan-id`) | `utils.require_sdk_kwargs` at runtime, so only the invocation that uses the option is affected | a module-level skip would drop coverage of the unfiltered call, which the floor does support |
+| a **keyword** on an existing method (`rules list --name`, `live feed --livescan-id`) | `client/utils.py`’s `require_sdk_kwargs` at runtime, so only the invocation that uses the option is affected | a module-level skip would drop coverage of the unfiltered call, which the floor does support |
 | a **parsed attribute** on a resource (`rule_count`, `source_rule_changed`) | `hasattr(<a built resource>, '<attr>')` | the resource CLASS exists on the floor and simply does not parse the key, so a class-level guard does not skip — the render tests FAIL and an absence-asserting test passes **vacuously**, which looks like coverage while pinning nothing |
 
 That last row is the one that bites: `getattr`-guarded formatter legs turn a missing
@@ -82,6 +82,6 @@ attribute into silent omission, so a test asserting a line is *absent* cannot te
 "correctly omitted" from "the SDK never parsed it". Build the resource and check the
 attribute.
 
-Whatever names the floor, name it **once** — `utils.SDK_FLOOR`, which a test ties to
+Whatever names the floor, name it **once** — `client/utils.py`’s `SDK_FLOOR`, which a test ties to
 the pin in `pyproject.toml`. The version is otherwise easy to drift: nothing fails if
 a hardcoded literal in a guard message goes stale.

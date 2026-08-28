@@ -12,7 +12,10 @@ import unittest
 
 import vcr as vcr_
 
-from tests._sdk_guards import needs_tracking_fields as _needs_tracking_fields
+from tests._sdk_guards import (
+    needs_favorite_method as _needs_favorite_method,
+    needs_tracking_fields as _needs_tracking_fields,
+)
 from polyswarm_api.api import PolyswarmAPI
 import click
 from click.testing import CliRunner
@@ -23,13 +26,6 @@ from polyswarm.client import polyswarm as client
 vcr = vcr_.VCR(cassette_library_dir='tests/vcr',
                path_transformer=vcr_.VCR.ensure_suffix('.vcr'))
 
-# The favorite surface ships in the paired SDK change; on the declared floor
-# (published polyswarm_api 4.3.0) `rules favorite` deliberately degrades to
-# the upgrade message, so its cassette tests must skip there — the suite has
-# to stay honest on both installs the pin permits.
-_needs_favorite_method = unittest.skipUnless(
-    hasattr(PolyswarmAPI, 'ruleset_favorite'),
-    'paired SDK method (ruleset_favorite) not installed')
 
 
 class BaseTestCase(TestCase):
@@ -314,7 +310,7 @@ class RulesetTest(BaseTestCase):
         # the error body actually lives (exc.request.errors, code string
         # included) — the unit test's hand-built mock cannot notice either
         # side renaming it — and the clean actionable message at exit 2, the
-        # central mapping's server-refusal code.
+        # central mapping's refusal path (exit 2, not 1).
         result = self._run_cli([
             '--output-format', 'text', 'rules', 'favorite', '45874884769561543'])
         expected = self.click_vcr(result)

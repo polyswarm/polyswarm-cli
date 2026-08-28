@@ -88,8 +88,8 @@ The known-good rendering attributes (`ArtifactInstance.state`, `.known_good`/`.k
 | Surface | Needs from the SDK | Guard |
 |---|---|---|
 | `rules favorite` | `ruleset_favorite` | `getattr` on the method |
-| `rules list --name/--status/--favorites-only/--has-new-results` | `ruleset_list(**filters)` | `utils.require_sdk_kwargs` |
-| `live feed --livescan-id/--max-results` | `live_feed(livescan_id=, max_results=)` | `utils.require_sdk_kwargs` |
+| `rules list --name/--status/--favorites-only/--has-new-results` | `ruleset_list(**filters)` | `client/utils.py`’s `require_sdk_kwargs` |
+| `live feed --livescan-id/--max-results` | `live_feed(livescan_id=, max_results=)` | `client/utils.py`’s `require_sdk_kwargs` |
 
 The distinction that keeps the floor where it is: a new **option** may require the newer SDK, but an existing **invocation** may not. So the guards fire only when the caller actually uses the new surface — an unfiltered `rules list` and a plain `live feed` still reach the floor's own signatures untouched — and a floor install gets a clean upgrade message at exit 2 rather than the `TypeError`/`AttributeError` traceback a bare call would raise. That is why the floor itself does not move; moving it has the two preconditions above, and neither holds until the SDK releases. `require_sdk_kwargs` inspects the installed signature rather than catching `TypeError`, so a genuine argument error inside the SDK is never mistaken for a version mismatch. When the SDK release lands on PyPI, bumping the floor and dropping all three guards is the follow-up.
 

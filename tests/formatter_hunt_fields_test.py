@@ -360,7 +360,7 @@ class RulesFavoriteCommandTest(TestCase):
 
     @_needs_favorite_method
     def test_favorite_limit_refusal_is_a_clean_message_at_exit_2(self):
-        # Exit 2 is the central mapping's server-refusal code; exit 1 is
+        # Exit 2 is the central mapping's code for this, never 1; exit 1 is
         # reserved for no-results/not-found. The friendly message rides a CLI
         # PolyswarmException so ExceptionHandlingGroup logs it cleanly.
         request = mock.Mock()
@@ -431,7 +431,8 @@ class RulesFavoriteCommandTest(TestCase):
                 ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
                  'rules', 'favorite', '5'])
         assert result.exit_code == 2, result.output
-        assert 'requires a polyswarm-api release newer than 4.3.0' in result.output
+        assert (f'requires a polyswarm-api release newer than {utils.SDK_FLOOR}'
+                in result.output)
         assert 'AttributeError' not in result.output
 
     @_needs_favorite_method
