@@ -140,3 +140,42 @@ def test_an_sdk_without_the_attribute_does_not_raise(cls, method):
     rendered = click.unstyle('\n'.join(getattr(TextOutput(color=False), method)(result, write=False)))
     assert 'Matched Strings' not in rendered
     assert 'Rule: dos_stub_message' in rendered   # the rest of the row still renders
+
+
+@pytest.mark.parametrize('cls,method', PATHS)
+def test_dropped_count_is_reported_to_the_user(cls, method):
+    """A short list must not read as the whole truth.
+
+    Without this line a user concludes their rule hit twice when it hit 21 times --
+    exactly the wrong-inference class the three-state contract exists to prevent.
+    """
+    lines = _matched_lines(_render(cls, method, matched_strings=_STRINGS,
+                                   matched_strings_dropped=19))
+    assert lines[-1].strip().startswith('…')
+    assert '19 more not shown' in lines[-1]
+
+
+@pytest.mark.parametrize('cls,method', PATHS)
+def test_no_dropped_line_when_nothing_was_dropped(cls, method):
+    rendered = _render(cls, method, matched_strings=_STRINGS)
+    assert 'not shown' not in rendered
+
+
+@pytest.mark.parametrize('cls,method', PATHS)
+def test_dropped_line_does_not_fabricate_a_strings_block(cls, method):
+    """A dropped count with no strings is not a thing the server can send -- the
+    first string is always kept -- but rendering must not invent a block if it did."""
+    rendered = _render(cls, method, matched_strings=None, matched_strings_dropped=19)
+    assert 'Matched Strings' not in rendered
+
+
+@pytest.mark.parametrize('cls,method', PATHS)
+def test_older_sdk_without_the_dropped_attribute_does_not_raise(cls, method):
+    """Same pin as matched_strings: the dependency floor admits SDKs without it."""
+    content = dict(_COMMON, matched_strings=_STRINGS)
+    content['livescan_id' if cls is resources.LiveHuntResult else 'historicalscan_id'] = 3
+    result = cls(content)
+    del result.matched_strings_dropped
+    rendered = click.unstyle('\n'.join(getattr(TextOutput(color=False), method)(result, write=False)))
+    assert 'Matched Strings:' in rendered
+    assert 'not shown' not in rendered

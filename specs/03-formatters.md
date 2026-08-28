@@ -194,8 +194,25 @@ SDK, so with a paired SDK on the path a bare read passes every one of them;
 `test_an_sdk_without_the_attribute_does_not_raise` deletes the attribute to stand in for
 an older SDK, and is the only guard.
 
+### The dropped-count line
+
+When `result.matched_strings_dropped` is non-zero, a final line is appended **inside** the
+block, in **yellow** rather than white:
+
+```
+  … 19 more not shown (result size limit)
+```
+
+It is the one line here reporting something the platform withheld, which is why it is not
+white like the entries above it. Omitted entirely when the count is zero or `None`.
+
+This is not cosmetic. Without it a truncated list reads as the whole truth and a user
+concludes their rule hit twice when it hit twenty-one times — the same wrong-inference
+class the three-state contract above exists to prevent, one level down. Read with
+`getattr(..., None)` for the same SDK-floor reason as `matched_strings` itself.
+
 `JSONOutput` needs no change — it dumps the resource's `.json`, which already carries the
-raw `matched_strings` key.
+raw `matched_strings` and `matched_strings_dropped` keys.
 
 Coverage is `tests/hunt_matched_strings_test.py` (Style 3 — the formatter driven directly
 with constructed SDK resources). The `cli_test.py` cassettes predate the field, so every result they

@@ -48,7 +48,7 @@ class TextOutput(base.BaseOutput):
     # alarm on every row. `live feed` loops over this same method and nothing on the
     # resource tells the routes apart. [] keeps its line -- it only reaches a detail route,
     # where "matched, no byte evidence" is a real answer.
-    def _matched_strings(self, strings):
+    def _matched_strings(self, strings, dropped=None):
         if strings is None:
             return []
         if not strings:
@@ -63,6 +63,12 @@ class TextOutput(base.BaseOutput):
                 size += ', truncated'
             lines.append(self._white(
                 f'  {string["identifier"]} @ 0x{string["offset"]:x} ({size}): {string["data"]}'))
+        if dropped:
+            # Without this the list reads as the whole truth, and a user concludes their
+            # rule hit N times when it hit N + dropped. Yellow, not white: it is the one
+            # line here reporting something the platform withheld.
+            lines.append(self._yellow(
+                f'  … {dropped} more not shown (result size limit)'))
         return lines
 
     def _output(self, output, write):
@@ -265,7 +271,9 @@ class TextOutput(base.BaseOutput):
             output.append(self._white(f'Tags: {result.tags}'))
         # getattr: the pin admits SDKs predating this attribute -- same defence as the
         # known-good reads below. Missing lands on the silent None branch.
-        output.extend(self._matched_strings(getattr(result, 'matched_strings', None)))
+        output.extend(self._matched_strings(
+            getattr(result, 'matched_strings', None),
+            getattr(result, 'matched_strings_dropped', None)))
         if result.download_url:
             output.append(self._white(f'Download Url: {result.download_url}'))
         return self._output(output, write)
@@ -299,7 +307,9 @@ class TextOutput(base.BaseOutput):
             output.append(self._white(f'Tags: {result.tags}'))
         # getattr: the pin admits SDKs predating this attribute -- same defence as the
         # known-good reads below. Missing lands on the silent None branch.
-        output.extend(self._matched_strings(getattr(result, 'matched_strings', None)))
+        output.extend(self._matched_strings(
+            getattr(result, 'matched_strings', None),
+            getattr(result, 'matched_strings_dropped', None)))
         if result.download_url:
             output.append(self._white(f'Download Url: {result.download_url}'))
         return self._output(output, write)
