@@ -48,6 +48,13 @@ def require_sdk_kwargs(method, names, what):
     unchanged on the floor (see specs/05-sdk-contract.md).
     """
     parameters = inspect.signature(method).parameters
+    if any(p.kind is inspect.Parameter.VAR_KEYWORD for p in parameters.values()):
+        # A method declared `**kwargs` accepts every name, but signature()
+        # reports one VAR_KEYWORD parameter rather than the names it takes, so
+        # a naive membership test would refuse an SDK that supports the option.
+        # Fail OPEN here: the point of inspecting the signature is to avoid a
+        # confusing upgrade message on a working install.
+        return
     missing = [n for n in names if n not in parameters]
     if missing:
         raise exceptions.PolyswarmException(

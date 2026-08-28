@@ -37,8 +37,11 @@ def live_stop(ctx, ruleset_id):
               help='How far back in MINUTES to request results '
                    '(default: 1440 — 24h, the window the ruleset badge counts). '
                    'Pass 0 for no time filter at all.')
-@click.option('-i', '--livescan-id',
-              help="Scope the feed to one live hunt (a ruleset's Live Hunt Id).")
+@click.option('-i', '--livescan-id', type=click.INT,
+              help="Scope the feed to one live hunt (a ruleset's Live Hunt Id). "
+                   'Ids are 17-digit numbers; click.INT matches every other id '
+                   'option in the CLI and rejects a typo before it reaches the '
+                   'server.')
 @click.option('-m', '--max-results', type=click.IntRange(min=0),
               help='Stop after this many results. Unset or 0 means no bound — '
                    'every page, as before. A negative is refused here rather '

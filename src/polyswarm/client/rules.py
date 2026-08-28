@@ -31,7 +31,7 @@ def delete(ctx, rule_id):
     output.ruleset(api.ruleset_delete(rule_id))
 
 
-@rules.command('list', short_help='List all rulesets.')
+@rules.command('list', short_help='List rulesets, optionally filtered.')
 @click.option('-n', '--name', help='Substring match on the ruleset name (case-insensitive).')
 @click.option('-s', '--status', type=click.Choice(['active']),
               help='Only rulesets whose live hunt is currently running.')
@@ -96,9 +96,11 @@ def favorite(ctx, rule_id, unfavorite):
         errors = getattr(exc.request, 'errors', None) or {}
         if isinstance(errors, dict) and errors.get('code') == 'FAVORITE_LIMIT':
             # The one refusal a user fixes themselves (unstar something):
-            # say so cleanly. A CLI PolyswarmException keeps the central
-            # exit-code mapping's 2 (server refusal) — a ClickException
-            # would exit 1, the code reserved for no-results/not-found.
+            # say so cleanly. A CLI PolyswarmException exits 2 through the
+            # central mapping — a ClickException would exit 1, the code
+            # reserved for no-results/not-found. (2 is a broad bucket, not a
+            # server-refusal code specifically; the contract here is "2, not
+            # 1".)
             used = errors.get('favorites_used')
             limit = errors.get('favorites_limit')
             if used is None or limit is None:

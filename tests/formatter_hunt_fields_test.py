@@ -278,7 +278,10 @@ class LiveFeedOptionsTest(TestCase):
             '--livescan-id', '72927285313305230', '--max-results', '5')
         assert result.exit_code == 0, result.output
         _, kwargs = live_feed.call_args
-        assert kwargs['livescan_id'] == '72927285313305230'
+        # click.INT, and Python ints are arbitrary precision — a 17-digit id
+        # survives exactly, which is the whole reason the server renders it as
+        # a string for JS consumers.
+        assert kwargs['livescan_id'] == 72927285313305230
         assert kwargs['max_results'] == 5
 
     def test_zero_max_results_is_unbounded_and_never_reaches_the_sdk(self):
@@ -309,6 +312,13 @@ class LiveFeedOptionsTest(TestCase):
             client.polyswarm_cli,
             ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
              'live', 'feed', '--max-results', '-1'])
+        assert result.exit_code != 0
+
+    def test_a_non_numeric_livescan_id_is_refused_before_the_server(self):
+        result = CliRunner().invoke(
+            client.polyswarm_cli,
+            ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+             'live', 'feed', '--livescan-id', 'not-an-id'])
         assert result.exit_code != 0
 
     def test_new_options_on_a_floor_sdk_are_a_clean_message(self):
