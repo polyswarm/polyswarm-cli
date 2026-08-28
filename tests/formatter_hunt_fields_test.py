@@ -217,11 +217,17 @@ class RulesListZeroArgTest(TestCase):
             result = CliRunner().invoke(
                 client.polyswarm_cli,
                 ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
-                 'rules', 'list', '--name', 'alpha', '--favorites-only'],
+                 'rules', 'list', '--name', 'alpha', '--favorites-only',
+                 '--status', 'active', '--has-new-results'],
                 catch_exceptions=False)
         assert result.exit_code == 0, result.output
+        # All four filters, because autospec is what turns this into a
+        # SIGNATURE check against the installed SDK: a kwarg name that only
+        # this side renamed would otherwise ship as require_sdk_kwargs
+        # refusing on an SDK that does have the surface.
         ruleset_list.assert_called_once_with(
-            mock.ANY, name='alpha', favorites_only=True)
+            mock.ANY, name='alpha', status='active',
+            favorites_only=True, has_new_results=True)
 
     def test_filtering_on_a_floor_sdk_is_a_clean_message_not_a_traceback(self):
         """The published floor's ``ruleset_list()`` takes no filters. Using one
@@ -384,6 +390,7 @@ class RulesFavoriteCommandTest(TestCase):
         assert '--unfavorite' in result.output            # names the way out
         assert 'Traceback' not in result.output
 
+    @_needs_favorite_method
     def test_favorite_limit_without_counters_uses_the_server_message(self):
         # The counters are advisory; an envelope can carry the code without
         # them. Interpolating them unguarded rendered "(None of None used)" at
@@ -401,6 +408,27 @@ class RulesFavoriteCommandTest(TestCase):
         assert result.exit_code == 2, result.output
         assert 'None of None' not in result.output
         assert 'Favorite limit reached (5 of 5 used).' in result.output
+        assert '--unfavorite' in result.output
+
+    @_needs_favorite_method
+    def test_favorite_limit_on_a_request_without_result_still_has_no_traceback(self):
+        # A Mock has every attribute, so the test above cannot fail on a missing
+        # `.result`. This one uses a real object that genuinely lacks it — the
+        # handler exists to avoid a traceback and must not raise one reaching
+        # for its own fallback.
+        class BareRequest:
+            errors = {'code': 'FAVORITE_LIMIT'}
+
+        refusal = exceptions.RequestException(BareRequest())
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_favorite',
+                        autospec=True, side_effect=refusal):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'favorite', '5'])
+        assert result.exit_code == 2, result.output
+        assert 'Traceback' not in result.output
+        assert 'None' not in result.output
         assert '--unfavorite' in result.output
 
     def test_favorite_on_the_floor_sdk_degrades_cleanly(self):

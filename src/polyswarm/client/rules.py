@@ -105,7 +105,10 @@ def favorite(ctx, rule_id, unfavorite):
                 # The counters are advisory and the envelope may carry only the
                 # code. Fall back to the server's own message rather than
                 # rendering "(None of None used)" at the user.
-                budget = str(exc.request.result or 'Favorite limit reached.')
+                # getattr, like `.errors` above: this block exists to avoid a
+                # traceback, so it must not raise one reaching for a fallback.
+                budget = str(getattr(exc.request, 'result', None)
+                             or 'Favorite limit reached.')
             else:
                 budget = f'Favorite limit reached ({used} of {limit} used).'
             raise exceptions.PolyswarmException(

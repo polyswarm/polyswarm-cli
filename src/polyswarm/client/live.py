@@ -54,8 +54,9 @@ def live_results(ctx, since, livescan_id, max_results, rule_name, family,
     """Show live-hunt results.
 
     `--livescan-id` is the drill-down for the per-ruleset new-results badge
-    that `rules view` renders: the badge counts a hunt's recent results, and
-    this is how you list them.
+    that `rules list` renders (the detail view deliberately does not carry
+    it): the badge counts a hunt's recent results, and this is how you list
+    them.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
