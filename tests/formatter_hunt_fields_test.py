@@ -338,13 +338,16 @@ class RulesFavoriteCommandTest(TestCase):
 
     @staticmethod
     def _response(favorite):
-        return resources.YaraRulesetFavorite(
-            {'id': '5', 'favorite': favorite,
-             'favorited_at': '2026-08-25T12:00:00+00:00' if favorite else None,
-             'favorites_used': 1, 'favorites_limit': 5}, api=None)
+        # A namespace, not the SDK resource: TextOutput.ruleset_favorite reads
+        # `.id` plus getattrs, so building the real class would make these
+        # command tests depend on the RESOURCE and a rename would silently skip
+        # the only coverage that `rules favorite` calls the SDK at all.
+        return types.SimpleNamespace(
+            id='5', favorite=favorite,
+            favorited_at='2026-08-25T12:00:00+00:00' if favorite else None,
+            favorites_used=1, favorites_limit=5)
 
     @_needs_favorite_method
-    @_needs_favorite_resource
     def test_favorite_calls_the_sdk_and_renders_the_budget(self):
         result, toggle = self._invoke(['5'], return_value=self._response(True))
         assert result.exit_code == 0, result.output
@@ -353,7 +356,6 @@ class RulesFavoriteCommandTest(TestCase):
         assert 'Favorites used: 1 of 5' in result.output
 
     @_needs_favorite_method
-    @_needs_favorite_resource
     def test_unfavorite_flag_flips_the_boolean(self):
         result, toggle = self._invoke(['5', '--unfavorite'],
                                       return_value=self._response(False))
@@ -451,6 +453,19 @@ class RulesFavoriteCommandTest(TestCase):
                  'rules', 'favorite', '5'])
         assert result.exit_code == 2                      # PolyswarmException family
         assert 'FAVORITE_LIMIT' not in result.output
+
+class ExitCodeHierarchyTest(TestCase):
+    """`rules favorite`'s non-limit refusals exit 2, and that holds only because
+    the SDK's RequestException is a PolyswarmException — the handler catches
+    that base BEFORE the transport branch, which matches the bare name
+    'RequestException' against the MRO and would exit 1 with "contact support".
+    Reparent it in the SDK and every fixable 4xx starts giving that advice, so
+    the dependency is pinned here rather than inferred."""
+
+    def test_request_exception_is_caught_as_a_polyswarm_exception(self):
+        assert issubclass(exceptions.RequestException,
+                          exceptions.PolyswarmException)
+
 
 class SdkFloorConstantTest(TestCase):
     """``utils.SDK_FLOOR`` must equal the lower bound in ``pyproject.toml``.

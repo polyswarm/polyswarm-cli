@@ -91,6 +91,20 @@ The known-good rendering attributes (`ArtifactInstance.state`, `.known_good`/`.k
 | `rules list --name/--status/--favorites-only/--has-new-results` | `ruleset_list(**filters)` | `client/utils.py`’s `require_sdk_kwargs` |
 | `live feed --livescan-id/--max-results` | `live_feed(livescan_id=, max_results=)` | `client/utils.py`’s `require_sdk_kwargs` |
 
+**Two behaviours the CLI relies on and cannot itself enforce**, both owned by the
+server and pinned there rather than here:
+
+- **`live feed --since` is SECONDS on the wire.** The CLI's `86400` default is
+  only correct under that reading; nothing in this repo can distinguish the unit
+  from a recorded query string. Pinned server-side by
+  `test_since_is_seconds_not_minutes`.
+- **`--since 0` means no time filter at all**, which the help text promises. The
+  CLI forwards `0` positionally and does nothing to make it mean "unfiltered";
+  the server applies the window on a truthiness test. Pinned server-side by
+  `test_since_zero_and_absent_both_mean_no_time_filter`. If that ever tightened
+  to `is not None`, `live feed --since 0` would silently return nothing while the
+  help says it returns everything.
+
 The distinction that keeps the floor where it is: a new **option** may require the newer SDK, but an existing **invocation** may not. So the guards fire only when the caller actually uses the new surface — an unfiltered `rules list` and a plain `live feed` still reach the floor's own signatures untouched — and a floor install gets a clean upgrade message at exit 2 rather than the `TypeError`/`AttributeError` traceback a bare call would raise. That is why the floor itself does not move; moving it has the two preconditions above, and neither holds until the SDK releases. `require_sdk_kwargs` inspects the installed signature rather than catching `TypeError`, so a genuine argument error inside the SDK is never mistaken for a version mismatch. When the SDK release lands on PyPI, bumping the floor and dropping all three guards is the follow-up.
 
 ## Worked example — the httpx SDK migration
