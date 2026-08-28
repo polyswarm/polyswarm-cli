@@ -26,8 +26,6 @@ The top-level command groups, what each is for, and the primary `polyswarm-api` 
 | `report-template` (`report_template.py`) | Manage report templates + logos | `report_template_{create,update,get,list}`, `report_template_logo_{download,upload}` |
 | `engine` → `votes` / `assertions` (`engine.py`) | Consolidated votes/assertions bundles per engine | `votes_{create,get,delete,list}`, `assertions_{create,get,delete,list}` |
 | `live` (`live.py`) | Live YARA hunts: start/stop, feed, results. `feed` takes `--since` in **MINUTES** (default 1440 — 24h, the window the ruleset badge counts; `0` means no time filter at all), plus `--livescan-id` (the drill-down for the per-ruleset new-results badge `rules list` renders — the detail view deliberately does not carry it) and `--max-results` (stop after N; unset means every page, as before). Those two need the paired SDK and are forwarded only when passed, so every pre-existing invocation is unchanged on the pin's floor — see [05-sdk-contract.md](./05-sdk-contract.md) §Current floor | `live_start`, `live_stop`, `live_feed`, `live_result`, `live_feed_delete` |
-> **The two hunt `--since` options differ in unit, deliberately.** `live feed --since` is MINUTES; `historical list --since` is SECONDS. They are different endpoints and the server reads each accordingly (`timedelta(minutes=...)` for the live feed, `timedelta(seconds=...)` for historical). The live feed's unit was corrected because every surface around it — its own default of 1440, the ruleset badge's 24h window — was written for minutes; the historical endpoint was left alone because nothing there disagrees. This is recorded so the remaining `seconds` is not read as a missed rename.
-
 | `historical` (`historical.py`) | Historical hunts: CRUD + results | `historical_{get,create,update,list}`, `historical_delete_multiple`, `historical_delete_list`, `historical_results_multiple`, `historical_result`, `historical_results_delete` |
 | `tag` (`tags.py`) | Tag CRUD | `tag_{create,delete,get,list}` |
 | `link` (`links.py`) | Tag/family links on artifacts | `tag_link_multiple`, `tag_link_get`, `tag_link_list` |
@@ -39,6 +37,8 @@ The top-level command groups, what each is for, and the primary `polyswarm-api` 
 | `notification` / webhooks (`notification.py`, `notification_webhook.py`) | Notification webhook CRUD | `notification_webhook_{create,get,update,delete,list}` |
 | `bundle` (`bundle.py`) | Sample bundle tasks | `sample_bundle_task_create`, `sample_bundle_task_get`, `sample_bundle_download` |
 | `sample` (`sample.py`) | Fetch a consolidated sample view | `sample` |
+
+> **The two hunt `--since` options differ in unit, deliberately.** `live feed --since` is MINUTES; `historical list --since` is SECONDS. They are different endpoints and the server reads each accordingly (`timedelta(minutes=...)` for the live feed, `timedelta(seconds=...)` for historical). The live feed's unit was corrected because every surface around it — its own default of 1440, the ruleset badge's 24h window — was written for minutes; the historical endpoint was left alone because nothing there disagrees. This is recorded so the remaining `seconds` is not read as a missed rename.
 
 ## Adding to the catalogue
 
