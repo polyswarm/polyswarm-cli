@@ -248,8 +248,9 @@ class LiveFeedOptionsTest(TestCase):
         assert result.exit_code == 0, result.output
         _, kwargs = live_feed.call_args
         assert 'livescan_id' not in kwargs and 'max_results' not in kwargs
-        # the default window is 1440 MINUTES (24h), passed positionally
-        assert live_feed.call_args[0][1] == 1440
+        # the default window is 86400 SECONDS (24h), passed positionally — the
+        # wire is seconds and stays seconds, so the CLI default carries the 24h
+        assert live_feed.call_args[0][1] == 86400
 
     def test_livescan_id_and_max_results_are_forwarded(self):
         result, live_feed = self._invoke(

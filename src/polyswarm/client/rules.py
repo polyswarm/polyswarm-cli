@@ -47,11 +47,8 @@ def list_rules(ctx, name, status, favorites_only, has_new_results):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    # UNFILTERED `rules list` stays a zero-argument call, so it keeps working
-    # on the pin's floor (4.3.0) exactly as before — every field it renders is
-    # a plain response field the formatters getattr-guard. Only a caller who
-    # actually passes a filter needs the paired SDK, and that caller gets a
-    # clean upgrade message instead of a TypeError traceback.
+    # Unfiltered stays a zero-argument call, so it keeps working on the floor;
+    # only a caller passing a filter needs the paired SDK.
     kwargs = {k: v for k, v in (('name', name), ('status', status),
                                 ('favorites_only', favorites_only or None),
                                 ('has_new_results', has_new_results or None))
@@ -93,31 +90,19 @@ def favorite(ctx, rule_id, unfavorite):
     try:
         output.ruleset_favorite(toggle(rule_id, not unfavorite))
     except api_exceptions.RequestException as exc:
-        # `exc.request` is read directly on purpose: RequestException.__init__
-        # assigns self.request unconditionally, so the attribute always exists,
-        # and a None request flows safely through the getattr below. Guarding it
-        # too would be dead code. (Raised in review more than once; recorded so
-        # it stays settled.)
+        # `exc.request` needs no guard: __init__ always assigns it, and a None
+        # request flows safely through the getattr. (Raised twice in review.)
         errors = getattr(exc.request, 'errors', None) or {}
         if isinstance(errors, dict) and errors.get('code') == 'FAVORITE_LIMIT':
-            # The one refusal a user fixes themselves (unstar something):
-            # say so cleanly. A CLI PolyswarmException exits 2 through the
-            # central mapping — a ClickException would exit 1, the code
-            # reserved for no-results/not-found. (2 is a broad bucket, not a
-            # server-refusal code specifically; the contract here is "2, not
-            # 1".)
             used = errors.get('favorites_used')
             limit = errors.get('favorites_limit')
-            if used is None or limit is None:
-                # The counters are advisory and the envelope may carry only the
-                # code. Fall back to the server's own message rather than
-                # rendering "(None of None used)" at the user.
-                # getattr, like `.errors` above: this block exists to avoid a
-                # traceback, so it must not raise one reaching for a fallback.
-                budget = str(getattr(exc.request, 'result', None)
-                             or 'Favorite limit reached.')
-            else:
-                budget = f'Favorite limit reached ({used} of {limit} used).'
+            # Counters are advisory; fall back rather than render "(None of None)".
+            budget = (f'Favorite limit reached ({used} of {limit} used).'
+                      if used is not None and limit is not None
+                      else str(getattr(exc.request, 'result', None)
+                               or 'Favorite limit reached.'))
+            # PolyswarmException exits 2; ClickException would exit 1, reserved
+            # for no-results/not-found.
             raise exceptions.PolyswarmException(
                 f'{budget} Unfavorite another ruleset first: '
                 f'`polyswarm rules favorite <id> --unfavorite`.'

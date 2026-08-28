@@ -12,10 +12,7 @@ from polyswarm_api import resources
 logger = logging.getLogger(__name__)
 HASH_VALIDATORS = resources.Hash.SUPPORTED_HASH_TYPES
 
-# The published SDK floor this repo pins (pyproject.toml, and
-# specs/05-sdk-contract.md Current floor). Named once so the follow-up bump
-# that drops the guards has a single place to look instead of three
-# hand-written strings that can drift apart.
+# The published SDK floor; tracks pyproject.toml's pin (SdkFloorConstantTest).
 SDK_FLOOR = '4.3.0'
 
 ####################################################
@@ -39,22 +36,12 @@ def parse_hashes(hashes, hash_file=None):
 def require_sdk_kwargs(method, names, what):
     """Refuse cleanly when the installed SDK predates a keyword this command needs.
 
-    The declared floor (published `polyswarm_api` SDK_FLOOR) predates the
-    hunt-page surface, and passing an unknown keyword to an older SDK raises a
-    bare TypeError that `ExceptionHandlingGroup` renders as a traceback plus
-    'Please contact support'. A new OPTION may require the newer SDK; an
-    existing invocation may not — so this is checked only when the caller
-    actually uses the option, leaving every pre-existing command working
-    unchanged on the floor (see specs/05-sdk-contract.md).
+    Called only when the caller actually uses the option, so existing
+    invocations keep working on the floor. See specs/05-sdk-contract.md.
     """
     parameters = inspect.signature(method).parameters
     if any(p.kind is inspect.Parameter.VAR_KEYWORD for p in parameters.values()):
-        # A method declared `**kwargs` accepts every name, but signature()
-        # reports one VAR_KEYWORD parameter rather than the names it takes, so
-        # a naive membership test would refuse an SDK that supports the option.
-        # Fail OPEN here: the point of inspecting the signature is to avoid a
-        # confusing upgrade message on a working install.
-        return
+        return  # **kwargs accepts every name; fail open rather than false-refuse
     missing = [n for n in names if n not in parameters]
     if missing:
         raise exceptions.PolyswarmException(

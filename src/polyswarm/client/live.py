@@ -33,9 +33,9 @@ def live_stop(ctx, ruleset_id):
 
 
 @live.command('feed', short_help='Get results from live hunt.')
-@click.option('-s', '--since', type=click.INT, default=1440,
-              help='How far back in MINUTES to request results '
-                   '(default: 1440 — 24h, the window the ruleset badge counts). '
+@click.option('-s', '--since', type=click.INT, default=86400,
+              help='How far back in SECONDS to request results '
+                   '(default: 86400 — 24h, the window the ruleset badge counts). '
                    'Pass 0 for no time filter at all.')
 @click.option('-i', '--livescan-id', type=click.INT,
               help="Scope the feed to one live hunt (a ruleset's Live Hunt Id). "
@@ -63,16 +63,12 @@ def live_results(ctx, since, livescan_id, max_results, rule_name, family,
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    # Both new options ride one guard: they are the only part of this command
-    # that needs the paired SDK, and a bare kwarg would be a TypeError
-    # traceback on the pin's floor. Every existing invocation is untouched.
+    # Both new options share one floor guard; existing invocations are untouched.
     kwargs = {}
     if livescan_id is not None:
         kwargs['livescan_id'] = livescan_id
-    # Truthiness, not `is not None`: --max-results 0 IS the pre-existing
-    # unbounded behaviour, so it must not reach the SDK and must not trip the
-    # floor guard. A new option may require the newer SDK; an invocation that
-    # asks for what the floor already does may not (specs/05 Current floor).
+    # Truthiness: 0 is the pre-existing unbounded behaviour, so it must not
+    # reach the SDK or trip the floor guard (specs/05 §Current floor).
     if max_results:
         kwargs['max_results'] = max_results
     if kwargs:
