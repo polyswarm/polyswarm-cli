@@ -12,6 +12,12 @@ from polyswarm_api import resources
 logger = logging.getLogger(__name__)
 HASH_VALIDATORS = resources.Hash.SUPPORTED_HASH_TYPES
 
+# The published SDK floor this repo pins (pyproject.toml, and
+# specs/05-sdk-contract.md Current floor). Named once so the follow-up bump
+# that drops the guards has a single place to look instead of three
+# hand-written strings that can drift apart.
+SDK_FLOOR = '4.3.0'
+
 ####################################################
 # Input parsers
 ####################################################
@@ -33,7 +39,7 @@ def parse_hashes(hashes, hash_file=None):
 def require_sdk_kwargs(method, names, what):
     """Refuse cleanly when the installed SDK predates a keyword this command needs.
 
-    The declared floor (published `polyswarm_api` 4.3.0) predates the
+    The declared floor (published `polyswarm_api` SDK_FLOOR) predates the
     hunt-page surface, and passing an unknown keyword to an older SDK raises a
     bare TypeError that `ExceptionHandlingGroup` renders as a traceback plus
     'Please contact support'. A new OPTION may require the newer SDK; an
@@ -45,7 +51,7 @@ def require_sdk_kwargs(method, names, what):
     missing = [n for n in names if n not in parameters]
     if missing:
         raise exceptions.PolyswarmException(
-            f'{what} requires a polyswarm-api release newer than 4.3.0 '
+            f'{what} requires a polyswarm-api release newer than {SDK_FLOOR} '
             f'(the paired SDK change adds {", ".join(missing)}). '
             f'Upgrade polyswarm-api to use it.')
 

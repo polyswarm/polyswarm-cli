@@ -39,8 +39,10 @@ def live_stop(ctx, ruleset_id):
                    'Pass 0 for no time filter at all.')
 @click.option('-i', '--livescan-id',
               help="Scope the feed to one live hunt (a ruleset's Live Hunt Id).")
-@click.option('-m', '--max-results', type=click.INT,
-              help='Stop after this many results. Unset means every page, as before.')
+@click.option('-m', '--max-results', type=click.IntRange(min=0),
+              help='Stop after this many results. Unset or 0 means no bound — '
+                   'every page, as before. A negative is refused here rather '
+                   'than silently meaning unbounded.')
 @click.option('-r', '--rule-name', help='Filter results on this rule name.')
 @click.option('-f', '--family', help='Filter hunt results based on the family name.')
 @click.option('-l', '--polyscore-lower', help='Polyscore lower bound for the hunt results.')

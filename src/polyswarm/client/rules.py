@@ -87,9 +87,9 @@ def favorite(ctx, rule_id, unfavorite):
         # traceback. (Same principle as the withdrawn --include-counts flag:
         # a new surface may require the new SDK; existing surfaces may not.)
         raise exceptions.PolyswarmException(
-            'rules favorite requires a polyswarm-api release newer than '
-            '4.3.0 (the paired SDK change adds ruleset_favorite). '
-            'Upgrade polyswarm-api to use this command.')
+            f'rules favorite requires a polyswarm-api release newer than '
+            f'{utils.SDK_FLOOR} (the paired SDK change adds ruleset_favorite). '
+            f'Upgrade polyswarm-api to use this command.')
     try:
         output.ruleset_favorite(toggle(rule_id, not unfavorite))
     except api_exceptions.RequestException as exc:
