@@ -1,5 +1,6 @@
 import logging
 import functools
+import inspect
 import sys
 
 import click
@@ -22,6 +23,31 @@ def parse_hashes(hashes, hash_file=None):
         hashes += hash_file.readlines()
 
     return [h.strip('\n') for h in hashes]
+
+
+####################################################
+# SDK-surface guards
+####################################################
+
+
+def require_sdk_kwargs(method, names, what):
+    """Refuse cleanly when the installed SDK predates a keyword this command needs.
+
+    The declared floor (published `polyswarm_api` 4.3.0) predates the
+    hunt-page surface, and passing an unknown keyword to an older SDK raises a
+    bare TypeError that `ExceptionHandlingGroup` renders as a traceback plus
+    'Please contact support'. A new OPTION may require the newer SDK; an
+    existing invocation may not — so this is checked only when the caller
+    actually uses the option, leaving every pre-existing command working
+    unchanged on the floor (see specs/05-sdk-contract.md).
+    """
+    parameters = inspect.signature(method).parameters
+    missing = [n for n in names if n not in parameters]
+    if missing:
+        raise exceptions.PolyswarmException(
+            f'{what} requires a polyswarm-api release newer than 4.3.0 '
+            f'(the paired SDK change adds {", ".join(missing)}). '
+            f'Upgrade polyswarm-api to use it.')
 
 
 ####################################################
