@@ -97,10 +97,12 @@ def favorite(ctx, rule_id, unfavorite):
             used = errors.get('favorites_used')
             limit = errors.get('favorites_limit')
             # Counters are advisory; fall back rather than render "(None of None)".
+            server_msg = getattr(exc.request, 'result', None)
+            # `result` is the parsed body: only usable here if it is a string.
             budget = (f'Favorite limit reached ({used} of {limit} used).'
                       if used is not None and limit is not None
-                      else str(getattr(exc.request, 'result', None)
-                               or 'Favorite limit reached.'))
+                      else (server_msg if isinstance(server_msg, str)
+                            else 'Favorite limit reached.'))
             # PolyswarmException exits 2; ClickException would exit 1, reserved
             # for no-results/not-found.
             raise exceptions.PolyswarmException(

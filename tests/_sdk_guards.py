@@ -17,10 +17,14 @@ from polyswarm_api.api import PolyswarmAPI
 _RULESET = {'id': '0', 'livescan_id': None, 'livescan_created': None,
             'name': 'n', 'description': 'd', 'deleted': False,
             'created': '2026-08-20T00:00:00+00:00',
-            'modified': '2026-08-20T00:00:00+00:00', 'yara': None}
+            'modified': '2026-08-20T00:00:00+00:00', 'yara': None,
+            # the probed keys are present so the guard does not depend on the
+            # SDK assigning absent ones
+            'rule_count': 1, 'favorite': False, 'historical_hunt_count': 0}
 _HUNT = {'id': '0', 'status': 'PENDING', 'progress': 0.0, 'active': None,
          'created': '2026-08-20T00:00:00+00:00', 'summary': None,
-         'results_csv_uri': None, 'ruleset_name': 'n', 'yara': None}
+         'results_csv_uri': None, 'ruleset_name': 'n', 'yara': None,
+         'rule_id': '1', 'rule_modified': None, 'source_rule_changed': False}
 
 # Keyed on the METHOD, never also on the resource class: that would let a
 # resource rename silently skip the whole command suite while CI stays green.

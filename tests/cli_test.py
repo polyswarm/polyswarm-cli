@@ -8,7 +8,6 @@ from unittest import TestCase, mock
 from polyswarm_api import resources
 from pathlib import Path
 
-import unittest
 
 import vcr as vcr_
 
@@ -16,7 +15,6 @@ from tests._sdk_guards import (
     needs_favorite_method as _needs_favorite_method,
     needs_tracking_fields as _needs_tracking_fields,
 )
-from polyswarm_api.api import PolyswarmAPI
 import click
 from click.testing import CliRunner
 

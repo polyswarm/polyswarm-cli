@@ -143,9 +143,9 @@ the known-good branch, which is the safe fallback — the pre-known-good renderi
 degradation is belt-and-braces, not a supported configuration: `.state` is load-bearing
 here with no substitute. Both attributes ship in SDK **4.1.0**, but the dependency floor is
 `polyswarm_api>=4.3.0` — the pin's current value (moved there by the #264 release
-bump). Its *rationale* is two behaviours that landed in 4.2.0 and still hold
-transitively; [05-sdk-contract.md](./05-sdk-contract.md) §Current floor is
-authoritative. Both of which
+bump); its *rationale* is two behaviours that landed in 4.2.0 and still hold
+transitively, and [05-sdk-contract.md](./05-sdk-contract.md) §Current floor is
+authoritative. Those two
 fail silently on 4.1.0 (see [`05-sdk-contract.md`](./05-sdk-contract.md) §Version pin) — so
 every supported install has them. `JSONOutput` needs no change — it dumps the resource's
 `.json`, which already carries the raw `state` and `known_good` keys.
