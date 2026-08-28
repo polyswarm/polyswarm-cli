@@ -32,17 +32,33 @@ def delete(ctx, rule_id):
 
 
 @rules.command('list', short_help='List all rulesets.')
+@click.option('-n', '--name', help='Substring match on the ruleset name (case-insensitive).')
+@click.option('-s', '--status', type=click.Choice(['active']),
+              help='Only rulesets whose live hunt is currently running.')
+@click.option('--favorites-only', is_flag=True, help='Only favorited (starred) rulesets.')
+@click.option('--has-new-results', is_flag=True,
+              help='Only rulesets whose stored new-results counter is positive.')
 @click.pass_context
-def list_rules(ctx):
+def list_rules(ctx, name, status, favorites_only, has_new_results):
+    """List rulesets, optionally filtered. All filters are conjunctive.
+
+    Filtering is applied SERVER-side: the list is keyset-paginated, so a
+    client filtering locally would have to walk every page to find matches.
+    """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    # Zero-argument on purpose: every hunt-page field this renders (counts,
-    # favorites, tracking) arrives as a plain response field the formatters
-    # getattr-guard, so the command needs NO new SDK behaviour and works
-    # unchanged on the pin's floor (4.3.0). The new-results badge is a STORED
-    # server-side counter refreshed on a schedule — there is no per-request
-    # count to ask for.
-    for ruleset in api.ruleset_list():
+    # UNFILTERED `rules list` stays a zero-argument call, so it keeps working
+    # on the pin's floor (4.3.0) exactly as before — every field it renders is
+    # a plain response field the formatters getattr-guard. Only a caller who
+    # actually passes a filter needs the paired SDK, and that caller gets a
+    # clean upgrade message instead of a TypeError traceback.
+    kwargs = {k: v for k, v in (('name', name), ('status', status),
+                                ('favorites_only', favorites_only or None),
+                                ('has_new_results', has_new_results or None))
+              if v is not None}
+    if kwargs:
+        utils.require_sdk_kwargs(api.ruleset_list, sorted(kwargs), 'rules list filtering')
+    for ruleset in api.ruleset_list(**kwargs):
         output.ruleset(ruleset)
 
 

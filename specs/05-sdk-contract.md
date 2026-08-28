@@ -84,7 +84,15 @@ The floor moved to **4.3.0** with #264 (`pyproject.toml` has said `>=4.3.0` sinc
 
 The known-good rendering attributes (`ArtifactInstance.state`, `.known_good`/`.known_good_sources`, read by `formatters/text.py` — see [`03-formatters.md`](./03-formatters.md) §Known-good artifact instances) ship in **4.1.0**, so they are *not* what sets the floor; they are simply covered by it.
 
-**One command exceeds the floor, by design, with a guarded degradation:** `rules favorite` wraps `ruleset_favorite`, which does not exist on published 4.3.0 — it ships in the paired SDK change and reaches PyPI with the next SDK release. The command guards with `getattr` and fails with a clean upgrade message (exit 2) on a floor install; every other command works unchanged there, which is why the floor itself does not move (moving it has the two preconditions above, and neither holds until the SDK releases). When the SDK release lands on PyPI, bumping the floor and dropping the guard is the follow-up.
+**Three surfaces exceed the floor, by design, each with a guarded degradation.** All ship in the paired SDK change and reach PyPI with the next SDK release:
+
+| Surface | Needs from the SDK | Guard |
+|---|---|---|
+| `rules favorite` | `ruleset_favorite` | `getattr` on the method |
+| `rules list --name/--status/--favorites-only/--has-new-results` | `ruleset_list(**filters)` | `utils.require_sdk_kwargs` |
+| `live feed --livescan-id/--max-results` | `live_feed(livescan_id=, max_results=)` | `utils.require_sdk_kwargs` |
+
+The distinction that keeps the floor where it is: a new **option** may require the newer SDK, but an existing **invocation** may not. So the guards fire only when the caller actually uses the new surface — an unfiltered `rules list` and a plain `live feed` still reach the floor's own signatures untouched — and a floor install gets a clean upgrade message at exit 2 rather than the `TypeError`/`AttributeError` traceback a bare call would raise. That is why the floor itself does not move; moving it has the two preconditions above, and neither holds until the SDK releases. `require_sdk_kwargs` inspects the installed signature rather than catching `TypeError`, so a genuine argument error inside the SDK is never mistaken for a version mismatch. When the SDK release lands on PyPI, bumping the floor and dropping all three guards is the follow-up.
 
 ## Worked example — the httpx SDK migration
 

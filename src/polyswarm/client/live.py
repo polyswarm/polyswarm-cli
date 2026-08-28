@@ -2,6 +2,8 @@ import logging
 
 import click
 
+from polyswarm.client import utils
+
 logger = logging.getLogger(__name__)
 
 
@@ -32,19 +34,44 @@ def live_stop(ctx, ruleset_id):
 
 @live.command('feed', short_help='Get results from live hunt.')
 @click.option('-s', '--since', type=click.INT, default=1440,
-              help='How far back in seconds to request results (default: 1440).')
+              help='How far back in MINUTES to request results '
+                   '(default: 1440 — 24h, the window the ruleset badge counts). '
+                   'Pass 0 for no time filter at all.')
+@click.option('-i', '--livescan-id',
+              help="Scope the feed to one live hunt (a ruleset's Live Hunt Id).")
+@click.option('-m', '--max-results', type=click.INT,
+              help='Stop after this many results. Unset means every page, as before.')
 @click.option('-r', '--rule-name', help='Filter results on this rule name.')
 @click.option('-f', '--family', help='Filter hunt results based on the family name.')
 @click.option('-l', '--polyscore-lower', help='Polyscore lower bound for the hunt results.')
 @click.option('-u', '--polyscore-upper', help='Polyscore upper bound for the hunt results.')
 @click.option('-p', '--private', is_flag=True, help='Filter results to only your private community.')
 @click.pass_context
-def live_results(ctx, since, rule_name, family, polyscore_lower, polyscore_upper, private):
+def live_results(ctx, since, livescan_id, max_results, rule_name, family,
+                 polyscore_lower, polyscore_upper, private):
+    """Show live-hunt results.
+
+    `--livescan-id` is the drill-down for the per-ruleset new-results badge
+    that `rules view` renders: the badge counts a hunt's recent results, and
+    this is how you list them.
+    """
     api = ctx.obj['api']
     output = ctx.obj['output']
+    # Both new options ride one guard: they are the only part of this command
+    # that needs the paired SDK, and a bare kwarg would be a TypeError
+    # traceback on the pin's floor. Every existing invocation is untouched.
+    kwargs = {}
+    if livescan_id is not None:
+        kwargs['livescan_id'] = livescan_id
+    if max_results is not None:
+        kwargs['max_results'] = max_results
+    if kwargs:
+        utils.require_sdk_kwargs(api.live_feed, sorted(kwargs), 'live feed ' +
+                                 ' and '.join('--' + k.replace('_', '-') for k in sorted(kwargs)))
     for result in api.live_feed(
             since, rule_name=rule_name, family=family,
-            polyscore_lower=polyscore_lower, polyscore_upper=polyscore_upper, community='private' if private else None):
+            polyscore_lower=polyscore_lower, polyscore_upper=polyscore_upper,
+            community='private' if private else None, **kwargs):
         output.live_result(result)
 
 
