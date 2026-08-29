@@ -179,3 +179,24 @@ def test_older_sdk_without_the_dropped_attribute_does_not_raise(cls, method):
     rendered = click.unstyle('\n'.join(getattr(TextOutput(color=False), method)(result, write=False)))
     assert 'Matched Strings:' in rendered
     assert 'not shown' not in rendered
+
+
+@pytest.mark.parametrize('cls,method', PATHS)
+def test_empty_list_with_a_dropped_count_does_not_claim_no_evidence(cls, method):
+    """Contradictory input must not produce a confident false statement.
+
+    The analyzer keeps a match's first string, so this should be unreachable -- but the
+    renderer trusted that invariant while asserting "matched without byte evidence" AND
+    discarding the count. Report what is certain instead.
+    """
+    line, = _matched_lines(_render(cls, method, matched_strings=[],
+                                   matched_strings_dropped=19))
+    assert 'without byte evidence' not in line, 'must not assert a rule property'
+    assert '19' in line and 'withheld' in line, 'the count must survive'
+
+
+@pytest.mark.parametrize('cls,method', PATHS)
+def test_empty_list_without_a_count_still_says_no_evidence(cls, method):
+    """The normal empty case is unchanged."""
+    line, = _matched_lines(_render(cls, method, matched_strings=[]))
+    assert 'without byte evidence' in line

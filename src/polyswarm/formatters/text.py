@@ -52,6 +52,14 @@ class TextOutput(base.BaseOutput):
         if strings is None:
             return []
         if not strings:
+            if dropped:
+                # Should be unreachable -- the analyzer keeps a match's first string, so an
+                # empty list with a non-zero count is contradictory. Report only what is
+                # certain: asserting "matched without byte evidence" here would be a false
+                # claim about the RULE, and silently discarding the count is the exact
+                # wrong inference this line exists to prevent.
+                return [self._yellow(
+                    f'Matched Strings: none shown ({dropped} withheld, result size limit)')]
             return [self._white('Matched Strings: none — the rule matched without byte '
                                 'evidence (a structural or negative match, or private strings)')]
         lines = [self._white('Matched Strings:')]

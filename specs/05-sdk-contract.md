@@ -90,6 +90,15 @@ Two behaviours the CLI relies on only exist from **4.2.0**; on 4.1.0 both fail *
 
 The known-good rendering attributes (`ArtifactInstance.state`, `.known_good`/`.known_good_sources`, read by `formatters/text.py` — see [`03-formatters.md`](./03-formatters.md) §Known-good artifact instances) ship in **4.1.0**, so they are *not* what sets the floor; they are simply covered by it.
 
+`matched_strings` / `matched_strings_dropped` are the opposite case and the floor does
+**not** yet cover them: they are unreleased at the time of writing, so the CLI reads both
+with `getattr(..., None)` and degrades to rendering nothing (see
+[`03-formatters.md`](./03-formatters.md) §Matched strings). Raising the floor is not
+possible until the SDK carrying them is on PyPI — §Version pin's two preconditions — so
+**record the version here once it releases**, and only then decide whether the graceful
+degradation is still wanted or the floor should move. Without a version written down
+nothing prompts that decision.
+
 ## Worked example — the httpx SDK migration
 
 The SDK's move to an `httpx`-based, three-layer architecture (pure-dataclass `PolyswarmRequest`, session-based execution, lazy generators) removed several 3.x affordances the CLI had reached into:

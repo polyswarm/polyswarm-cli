@@ -206,6 +206,13 @@ block, in **yellow** rather than white:
 It is the one line here reporting something the platform withheld, which is why it is not
 white like the entries above it. Omitted entirely when the count is zero or `None`.
 
+**An empty list with a non-zero count does not claim "no byte evidence".** That
+combination should be unreachable — the analyzer keeps a match's first string, so
+`[] ⇒ dropped == 0` — but the renderer must not *depend* on an invariant owned by another
+repo while making a positive claim about the rule. It reports what is certain instead
+(`none shown (N withheld, result size limit)`), because asserting a structural match and
+discarding the count is the precise wrong inference this line exists to prevent.
+
 This is not cosmetic. Without it a truncated list reads as the whole truth and a user
 concludes their rule hit twice when it hit twenty-one times — the same wrong-inference
 class the three-state contract above exists to prevent, one level down. Read with
