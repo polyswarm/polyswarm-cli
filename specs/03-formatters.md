@@ -176,6 +176,20 @@ Two constraints, both counter-intuitive enough to be worth stating:
   is a real answer to "why did this hit". Since the analyzer always sends `strings` once
   this feature ships, `None` on a detail route means a result predating it — nothing to
   say.
+- **The attribute is defended; the entry keys are not, and that is deliberate.**
+  `matched_strings` / `matched_strings_dropped` are read with `getattr(..., None)` because
+  the *dependency floor* admits SDKs without them — a version-skew problem. The keys
+  *inside* an entry (`identifier`, `offset`, `length`, `data`, `truncated`) are
+  subscripted, because a partial entry is not version skew but a producer violating its
+  own contract, and rendering half a match as though it were whole is worse than failing.
+  The two look inconsistent side by side and are answering different questions.
+- **`data` is sanitised before rendering.** It is the only sample-derived field in a hunt
+  result, so it is attacker-controlled end to end. yara escapes non-printables upstream
+  and the analyzer preserves that rendering, so `_safe_data` is a no-op on valid input —
+  it exists because the guarantee lives in another repo, and a raw CSI sequence reaching
+  a terminal would repaint or clear an analyst's screen.
+- **ASCII only.** `TextOutput` emits no non-ASCII; stdout under a C/POSIX locale replaces
+  it with `?`. `test_output_is_ascii_only` pins that.
 - **`truncated` is not a byte count.** The stored length is capped server-side, so the
   marker means "there was more than this" and over-reports at exactly the cap. Never
   render it as an exact size.

@@ -1,5 +1,6 @@
 import sys
 import functools
+import re
 import json
 from datetime import datetime
 
@@ -15,6 +16,19 @@ def pretty_print_datetime(value):
     if isinstance(value, str):
         value = parse_isoformat(value)
     return datetime.strftime(value, '%Y-%m-%d %H:%M:%S UTC')
+
+
+# Matched-string `data` is the one field in a hunt result derived from the SAMPLE, so it
+# is attacker-controlled end to end. yara escapes non-printables before we ever see it and
+# the analyzer keeps that rendering verbatim, so valid data is already printable ASCII and
+# this is a no-op on it. It exists because that guarantee lives in ANOTHER repo: if it ever
+# slips, a raw CSI sequence here would repaint or clear the analyst's terminal.
+_CONTROL_CHARS = re.compile(r'[\x00-\x1f\x7f]')
+
+
+def _safe_data(value):
+    """Matched bytes as yara rendered them, with any control character neutralised."""
+    return _CONTROL_CHARS.sub('.', value)
 
 
 def is_grouped(fn):
@@ -60,7 +74,7 @@ class TextOutput(base.BaseOutput):
                 # wrong inference this line exists to prevent.
                 return [self._yellow(
                     f'Matched Strings: none shown ({dropped} withheld, result size limit)')]
-            return [self._white('Matched Strings: none — the rule matched without byte '
+            return [self._white('Matched Strings: none -- the rule matched without byte '
                                 'evidence (a structural or negative match, or private strings)')]
         lines = [self._white('Matched Strings:')]
         for string in strings:
@@ -70,13 +84,13 @@ class TextOutput(base.BaseOutput):
                 # rather than render half-right.
                 size += ', truncated'
             lines.append(self._white(
-                f'  {string["identifier"]} @ 0x{string["offset"]:x} ({size}): {string["data"]}'))
+                f'  {string["identifier"]} @ 0x{string["offset"]:x} ({size}): {_safe_data(string["data"])}'))
         if dropped:
             # Without this the list reads as the whole truth, and a user concludes their
             # rule hit N times when it hit N + dropped. Yellow, not white: it is the one
             # line here reporting something the platform withheld.
             lines.append(self._yellow(
-                f'  … {dropped} more not shown (result size limit)'))
+                f'  ... {dropped} more not shown (result size limit)'))
         return lines
 
     def _output(self, output, write):

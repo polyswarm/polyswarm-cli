@@ -39,6 +39,24 @@ _STRINGS = [
 ]
 
 # (resource class, formatter method name)
+def _sdk_carries_the_fields():
+    """Whether the installed SDK parses the attributes this module renders.
+
+    The declared pin (`polyswarm_api>=4.3.0`) still admits SDKs predating them -- 4.3.0
+    itself is released without them -- so `pip install .[tests] && pytest` against the
+    floor would fail this module wholesale. CI resolves the paired SDK branch and runs it
+    for real. Remove this guard when the floor is raised past the release that adds them
+    (specs/05-sdk-contract.md, §Current floor).
+    """
+    probe = resources.LiveHuntResult(dict(_COMMON, livescan_id=3))
+    return hasattr(probe, 'matched_strings') and hasattr(probe, 'matched_strings_dropped')
+
+
+pytestmark = pytest.mark.skipif(
+    not _sdk_carries_the_fields(),
+    reason='installed SDK predates matched_strings / matched_strings_dropped')
+
+
 PATHS = [
     (resources.LiveHuntResult, 'live_result'),
     (resources.HistoricalHuntResult, 'historical_result'),
@@ -136,7 +154,11 @@ def test_an_sdk_without_the_attribute_does_not_raise(cls, method):
     content = dict(_COMMON)
     content['livescan_id' if cls is resources.LiveHuntResult else 'historicalscan_id'] = 3
     result = cls(content)
-    del result.matched_strings
+    # pop, not `del`: on an SDK that never SET the attribute -- exactly the configuration
+    # this test models, and one inside the declared pin -- `del` raises AttributeError and
+    # the test errors instead of passing.
+    result.__dict__.pop('matched_strings', None)
+    assert not hasattr(result, 'matched_strings')
     rendered = click.unstyle('\n'.join(getattr(TextOutput(color=False), method)(result, write=False)))
     assert 'Matched Strings' not in rendered
     assert 'Rule: dos_stub_message' in rendered   # the rest of the row still renders
@@ -151,7 +173,7 @@ def test_dropped_count_is_reported_to_the_user(cls, method):
     """
     lines = _matched_lines(_render(cls, method, matched_strings=_STRINGS,
                                    matched_strings_dropped=19))
-    assert lines[-1].strip().startswith('…')
+    assert lines[-1].strip().startswith('...')
     assert '19 more not shown' in lines[-1]
 
 
@@ -175,7 +197,8 @@ def test_older_sdk_without_the_dropped_attribute_does_not_raise(cls, method):
     content = dict(_COMMON, matched_strings=_STRINGS)
     content['livescan_id' if cls is resources.LiveHuntResult else 'historicalscan_id'] = 3
     result = cls(content)
-    del result.matched_strings_dropped
+    result.__dict__.pop('matched_strings_dropped', None)   # see the sibling test: not `del`
+    assert not hasattr(result, 'matched_strings_dropped')
     rendered = click.unstyle('\n'.join(getattr(TextOutput(color=False), method)(result, write=False)))
     assert 'Matched Strings:' in rendered
     assert 'not shown' not in rendered
@@ -200,3 +223,36 @@ def test_empty_list_without_a_count_still_says_no_evidence(cls, method):
     """The normal empty case is unchanged."""
     line, = _matched_lines(_render(cls, method, matched_strings=[]))
     assert 'without byte evidence' in line
+
+
+@pytest.mark.parametrize('cls,method', PATHS)
+def test_control_characters_in_data_are_neutralised(cls, method):
+    """`data` is sample-derived, so it is the one attacker-controlled field here.
+
+    yara escapes non-printables upstream and the analyzer keeps that rendering, so valid
+    data never contains a raw control byte -- but that guarantee lives in another repo.
+    A CSI sequence reaching a terminal unescaped could repaint or clear an analyst's
+    screen, so the renderer neutralises rather than trusting.
+    """
+    hostile = [{'offset': 0, 'identifier': '$evil', 'length': 9,
+                'data': 'A\x1b[2JB\r\nC\x00D', 'truncated': False}]
+    rendered = _render(cls, method, matched_strings=hostile)
+    assert '\x1b' not in rendered and chr(27) not in rendered
+    assert '\r' not in rendered and '\x00' not in rendered
+    # the surviving printable bytes still render, so a legitimate match is unharmed
+    assert 'A.[2JB..C.D' in rendered
+
+
+@pytest.mark.parametrize('cls,method', PATHS)
+def test_ordinary_data_is_untouched_by_the_sanitiser(cls, method):
+    """The escaping is a no-op on what yara actually emits."""
+    rendered = _render(cls, method, matched_strings=_STRINGS)
+    assert '54 68 69 73 20 70 72 6F 67 72 61 6D 20 63' in rendered
+
+
+@pytest.mark.parametrize('cls,method', PATHS)
+def test_output_is_ascii_only(cls, method):
+    """stdout under a C/POSIX locale replaces non-ASCII with '?'. Nothing here needs it."""
+    rendered = _render(cls, method, matched_strings=_STRINGS, matched_strings_dropped=19)
+    block = '\n'.join(_matched_lines(rendered))
+    assert block.isascii(), [c for c in block if not c.isascii()]
