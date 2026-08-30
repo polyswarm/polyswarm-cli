@@ -278,3 +278,46 @@ def test_output_is_ascii_only(cls, method):
     rendered = _render(cls, method, matched_strings=_STRINGS, matched_strings_dropped=19)
     block = '\n'.join(_matched_lines(rendered))
     assert block.isascii(), [c for c in block if not c.isascii()]
+
+
+def _render_styled(cls, method, **extra):
+    """Keeps the ANSI wrapper, so the colour decision is observable.
+
+    Every other render here uses color=False and unstyles, which makes colour invisible --
+    both dropped-count lines could regress to white and the module would stay green. Both
+    halves are load-bearing: color=True is what makes TextOutput paint, and the absent
+    click.unstyle is what keeps the codes in the string. Mirrors _render_styled in
+    known_good_field_test.py, the established pattern for this (specs/03-formatters.md).
+    """
+    content = dict(_COMMON, **extra)
+    content['livescan_id' if cls is resources.LiveHuntResult else 'historicalscan_id'] = 3
+    return '\n'.join(getattr(TextOutput(color=True), method)(cls(content), write=False))
+
+
+@needs_sdk_fields
+@pytest.mark.parametrize('cls,method', PATHS)
+def test_dropped_count_line_is_yellow(cls, method):
+    """specs/03 states the colour as a deliberate signal: it is the one line in the block
+    reporting something the platform withheld, so it must not read as ordinary output."""
+    rendered = _render_styled(cls, method, matched_strings=_STRINGS,
+                              matched_strings_dropped=19)
+    expected = click.style('  ... 19 more not shown (result size limit)', fg='yellow')
+    assert expected in rendered, rendered
+
+
+@needs_sdk_fields
+@pytest.mark.parametrize('cls,method', PATHS)
+def test_empty_with_a_count_line_is_yellow(cls, method):
+    """The other withheld-reporting line, and the one a reader is most likely to meet."""
+    rendered = _render_styled(cls, method, matched_strings=[], matched_strings_dropped=19)
+    expected = click.style('Matched Strings: none shown (19 withheld, result size limit)',
+                           fg='yellow')
+    assert expected in rendered, rendered
+
+
+@needs_sdk_fields
+@pytest.mark.parametrize('cls,method', PATHS)
+def test_the_ordinary_block_is_not_yellow(cls, method):
+    """Otherwise the two tests above would pass on a formatter that painted everything."""
+    rendered = _render_styled(cls, method, matched_strings=_STRINGS)
+    assert click.style('Matched Strings:', fg='yellow') not in rendered

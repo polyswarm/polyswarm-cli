@@ -159,7 +159,8 @@ line.
 | `matched_strings` | Rendered |
 |---|---|
 | `None` | *nothing* — no line is emitted |
-| `[]` | `Matched Strings: none -- the rule matched without byte evidence (a structural or negative match, or private strings)` |
+| `[]`, no count | `Matched Strings: none -- the rule matched without byte evidence (a structural or negative match, or private strings)` |
+| `[]`, count > 0 | `Matched Strings: none shown (N withheld, result size limit)` — the count **overrides** the row above, because asserting a structural match while discarding a withheld count would be a confident false statement. Should be unreachable; see below. |
 | `[…]` | `Matched Strings:` followed by one indented `  $ident @ 0xOFFSET (N bytes[, truncated]): DATA` line per entry |
 
 **The silent-`None` branch depends on list routes sending `null`, and that is measured
