@@ -91,7 +91,7 @@ class TextOutput(base.BaseOutput):
                 # rather than render half-right.
                 size += ', truncated'
             lines.append(self._white(
-                f'  {string["identifier"]} @ 0x{string["offset"]:x} ({size}): {_safe_data(string["data"])}'))
+                f'  {_safe_data(string["identifier"])} @ 0x{string["offset"]:x} ({size}): {_safe_data(string["data"])}'))
         if dropped:
             # Without this the list reads as the whole truth, and a user concludes their
             # rule hit N times when it hit N + dropped. Yellow, not white: it is the one

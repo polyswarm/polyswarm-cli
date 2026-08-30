@@ -42,7 +42,10 @@ The `Polyswarm(PolyswarmAPI)` wrapper holds CLI-only orchestration (parallel fan
 the SDK carrying them is not on PyPI, so neither precondition in
 [`05-sdk-contract.md`](./05-sdk-contract.md) §Version pin is met. The CLI reads both with
 `getattr(..., None)` and degrades to rendering nothing, and
-`tests/hunt_matched_strings_test.py` carries a module-level skip for the same reason.
+`tests/hunt_matched_strings_test.py` carries a `needs_sdk_fields` mark on the tests that
+construct populated resources — deliberately **per-test, not module-level**, so the two
+older-SDK tests still run on a floor SDK, which is the only install where they guard
+anything.
 
 **Action once the SDK releases:** record the version in `05-sdk-contract.md` §Current
 floor, decide whether to raise the floor past it, and if so drop *both* the `getattr`

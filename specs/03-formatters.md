@@ -162,6 +162,15 @@ line.
 | `[]` | `Matched Strings: none -- the rule matched without byte evidence (a structural or negative match, or private strings)` |
 | `[…]` | `Matched Strings:` followed by one indented `  $ident @ 0xOFFSET (N bytes[, truncated]): DATA` line per entry |
 
+**The silent-`None` branch depends on list routes sending `null`, and that is measured
+rather than assumed.** If a list route ever returned `[]` per row instead, every row of a
+large hunt would carry the loud "matched without byte evidence" line — the permanent
+false alarm this design exists to avoid, arriving through the branch deliberately kept
+loud. The server pins it for **both** hunt pairs in artifact-index's
+`test_list_serializers_never_touch_storage`, which asserts the key is present-and-null on
+`ScanResultListSerializer` *and* `LiveResultListSerializer`, against fixture rows that do
+carry evidence. This repo cannot verify it; it relies on that test.
+
 Two constraints, both counter-intuitive enough to be worth stating:
 
 - **`None` emits nothing, and `[]` must not follow it into silence.** The instinct is to
@@ -188,10 +197,10 @@ Two constraints, both counter-intuitive enough to be worth stating:
   and the analyzer preserves that rendering, so `_safe_data` is a no-op on valid input —
   it exists because the guarantee lives in another repo, and a raw CSI sequence reaching
   a terminal would repaint or clear an analyst's screen.
-- **ASCII only, and enforced where it can be.** The literals this module emits are
-  ASCII, and `data` is filtered to printable ASCII by `_safe_data`. Server-supplied
-  `rule_name` / `tags` are **not** filtered and are outside this claim. Stdout under a
-  C/POSIX locale replaces non-ASCII with `?`.
+- **ASCII only, and true of this whole block.** The literals are ASCII, and both
+  server-supplied fields inside the matched-strings block — `data` and `identifier` — go
+  through `_safe_data`. Fields *outside* the block (`rule_name`, `tags`) are unfiltered
+  and outside this claim. Stdout under a C/POSIX locale replaces non-ASCII with `?`.
 - **`truncated` is not a byte count.** The stored length is capped server-side, so the
   marker means "there was more than this" and over-reports at exactly the cap. Never
   render it as an exact size.
