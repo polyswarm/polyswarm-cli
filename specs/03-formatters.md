@@ -159,7 +159,7 @@ line.
 | `matched_strings` | Rendered |
 |---|---|
 | `None` | *nothing* — no line is emitted |
-| `[]` | `Matched Strings: none — the rule matched without byte evidence (a structural or negative match, or private strings)` |
+| `[]` | `Matched Strings: none -- the rule matched without byte evidence (a structural or negative match, or private strings)` |
 | `[…]` | `Matched Strings:` followed by one indented `  $ident @ 0xOFFSET (N bytes[, truncated]): DATA` line per entry |
 
 Two constraints, both counter-intuitive enough to be worth stating:
@@ -188,8 +188,10 @@ Two constraints, both counter-intuitive enough to be worth stating:
   and the analyzer preserves that rendering, so `_safe_data` is a no-op on valid input —
   it exists because the guarantee lives in another repo, and a raw CSI sequence reaching
   a terminal would repaint or clear an analyst's screen.
-- **ASCII only.** `TextOutput` emits no non-ASCII; stdout under a C/POSIX locale replaces
-  it with `?`. `test_output_is_ascii_only` pins that.
+- **ASCII only, and enforced where it can be.** The literals this module emits are
+  ASCII, and `data` is filtered to printable ASCII by `_safe_data`. Server-supplied
+  `rule_name` / `tags` are **not** filtered and are outside this claim. Stdout under a
+  C/POSIX locale replaces non-ASCII with `?`.
 - **`truncated` is not a byte count.** The stored length is capped server-side, so the
   marker means "there was more than this" and over-reports at exactly the cap. Never
   render it as an exact size.
@@ -214,7 +216,7 @@ When `result.matched_strings_dropped` is non-zero, a final line is appended **in
 block, in **yellow** rather than white:
 
 ```
-  … 19 more not shown (result size limit)
+  ... 19 more not shown (result size limit)
 ```
 
 It is the one line here reporting something the platform withheld, which is why it is not

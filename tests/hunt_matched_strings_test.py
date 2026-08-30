@@ -52,7 +52,11 @@ def _sdk_carries_the_fields():
     return hasattr(probe, 'matched_strings') and hasattr(probe, 'matched_strings_dropped')
 
 
-pytestmark = pytest.mark.skipif(
+# Applied per-test, NOT as a module-level pytestmark. The two older-SDK tests below build
+# a resource and pop the attribute off, so they pass on a floor SDK -- and that is the ONE
+# install where they guard anything. A module-level skip took them out of exactly the
+# configuration they model, leaving the getattr defence verified by nothing there.
+needs_sdk_fields = pytest.mark.skipif(
     not _sdk_carries_the_fields(),
     reason='installed SDK predates matched_strings / matched_strings_dropped')
 
@@ -83,6 +87,7 @@ def _matched_lines(text):
     return lines[start:end]
 
 
+@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_absent_renders_nothing(cls, method):
     """None is dominated by the list route, which can never carry strings -- `live feed`
@@ -92,12 +97,14 @@ def test_absent_renders_nothing(cls, method):
     assert 'Matched Strings' not in _render(cls, method)
 
 
+@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_explicit_null_renders_the_same_as_absent(cls, method):
     assert _matched_lines(_render(cls, method)) == \
         _matched_lines(_render(cls, method, matched_strings=None))
 
 
+@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_empty_says_the_rule_matched_without_evidence(cls, method):
     """`[]` must NOT read as an error or as the absent case — the rule really did match."""
@@ -106,6 +113,7 @@ def test_empty_says_the_rule_matched_without_evidence(cls, method):
     assert 'without byte evidence' in line
 
 
+@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_empty_and_absent_are_distinguishable(cls, method):
     """The whole reason the server keeps them apart; collapsing them here wastes that.
@@ -115,6 +123,7 @@ def test_empty_and_absent_are_distinguishable(cls, method):
     assert len(_matched_lines(_render(cls, method, matched_strings=[]))) == 1
 
 
+@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_populated_renders_identifier_offset_length_and_data(cls, method):
     header, first, second = _matched_lines(_render(cls, method, matched_strings=_STRINGS))
@@ -123,6 +132,7 @@ def test_populated_renders_identifier_offset_length_and_data(cls, method):
     assert second == '  $mz @ 0x0 (512 bytes, truncated): 4D 5A 90 00 ...'
 
 
+@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_truncation_is_marked_only_where_it_applies(cls, method):
     _, first, second = _matched_lines(_render(cls, method, matched_strings=_STRINGS))
@@ -130,6 +140,7 @@ def test_truncation_is_marked_only_where_it_applies(cls, method):
     assert 'truncated' in second
 
 
+@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_block_sits_between_tags_and_download_url(cls, method):
     """Placement is the acceptance criteria — alongside Rule / Tags, not appended last."""
@@ -164,6 +175,7 @@ def test_an_sdk_without_the_attribute_does_not_raise(cls, method):
     assert 'Rule: dos_stub_message' in rendered   # the rest of the row still renders
 
 
+@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_dropped_count_is_reported_to_the_user(cls, method):
     """A short list must not read as the whole truth.
@@ -177,12 +189,14 @@ def test_dropped_count_is_reported_to_the_user(cls, method):
     assert '19 more not shown' in lines[-1]
 
 
+@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_no_dropped_line_when_nothing_was_dropped(cls, method):
     rendered = _render(cls, method, matched_strings=_STRINGS)
     assert 'not shown' not in rendered
 
 
+@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_dropped_line_does_not_fabricate_a_strings_block(cls, method):
     """A dropped count with no strings is not a thing the server can send -- the
@@ -204,6 +218,7 @@ def test_older_sdk_without_the_dropped_attribute_does_not_raise(cls, method):
     assert 'not shown' not in rendered
 
 
+@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_empty_list_with_a_dropped_count_does_not_claim_no_evidence(cls, method):
     """Contradictory input must not produce a confident false statement.
@@ -218,6 +233,7 @@ def test_empty_list_with_a_dropped_count_does_not_claim_no_evidence(cls, method)
     assert '19' in line and 'withheld' in line, 'the count must survive'
 
 
+@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_empty_list_without_a_count_still_says_no_evidence(cls, method):
     """The normal empty case is unchanged."""
@@ -225,6 +241,7 @@ def test_empty_list_without_a_count_still_says_no_evidence(cls, method):
     assert 'without byte evidence' in line
 
 
+@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_control_characters_in_data_are_neutralised(cls, method):
     """`data` is sample-derived, so it is the one attacker-controlled field here.
@@ -234,15 +251,19 @@ def test_control_characters_in_data_are_neutralised(cls, method):
     A CSI sequence reaching a terminal unescaped could repaint or clear an analyst's
     screen, so the renderer neutralises rather than trusting.
     """
+    # \x9b is the 8-bit CSI and is the reason this whitelists printable ASCII rather than
+    # blacklisting C0: an earlier version stopped at \x7f and let it through, so `\x9b2J`
+    # still cleared the screen -- a hole in the exact byte the sanitiser exists to block.
     hostile = [{'offset': 0, 'identifier': '$evil', 'length': 9,
-                'data': 'A\x1b[2JB\r\nC\x00D', 'truncated': False}]
+                'data': 'A\x1b[2JB\r\nC\x00D\x9b2JE\u00e9F', 'truncated': False}]
     rendered = _render(cls, method, matched_strings=hostile)
-    assert '\x1b' not in rendered and chr(27) not in rendered
-    assert '\r' not in rendered and '\x00' not in rendered
+    for bad in ('\x1b', '\x9b', '\r', '\n\n', '\x00', '\u00e9'):
+        assert bad not in rendered.split('Matched Strings:')[1], repr(bad)
     # the surviving printable bytes still render, so a legitimate match is unharmed
-    assert 'A.[2JB..C.D' in rendered
+    assert 'A.[2JB..C.D.2JE.F' in rendered
 
 
+@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_ordinary_data_is_untouched_by_the_sanitiser(cls, method):
     """The escaping is a no-op on what yara actually emits."""
@@ -250,6 +271,7 @@ def test_ordinary_data_is_untouched_by_the_sanitiser(cls, method):
     assert '54 68 69 73 20 70 72 6F 67 72 61 6D 20 63' in rendered
 
 
+@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_output_is_ascii_only(cls, method):
     """stdout under a C/POSIX locale replaces non-ASCII with '?'. Nothing here needs it."""

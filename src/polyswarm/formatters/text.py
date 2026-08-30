@@ -23,12 +23,19 @@ def pretty_print_datetime(value):
 # the analyzer keeps that rendering verbatim, so valid data is already printable ASCII and
 # this is a no-op on it. It exists because that guarantee lives in ANOTHER repo: if it ever
 # slips, a raw CSI sequence here would repaint or clear the analyst's terminal.
-_CONTROL_CHARS = re.compile(r'[\x00-\x1f\x7f]')
+# Everything outside printable ASCII, not just the C0 range. An earlier version stopped at
+# \x7f and let U+009B through -- which IS the 8-bit CSI, acted on by xterm and VTE in UTF-8
+# mode, so `\x9b2J` still cleared the screen: a hole in exactly the byte this exists to
+# block. The threat model is "the upstream escaping guarantee lives in another repo and may
+# slip", and if it slips it slips into raw bytes, which do not stay conveniently low.
+# Whitelisting printable ASCII also makes the ASCII-only rule in specs/03 true of this
+# field rather than merely true of the literals around it.
+_UNPRINTABLE = re.compile(r'[^\x20-\x7e]')
 
 
 def _safe_data(value):
-    """Matched bytes as yara rendered them, with any control character neutralised."""
-    return _CONTROL_CHARS.sub('.', value)
+    """Matched bytes as yara rendered them, with anything unprintable neutralised."""
+    return _UNPRINTABLE.sub('.', value)
 
 
 def is_grouped(fn):
@@ -292,7 +299,7 @@ class TextOutput(base.BaseOutput):
         if result.tags:
             output.append(self._white(f'Tags: {result.tags}'))
         # getattr: the pin admits SDKs predating this attribute -- same defence as the
-        # known-good reads below. Missing lands on the silent None branch.
+        # known-good reads above. Missing lands on the silent None branch.
         output.extend(self._matched_strings(
             getattr(result, 'matched_strings', None),
             getattr(result, 'matched_strings_dropped', None)))
@@ -328,7 +335,7 @@ class TextOutput(base.BaseOutput):
         if result.tags:
             output.append(self._white(f'Tags: {result.tags}'))
         # getattr: the pin admits SDKs predating this attribute -- same defence as the
-        # known-good reads below. Missing lands on the silent None branch.
+        # known-good reads above. Missing lands on the silent None branch.
         output.extend(self._matched_strings(
             getattr(result, 'matched_strings', None),
             getattr(result, 'matched_strings_dropped', None)))
