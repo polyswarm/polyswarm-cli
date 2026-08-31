@@ -84,7 +84,8 @@ def favorite(ctx, rule_id, unfavorite):
             # `.json` is the response envelope and `result` a key inside it —
             # the request has no `.result`, only a private `._result`. getattr
             # so a bare request still reaches the message (specs/05).
-            server_msg = (getattr(exc.request, 'json', None) or {}).get('result')
+            envelope = getattr(exc.request, 'json', None)
+            server_msg = envelope.get('result') if isinstance(envelope, dict) else None
             budget = (f'Favorite limit reached ({used} of {limit} used).'
                       if used is not None and limit is not None
                       else (server_msg if isinstance(server_msg, str)

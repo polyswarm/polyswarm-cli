@@ -379,6 +379,26 @@ class RulesFavoriteCommandTest(TestCase):
         assert 'Traceback' not in result.output
         assert 'None' not in result.output
         assert '--unfavorite' in result.output
+    def test_a_list_shaped_json_envelope_does_not_crash_the_handler(self):
+        """The `errors` mapping is isinstance-guarded so a non-mapping falls
+        through; `.json` was not, so a non-dict envelope raised inside the very
+        handler that exists to avoid a traceback. Needs all three at once: a
+        dict `errors` carrying the code, no counters, and a non-dict `.json`."""
+        request = core.PolyswarmRequest(api=None, method='PUT', url='http://x')
+        request.errors = {'code': 'FAVORITE_LIMIT'}
+        request.json = [{'result': 'a list, not the envelope'}]
+        refusal = exceptions.RequestException(request, 'refused')
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_favorite',
+                        autospec=True, side_effect=refusal):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'favorite', '5'])
+        assert result.exit_code == 2, result.output
+        assert 'Traceback' not in result.output
+        assert 'contact support' not in result.output
+        assert 'Favorite limit reached.' in result.output
+
     def test_the_unfavorite_direction_gets_no_remedy_sentence(self):
         """Only the star direction can hit the cap and only it has a remedy —
         telling someone unstarring to unstar something else cannot help. Every

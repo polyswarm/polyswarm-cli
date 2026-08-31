@@ -9,7 +9,7 @@ How the CLI is tested: the `CliRunner` harness, the two mocking styles (SDK-boun
 - **Anything that is command behaviour is driven through `click.testing.CliRunner`** — argument parsing, the SDK call, the wiring, the exit code: exercise the real command tree, never an internal function standing in for it. No live PolySwarm stack is required. The one sanctioned exception is pure rendering logic — see [Style 3](#style-3--formatter-unit-tests).
 - **Mock at the SDK boundary, or replay HTTP with VCR — never both for the same path.** A test either patches `polyswarm_api.api.PolyswarmAPI.<method>` (unit-style) or lets VCR replay recorded HTTP (end-to-end). The CLI's own code is exercised either way.
 
-- **VCR is an efficiency cache, not a load-bearing requirement.** The suite must pass against a live e2e stack with VCR off. Don't hardcode `record_mode='none'`; if a test only works against its recorded cassette, that's a bug in the test.
+- **VCR is an efficiency cache, not a load-bearing requirement.** The suite must pass against a live e2e stack with VCR off. Don't hardcode `record_mode='none'`; if a test only works against its recorded cassette, that's a bug in the test. Note this is about a test's *logic*, not its fixtures: a `.click` snapshot pins server-generated ids and timestamps, so re-recording needs a stack in a particular state — see [Re-recording a cassette](#re-recording-a-cassette).
 
 - **Never `cp` a cassette from a sibling test, never hand-edit cassette bytes.** Re-record against a live stack.
 
@@ -46,7 +46,10 @@ because `_assert_text_result` compares the whole rendered block verbatim and the
 counter is part of it: `test_ruleset_favorite_text` pins `Favorites used: 2 of 5` and
 `test_ruleset_unfavorite_text` pins `1 of 5`. Re-record them **together**, from a known
 starting state, in the order they run — they describe one sequence (star, star, unstar) and
-recorded piecemeal their counters contradict each other.
+recorded piecemeal their counters contradict each other. That order is `unittest`'s: method
+names, sorted (`favorite_json` → `favorite_text` → `unfavorite_text`). Renaming or reordering
+a method breaks the sequence **silently**, because replay keeps passing and only the next
+re-record shows it — so if you rename one, re-record all of them.
 
 **A refusal at the favorite cap is deliberately not recorded here.** Saturating the budget
 takes all five team slots, which is exactly the state the tests above must *not* be in, so
