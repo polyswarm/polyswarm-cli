@@ -63,6 +63,15 @@ class FormatterHuntFieldsTest(TestCase):
         assert 'Rules in ruleset: 0' in rendered
         assert 'Historical hunts triggered: 0' in rendered
         assert 'New live results: 3' in rendered
+        # The count arrived without its marker: the inner guard's False arm.
+        # Without this the guard could be inverted and nothing would fail.
+        assert 'New-results count refreshed at' not in rendered
+    def test_a_favorite_without_a_timestamp_renders_the_state_alone(self):
+        # favorite=True carries favorited_at only when the server has one; the
+        # nested guard's False arm, unreached by the tests above.
+        rendered = self._render('ruleset', _ruleset(favorite=True, favorited_at=None))
+        assert 'Favorite: yes' in rendered
+        assert 'Favorited at' not in rendered
     def test_ruleset_staleness_marker_renders_beside_the_count(self):
         # The stored badge's marker: how fresh the number is. Rendered only
         # with a count (the server sends them together).

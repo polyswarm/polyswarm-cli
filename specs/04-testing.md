@@ -42,7 +42,12 @@ Helpers in `cli_test.py`: `_run_cli(args)` invokes the command tree under a cass
 
 ### Re-recording a cassette
 
-Some cassettes need a **stack state**, not just a live stack. `test_ruleset_favorite_limit_text`
+Some cassettes need a **stack state**, not just a live stack. All three ruleset-favorite
+cassettes do, because `_assert_text_result` compares the whole rendered block verbatim and
+the budget counter is part of it: `test_ruleset_favorite_text` pins `Favorites used: 2 of 5`
+and `test_ruleset_unfavorite_text` pins `1 of 5`, so each needs the team holding exactly
+that many stars at record time. Re-record them together, in a known starting state, or the
+counters disagree with each other. `test_ruleset_favorite_limit_text`
 records the server refusing at the favorite cap, so it needs a ruleset that exists *and* a
 team whose budget is already saturated. Against a fresh stack the recorded id is simply
 absent and the run 404s; against a stack where it exists but the budget is not full, the
