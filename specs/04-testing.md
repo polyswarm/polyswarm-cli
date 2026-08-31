@@ -42,10 +42,13 @@ Helpers in `cli_test.py`: `_run_cli(args)` invokes the command tree under a cass
 
 ### Re-recording a cassette
 
-Some cassettes need a **stack state**, not just a live stack (see the VCR invariant
-above). `test_ruleset_favorite_limit_text` needs the team's favorite budget already
-saturated; re-recording it against a fresh stack yields a 200 and a cassette that no
-longer tests anything. Set the state first, then record.
+Some cassettes need a **stack state**, not just a live stack. `test_ruleset_favorite_limit_text`
+records the server refusing at the favorite cap, so it needs a ruleset that exists *and* a
+team whose budget is already saturated. Against a fresh stack the recorded id is simply
+absent and the run 404s; against a stack where it exists but the budget is not full, the
+server accepts the star and the cassette records a success that tests nothing. Set both up
+first, then record — and note that saturating the budget consumes slots the other favorite
+tests use, so do it deliberately rather than as a side effect of a full-suite recording.
 
 ```bash
 rm tests/vcr/<name>.vcr            # (and regenerate <name>.click from the new run)
