@@ -74,49 +74,50 @@ When a CLI feature needs an SDK surface that doesn't exist yet:
 
   **Read the declared version off the archive's own tree, and mind pre-release suffixes.** PEP 440 orders `4.2.0.dev1 < 4.2.0`, so a `develop` head carrying a dev suffix (the SDK's `pyproject.toml` has a `[tool.bumpversion.parts.dev]`) would *not* satisfy a `>=4.2.0` floor even though it looks like 4.2.0 — and the archive build would be silently replaced from PyPI. Check the version string in the SDK branch's `pyproject.toml` / `__init__.py`, not the last release tag. When the floor was last verified this way both were read from `origin/develop` as `4.2.0`, no suffix; the pin has since moved to 4.3.0 (§Current floor), and a future bump should be re-checked the same way.
 
-### Current floor — `polyswarm_api>=4.3.0`
+### Current floor — `polyswarm_api>=4.4.0`
 
-The floor moved to **4.3.0** with #264 (`pyproject.toml` has said `>=4.3.0` since then; this header lagged at 4.2.0 — the drift itself is why the floor lives in ONE authoritative place, the pin, and this doc must follow it). The 4.2.0 rationale below still holds transitively; on 4.1.0 both behaviours fail *silently*, which is why the floor is a hard requirement rather than a preference:
+The floor moved to **4.4.0** with the hunt-page change set; before that **4.3.0** with #264 (`pyproject.toml` has said `>=4.3.0` since then; this header lagged at 4.2.0 — the drift itself is why the floor lives in ONE authoritative place, the pin, and this doc must follow it). The 4.2.0 rationale below still holds transitively; on 4.1.0 both behaviours fail *silently*, which is why the floor is a hard requirement rather than a preference:
 
 1. **`llm_report_create` sends the client's community.** 4.2.0 passes `community=self.community` when it builds the report resource; 4.1.0 omits it. `report llm-create` (`client/report.py`) supplies no community of its own — it relies entirely on the client's — so on 4.1.0 a report requested for a sample in a private community is created without one. No error, wrong resource.
 2. **A streaming download answered `204 No Content` raises `NoResultsException`.** The streaming path bypasses `parse_response`, so the 204 has to be raised by the session itself; 4.2.0 does that, 4.1.0 has no such raise anywhere in its session. The CLI's `download` commands depend on it for the no-results **exit code `1`** (§No-results signalling); against 4.1.0 an empty response reads as a successful download and exits `0`.
 
 The known-good rendering attributes (`ArtifactInstance.state`, `.known_good`/`.known_good_sources`, read by `formatters/text.py` — see [`03-formatters.md`](./03-formatters.md) §Known-good artifact instances) ship in **4.1.0**, so they are *not* what sets the floor; they are simply covered by it.
 
-**Three surfaces exceed the floor, by design, each with a guarded degradation.** All ship in the paired SDK change and reach PyPI with the next SDK release:
+**The floor is how this repo expresses every SDK dependency.** There are no runtime
+probes and no per-test skip guards: if the CLI uses an SDK surface, the floor names a
+version that has it, and `pip` enforces that at install time. The hunt-page surfaces —
+`ruleset_favorite` and the `YaraRulesetFavorite` resource, the `ruleset_list` filters,
+`live_feed(livescan_id=, max_results=)`, and the tracking/provenance fields the
+formatters render — are what moved the floor to 4.4.0. Code and tests use them
+directly.
 
-| Surface | Needs from the SDK | Guard |
-|---|---|---|
-| `rules favorite` | `ruleset_favorite` | `getattr` on the method |
-| `rules list --name/--status/--favorites-only/--has-new-results` | `ruleset_list(**filters)` | `client/utils.py`’s `require_sdk_kwargs` |
-| `live feed --livescan-id/--max-results` | `live_feed(livescan_id=, max_results=)` | `client/utils.py`’s `require_sdk_kwargs` |
+**Raising the floor is the whole procedure** when this repo needs something new from
+the SDK:
 
-**Two behaviours the CLI relies on and cannot itself enforce**, both owned by the
-server and pinned there rather than here:
+1. Add the surface in `polyswarm-api`.
+2. Bump the SDK's version **in that same PR** — minor for an additive surface. The
+   floor here cannot name a version the SDK has not declared, so this is the one case
+   where a feature PR carries the bump rather than the release step.
+3. Raise `polyswarm_api>=` here to that version.
+4. Use it. No guard, no `getattr`, no signature inspection.
 
-- **`live feed --since` is SECONDS on the wire.** The CLI's `86400` default is
-  only correct under that reading; nothing in this repo can distinguish the unit
-  from a recorded query string. Pinned server-side by
-  `test_since_is_seconds_not_minutes`.
-- **`--since 0` means no time filter at all**, which the help text promises. The
-  CLI forwards `0` positionally and does nothing to make it mean "unfiltered";
-  the server applies the window on a truthiness test. Pinned server-side by
-  `test_since_zero_and_absent_both_mean_no_time_filter`. If that ever tightened
-  to `is not None`, `live feed --since 0` would silently return nothing while the
-  help says it returns everything.
+**Two consequences, both worth knowing before you do it.**
 
-The distinction that keeps the floor where it is: a new **option** may require the newer SDK, but an existing **invocation** may not. So the guards fire only when the caller actually uses the new surface — an unfiltered `rules list` and a plain `live feed` still reach the floor's own signatures untouched — and a floor install gets a clean upgrade message at exit 2 rather than the `TypeError`/`AttributeError` traceback a bare call would raise. That is why the floor itself does not move; moving it has the two preconditions above, and neither holds until the SDK releases. `require_sdk_kwargs` inspects the installed signature rather than catching `TypeError`, so a genuine argument error inside the SDK is never mistaken for a version mismatch.
+*Release order is forced.* This repo cannot be released to PyPI until the SDK version
+its floor names is on PyPI — so the SDK's `develop → master` must merge and release
+first. CI is unaffected: `.gitlab-ci.yml` installs the SDK from git by branch name
+(`$CI_COMMIT_BRANCH.zip`, falling back to `develop.zip`), so an unreleased version
+tests fine.
 
-**The floor's real signatures, read off the published 4.3.0 wheel** (not inferred — the guard fails *open* on `**kwargs`, so a floor that declared one would silently forward the new options to an SDK that drops them, and the caller would get an unfiltered list at exit 0):
+*A missing paired branch now fails loudly.* If the SDK branch does not exist, CI falls
+back to the SDK's `develop`, whose version does not satisfy the new floor, and
+`pip install .[tests]` fails. That is the intended behaviour and an improvement: the
+old fallback silently tested against an SDK that lacked the surfaces.
 
-```python
-def ruleset_list(self)                      # no filters, no **kwargs
-def live_feed(self, since=None, rule_name=None, family=None,
-              polyscore_lower=None, polyscore_upper=None,
-              community=None)               # no livescan_id, no max_results, no **kwargs
-```
-
-Neither declares `VAR_KEYWORD`, so the fail-open branch is unreachable against the real floor and the guards refuse as designed. The stand-ins in the floor tests match these exactly. Re-read them off the wheel — `pip download polyswarm_api==<floor> --no-deps` — whenever the floor moves; a signature is not something to take on trust from the branch you happen to have checked out. When the SDK release lands on PyPI, bumping the floor and dropping all three guards is the follow-up.
+*Version strings must be clean.* PEP 440 orders `4.4.0.dev0` **below** `4.4.0`, so a
+dev-suffixed SDK build does not satisfy `>=4.4.0` — CI then goes to PyPI for a version
+that does not exist yet. The SDK's `bump-my-version` config can emit that form; its
+`AGENTS.md` carries the check.
 
 ## Worked example — the httpx SDK migration
 

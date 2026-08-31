@@ -11,11 +11,6 @@ from pathlib import Path
 
 import vcr as vcr_
 
-from tests._sdk_guards import (
-    needs_favorite_method as _needs_favorite_method,
-    needs_favorite_resource as _needs_favorite_resource,
-    needs_tracking_fields as _needs_tracking_fields,
-)
 import click
 from click.testing import CliRunner
 
@@ -185,11 +180,6 @@ class LiveHuntTest(BaseTestCase):
             '--output-format', 'json', 'live', 'start', '44051669277897879'])
         self._assert_json_result(result, self.click_vcr(result))
 
-    # The re-recorded .click expects 'Rules in ruleset' / 'Historical hunts
-    # triggered', which render only when the SDK PARSES those attributes —
-    # on the floor the formatter's getattr guard omits them and this fails
-    # rather than skips (specs/04 §Staying honest on both installs).
-    @_needs_tracking_fields
     @vcr.use_cassette()
     def test_live_hunt_start_text(self):
         result = self._run_cli([
@@ -201,11 +191,6 @@ class LiveHuntTest(BaseTestCase):
         result = self._run_cli(['--output-format', 'json', 'live', 'stop', '44051669277897879'])
         self._assert_json_result(result, self.click_vcr(result))
 
-    # The re-recorded .click expects 'Rules in ruleset' / 'Historical hunts
-    # triggered', which render only when the SDK PARSES those attributes —
-    # on the floor the formatter's getattr guard omits them and this fails
-    # rather than skips (specs/04 §Staying honest on both installs).
-    @_needs_tracking_fields
     @vcr.use_cassette()
     def test_live_hunt_stop_text(self):
         result = self._run_cli(['--output-format', 'text', 'live', 'stop', '44051669277897879'])
@@ -278,32 +263,22 @@ class RulesetTest(BaseTestCase):
         result = self._run_cli([
             '--output-format', 'json', 'rules', 'list'])
         self._assert_json_result(result, self.click_vcr(result))
-
-    @_needs_favorite_method
-    @_needs_favorite_resource
     @vcr.use_cassette()
     def test_ruleset_favorite_text(self):
         result = self._run_cli([
             '--output-format', 'text', 'rules', 'favorite', '96652060989160147'])
         self._assert_text_result(result, self.click_vcr(result))
-
-    @_needs_favorite_method
-    @_needs_favorite_resource
     @vcr.use_cassette()
     def test_ruleset_unfavorite_text(self):
         result = self._run_cli([
             '--output-format', 'text', 'rules', 'favorite', '96652060989160147',
             '--unfavorite'])
         self._assert_text_result(result, self.click_vcr(result))
-
-    @_needs_favorite_method
     @vcr.use_cassette()
     def test_ruleset_favorite_json(self):
         result = self._run_cli([
             '--output-format', 'json', 'rules', 'favorite', '14883307518120680'])
         self._assert_json_result(result, self.click_vcr(result))
-
-    @_needs_favorite_method
     @vcr.use_cassette()
     def test_ruleset_favorite_limit_text(self):
         # The server's machine-readable FAVORITE_LIMIT refusal, recorded off

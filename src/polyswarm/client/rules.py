@@ -47,14 +47,11 @@ def list_rules(ctx, name, status, favorites_only, has_new_results):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    # Unfiltered stays a zero-argument call, so it keeps working on the floor;
-    # only a caller passing a filter needs the paired SDK.
+    # A False flag is not a filter: send only what the caller actually asked for.
     kwargs = {k: v for k, v in (('name', name), ('status', status),
                                 ('favorites_only', favorites_only or None),
                                 ('has_new_results', has_new_results or None))
               if v is not None}
-    if kwargs:
-        utils.require_sdk_kwargs(api.ruleset_list, sorted(kwargs), 'rules list filtering')
     for ruleset in api.ruleset_list(**kwargs):
         output.ruleset(ruleset)
 
@@ -74,21 +71,8 @@ def favorite(ctx, rule_id, unfavorite):
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    toggle = getattr(api, 'ruleset_favorite', None)
-    if toggle is None:
-        # The declared floor (published polyswarm-api 4.3.0) predates the
-        # favorite surface — it ships in the paired SDK change. Every OTHER
-        # command keeps working on the floor (an unfiltered list still is);
-        # only this command needs the newer SDK, and on the floor it must
-        # fail with a clean upgrade message, never an AttributeError
-        # traceback. The principle: a new OPTION may require the newer SDK; an
-        # existing INVOCATION may not.
-        raise exceptions.PolyswarmException(
-            f'rules favorite requires a polyswarm-api release newer than '
-            f'{utils.SDK_FLOOR} (the paired SDK change adds ruleset_favorite). '
-            f'Upgrade polyswarm-api to use this command.')
     try:
-        output.ruleset_favorite(toggle(rule_id, not unfavorite))
+        output.ruleset_favorite(api.ruleset_favorite(rule_id, not unfavorite))
     except api_exceptions.RequestException as exc:
         # `exc.request` needs no guard: __init__ always assigns it, and a None
         # request flows safely through the getattr.

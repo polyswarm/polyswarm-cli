@@ -31,7 +31,6 @@ from unittest import TestCase, mock
 from click.testing import CliRunner
 
 from polyswarm.client import polyswarm as client
-from polyswarm.client import utils
 from polyswarm.formatters import text
 from polyswarm_api import exceptions, resources
 
@@ -44,14 +43,6 @@ from polyswarm_api import exceptions, resources
 # need only the METHOD (keying them on the resource too would let a resource
 # rename silently skip the whole command suite while CI stays green), and the
 # formatter fixture tests need only the RESOURCE class they instantiate.
-from tests._sdk_guards import (                      # noqa: E402
-    needs_favorite_method as _needs_favorite_method,
-    needs_favorite_resource as _needs_favorite_resource,
-    needs_live_feed_options as _needs_live_feed_options,
-    needs_provenance_fields as _needs_provenance_fields,
-    needs_ruleset_list_filters as _needs_ruleset_list_filters,
-    needs_tracking_fields as _needs_tracking_fields,
-)
 
 
 def _ruleset(**overrides):
@@ -90,8 +81,6 @@ class FormatterHuntFieldsTest(TestCase):
         out = io.StringIO()
         getattr(text.TextOutput(color=False, output=out), method)(result, **kwargs)
         return out.getvalue()
-
-    @_needs_tracking_fields
     def test_ruleset_tracking_fields_render_with_zero_distinct_from_absent(self):
         rendered = self._render('ruleset', _ruleset(
             favorite=True, favorited_at='2026-08-20T12:00:00+00:00', rule_count=0,
@@ -102,8 +91,6 @@ class FormatterHuntFieldsTest(TestCase):
         assert 'Rules in ruleset: 0' in rendered
         assert 'Historical hunts triggered: 0' in rendered
         assert 'New live results (last 24h): 3' in rendered
-
-    @_needs_tracking_fields
     def test_ruleset_staleness_marker_renders_beside_the_count(self):
         # The stored badge's marker: how fresh the number is. Rendered only
         # with a count (the server sends them together).
@@ -112,8 +99,6 @@ class FormatterHuntFieldsTest(TestCase):
             new_results_counted_at='2026-08-25T12:00:00+00:00'))
         assert 'New live results (last 24h): 0' in rendered
         assert 'New-results count refreshed at: 2026-08-25 12:00:00+00:00' in rendered
-
-    @_needs_favorite_resource
     def test_ruleset_favorite_response_renders_state_and_budget(self):
         rendered = self._render('ruleset_favorite', resources.YaraRulesetFavorite(
             {'id': '5', 'favorite': True,
@@ -123,8 +108,6 @@ class FormatterHuntFieldsTest(TestCase):
         assert 'Favorite: yes' in rendered
         assert 'Favorited at: 2026-08-25 12:00:00+00:00' in rendered
         assert 'Favorites used: 3 of 5' in rendered
-
-    @_needs_favorite_resource
     def test_ruleset_unfavorite_response_renders_no_state(self):
         rendered = self._render('ruleset_favorite', resources.YaraRulesetFavorite(
             {'id': '5', 'favorite': False, 'favorited_at': None,
@@ -132,8 +115,6 @@ class FormatterHuntFieldsTest(TestCase):
         assert 'Favorite: no' in rendered
         assert 'Favorited at' not in rendered
         assert 'Favorites used: 2 of 5' in rendered
-
-    @_needs_tracking_fields
     def test_ruleset_none_and_false_fields_are_omitted(self):
         rendered = self._render('ruleset', _ruleset(
             favorite=False, favorited_at=None, rule_count=None,
@@ -147,8 +128,6 @@ class FormatterHuntFieldsTest(TestCase):
         rendered = self._render('ruleset', _old_sdk_ruleset())
         assert 'Ruleset Id: 5' in rendered
         assert 'Favorite' not in rendered
-
-    @_needs_provenance_fields
     def test_hunt_provenance_fields_render_with_the_reference_point(self):
         rendered = self._render('hunt', _hunt(
             rule_id='5', rule_modified='2026-08-20T12:00:00+00:00',
@@ -184,8 +163,6 @@ class RulesListZeroArgTest(TestCase):
                 catch_exceptions=False)
         assert result.exit_code == 0, result.output
         ruleset_list.assert_called_once_with(mock.ANY)
-
-    @_needs_ruleset_list_filters
     def test_filters_are_forwarded_only_when_given(self):
         """A filtered list forwards exactly the filters passed and nothing
         else — the flags default to False, and a False flag must not become
@@ -200,33 +177,13 @@ class RulesListZeroArgTest(TestCase):
                  '--status', 'active', '--has-new-results'],
                 catch_exceptions=False)
         assert result.exit_code == 0, result.output
-        # All four filters, because autospec is what turns this into a
-        # SIGNATURE check against the installed SDK: a kwarg name that only
-        # this side renamed would otherwise ship as require_sdk_kwargs
-        # refusing on an SDK that does have the surface.
+        # All four, and autospec makes this a SIGNATURE check against the
+        # installed SDK: a kwarg only this side renamed fails here rather than
+        # reaching the server as a filter it silently ignores.
         ruleset_list.assert_called_once_with(
             mock.ANY, name='alpha', status='active',
             favorites_only=True, has_new_results=True)
 
-    def test_filtering_on_a_floor_sdk_is_a_clean_message_not_a_traceback(self):
-        """The published floor's ``ruleset_list()`` takes no filters. Using one
-        there must produce the upgrade message at exit 2 (the server-refusal
-        code), never the TypeError traceback a bare kwarg would raise.
-
-        The floor is simulated by a stand-in with the FLOOR signature, which is
-        what the guard inspects."""
-        def floor_ruleset_list(self):
-            return iter(())
-
-        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
-                        floor_ruleset_list):
-            result = CliRunner().invoke(
-                client.polyswarm_cli,
-                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
-                 'rules', 'list', '--name', 'alpha'])
-        assert result.exit_code == 2, result.output
-        assert f'newer than {utils.SDK_FLOOR}' in result.output
-        assert 'Traceback' not in result.output
 
 
 class LiveFeedOptionsTest(TestCase):
@@ -252,8 +209,6 @@ class LiveFeedOptionsTest(TestCase):
         # the default window is 86400 SECONDS (24h), passed positionally — the
         # wire is seconds and stays seconds, so the CLI default carries the 24h
         assert live_feed.call_args[0][1] == 86400
-
-    @_needs_live_feed_options
     def test_livescan_id_and_max_results_are_forwarded(self):
         result, live_feed = self._invoke(
             '--livescan-id', '72927285313305230', '--max-results', '5')
@@ -266,9 +221,8 @@ class LiveFeedOptionsTest(TestCase):
         assert kwargs['max_results'] == 5
 
     def test_zero_max_results_is_unbounded_and_never_reaches_the_sdk(self):
-        """--max-results 0 is documented as the pre-existing unbounded
-        behaviour, so it must not be forwarded — and therefore must not trip the
-        floor guard for an invocation the floor already serves."""
+        """--max-results 0 is the pre-existing unbounded behaviour, so it must not
+        be forwarded — omitting it is what already means "no bound"."""
         result, live_feed = self._invoke('--max-results', '0')
         assert result.exit_code == 0, result.output
         _, kwargs = live_feed.call_args
@@ -283,19 +237,6 @@ class LiveFeedOptionsTest(TestCase):
         assert result.exit_code == 0, result.output
         assert live_feed.call_args[0][1] == 0
 
-    def test_zero_max_results_does_not_trip_the_floor_guard(self):
-        def floor_live_feed(self, since=None, rule_name=None, family=None,
-                            polyscore_lower=None, polyscore_upper=None,
-                            community=None):
-            return iter(())
-
-        with mock.patch('polyswarm_api.api.PolyswarmAPI.live_feed',
-                        floor_live_feed):
-            result = CliRunner().invoke(
-                client.polyswarm_cli,
-                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
-                 'live', 'feed', '--max-results', '0'])
-        assert result.exit_code == 0, result.output
 
     def test_a_negative_max_results_is_refused_at_the_interface(self):
         result = CliRunner().invoke(
@@ -311,38 +252,7 @@ class LiveFeedOptionsTest(TestCase):
              'live', 'feed', '--livescan-id', 'not-an-id'])
         assert result.exit_code != 0
 
-    def test_a_kwargs_sdk_fails_open_rather_than_false_refusing(self):
-        """The guard cannot see through **kwargs, so it forwards rather than
-        refusing an SDK that may well accept the name. Published 4.3.0 declares
-        no **kwargs (specs/05 §Current floor records the signatures), so this
-        branch is unreachable today — but it is product code, and an SDK that
-        grew one would take it."""
-        def kwargs_ruleset_list(self, **kwargs):
-            return iter(())
 
-        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
-                        kwargs_ruleset_list):
-            result = CliRunner().invoke(
-                client.polyswarm_cli,
-                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
-                 'rules', 'list', '--favorites-only'])
-        assert result.exit_code == 0, result.output
-
-    def test_new_options_on_a_floor_sdk_are_a_clean_message(self):
-        def floor_live_feed(self, since=None, rule_name=None, family=None,
-                            polyscore_lower=None, polyscore_upper=None,
-                            community=None):
-            return iter(())
-
-        with mock.patch('polyswarm_api.api.PolyswarmAPI.live_feed',
-                        floor_live_feed):
-            result = CliRunner().invoke(
-                client.polyswarm_cli,
-                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
-                 'live', 'feed', '--livescan-id', '7'])
-        assert result.exit_code == 2, result.output
-        assert f'newer than {utils.SDK_FLOOR}' in result.output
-        assert 'Traceback' not in result.output
 
 
 class RulesFavoriteCommandTest(TestCase):
@@ -372,24 +282,18 @@ class RulesFavoriteCommandTest(TestCase):
             id='5', favorite=favorite,
             favorited_at='2026-08-25T12:00:00+00:00' if favorite else None,
             favorites_used=1, favorites_limit=5)
-
-    @_needs_favorite_method
     def test_favorite_calls_the_sdk_and_renders_the_budget(self):
         result, toggle = self._invoke(['5'], return_value=self._response(True))
         assert result.exit_code == 0, result.output
         toggle.assert_called_once_with(mock.ANY, 5, True)
         assert 'Favorite: yes' in result.output
         assert 'Favorites used: 1 of 5' in result.output
-
-    @_needs_favorite_method
     def test_unfavorite_flag_flips_the_boolean(self):
         result, toggle = self._invoke(['5', '--unfavorite'],
                                       return_value=self._response(False))
         assert result.exit_code == 0, result.output
         toggle.assert_called_once_with(mock.ANY, 5, False)
         assert 'Favorite: no' in result.output
-
-    @_needs_favorite_method
     def test_favorite_limit_refusal_is_a_clean_message_at_exit_2(self):
         # Exit 2 is the central mapping's code for this, never 1; exit 1 is
         # reserved for no-results/not-found. The friendly message rides a CLI
@@ -408,8 +312,6 @@ class RulesFavoriteCommandTest(TestCase):
         assert 'Favorite limit reached (5 of 5 used)' in result.output
         assert '--unfavorite' in result.output            # names the way out
         assert 'Traceback' not in result.output
-
-    @_needs_favorite_method
     def test_favorite_limit_without_counters_uses_the_server_message(self):
         # The counters are advisory; an envelope can carry the code without
         # them. Interpolating them unguarded rendered "(None of None used)" at
@@ -428,8 +330,6 @@ class RulesFavoriteCommandTest(TestCase):
         assert 'None of None' not in result.output
         assert 'Favorite limit reached (5 of 5 used).' in result.output
         assert '--unfavorite' in result.output
-
-    @_needs_favorite_method
     def test_favorite_limit_on_a_request_without_result_still_has_no_traceback(self):
         # A Mock has every attribute, so the test above cannot fail on a missing
         # `.result`. This one uses a real object that genuinely lacks it — the
@@ -449,24 +349,6 @@ class RulesFavoriteCommandTest(TestCase):
         assert 'Traceback' not in result.output
         assert 'None' not in result.output
         assert '--unfavorite' in result.output
-
-    def test_favorite_on_the_floor_sdk_degrades_cleanly(self):
-        # The declared floor (published 4.3.0) has no ruleset_favorite: the
-        # command must fail with a clean upgrade message at exit 2, never an
-        # AttributeError traceback — CI's branch-name SDK install can never
-        # surface this, so the test simulates the floor by nulling the method.
-        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_favorite',
-                        new=None, create=True):
-            result = CliRunner().invoke(
-                client.polyswarm_cli,
-                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
-                 'rules', 'favorite', '5'])
-        assert result.exit_code == 2, result.output
-        assert (f'requires a polyswarm-api release newer than {utils.SDK_FLOOR}'
-                in result.output)
-        assert 'AttributeError' not in result.output
-
-    @_needs_favorite_method
     def test_other_refusals_still_raise(self):
         request = mock.Mock()
         request.errors = None
@@ -493,19 +375,3 @@ class ExitCodeHierarchyTest(TestCase):
                           exceptions.PolyswarmException)
 
 
-class SdkFloorConstantTest(TestCase):
-    """``utils.SDK_FLOOR`` must equal the lower bound in ``pyproject.toml``.
-
-    specs/05-sdk-contract.md makes the pin the one authoritative floor, and the
-    constant only exists so the guard messages can name it. Nothing else ties
-    the two together: the follow-up bump edits the pin, and a stale constant
-    would leave every upgrade message naming the wrong version while the suite
-    stayed green — the exact drift specs/05 says the pin exists to prevent."""
-
-    def test_the_constant_matches_the_pin(self):
-        import re
-        pyproject = (pathlib.Path(__file__).resolve().parent.parent
-                     / 'pyproject.toml').read_text()
-        match = re.search(r'polyswarm_api>=([0-9]+\.[0-9]+\.[0-9]+)', pyproject)
-        assert match, 'polyswarm_api pin not found in pyproject.toml'
-        assert utils.SDK_FLOOR == match.group(1)

@@ -75,7 +75,7 @@ The catalogue of groups and the SDK methods each wraps is in [`02-commands.md`](
 ## Support — `utils.py`, `exceptions.py`
 
 - **`utils.py`** — `parallelize`/`parallel_executor` (thread-pool fan-out with per-item exception aggregation: collects results, logs per-item no-results, raises an aggregate `NoResultsException`/`NotFoundException`/`InternalFailureException` at the end) and `parallel_executor_iterable_results` (the same, for SDK methods that return generators — it materialises each generator inside the worker so per-item exception handling still fires).
-- **`client/utils.py`** — input parsing/validation (`parse_hashes`, hash/IP detection) and `require_sdk_kwargs`, the floor guard that refuses an option the installed SDK's signature does not accept (`SDK_FLOOR` lives here too; see [`05-sdk-contract.md`](./05-sdk-contract.md) §Current floor). Note the module is `client/utils.py`, not the top-level `utils.py` above — the two are distinct and this section named the wrong one until the hunt-page change.
+- **`client/utils.py`** — input parsing/validation (`parse_hashes`, hash/IP detection) and the click parameter validators. Note the module is `client/utils.py`, not the top-level `utils.py` above — the two are distinct and this section named the wrong one until the hunt-page change.
 - **`exceptions.py`** — the CLI's own hierarchy, **distinct from the SDK's**: `PolyswarmException` → `NoResultsException`, `NotFoundException`, `InternalFailureException`, `PartialResultsException`. `ExceptionHandlingGroup` catches both these and the SDK's `api_exceptions.*`.
 
 ## Lifecycle of a command (end to end)

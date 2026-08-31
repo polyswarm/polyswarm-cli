@@ -1,6 +1,5 @@
 import logging
 import functools
-import inspect
 import sys
 
 import click
@@ -11,9 +10,6 @@ from polyswarm_api import resources
 
 logger = logging.getLogger(__name__)
 HASH_VALIDATORS = resources.Hash.SUPPORTED_HASH_TYPES
-
-# The published SDK floor; tracks pyproject.toml's pin (SdkFloorConstantTest).
-SDK_FLOOR = '4.3.0'
 
 ####################################################
 # Input parsers
@@ -31,23 +27,6 @@ def parse_hashes(hashes, hash_file=None):
 ####################################################
 # SDK-surface guards
 ####################################################
-
-
-def require_sdk_kwargs(method, names, what):
-    """Refuse cleanly when the installed SDK predates a keyword this command needs.
-
-    Called only when the caller actually uses the option, so existing
-    invocations keep working on the floor. See specs/05-sdk-contract.md.
-    """
-    parameters = inspect.signature(method).parameters
-    if any(p.kind is inspect.Parameter.VAR_KEYWORD for p in parameters.values()):
-        return  # **kwargs accepts every name; fail open rather than false-refuse
-    missing = [n for n in names if n not in parameters]
-    if missing:
-        raise exceptions.PolyswarmException(
-            f'{what} requires a polyswarm-api release newer than {SDK_FLOOR} '
-            f'(the paired SDK change adds {", ".join(missing)}). '
-            f'Upgrade polyswarm-api to use it.')
 
 
 ####################################################

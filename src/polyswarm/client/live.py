@@ -69,17 +69,12 @@ def live_results(ctx, since, livescan_id, max_results, rule_name, family,
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    # Both new options share one floor guard; existing invocations are untouched.
     kwargs = {}
     if livescan_id is not None:
         kwargs['livescan_id'] = livescan_id
-    # Truthiness: 0 is the pre-existing unbounded behaviour, so it must not
-    # reach the SDK or trip the floor guard (specs/05 §Current floor).
+    # Truthiness: 0 means unbounded, which is what omitting it already does.
     if max_results:
         kwargs['max_results'] = max_results
-    if kwargs:
-        utils.require_sdk_kwargs(api.live_feed, sorted(kwargs), 'live feed ' +
-                                 ' and '.join('--' + k.replace('_', '-') for k in sorted(kwargs)))
     for result in api.live_feed(
             since, rule_name=rule_name, family=family,
             polyscore_lower=polyscore_lower, polyscore_upper=polyscore_upper,

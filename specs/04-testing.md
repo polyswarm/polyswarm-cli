@@ -62,26 +62,40 @@ Use it **only** for that. Argument parsing, SDK calls, generator consumption, `c
 
 This spec describes the harness as it stands. Not yet documented (add as the suite grows): a per-command coverage matrix, a documented "VCR-off against live e2e" CI job, and conventions for fixture/`.click` generation. See [`99-open-questions.md`](./99-open-questions.md).
 
-## Staying honest on both installs the pin permits
+## The SDK floor is a version pin, not a runtime probe
 
-`pyproject.toml` pins a **floor**, not an exact SDK, so the suite can run against
-either the floor or a newer paired SDK. A test that needs a surface the floor does
-not have must **skip** there — not fail, and above all not pass vacuously.
+**A test never asks the installed SDK whether it has a feature. The pin guarantees
+it.** When this repo needs a surface the SDK does not yet publish, the SDK bumps its
+version and `pyproject.toml` raises `polyswarm_api>=` to it. `pip` then refuses the
+combination that would fail, at install time, before a single test runs — so a test
+can simply use the surface.
 
-Guard on the **narrowest dependency the test actually has**, because the failure
-modes differ by level:
+This replaces an earlier convention of per-test skip guards (`hasattr` on a method, a
+built resource's attribute, a parameter in the installed signature). They are gone, and
+should not come back. What was wrong with them:
 
-| The test needs | Guard on | Why not something broader |
-|---|---|---|
-| an API **method** (`rules favorite` → `ruleset_favorite`) | `hasattr(PolyswarmAPI, '<method>')` | keying it on the resource class too would let a resource rename silently skip the whole command suite while CI stays green |
-| a **keyword** on an existing method (`rules list --name`, `live feed --livescan-id`) | the parameter's presence in the installed signature — `inspect.signature(<method>).parameters`. Guard **only the test that passes the option**; leave the plain-invocation test unguarded | a class- or module-level skip would drop coverage of the unfiltered call, which the floor does support. Do **not** reach for `client/utils.py`’s `require_sdk_kwargs` here: that is product code, so on the floor it refuses and the command exits 2 — the test FAILS instead of skipping |
-| a **parsed attribute** on a resource (`rule_count`, `source_rule_changed`) | `hasattr(<a built resource>, '<attr>')` | the resource CLASS exists on the floor and simply does not parse the key, so a class-level guard does not skip — the render tests FAIL and an absence-asserting test passes **vacuously**, which looks like coverage while pinning nothing |
+- **The fact lived twice.** The pin said one thing; each guard re-derived the same
+  thing at runtime. Nothing kept them in sync, so every guard was one edit away from
+  disagreeing with the tests it gated.
+- **Both ways of disagreeing are defects.** A guard that checks *less* than its test
+  uses lets the test run and **fail** where it should have skipped. One that checks
+  *more* **skips** a test that would have passed — silently dropping coverage while CI
+  stays green. The second is the dangerous one, because nothing reports it.
+- **It never verified the thing it claimed to protect.** A green run against the paired
+  SDK said nothing about the floor install the guards existed for.
 
-That last row is the one that bites: `getattr`-guarded formatter legs turn a missing
-attribute into silent omission, so a test asserting a line is *absent* cannot tell
-"correctly omitted" from "the SDK never parsed it". Build the resource and check the
-attribute.
+The version contract has none of that: the claim is checked once, by a tool, against
+the artifact that will actually be installed.
 
-Whatever names the floor, name it **once** — `client/utils.py`’s `SDK_FLOOR`, which a test ties to
-the pin in `pyproject.toml`. The version is otherwise easy to drift: nothing fails if
-a hardcoded literal in a guard message goes stale.
+**When you need a new SDK surface**, in order: add it in `polyswarm-api` → bump that
+repo's version (minor, for an additive surface) **in the same PR**, because this repo's
+floor cannot name a version the SDK has not declared → raise the floor here → use the
+surface in code and tests with no guard. CI installs the SDK from git by branch name,
+so an unreleased version is not an obstacle; see
+[`05-sdk-contract.md`](./05-sdk-contract.md) §Current floor for the ordering that
+forces at release time.
+
+**The failure mode to expect**, and it is a good one: if the paired SDK branch is
+missing, CI falls back to the SDK's `develop`, whose version does not satisfy the new
+floor, and `pip install .[tests]` fails loudly. Before, that fallback silently tested
+against the wrong SDK.
