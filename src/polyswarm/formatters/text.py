@@ -201,13 +201,13 @@ class TextOutput(base.BaseOutput):
             self._close_group()
         if result.ruleset_name is not None:
             output.append(self._white(f'Ruleset Name: {result.ruleset_name}'))
-        # Source-rule provenance — getattr-guarded so the formatter also
-        # renders results parsed by an SDK release that predates the fields.
-        if getattr(result, 'rule_id', None) is not None:
+        # Source-rule provenance. The pin guarantees the SDK parses these,
+        # so None means the SERVER had no answer (specs/03).
+        if result.rule_id is not None:
             output.append(self._white(f'Source Ruleset Id: {result.rule_id}'))
-        if getattr(result, 'rule_modified', None) is not None:
+        if result.rule_modified is not None:
             output.append(self._white(f'Source ruleset last modified at freeze: {result.rule_modified}'))
-        if getattr(result, 'source_rule_changed', None) is not None:
+        if result.source_rule_changed is not None:
             # Tri-state upstream: None (unknown) prints nothing; the label
             # names the reference point so it can't read as "edited recently".
             changed = 'yes' if result.source_rule_changed else 'no'
@@ -295,23 +295,23 @@ class TextOutput(base.BaseOutput):
         output.append(self._white(f'Description: {result.description}'))
         output.append(self._white(f'Created at: {result.created}'))
         output.append(self._white(f'Modified at: {result.modified}'))
-        # Tracking fields are guarded with getattr so this formatter also
-        # renders results parsed by an SDK release that predates them.
-        if getattr(result, 'favorite', None):
+        # The pin guarantees the SDK parses these, so None means the SERVER
+        # had no answer — never an older SDK (specs/03).
+        if result.favorite:
             output.append(self._yellow('Favorite: yes'))
-            if getattr(result, 'favorited_at', None) is not None:
+            if result.favorited_at is not None:
                 output.append(self._white(f'Favorited at: {result.favorited_at}'))
-        if getattr(result, 'rule_count', None) is not None:
+        if result.rule_count is not None:
             output.append(self._white(f'Rules in ruleset: {result.rule_count}'))
-        if getattr(result, 'historical_hunt_count', None) is not None:
+        if result.historical_hunt_count is not None:
             output.append(self._white(f'Historical hunts triggered: {result.historical_hunt_count}'))
-        if getattr(result, 'new_results_count', None) is not None:
+        if result.new_results_count is not None:
             # The window is the server's fixed 24 h product window (the badge
             # is a stored counter its scheduled refresh maintains — a caller
             # cannot choose the window, so the label must not imply one), and
             # the marker says how fresh the stored number is.
             output.append(self._white(f'New live results (last 24h): {result.new_results_count}'))
-            if getattr(result, 'new_results_counted_at', None) is not None:
+            if result.new_results_counted_at is not None:
                 output.append(self._white(f'New-results count refreshed at: {result.new_results_counted_at}'))
         if contents:
             output.append(self._white(f'Ruleset Contents:\n{result.yara}'))

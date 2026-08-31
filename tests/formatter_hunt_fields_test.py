@@ -13,15 +13,13 @@ Pins three contracts:
   no such attributes to build from) renders without raising and simply omits
   the new lines; and
 * the command plumbing: an UNFILTERED ``rules list`` still calls a
-  zero-argument ``ruleset_list()`` (the pin's floor, 4.3.0, has exactly
-  that signature, so the common invocation needs no new SDK behaviour),
-  a FILTERED one forwards exactly the filters given, ``live feed``
-  forwards ``--livescan-id`` / ``--max-results`` only when passed, and
-  ``rules favorite`` renders the toggle response and converts the
-  machine-readable FAVORITE_LIMIT refusal into a clean message. All are
-  asserted through autospec'd mocks so every call is signature-checked
-  against the installed SDK; the options that DO need the paired SDK are
-  pinned to degrade with a clean upgrade message on the floor.
+  zero-argument ``ruleset_list()`` (a False flag is not a filter), a
+  FILTERED one forwards exactly the filters given, ``live feed`` forwards
+  ``--livescan-id`` / ``--max-results`` only when passed, and ``rules
+  favorite`` renders the toggle response and converts the machine-readable
+  FAVORITE_LIMIT refusal into a clean message. All are asserted through
+  autospec'd mocks, so every call is signature-checked against the SDK the
+  pin actually installs.
 """
 import io
 import pathlib
@@ -34,15 +32,6 @@ from polyswarm.client import polyswarm as client
 from polyswarm.formatters import text
 from polyswarm_api import exceptions, resources
 
-# The favorite surface ships in the paired SDK change; the pin's floor
-# (published 4.3.0) has neither the method nor the resource. These tests must
-# stay honest on BOTH installs: everything that needs the new surface skips
-# on the floor (where `rules favorite` itself degrades to the clean upgrade
-# message its own floor test pins with create=True).
-# Two guards, deliberately as NARROW as each dependency: the command tests
-# need only the METHOD (keying them on the resource too would let a resource
-# rename silently skip the whole command suite while CI stays green), and the
-# formatter fixture tests need only the RESOURCE class they instantiate.
 
 
 def _ruleset(**overrides):
@@ -61,19 +50,8 @@ def _hunt(**overrides):
     return resources.HistoricalHunt(content, api=None)
 
 
-def _old_sdk_ruleset():
-    """A result parsed by an SDK release that predates the tracking fields:
-    the attributes are ABSENT, not None — SimpleNamespace is deliberate, since
-    the installed (new) SDK cannot build such an object."""
-    return types.SimpleNamespace(
-        id='5', livescan_id=None, livescan_created=None, name='n',
-        description='d', created='c', modified='m', yara=None)
 
 
-def _old_sdk_hunt():
-    return types.SimpleNamespace(
-        id='9', status='PENDING', progress=None, active=None, created='c',
-        summary=None, results_csv_uri=None, ruleset_name='n', yara=None)
 
 
 class FormatterHuntFieldsTest(TestCase):
@@ -124,10 +102,6 @@ class FormatterHuntFieldsTest(TestCase):
         assert 'Historical hunts triggered' not in rendered
         assert 'New live results' not in rendered
 
-    def test_old_sdk_ruleset_without_the_attributes_renders(self):
-        rendered = self._render('ruleset', _old_sdk_ruleset())
-        assert 'Ruleset Id: 5' in rendered
-        assert 'Favorite' not in rendered
     def test_hunt_provenance_fields_render_with_the_reference_point(self):
         rendered = self._render('hunt', _hunt(
             rule_id='5', rule_modified='2026-08-20T12:00:00+00:00',
@@ -141,15 +115,11 @@ class FormatterHuntFieldsTest(TestCase):
             rule_id=None, rule_modified=None, source_rule_changed=None))
         assert 'Source' not in rendered
 
-    def test_old_sdk_hunt_without_the_attributes_renders(self):
-        rendered = self._render('hunt', _old_sdk_hunt())
-        assert 'Hunt Id: 9' in rendered
-        assert 'Source' not in rendered
 
 
 class RulesListZeroArgTest(TestCase):
-    """`rules list` calls a zero-argument ``ruleset_list()`` — the pin's
-    floor (4.3.0) has exactly that signature, so the command needs no new SDK
+    """`rules list` calls a zero-argument ``ruleset_list()`` — a False flag
+    is not a filter, so an unfiltered list forwards no
     behaviour at all. autospec makes the assertion a signature check against
     the installed SDK."""
 

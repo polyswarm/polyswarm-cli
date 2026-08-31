@@ -142,8 +142,8 @@ either field) never raises `AttributeError`; an SDK without `.state` simply neve
 the known-good branch, which is the safe fallback — the pre-known-good rendering. That
 degradation is belt-and-braces, not a supported configuration: `.state` is load-bearing
 here with no substitute. Both attributes ship in SDK **4.1.0**, but the dependency floor is
-`polyswarm_api>=4.3.0` — the pin's current value (moved there by the #264 release
-bump); its *rationale* is two behaviours that landed in 4.2.0 and still hold
+`polyswarm_api>=4.4.0` — the pin's current value (moved there by the hunt-page change
+set; 4.3.0 before it, by the #264 release bump); its *rationale* is two behaviours that landed in 4.2.0 and still hold
 transitively, and [05-sdk-contract.md](./05-sdk-contract.md) §Current floor is
 authoritative. Those two
 fail silently on 4.1.0 (see [`05-sdk-contract.md`](./05-sdk-contract.md) §Version pin) — so
@@ -152,18 +152,21 @@ every supported install has them. `JSONOutput` needs no change — it dumps the 
 
 ## Hunt-page tracking fields (rulesets + historical hunts)
 
-Rendering rules that are deliberate, not incidental — all getattr-guarded so
-an SDK release predating the fields renders without the lines:
+Rendering rules that are deliberate, not incidental. Every one of these fields is
+parsed by the pinned SDK, so the attribute always exists and `None` means the
+**server** had no answer — never an older SDK (the floor forbids one; see
+[`05-sdk-contract.md`](./05-sdk-contract.md) §Current floor). The formatters read
+the attributes directly:
 
 - `rule_count` / `historical_hunt_count`: `0` renders as a real zero;
   `None` (the server had no answer) omits the line — never shown as 0.
-- `favorite` is truthy-only ("Favorite: yes"): False and old-SDK-absent both
-  print nothing, deliberately indistinguishable.
+- `favorite` is truthy-only ("Favorite: yes"): False and None both print
+  nothing, deliberately indistinguishable.
 - `new_results_count` is the server's STORED badge (refreshed by its
   scheduled job — the window is the fixed 24 h product window, which the
   label names, since a caller cannot choose it): a number renders with its
   `new_results_counted_at` staleness marker beside it; `None` (never
-  refreshed / no live hunt / old SDK) omits both lines.
+  refreshed / no live hunt) omits both lines.
 - `ruleset_favorite` renders the toggle response: `Favorite: yes/no`, the
   `favorited_at` timestamp when starred, and the server-owned budget as
   "Favorites used: N of M" — the client never counts.
