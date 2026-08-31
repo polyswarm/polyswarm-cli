@@ -31,20 +31,60 @@ def live_stop(ctx, ruleset_id):
 
 
 @live.command('feed', short_help='Get results from live hunt.')
-@click.option('-s', '--since', type=click.INT, default=1440,
-              help='How far back in seconds to request results (default: 1440).')
+# IntRange(min=0) for the same reason as --max-results below: 0 is meaningful
+# (no time filter), a negative is not, and bare INT would forward it.
+@click.option('-s', '--since', type=click.IntRange(min=0), default=86400,
+              help='How far back in SECONDS to request results '
+                   '(default: 86400 — 24h). '
+                   'Pass 0 for no time filter at all.')
+# click.INT matches every other id option in the CLI and rejects a typo before
+# it reaches the server.
+@click.option('-i', '--livescan-id', type=click.INT,
+              help="Scope the feed to one live hunt (a ruleset's Live Hunt Id). "
+                   'Shows one community at a time, while '
+                   'the badge counts all of them, so the counts need not match.')
+# IntRange(min=0) refuses a negative rather than letting it silently mean unbounded.
+@click.option('-m', '--max-results', type=click.IntRange(min=0),
+              help='Stop after this many results. Unset or 0 means no bound — '
+                   'every page, as before.')
 @click.option('-r', '--rule-name', help='Filter results on this rule name.')
 @click.option('-f', '--family', help='Filter hunt results based on the family name.')
 @click.option('-l', '--polyscore-lower', help='Polyscore lower bound for the hunt results.')
 @click.option('-u', '--polyscore-upper', help='Polyscore upper bound for the hunt results.')
 @click.option('-p', '--private', is_flag=True, help='Filter results to only your private community.')
 @click.pass_context
-def live_results(ctx, since, rule_name, family, polyscore_lower, polyscore_upper, private):
+def live_results(ctx, since, livescan_id, max_results, rule_name, family,
+                 polyscore_lower, polyscore_upper, private):
+    """Show live-hunt results.
+
+    `--since` is SECONDS and defaults to 86400 (24h). Earlier versions defaulted
+    to a 24-minute window; pass `--since 1440` for that. Because the default
+    window is much wider and `--max-results` is unset by default, a bare
+    `live feed` pages through everything in it — bound it with `--max-results`
+    if that matters.
+
+    `--livescan-id` scopes the feed to one live hunt, the drill-down for the
+    per-ruleset new-results count that `rules list` shows.
+
+    The two do not have to agree, and a smaller feed is not a bug: that count
+    covers EVERY community the hunt runs in, public and private together, while
+    the feed shows one at a time (`--private` selects it). A hunt spanning both
+    shows fewer rows here than the count reports.
+    """
     api = ctx.obj['api']
     output = ctx.obj['output']
+    # Sent only when passed. The request is byte-identical either way, so this
+    # exists to keep a pre-existing invocation's call shape unchanged. Note
+    # `since` is NOT folded in here: 0 must reach the SDK (specs/02).
+    kwargs = {}
+    if livescan_id is not None:
+        kwargs['livescan_id'] = livescan_id
+    if max_results:
+        kwargs['max_results'] = max_results
     for result in api.live_feed(
             since, rule_name=rule_name, family=family,
-            polyscore_lower=polyscore_lower, polyscore_upper=polyscore_upper, community='private' if private else None):
+            polyscore_lower=polyscore_lower, polyscore_upper=polyscore_upper,
+            community='private' if private else None, **kwargs):
         output.live_result(result)
 
 

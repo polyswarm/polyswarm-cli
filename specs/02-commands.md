@@ -25,18 +25,42 @@ The top-level command groups, what each is for, and the primary `polyswarm-api` 
 | `report` (`report.py`) | Create/fetch/download reports; `prompt-config` subgroup; LLM reports | `report_create`, `report_wait_for`, `report_download`, `report_get`, `llm_report_{create,get,download}`, `prompt_config_{create,get,update,list}` |
 | `report-template` (`report_template.py`) | Manage report templates + logos | `report_template_{create,update,get,list}`, `report_template_logo_{download,upload}` |
 | `engine` → `votes` / `assertions` (`engine.py`) | Consolidated votes/assertions bundles per engine | `votes_{create,get,delete,list}`, `assertions_{create,get,delete,list}` |
-| `live` (`live.py`) | Live YARA hunts: start/stop, feed, results | `live_start`, `live_stop`, `live_feed`, `live_result`, `live_feed_delete` |
+| `live` (`live.py`) | Live YARA hunts: start/stop, feed, results. `feed` takes `--since` in **SECONDS** (default 86400 — 24h; `0` means no time filter at all, and a negative is refused at parse time rather than forwarded). **`0` is the API's contract, not a CLI convention:** the endpoint applies the window only when `since` is truthy, so `0` and an absent parameter behave identically. The CLI's own test can only pin that it forwards `0` rather than dropping it — which is the half that can regress here, plus `--livescan-id` (the drill-down for the per-ruleset new-results badge `rules list` renders — the detail view deliberately does not carry the badge; the badge counts the hunt across **every** community it runs in, public and private, while the feed shows one at a time, so a multi-community hunt lists fewer rows than the badge reports) and `--max-results` (stop after N; unset means every page, as before). Both are guaranteed by the pin (see [05-sdk-contract.md](./05-sdk-contract.md) §Current floor) and called directly; they are forwarded only when passed purely so a pre-existing invocation's call shape is unchanged — the request is identical either way | `live_start`, `live_stop`, `live_feed`, `live_result`, `live_feed_delete` |
 | `historical` (`historical.py`) | Historical hunts: CRUD + results | `historical_{get,create,update,list}`, `historical_delete_multiple`, `historical_delete_list`, `historical_results_multiple`, `historical_result`, `historical_results_delete` |
 | `tag` (`tags.py`) | Tag CRUD | `tag_{create,delete,get,list}` |
 | `link` (`links.py`) | Tag/family links on artifacts | `tag_link_multiple`, `tag_link_get`, `tag_link_list` |
 | `family` (`families.py`) | Malware-family CRUD | `family_{create,update,delete,get,list}` |
-| `rules` (`rules.py`) | YARA ruleset CRUD | `ruleset_{create,delete,update,get,list}` |
+| `rules` (`rules.py`) | YARA ruleset CRUD plus `favorite <id> [--unfavorite]` (the star toggle: renders the new state + the server-owned "N of M used" budget, and converts the machine-readable `FAVORITE_LIMIT` refusal into a clean actionable message at exit 2, never 1 — 1 is reserved for no-results/not-found; 2 is the broad bucket `ExceptionHandlingGroup` maps the PolyswarmException hierarchies to. **2 does not identify a server refusal:** click exits 2 for a `UsageError` too, so a scripted caller cannot tell “the favorite budget is full” from “you passed a bad flag” without reading the message). `list` takes the server-side filters `--name` / `--status active` / `--favorites-only` / `--has-new-results` (conjunctive; the list is keyset-paginated, so filtering locally would mean walking every page). `rules favorite` and the `rules list` filters need SDK 4.4.0, which the pin requires (see [05-sdk-contract.md](./05-sdk-contract.md) §Current floor), so they are called directly. The formatters read the hunt-page fields directly: the pin guarantees the SDK parses them, so `None` means the *server* had no answer | `ruleset_{create,delete,update,get,list,favorite}` |
 | `metadata` (`metadata.py`) | Rerun metadata; scan lookup; IP/URL analysis | `rerun_metadata`, `scan_lookup`, `submit_url` |
 | `activity` (`event.py`) | List account activity/events | `event_list` |
 | `account` (`account.py`) | Account whois / features | `account_whois`, `account_features` |
 | `notification` / webhooks (`notification.py`, `notification_webhook.py`) | Notification webhook CRUD | `notification_webhook_{create,get,update,delete,list}` |
 | `bundle` (`bundle.py`) | Sample bundle tasks | `sample_bundle_task_create`, `sample_bundle_task_get`, `sample_bundle_download` |
 | `sample` (`sample.py`) | Fetch a consolidated sample view | `sample` |
+
+> **`live feed --since` defaults to 86400 seconds (24h), not 1440.** The old
+> default was written as `24 * 60` against an SDK docstring that said the
+> parameter was minutes; the server has always read **seconds**, so the real
+> default window was 24 minutes while the ruleset badge beside it counts 24
+> hours. The fix is here rather than on the wire: the endpoint takes ~197k
+> requests per 30 days carrying `since` from clients outside our control, and
+> re-basing the server to minutes would widen every one of them 60x with no
+> error. `historical list --since` is seconds too — those two agree.
+>
+> **Migration, for a caller who relied on the old behaviour:** pass
+> `--since 1440` to get the 24-minute window back. Two effects compound and
+> the second is the sharper one — the default window widens ~60x, and
+> `--max-results` is unset by default, so a bare `live feed` pages through all
+> of it rather than stopping. This repo has no CHANGELOG, so the note lives
+> here and in the command's own `--help` rather than only in a release-time
+> reminder.
+>
+> **A third `--since` is genuinely MINUTES and must stay that way:**
+> `download stream --since` (`client/download.py`, `IntRange(1, 2880)`,
+> default `1440`) hits a different endpoint that really does read minutes. That
+> `1440` is the same literal `live feed` is being corrected away from, and is the
+> likeliest origin of the original mistake — check which endpoint you are on
+> before copying a default between them.
 
 ## Adding to the catalogue
 

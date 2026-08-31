@@ -22,6 +22,9 @@ class BaseOutput:
     def ruleset(self, result, contents=False):
         raise NotImplementedError
 
+    def ruleset_favorite(self, result):
+        raise NotImplementedError
+
     def iocs(self, iocs, write=True):
         raise NotImplementedError
     

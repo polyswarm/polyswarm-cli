@@ -76,8 +76,10 @@ class TextOutput(base.BaseOutput):
         if not instance.failed:
             output.append(self._white(f'Scan permalink: {instance.permalink}'))
 
-        # Defensive getattr: these attributes ship in the paired SDK release, but a
-        # CLI running against an older installed SDK won't have them (no AttributeError).
+        # Defensive getattr, kept deliberately: these attributes ship in 4.1.0, well
+        # below the dependency floor, so the pin already guarantees them. This is
+        # belt-and-braces for an unsupported configuration, NOT the version-probing
+        # the floor replaced -- don't add siblings for a version the floor permits.
         # The bounty state (KNOWN_GOOD) is the only reliable signal that this artifact is
         # a known-good binary whose bytes are withheld — it alone decides. known_good_sources
         # (the flagging feeds) is emitted for any instance whose sha256 matches a known-good
@@ -201,6 +203,17 @@ class TextOutput(base.BaseOutput):
             self._close_group()
         if result.ruleset_name is not None:
             output.append(self._white(f'Ruleset Name: {result.ruleset_name}'))
+        # Source-rule provenance. The pin guarantees the SDK parses these,
+        # so None means the SERVER had no answer (specs/03).
+        if result.rule_id is not None:
+            output.append(self._white(f'Source Ruleset Id: {result.rule_id}'))
+        if result.rule_modified is not None:
+            output.append(self._white(f'Source ruleset last modified at freeze: {result.rule_modified}'))
+        if result.source_rule_changed is not None:
+            # Tri-state upstream: None (unknown) prints nothing; the label
+            # names the reference point so it can't read as "edited recently".
+            changed = 'yes' if result.source_rule_changed else 'no'
+            output.append(self._white(f'Source ruleset changed since this hunt froze it: {changed}'))
         if result.yara:
             output.append(self._white(f'Ruleset Contents:\n{result.yara}'))
         return self._output(output, write)
@@ -284,8 +297,46 @@ class TextOutput(base.BaseOutput):
         output.append(self._white(f'Description: {result.description}'))
         output.append(self._white(f'Created at: {result.created}'))
         output.append(self._white(f'Modified at: {result.modified}'))
+        # The pin guarantees the SDK parses these, so None means the SERVER
+        # had no answer — never an older SDK (specs/03).
+        if result.favorite:
+            output.append(self._yellow('Favorite: yes'))
+            if result.favorited_at is not None:
+                output.append(self._white(f'Favorited at: {result.favorited_at}'))
+        if result.rule_count is not None:
+            output.append(self._white(f'Rules in ruleset: {result.rule_count}'))
+        if result.historical_hunt_count is not None:
+            output.append(self._white(f'Historical hunts triggered: {result.historical_hunt_count}'))
+        if result.new_results_count is not None:
+            # The badge is a stored counter the server's scheduled refresh
+            # maintains. The response carries no window and a caller cannot
+            # choose one, so the label must not imply a window; the marker
+            # below is what says how fresh the number is.
+            output.append(self._white(f'New live results: {result.new_results_count}'))
+            if result.new_results_counted_at is not None:
+                output.append(self._white(f'New-results count refreshed at: {result.new_results_counted_at}'))
         if contents:
             output.append(self._white(f'Ruleset Contents:\n{result.yara}'))
+        return self._output(output, write)
+
+    def ruleset_favorite(self, result, write=True):
+        output = []
+        output.append(self._blue(f'Ruleset Id: {result.id}'))
+        starred = result.favorite
+        # Nested under `starred`, matching `ruleset` above: the timestamp
+        # describes the star, so an unstar response still carrying one must not
+        # render "Favorite: no" with a "Favorited at" beneath it.
+        if starred:
+            output.append(self._yellow('Favorite: yes'))
+            if result.favorited_at is not None:
+                output.append(self._white(f'Favorited at: {result.favorited_at}'))
+        else:
+            output.append(self._white('Favorite: no'))
+        used = result.favorites_used
+        limit = result.favorites_limit
+        if used is not None and limit is not None:
+            # server-owned budget counters — the client never counts
+            output.append(self._white(f'Favorites used: {used} of {limit}'))
         return self._output(output, write)
 
     def tag_link(self, result, write=True):
