@@ -321,10 +321,15 @@ class TextOutput(base.BaseOutput):
         output = []
         output.append(self._blue(f'Ruleset Id: {result.id}'))
         starred = result.favorite
-        output.append(self._yellow('Favorite: yes') if starred
-                      else self._white('Favorite: no'))
-        if result.favorited_at is not None:
-            output.append(self._white(f'Favorited at: {result.favorited_at}'))
+        # Nested under `starred`, matching `ruleset` above: the timestamp
+        # describes the star, so an unstar response still carrying one must not
+        # render "Favorite: no" with a "Favorited at" beneath it.
+        if starred:
+            output.append(self._yellow('Favorite: yes'))
+            if result.favorited_at is not None:
+                output.append(self._white(f'Favorited at: {result.favorited_at}'))
+        else:
+            output.append(self._white('Favorite: no'))
         used = result.favorites_used
         limit = result.favorites_limit
         if used is not None and limit is not None:

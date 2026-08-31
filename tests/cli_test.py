@@ -260,22 +260,26 @@ class RulesetTest(BaseTestCase):
         result = self._run_cli([
             '--output-format', 'json', 'rules', 'list'])
         self._assert_json_result(result, self.click_vcr(result))
+
     @vcr.use_cassette()
     def test_ruleset_favorite_text(self):
         result = self._run_cli([
             '--output-format', 'text', 'rules', 'favorite', '96652060989160147'])
         self._assert_text_result(result, self.click_vcr(result))
+
     @vcr.use_cassette()
     def test_ruleset_unfavorite_text(self):
         result = self._run_cli([
             '--output-format', 'text', 'rules', 'favorite', '96652060989160147',
             '--unfavorite'])
         self._assert_text_result(result, self.click_vcr(result))
+
     @vcr.use_cassette()
     def test_ruleset_favorite_json(self):
         result = self._run_cli([
             '--output-format', 'json', 'rules', 'favorite', '14883307518120680'])
         self._assert_json_result(result, self.click_vcr(result))
+
     @vcr.use_cassette()
     def test_ruleset_favorite_limit_text(self):
         # The server's machine-readable FAVORITE_LIMIT refusal, recorded off

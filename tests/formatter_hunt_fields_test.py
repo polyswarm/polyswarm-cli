@@ -18,7 +18,6 @@ Pins two contracts:
   pin actually installs.
 """
 import io
-import pathlib
 from unittest import TestCase, mock
 
 from click.testing import CliRunner
@@ -88,6 +87,17 @@ class FormatterHuntFieldsTest(TestCase):
         assert 'Favorite: no' in rendered
         assert 'Favorited at' not in rendered
         assert 'Favorites used: 2 of 5' in rendered
+    def test_unfavorite_carrying_a_stale_timestamp_hides_it(self):
+        """An unstar response that still carries `favorited_at` must not render
+        it: the timestamp describes the star. No cassette produces this — the
+        server sends null — so it is unit-pinned."""
+        rendered = self._render('ruleset_favorite', resources.YaraRulesetFavorite(
+            {'id': '5', 'favorite': False,
+             'favorited_at': '2026-08-25T12:00:00+00:00',
+             'favorites_used': 2, 'favorites_limit': 5}, api=None))
+        assert 'Favorite: no' in rendered
+        assert 'Favorited at' not in rendered
+
     def test_ruleset_none_and_false_fields_are_omitted(self):
         rendered = self._render('ruleset', _ruleset(
             favorite=False, favorited_at=None, rule_count=None,
