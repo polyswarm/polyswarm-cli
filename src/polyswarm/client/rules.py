@@ -81,13 +81,9 @@ def favorite(ctx, rule_id, unfavorite):
             used = errors.get('favorites_used')
             limit = errors.get('favorites_limit')
             # Counters are advisory; fall back rather than render "(None of None)".
-            # The server's own message, off the DOCUMENTED path: the response
-            # envelope is `request.json`, and `result` is a key inside it. The
-            # request object has no `.result` attribute — only a private
-            # `._result` — so reading that spelling silently yielded None.
-            # getattr, not attribute access: a malformed/bare request must
-            # still reach the clean message rather than an AttributeError
-            # traceback (pinned by the bare-request test).
+            # `.json` is the response envelope and `result` a key inside it —
+            # the request has no `.result`, only a private `._result`. getattr
+            # so a bare request still reaches the message (specs/05).
             server_msg = (getattr(exc.request, 'json', None) or {}).get('result')
             budget = (f'Favorite limit reached ({used} of {limit} used).'
                       if used is not None and limit is not None
@@ -95,9 +91,7 @@ def favorite(ctx, rule_id, unfavorite):
                             else 'Favorite limit reached.'))
             # PolyswarmException exits 2; ClickException would exit 1, reserved
             # for no-results/not-found.
-            # Only the star direction can hit the cap, and only it has a
-            # remedy — telling someone unstarring to unstar something else is
-            # advice that cannot help.
+            # Only starring can hit the cap, and only it has a remedy.
             remedy = ('' if unfavorite else
                       ' Unfavorite another ruleset first: '
                       '`polyswarm rules favorite <id> --unfavorite`.')

@@ -57,31 +57,25 @@ def live_results(ctx, since, livescan_id, max_results, rule_name, family,
                  polyscore_lower, polyscore_upper, private):
     """Show live-hunt results.
 
-    `--since` is SECONDS and defaults to 86400 (24h). It used to default to
-    1440, which was written as 24*60 believing the unit was minutes — so the
-    real window was 24 MINUTES. Pass `--since 1440` to get the old behaviour
-    back. The default now returns roughly 60x more, and `--max-results` is
-    unset by default, so a bare `live feed` pages through all of it; bound it
-    with `--max-results` if that matters.
+    `--since` is SECONDS and defaults to 86400 (24h). Earlier versions defaulted
+    to a 24-minute window; pass `--since 1440` for that. Because the default
+    window is much wider and `--max-results` is unset by default, a bare
+    `live feed` pages through everything in it — bound it with `--max-results`
+    if that matters.
 
-    `--livescan-id` scopes the feed to one live hunt — the drill-down for the
-    per-ruleset new-results badge that `rules list` renders (the detail view
-    deliberately does not carry the badge).
+    `--livescan-id` scopes the feed to one live hunt, the drill-down for the
+    per-ruleset new-results count that `rules list` shows.
 
-    The two do not have to agree, and a smaller feed is not a bug. The badge
-    counts the hunt across EVERY community it runs in, public and private
-    together; the feed shows one community at a time (this command always
-    sends one — `--private` selects it). A hunt spanning both will show fewer
-    rows here than the badge reports.
+    The two do not have to agree, and a smaller feed is not a bug: that count
+    covers EVERY community the hunt runs in, public and private together, while
+    the feed shows one at a time (`--private` selects it). A hunt spanning both
+    shows fewer rows here than the count reports.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
-    # Both are redundant against the pinned SDK — `livescan_id` defaults to None
-    # and the SDK maps 0/None to "no bound" (a negative never reaches it —
-    # IntRange(min=0) refuses one at the interface) — and the request
-    # is byte-identical either way. Kept so a pre-existing invocation's call
-    # shape does not move, which `test_plain_feed_forwards_neither_new_kwarg`
-    # pins alongside the `--since 0` refactor hazard beside it.
+    # Sent only when passed. The request is byte-identical either way, so this
+    # exists to keep a pre-existing invocation's call shape unchanged. Note
+    # `since` is NOT folded in here: 0 must reach the SDK (specs/02).
     kwargs = {}
     if livescan_id is not None:
         kwargs['livescan_id'] = livescan_id
