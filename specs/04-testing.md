@@ -44,12 +44,25 @@ Helpers in `cli_test.py`: `_run_cli(args)` invokes the command tree under a cass
 Some cassettes need a **stack state**, not just a live stack. The ruleset-favorite ones do,
 because `_assert_text_result` compares the whole rendered block verbatim and the budget
 counter is part of it: `test_ruleset_favorite_text` pins `Favorites used: 2 of 5` and
-`test_ruleset_unfavorite_text` pins `1 of 5`. Re-record them **together**, from a known
-starting state, in the order they run — they describe one sequence (star, star, unstar) and
-recorded piecemeal their counters contradict each other. That order is `unittest`'s: method
-names, sorted (`favorite_json` → `favorite_text` → `unfavorite_text`). Renaming or reordering
-a method breaks the sequence **silently**, because replay keeps passing and only the next
-re-record shows it — so if you rename one, re-record all of them.
+`test_ruleset_unfavorite_text` pins `1 of 5`. Their counters only make sense as a
+sequence (star, star, unstar), so re-recording one alone produces a set that contradicts
+itself.
+
+Re-recording them is harder than it looks, and the shipped set is **not** what a single
+pass produces — `test_ruleset_favorite_text` acts on a ruleset that does not appear in
+`test_ruleset_list_json`'s inventory at all, so the two were recorded against different
+stack states. Two couplings to plan around before starting:
+
+- `unittest` runs methods in **sorted-name** order, and `test_ruleset_list_json` sorts
+  *between* `favorite_text` and `unfavorite_text`. Its snapshot pins `"favorite": false` on
+  every ruleset, so a full-suite recording captures it while a ruleset is starred and that
+  snapshot changes too. Re-record it with the others, or not at all.
+- Renaming or reordering any of these methods changes the sequence **silently**: replay
+  keeps passing, and only the next re-record surfaces the contradiction.
+
+If keeping them consistent stops being worth it, break the coupling rather than documenting
+a wider one — `_assert_text_result` already takes a `replace=` hook, and normalising the
+budget counter there makes each cassette independent of what ran before it.
 
 **A refusal at the favorite cap is deliberately not recorded here.** Saturating the budget
 takes all five team slots, which is exactly the state the tests above must *not* be in, so
