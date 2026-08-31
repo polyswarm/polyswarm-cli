@@ -376,7 +376,15 @@ class RulesFavoriteCommandTest(TestCase):
                 ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
                  'rules', 'favorite', '5'])
         assert result.exit_code == 2                      # PolyswarmException family
-        assert 'FAVORITE_LIMIT' not in result.output
+        # The claim is that a non-limit refusal FALLS THROUGH, so the thing to
+        # assert is the absence of the limit-specific message. Asserting only
+        # that the raw code doesn't leak did not test that: the fall-through
+        # message doesn't contain the literal 'FAVORITE_LIMIT' either, so the
+        # test passed with the branch forced to treat every refusal as the
+        # limit case. Verified by doing exactly that.
+        assert 'Favorite limit reached' not in result.output
+        assert 'FAVORITE_LIMIT' not in result.output      # nor the raw code
+        assert 'Traceback' not in result.output
 
 class ExitCodeHierarchyTest(TestCase):
     """`rules favorite`'s non-limit refusals exit 2, and that holds only because
