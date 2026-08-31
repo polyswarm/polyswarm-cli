@@ -256,7 +256,7 @@ class RulesFavoriteCommandTest(TestCase):
     def test_favorite_calls_the_sdk_and_renders_the_budget(self):
         result, toggle = self._invoke(['5'], return_value=self._response(True))
         assert result.exit_code == 0, result.output
-        toggle.assert_called_once_with(mock.ANY, 5, True)
+        toggle.assert_called_once_with(mock.ANY, 5, favorite=True)
         assert 'Favorite: yes' in result.output
         assert 'Favorites used: 1 of 5' in result.output
     def test_unfavorite_flag_flips_the_boolean(self):

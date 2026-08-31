@@ -72,7 +72,7 @@ def favorite(ctx, rule_id, unfavorite):
     api = ctx.obj['api']
     output = ctx.obj['output']
     try:
-        output.ruleset_favorite(api.ruleset_favorite(rule_id, not unfavorite))
+        output.ruleset_favorite(api.ruleset_favorite(rule_id, favorite=not unfavorite))
     except api_exceptions.RequestException as exc:
         # `exc.request` needs no guard: __init__ always assigns it, and a None
         # request flows safely through the getattr.

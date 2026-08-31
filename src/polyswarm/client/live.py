@@ -75,7 +75,8 @@ def live_results(ctx, since, livescan_id, max_results, rule_name, family,
     api = ctx.obj['api']
     output = ctx.obj['output']
     # Both are redundant against the pinned SDK — `livescan_id` defaults to None
-    # and the SDK maps 0/negative/None to "no bound" — and the request
+    # and the SDK maps 0/None to "no bound" (a negative never reaches it —
+    # IntRange(min=0) refuses one at the interface) — and the request
     # is byte-identical either way. Kept so a pre-existing invocation's call
     # shape does not move, which `test_plain_feed_forwards_neither_new_kwarg`
     # pins alongside the `--since 0` refactor hazard beside it.

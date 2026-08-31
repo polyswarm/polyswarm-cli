@@ -8,6 +8,8 @@ How the CLI is tested: the `CliRunner` harness, the two mocking styles (SDK-boun
 
 - **Anything that is command behaviour is driven through `click.testing.CliRunner`** — argument parsing, the SDK call, the wiring, the exit code: exercise the real command tree, never an internal function standing in for it. No live PolySwarm stack is required. The one sanctioned exception is pure rendering logic — see [Style 3](#style-3--formatter-unit-tests).
 - **Mock at the SDK boundary, or replay HTTP with VCR — never both for the same path.** A test either patches `polyswarm_api.api.PolyswarmAPI.<method>` (unit-style) or lets VCR replay recorded HTTP (end-to-end). The CLI's own code is exercised either way.
+
+  **One sanctioned exception, where the two pin different things:** a refusal whose *rendering* is a CLI decision and whose *envelope shape* is an SDK contract. `FAVORITE_LIMIT` is covered both ways deliberately — the SDK-boundary mock pins the message and the exit code, the recorded 400 pins where in the envelope the machine-readable code actually lives. Neither substitutes for the other, and dropping the cassette would leave the CLI asserting a shape nothing checks. Use this only when you can name what each half pins.
 - **VCR is an efficiency cache, not a load-bearing requirement.** The suite must pass against a live e2e stack with VCR off. Don't hardcode `record_mode='none'`; if a test only works against its recorded cassette, that's a bug in the test.
 - **Never `cp` a cassette from a sibling test, never hand-edit cassette bytes.** Re-record against a live stack.
 
@@ -38,6 +40,12 @@ The VCR object is built with the default request matcher (`method, scheme, host,
 Helpers in `cli_test.py`: `_run_cli(args)` invokes the command tree under a cassette; `_assert_text_result` / `_assert_json_result` compare `result.output` and the exit code against the `.click` fixture.
 
 ### Re-recording a cassette
+
+Some cassettes need a **stack state**, not just a live stack, and the steps below will
+not produce it on their own. `test_ruleset_favorite_limit_text` needs the team's favorite
+budget already saturated, because it records the server's refusal; re-recording it against
+a fresh stack yields a 200 and a cassette that no longer tests anything. Set the state
+first, then record.
 
 ```bash
 rm tests/vcr/<name>.vcr            # (and regenerate <name>.click from the new run)
