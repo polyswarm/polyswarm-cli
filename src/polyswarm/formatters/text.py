@@ -76,8 +76,10 @@ class TextOutput(base.BaseOutput):
         if not instance.failed:
             output.append(self._white(f'Scan permalink: {instance.permalink}'))
 
-        # Defensive getattr: these attributes ship in the paired SDK release, but a
-        # CLI running against an older installed SDK won't have them (no AttributeError).
+        # Defensive getattr, kept deliberately: these attributes ship in 4.1.0, well
+        # below the dependency floor, so the pin already guarantees them. This is
+        # belt-and-braces for an unsupported configuration, NOT the version-probing
+        # the floor replaced -- don't add siblings for a version the floor permits.
         # The bounty state (KNOWN_GOOD) is the only reliable signal that this artifact is
         # a known-good binary whose bytes are withheld — it alone decides. known_good_sources
         # (the flagging feeds) is emitted for any instance whose sha256 matches a known-good

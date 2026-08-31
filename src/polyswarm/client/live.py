@@ -40,8 +40,8 @@ def live_stop(ctx, ruleset_id):
 # click.INT matches every other id option in the CLI and rejects a typo before
 # it reaches the server.
 @click.option('-i', '--livescan-id', type=click.INT,
-              help="Scope the feed to one live hunt (a ruleset's Live Hunt Id, "
-                   'a 17-digit number). Shows one community at a time, while '
+              help="Scope the feed to one live hunt (a ruleset's Live Hunt Id). "
+                   'Shows one community at a time, while '
                    'the badge counts all of them, so the counts need not match.')
 # IntRange(min=0) refuses a negative rather than letting it silently mean unbounded.
 @click.option('-m', '--max-results', type=click.IntRange(min=0),

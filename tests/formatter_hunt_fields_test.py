@@ -311,8 +311,13 @@ class RulesFavoriteCommandTest(TestCase):
         # the user, so the server's own message is the fallback.
         # A REAL request, not a Mock: a Mock fabricates whatever attribute it
         # is asked for, so it passed even while the code read a spelling the
-        # request object does not have.
+        # request object does not have. Assigning `.json` below fabricates it
+        # just as effectively, so pin the spelling on the UNTOUCHED request
+        # first — that is the part a Mock could never have told us, and it is
+        # what fails if the SDK ever renames the envelope.
         request = core.PolyswarmRequest(api=None, method='PUT', url='http://x')
+        assert hasattr(request, 'json'), 'SDK renamed the response envelope'
+        assert not hasattr(request, 'result'), 'the wrong spelling became real'
         request.json = {'errors': {'code': 'FAVORITE_LIMIT'},
                         'result': 'Favorite limit reached (5 of 5 used).',
                         'status': 'error'}
@@ -365,6 +370,25 @@ class RulesFavoriteCommandTest(TestCase):
         assert 'Traceback' not in result.output
         assert 'None' not in result.output
         assert '--unfavorite' in result.output
+    def test_the_unfavorite_direction_gets_no_remedy_sentence(self):
+        """Only the star direction can hit the cap and only it has a remedy —
+        telling someone unstarring to unstar something else cannot help. Every
+        other limit test invokes WITHOUT --unfavorite, so the empty-remedy arm
+        never ran and inverting the conditional would not have failed one."""
+        request = mock.Mock()
+        request.errors = {'code': 'FAVORITE_LIMIT',
+                          'favorites_used': 5, 'favorites_limit': 5}
+        refusal = exceptions.RequestException(request)
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_favorite',
+                        autospec=True, side_effect=refusal):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'favorite', '5', '--unfavorite'])
+        assert result.exit_code == 2, result.output
+        assert 'Favorite limit reached (5 of 5 used).' in result.output
+        assert 'Unfavorite another ruleset first' not in result.output
+
     def test_other_refusals_still_raise(self):
         request = mock.Mock()
         request.errors = None

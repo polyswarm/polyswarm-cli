@@ -129,6 +129,12 @@ working value that `develop` integration validates. **At cutoff:** bump the SDK 
 if the repo files do not already carry it, then set this repo's dependency to the version
 actually being released. This repo cannot be released before that SDK release exists.
 
+*Behaviour changes to existing invocations are called out at the same cutoff.* This repo
+has no CHANGELOG, so a change that alters what an unchanged command line does — a default
+that moves, an argument that starts being rejected — is visible to users only if the
+`develop → master` PR says so. List them there, and let the release be at least a minor.
+A note that lives only in a spec is not a release note.
+
 *A missing paired branch now fails loudly.* If the SDK branch does not exist, CI falls
 back to the SDK's `develop`, whose version does not satisfy the new floor, and
 `pip install .[tests]` fails. That is the intended behaviour and an improvement: the
