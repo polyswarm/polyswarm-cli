@@ -70,7 +70,12 @@ When a CLI feature needs an SDK surface that doesn't exist yet:
 - The CLI is **sync-only** — it imports `polyswarm_api.api.PolyswarmAPI`, never `polyswarm_api.aio`. Don't add the `polyswarm_api[async]` extra.
 - Bumping the pin is a normal code change; bumping the CLI's *own* version is a release step (`AGENTS.md` §Gitflow). They're unrelated.
 - There is **no lock file / compiled requirements** to keep in step: `pyproject.toml` is the only place the SDK version is expressed, and CI installs the SDK straight from the SDK repo's branch archive (see §Coordinated changes). A pin change is a one-file change *in this repo*, but it is not free of interactions — see below.
-- **The floor must be satisfied by the SDK archive CI installs, and by PyPI.** CI installs the archive build and *then* runs `pip install .[tests]`; if the archive's declared version is below the floor, that second install silently pulls a newer SDK from PyPI **over** the archive build, and CI stops testing the SDK branch at all — the mechanism §Coordinated changes rests on, defeated with no error. Symmetrically, a floor above the newest **published** version breaks `pip install polyswarm-cli` for every consumer the moment it reaches `master`. So a floor bump has two preconditions: the version is on PyPI, and the SDK's `develop` declares at least that version.
+- **The floor must be satisfied by the SDK archive CI installs, and by PyPI.** CI installs the archive build and *then* runs `pip install .[tests]`; if the archive's declared version is below the floor, that second install silently pulls a newer SDK from PyPI **over** the archive build, and CI stops testing the SDK branch at all — the mechanism §Coordinated changes rests on, defeated with no error. Symmetrically, a floor above the newest **published** version breaks `pip install polyswarm-cli` for every consumer the moment it reaches `master`. So a floor bump has two preconditions, and they fall due at **different moments** — conflating them is what makes a correct bump look wrong:
+
+  - **To merge here:** the SDK's `develop` must declare at least the floor. Nothing about PyPI applies yet; merging to `develop` publishes nothing.
+  - **To release here:** the floor version must be on PyPI, which needs the SDK's own `develop → master` first.
+
+  A floor naming a version that is declared on the SDK's `develop` but not yet released is therefore correct and mergeable — that is the normal state of a paired change between the two merges.
 
   **Read the declared version off the archive's own tree, and mind pre-release suffixes.** PEP 440 orders `4.2.0.dev1 < 4.2.0`, so a `develop` head carrying a dev suffix (the SDK's `pyproject.toml` has a `[tool.bumpversion.parts.dev]`) would *not* satisfy a `>=4.2.0` floor even though it looks like 4.2.0 — and the archive build would be silently replaced from PyPI. Check the version string in the SDK branch's `pyproject.toml` / `__init__.py`, not the last release tag. When the floor was last verified this way both were read from `origin/develop` as `4.2.0`, no suffix; the pin has since moved to 4.3.0 (§Current floor), and a future bump should be re-checked the same way.
 
@@ -83,9 +88,12 @@ The floor moved to **4.4.0** with the hunt-page change set; before that **4.3.0*
 
 The known-good rendering attributes (`ArtifactInstance.state`, `.known_good`/`.known_good_sources`, read by `formatters/text.py` — see [`03-formatters.md`](./03-formatters.md) §Known-good artifact instances) ship in **4.1.0**, so they are *not* what sets the floor; they are simply covered by it.
 
-**The floor is how this repo expresses every SDK dependency.** There are no runtime
-probes and no per-test skip guards: if the CLI uses an SDK surface, the floor names a
-version that has it, and `pip` enforces that at install time. The hunt-page surfaces —
+**The floor is how this repo expresses every SDK dependency.** No runtime probes for the
+surfaces the floor names, and no per-test skip guards: if the CLI uses an SDK surface, the
+floor names a version that has it, and `pip` enforces that at install time. (One carve-out
+predates this and is documented where it lives: the known-good rendering attributes in
+[`03-formatters.md`](./03-formatters.md), guarded belt-and-braces against a configuration
+that is not supported rather than against a version the floor permits.) The hunt-page surfaces —
 `ruleset_favorite` and the `YaraRulesetFavorite` resource, the `ruleset_list` filters,
 `live_feed(livescan_id=, max_results=)`, and the tracking/provenance fields the
 formatters render — are what moved the floor to 4.4.0. Code and tests use them

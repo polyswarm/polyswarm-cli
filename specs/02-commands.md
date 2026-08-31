@@ -47,6 +47,14 @@ The top-level command groups, what each is for, and the primary `polyswarm-api` 
 > re-basing the server to minutes would widen every one of them 60x with no
 > error. `historical list --since` is seconds too — those two agree.
 >
+> **Migration, for a caller who relied on the old behaviour:** pass
+> `--since 1440` to get the 24-minute window back. Two effects compound and
+> the second is the sharper one — the default window widens ~60x, and
+> `--max-results` is unset by default, so a bare `live feed` pages through all
+> of it rather than stopping. This repo has no CHANGELOG, so the note lives
+> here and in the command's own `--help` rather than only in a release-time
+> reminder.
+>
 > **A third `--since` is genuinely MINUTES and must stay that way:**
 > `download stream --since` (`client/download.py`, `IntRange(1, 2880)`,
 > default `1440`) hits a different endpoint that really does read minutes. That

@@ -55,6 +55,13 @@ def live_results(ctx, since, livescan_id, max_results, rule_name, family,
                  polyscore_lower, polyscore_upper, private):
     """Show live-hunt results.
 
+    `--since` is SECONDS and defaults to 86400 (24h). It used to default to
+    1440, which was written as 24*60 believing the unit was minutes — so the
+    real window was 24 MINUTES. Pass `--since 1440` to get the old behaviour
+    back. The default now returns roughly 60x more, and `--max-results` is
+    unset by default, so a bare `live feed` pages through all of it; bound it
+    with `--max-results` if that matters.
+
     `--livescan-id` scopes the feed to one live hunt — the drill-down for the
     per-ruleset new-results badge that `rules list` renders (the detail view
     deliberately does not carry it).

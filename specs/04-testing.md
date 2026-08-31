@@ -65,7 +65,8 @@ This spec describes the harness as it stands. Not yet documented (add as the sui
 ## The SDK floor is a version pin, not a runtime probe
 
 **A test never asks the installed SDK whether it has a feature. The pin guarantees
-it.** When this repo needs a surface the SDK does not yet publish, the SDK bumps its
+it.** (For the one pre-existing render guard this does not cover, see
+[`03-formatters.md`](./03-formatters.md) §Known-good artifact instances.) When this repo needs a surface the SDK does not yet publish, the SDK bumps its
 version and `pyproject.toml` raises `polyswarm_api>=` to it. `pip` then refuses the
 combination that would fail, at install time, before a single test runs — so a test
 can simply use the surface.
