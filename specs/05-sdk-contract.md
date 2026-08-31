@@ -111,18 +111,23 @@ the SDK:
 
 **Two consequences, both worth knowing before you do it.**
 
-*Merge order is forced too, and it bites earlier than release.* CI installs the SDK by
-branch name — `$CI_COMMIT_BRANCH.zip`, falling back to `develop.zip`. On a feature
-branch that resolves to the paired SDK branch, so an unreleased version tests fine. But
-**once this repo merges, its `develop` CI asks for the SDK's `develop.zip`** — and if the
-SDK has not merged to `develop` yet, that archive still declares the old version, `pip
-install .[tests]` cannot satisfy the new floor from it or from PyPI, and **`develop` CI
-breaks for every subsequent PR**, not just this one. So the SDK merges to `develop`
-first, then this repo.
+*The two `develop` branches move in lockstep, by design.* CI installs the SDK by branch
+name — `$CI_COMMIT_BRANCH.zip`, falling back to `develop.zip` — so a paired feature
+branch tests against its opposite number, and once merged, each repo's `develop` tests
+against the other's. That is the point: both ends carry the latest features and are
+exercised against each other continuously, without waiting on a release. A change that
+spans the pair is pushed to both ends together and merged to both `develop`s together.
 
-*Release order is forced separately.* This repo cannot be released to PyPI until the SDK
-version its floor names is on PyPI, so the SDK's `develop → master` must merge and
-release before this repo's does. Merging to `develop` publishes nothing.
+Out of lockstep, the mechanism says so immediately: this repo's `develop` asks for the
+SDK's `develop.zip`, and if that archive does not yet declare the floor, `pip install
+.[tests]` fails. That is the pairing being broken, not a trap to design around — the fix
+is to land the SDK side, not to loosen the floor.
+
+*Publication is a separate, later cutoff.* Merging to `develop` publishes nothing; PyPI
+only sees a version when `develop → master` merges. So the floor a feature PR sets is a
+working value that `develop` integration validates. **At cutoff:** bump the SDK version
+if the repo files do not already carry it, then set this repo's dependency to the version
+actually being released. This repo cannot be released before that SDK release exists.
 
 *A missing paired branch now fails loudly.* If the SDK branch does not exist, CI falls
 back to the SDK's `develop`, whose version does not satisfy the new floor, and
