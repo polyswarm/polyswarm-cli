@@ -50,9 +50,10 @@ def _hunt(**overrides):
 
 class FormatterHuntFieldsTest(TestCase):
     def _render(self, method, result, **kwargs):
-        out = io.StringIO()
-        getattr(text.TextOutput(color=False, output=out), method)(result, **kwargs)
-        return out.getvalue()
+        # write=False and join the returned lines, per specs/04 Style 3 — no
+        # stream, matching known_good_field_test.py.
+        return '\n'.join(
+            getattr(text.TextOutput(color=False), method)(result, write=False, **kwargs))
     def test_ruleset_tracking_fields_render_with_zero_distinct_from_absent(self):
         rendered = self._render('ruleset', _ruleset(
             favorite=True, favorited_at='2026-08-20T12:00:00+00:00', rule_count=0,
@@ -62,14 +63,14 @@ class FormatterHuntFieldsTest(TestCase):
         assert 'Favorited at: 2026-08-20 12:00:00+00:00' in rendered
         assert 'Rules in ruleset: 0' in rendered
         assert 'Historical hunts triggered: 0' in rendered
-        assert 'New live results (last 24h): 3' in rendered
+        assert 'New live results: 3' in rendered
     def test_ruleset_staleness_marker_renders_beside_the_count(self):
         # The stored badge's marker: how fresh the number is. Rendered only
         # with a count (the server sends them together).
         rendered = self._render('ruleset', _ruleset(
             new_results_count=0,
             new_results_counted_at='2026-08-25T12:00:00+00:00'))
-        assert 'New live results (last 24h): 0' in rendered
+        assert 'New live results: 0' in rendered
         assert 'New-results count refreshed at: 2026-08-25 12:00:00+00:00' in rendered
     def test_ruleset_favorite_response_renders_state_and_budget(self):
         rendered = self._render('ruleset_favorite', resources.YaraRulesetFavorite(

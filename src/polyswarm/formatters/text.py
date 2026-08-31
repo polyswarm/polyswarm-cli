@@ -310,7 +310,7 @@ class TextOutput(base.BaseOutput):
             # is a stored counter its scheduled refresh maintains — a caller
             # cannot choose the window, so the label must not imply one), and
             # the marker says how fresh the stored number is.
-            output.append(self._white(f'New live results (last 24h): {result.new_results_count}'))
+            output.append(self._white(f'New live results: {result.new_results_count}'))
             if result.new_results_counted_at is not None:
                 output.append(self._white(f'New-results count refreshed at: {result.new_results_counted_at}'))
         if contents:

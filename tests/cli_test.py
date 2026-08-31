@@ -14,9 +14,9 @@ from click.testing import CliRunner
 
 from polyswarm.client import polyswarm as client
 
+
 vcr = vcr_.VCR(cassette_library_dir='tests/vcr',
                path_transformer=vcr_.VCR.ensure_suffix('.vcr'))
-
 
 
 class BaseTestCase(TestCase):

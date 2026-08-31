@@ -142,8 +142,9 @@ either field) never raises `AttributeError`; an SDK without `.state` simply neve
 the known-good branch, which is the safe fallback — the pre-known-good rendering. That
 degradation is belt-and-braces, not a supported configuration: `.state` is load-bearing
 here with no substitute. Both attributes ship in SDK **4.1.0**, but the dependency floor is
-`polyswarm_api>=4.4.0` — the pin's current value (moved there by the hunt-page change
-set; 4.3.0 before it, by the #264 release bump); its *rationale* is two behaviours that landed in 4.2.0 and still hold
+the value in `pyproject.toml` (see [05-sdk-contract.md](./05-sdk-contract.md)
+§Current floor, which is authoritative — repeating the number here is what let this
+line go stale before); its *rationale* is two behaviours that landed in 4.2.0 and still hold
 transitively, and [05-sdk-contract.md](./05-sdk-contract.md) §Current floor is
 authoritative. Those two
 fail silently on 4.1.0 (see [`05-sdk-contract.md`](./05-sdk-contract.md) §Version pin) — so

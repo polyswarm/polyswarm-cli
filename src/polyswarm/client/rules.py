@@ -95,10 +95,13 @@ def favorite(ctx, rule_id, unfavorite):
                             else 'Favorite limit reached.'))
             # PolyswarmException exits 2; ClickException would exit 1, reserved
             # for no-results/not-found.
-            raise exceptions.PolyswarmException(
-                f'{budget} Unfavorite another ruleset first: '
-                f'`polyswarm rules favorite <id> --unfavorite`.'
-            ) from exc
+            # Only the star direction can hit the cap, and only it has a
+            # remedy — telling someone unstarring to unstar something else is
+            # advice that cannot help.
+            remedy = ('' if unfavorite else
+                      ' Unfavorite another ruleset first: '
+                      '`polyswarm rules favorite <id> --unfavorite`.')
+            raise exceptions.PolyswarmException(f'{budget}{remedy}') from exc
         raise
 
 

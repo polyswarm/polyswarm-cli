@@ -33,7 +33,7 @@ def live_stop(ctx, ruleset_id):
 @live.command('feed', short_help='Get results from live hunt.')
 @click.option('-s', '--since', type=click.INT, default=86400,
               help='How far back in SECONDS to request results '
-                   '(default: 86400 — 24h, the window the ruleset badge counts). '
+                   '(default: 86400 — 24h). '
                    'Pass 0 for no time filter at all.')
 # click.INT matches every other id option in the CLI and rejects a typo before
 # it reaches the server.
@@ -75,7 +75,7 @@ def live_results(ctx, since, livescan_id, max_results, rule_name, family,
     api = ctx.obj['api']
     output = ctx.obj['output']
     # Both are redundant against the pinned SDK — `livescan_id` defaults to None
-    # and `as_result_bound` maps 0/negative/None to "no bound" — and the request
+    # and the SDK maps 0/negative/None to "no bound" — and the request
     # is byte-identical either way. Kept so a pre-existing invocation's call
     # shape does not move, which `test_plain_feed_forwards_neither_new_kwarg`
     # pins alongside the `--since 0` refactor hazard beside it.
