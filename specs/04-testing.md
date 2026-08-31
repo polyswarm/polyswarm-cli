@@ -42,18 +42,19 @@ Helpers in `cli_test.py`: `_run_cli(args)` invokes the command tree under a cass
 
 ### Re-recording a cassette
 
-Some cassettes need a **stack state**, not just a live stack. All three ruleset-favorite
-cassettes do, because `_assert_text_result` compares the whole rendered block verbatim and
-the budget counter is part of it: `test_ruleset_favorite_text` pins `Favorites used: 2 of 5`
-and `test_ruleset_unfavorite_text` pins `1 of 5`, so each needs the team holding exactly
-that many stars at record time. Re-record them together, in a known starting state, or the
-counters disagree with each other. `test_ruleset_favorite_limit_text`
-records the server refusing at the favorite cap, so it needs a ruleset that exists *and* a
-team whose budget is already saturated. Against a fresh stack the recorded id is simply
-absent and the run 404s; against a stack where it exists but the budget is not full, the
-server accepts the star and the cassette records a success that tests nothing. Set both up
-first, then record — and note that saturating the budget consumes slots the other favorite
-tests use, so do it deliberately rather than as a side effect of a full-suite recording.
+Some cassettes need a **stack state**, not just a live stack. The ruleset-favorite ones do,
+because `_assert_text_result` compares the whole rendered block verbatim and the budget
+counter is part of it: `test_ruleset_favorite_text` pins `Favorites used: 2 of 5` and
+`test_ruleset_unfavorite_text` pins `1 of 5`. Re-record them **together**, from a known
+starting state, in the order they run — they describe one sequence (star, star, unstar) and
+recorded piecemeal their counters contradict each other.
+
+**A refusal at the favorite cap is deliberately not recorded here.** Saturating the budget
+takes all five team slots, which is exactly the state the tests above must *not* be in, so
+the cassette and its siblings cannot both be satisfiable in one VCR-off run. That refusal is
+pinned without a stack instead: the CLI's message and exit code at the SDK boundary, the
+envelope spelling against a real `PolyswarmRequest`, and the wire shape by the SDK's own
+stubbed-transport suite, which declined a recording for the same reason.
 
 ```bash
 rm tests/vcr/<name>.vcr            # (and regenerate <name>.click from the new run)

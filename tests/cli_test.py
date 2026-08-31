@@ -280,22 +280,6 @@ class RulesetTest(BaseTestCase):
             '--output-format', 'json', 'rules', 'favorite', '14883307518120680'])
         self._assert_json_result(result, self.click_vcr(result))
 
-    @vcr.use_cassette()
-    def test_ruleset_favorite_limit_text(self):
-        # The server's machine-readable FAVORITE_LIMIT refusal, recorded off
-        # the real wire (a stack with all five team slots held): pins where
-        # the error body actually lives (exc.request.errors, code string
-        # included) — the unit test's hand-built mock cannot notice either
-        # side renaming it — and the clean actionable message at exit 2, the
-        # central mapping's refusal path (exit 2, not 1).
-        result = self._run_cli([
-            '--output-format', 'text', 'rules', 'favorite', '45874884769561543'])
-        expected = self.click_vcr(result)
-        self._assert_text_result(result, expected, expected_return_code=2)
-        assert 'Favorite limit reached (5 of 5 used)' in expected
-        assert '--unfavorite' in expected
-
-
 class SubmissionTest(BaseTestCase):
     @vcr.use_cassette()
     def test_submission_lookup_json(self):
