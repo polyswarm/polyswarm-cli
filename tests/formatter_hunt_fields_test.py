@@ -24,7 +24,7 @@ from click.testing import CliRunner
 
 from polyswarm.client import polyswarm as client
 from polyswarm.formatters import text
-from polyswarm_api import exceptions, resources
+from polyswarm_api import core, exceptions, resources
 
 
 
@@ -287,9 +287,14 @@ class RulesFavoriteCommandTest(TestCase):
         # The counters are advisory; an envelope can carry the code without
         # them. Interpolating them unguarded rendered "(None of None used)" at
         # the user, so the server's own message is the fallback.
-        request = mock.Mock()
-        request.errors = {'code': 'FAVORITE_LIMIT'}
-        request.result = 'Favorite limit reached (5 of 5 used).'
+        # A REAL request, not a Mock: a Mock fabricates whatever attribute it
+        # is asked for, so it passed even while the code read a spelling the
+        # request object does not have.
+        request = core.PolyswarmRequest(api=None, method='PUT', url='http://x')
+        request.json = {'errors': {'code': 'FAVORITE_LIMIT'},
+                        'result': 'Favorite limit reached (5 of 5 used).',
+                        'status': 'error'}
+        request.errors = request.json['errors']
         refusal = exceptions.RequestException(request)
         with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_favorite',
                         autospec=True, side_effect=refusal):

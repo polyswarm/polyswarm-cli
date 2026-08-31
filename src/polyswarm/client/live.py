@@ -64,7 +64,7 @@ def live_results(ctx, since, livescan_id, max_results, rule_name, family,
 
     `--livescan-id` scopes the feed to one live hunt — the drill-down for the
     per-ruleset new-results badge that `rules list` renders (the detail view
-    deliberately does not carry it).
+    deliberately does not carry the badge).
 
     The two do not have to agree, and a smaller feed is not a bug. The badge
     counts the hunt across EVERY community it runs in, public and private
