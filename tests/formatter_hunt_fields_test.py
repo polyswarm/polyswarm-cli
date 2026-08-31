@@ -17,7 +17,6 @@ Pins two contracts:
   autospec'd mocks, so every call is signature-checked against the SDK the
   pin actually installs.
 """
-import io
 from unittest import TestCase, mock
 
 from click.testing import CliRunner
@@ -307,6 +306,24 @@ class RulesFavoriteCommandTest(TestCase):
         assert 'None of None' not in result.output
         assert 'Favorite limit reached (5 of 5 used).' in result.output
         assert '--unfavorite' in result.output
+    def test_a_list_shaped_errors_envelope_does_not_crash_the_handler(self):
+        """The SDK carries a legacy LIST shape for `errors` alongside the
+        mapping. Only the mapping carries a machine-readable code, so a
+        list-shaped refusal cannot be FAVORITE_LIMIT — the `isinstance` guard
+        exists so such a refusal falls through to the generic path instead of
+        raising on `.get`. Still exit 2, still no traceback."""
+        request = core.PolyswarmRequest(api=None, method='PUT', url='http://x')
+        request.errors = [{'code': 'FAVORITE_LIMIT', 'favorites_used': 5}]
+        refusal = exceptions.RequestException(request)
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_favorite',
+                        autospec=True, side_effect=refusal):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'favorite', '5'])
+        assert result.exit_code == 2, result.output
+        assert 'Traceback' not in result.output
+
     def test_favorite_limit_on_a_request_without_result_still_has_no_traceback(self):
         # A Mock has every attribute, so the test above cannot fail on a missing
         # `.result`. This one uses a real object that genuinely lacks it — the

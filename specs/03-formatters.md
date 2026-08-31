@@ -164,8 +164,8 @@ the attributes directly:
 - `favorite` is truthy-only ("Favorite: yes"): False and None both print
   nothing, deliberately indistinguishable.
 - `new_results_count` is the server's STORED badge (refreshed by its
-  scheduled job — the window is the fixed 24 h product window, which the
-  label names, since a caller cannot choose it): a number renders with its
+  scheduled job; the window is the server's and the response does not carry
+  it, so the label deliberately does not name one): a number renders with its
   `new_results_counted_at` staleness marker beside it; `None` (never
   refreshed / no live hunt) omits both lines.
 - `ruleset_favorite` renders the toggle response: `Favorite: yes/no`, the
