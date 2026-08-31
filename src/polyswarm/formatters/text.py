@@ -306,10 +306,10 @@ class TextOutput(base.BaseOutput):
         if result.historical_hunt_count is not None:
             output.append(self._white(f'Historical hunts triggered: {result.historical_hunt_count}'))
         if result.new_results_count is not None:
-            # The window is the server's fixed 24 h product window (the badge
-            # is a stored counter its scheduled refresh maintains — a caller
-            # cannot choose the window, so the label must not imply one), and
-            # the marker says how fresh the stored number is.
+            # The badge is a stored counter the server's scheduled refresh
+            # maintains. The response carries no window and a caller cannot
+            # choose one, so the label must not imply a window; the marker
+            # below is what says how fresh the number is.
             output.append(self._white(f'New live results: {result.new_results_count}'))
             if result.new_results_counted_at is not None:
                 output.append(self._white(f'New-results count refreshed at: {result.new_results_counted_at}'))
