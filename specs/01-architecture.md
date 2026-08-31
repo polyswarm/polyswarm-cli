@@ -38,6 +38,14 @@ The console-script entry (`__main__.py`) calls `polyswarm_cli(prog_name='polyswa
 
 The transport-error branch matches by **ancestry class name** — it intersects `{c.__name__ for c in type(e).__mro__}` with `{'HTTPError', 'RequestException', 'ConnectionError', 'SSLError'}` — because those classes come from the SDK's HTTP dependency (`httpx`; `requests` historically) and shouldn't be imported here directly. `httpx` roots every request/transport/status error at `HTTPError`, so ancestry matching covers all its leaf classes (`ConnectError`, `ReadTimeout`, `RemoteProtocolError`, `ProxyError`, …) without enumerating them.
 
+**The order of the `except` clauses is load-bearing, not stylistic.** The SDK has its own
+`api_exceptions.RequestException`, which subclasses `PolyswarmException` but shares the bare
+name `requests` used — so it satisfies the ancestry-name test above and would take the
+transport branch (exit `1`, "contact support") if it ever reached it. It exits `2` only
+because the `PolyswarmException` clause is matched **before** the transport branch. Reordering
+those clauses silently changes the exit code of every SDK request refusal, `FAVORITE_LIMIT`
+included; `ExitCodeHierarchyTest` pins the subclass relation the ordering rests on.
+
 ## The SDK wrapper — `polyswarm.py`
 
 `class Polyswarm(PolyswarmAPI)` subclasses the SDK's sync client to add **CLI-only** behaviour the SDK has no reason to ship:

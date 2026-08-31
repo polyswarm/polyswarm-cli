@@ -91,7 +91,7 @@ Details in [`specs/04-testing.md`](./specs/04-testing.md). The shape:
 - Tests live in `tests/` and drive command behaviour through `click.testing.CliRunner` — no live PolySwarm stack needed.
 - Two styles for that: **SDK-boundary mocks** (`mock.patch('polyswarm_api.api.PolyswarmAPI.<method>')`, e.g. `tests/field_property_test.py`) and **VCR cassettes** (`tests/cli_test.py`) that replay recorded HTTP for end-to-end CLI runs. Cassettes live in `tests/vcr/` (`.vcr` for the HTTP interactions, `.click` for the expected rendered output).
 - Pure rendering logic — which line a given field set produces, no command-tree behaviour — is instead unit-tested against the formatter directly (e.g. `tests/known_good_field_test.py`); see the spec's *Style 3* for when that's the right choice.
-- VCR is an **efficiency cache, not a requirement** — the suite must pass against a live e2e stack with VCR off. Re-record a cassette by deleting it and re-running the test against a live stack; never hand-edit a cassette or `cp` one from a sibling test.
+- VCR is an **efficiency cache, not a requirement** — the suite must pass against a live e2e stack with VCR off, with one named exception (an assertion needing a stack state the suite cannot create) argued in [`specs/04-testing.md`](./specs/04-testing.md) §Invariants. Adding a second one means writing it down there too. Re-record a cassette by deleting it and re-running the test against a live stack; never hand-edit a cassette or `cp` one from a sibling test.
 
 ## Commit + PR hygiene
 
