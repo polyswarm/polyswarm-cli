@@ -18,18 +18,10 @@ def pretty_print_datetime(value):
     return datetime.strftime(value, '%Y-%m-%d %H:%M:%S UTC')
 
 
-# Matched-string `data` is the one field in a hunt result derived from the SAMPLE, so it
-# is attacker-controlled end to end. yara escapes non-printables before we ever see it and
-# the analyzer keeps that rendering verbatim, so valid data is already printable ASCII and
-# this is a no-op on it. It exists because that guarantee lives in ANOTHER repo: if it ever
-# slips, a raw CSI sequence here would repaint or clear the analyst's terminal.
-# Everything outside printable ASCII, not just the C0 range. An earlier version stopped at
-# \x7f and let U+009B through -- which IS the 8-bit CSI, acted on by xterm and VTE in UTF-8
-# mode, so `\x9b2J` still cleared the screen: a hole in exactly the byte this exists to
-# block. The threat model is "the upstream escaping guarantee lives in another repo and may
-# slip", and if it slips it slips into raw bytes, which do not stay conveniently low.
-# Whitelisting printable ASCII also makes the ASCII-only rule in specs/03 true of this
-# field rather than merely true of the literals around it.
+# `data` and `identifier` are sample-derived, so attacker-controlled; the escaping that
+# makes them safe is upstream's contract, not ours. Whitelist, not blacklist -- an
+# earlier blacklist stopped at \x7f and let U+009B (8-bit CSI) through.
+# Rationale: specs/03-formatters.md, Matched strings.
 _UNPRINTABLE = re.compile(r'[^\x20-\x7e]')
 
 
@@ -62,23 +54,16 @@ class TextOutput(base.BaseOutput):
         else:
             return self._red
 
-    # Three-state -- see the SDK's specs/05-downstream-contract.md.
-    #
-    # None renders NOTHING, reversing the instinct to explain the absence: None almost
-    # always means "list route", which can never carry strings, so a line there is a false
-    # alarm on every row. `live feed` loops over this same method and nothing on the
-    # resource tells the routes apart. [] keeps its line -- it only reaches a detail route,
-    # where "matched, no byte evidence" is a real answer.
+    # Three-state, and NOT interchangeable: None renders nothing (it is dominated by list
+    # routes, which can never carry strings), [] keeps its line, a list renders entries.
+    # Do not collapse them or add a line for None. Why: specs/03-formatters.md.
     def _matched_strings(self, strings, dropped=None):
         if strings is None:
             return []
         if not strings:
             if dropped:
-                # Should be unreachable -- the analyzer keeps a match's first string, so an
-                # empty list with a non-zero count is contradictory. Report only what is
-                # certain: asserting "matched without byte evidence" here would be a false
-                # claim about the RULE, and silently discarding the count is the exact
-                # wrong inference this line exists to prevent.
+                # Contradictory input (the analyzer keeps a match's first string).
+                # Report only what is certain rather than assert a rule property.
                 return [self._yellow(
                     f'Matched Strings: none shown ({dropped} withheld, result size limit)')]
             return [self._white('Matched Strings: none -- the rule matched without byte '
@@ -87,15 +72,13 @@ class TextOutput(base.BaseOutput):
         for string in strings:
             size = f'{string["length"]} bytes'
             if string['truncated']:
-                # Subscripted like the other four: fail loudly on a partial entry
-                # rather than render half-right.
+                # Subscripted, unlike the attributes above -- a partial entry is a
+                # producer breaking its contract, not version skew. specs/03 records why.
                 size += ', truncated'
             lines.append(self._white(
                 f'  {_safe_data(string["identifier"])} @ 0x{string["offset"]:x} ({size}): {_safe_data(string["data"])}'))
         if dropped:
-            # Without this the list reads as the whole truth, and a user concludes their
-            # rule hit N times when it hit N + dropped. Yellow, not white: it is the one
-            # line here reporting something the platform withheld.
+            # Yellow: the one line here reporting something the platform withheld.
             lines.append(self._yellow(
                 f'  ... {dropped} more not shown (result size limit)'))
         return lines
@@ -298,8 +281,7 @@ class TextOutput(base.BaseOutput):
                     output.append(self._white(malicious))
         if result.tags:
             output.append(self._white(f'Tags: {result.tags}'))
-        # getattr: the pin admits SDKs predating this attribute -- same defence as the
-        # known-good reads above. Missing lands on the silent None branch.
+        # getattr: the pin admits SDKs predating these fields (specs/05-sdk-contract.md).
         output.extend(self._matched_strings(
             getattr(result, 'matched_strings', None),
             getattr(result, 'matched_strings_dropped', None)))
@@ -334,8 +316,7 @@ class TextOutput(base.BaseOutput):
                     output.append(self._white(malicious))
         if result.tags:
             output.append(self._white(f'Tags: {result.tags}'))
-        # getattr: the pin admits SDKs predating this attribute -- same defence as the
-        # known-good reads above. Missing lands on the silent None branch.
+        # getattr: the pin admits SDKs predating these fields (specs/05-sdk-contract.md).
         output.extend(self._matched_strings(
             getattr(result, 'matched_strings', None),
             getattr(result, 'matched_strings_dropped', None)))

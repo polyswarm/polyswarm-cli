@@ -207,10 +207,17 @@ def test_dropped_line_does_not_fabricate_a_strings_block(cls, method):
 
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_older_sdk_without_the_dropped_attribute_does_not_raise(cls, method):
-    """Same pin as matched_strings: the dependency floor admits SDKs without it."""
-    content = dict(_COMMON, matched_strings=_STRINGS)
+    """Same pin as matched_strings: the dependency floor admits SDKs without it.
+
+    matched_strings is INJECTED rather than passed in the content dict. Relying on the SDK
+    to parse it makes the test require the very field the floor does not guarantee -- it
+    then fails at the floor, which is the one install where it guards anything. The sibling
+    above escapes this only because it asserts an ABSENCE.
+    """
+    content = dict(_COMMON)
     content['livescan_id' if cls is resources.LiveHuntResult else 'historicalscan_id'] = 3
     result = cls(content)
+    result.__dict__['matched_strings'] = _STRINGS
     result.__dict__.pop('matched_strings_dropped', None)   # see the sibling test: not `del`
     assert not hasattr(result, 'matched_strings_dropped')
     rendered = click.unstyle('\n'.join(getattr(TextOutput(color=False), method)(result, write=False)))
