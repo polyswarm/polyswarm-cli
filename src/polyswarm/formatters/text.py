@@ -320,13 +320,13 @@ class TextOutput(base.BaseOutput):
     def ruleset_favorite(self, result, write=True):
         output = []
         output.append(self._blue(f'Ruleset Id: {result.id}'))
-        starred = getattr(result, 'favorite', None)
+        starred = result.favorite
         output.append(self._yellow('Favorite: yes') if starred
                       else self._white('Favorite: no'))
-        if getattr(result, 'favorited_at', None) is not None:
+        if result.favorited_at is not None:
             output.append(self._white(f'Favorited at: {result.favorited_at}'))
-        used = getattr(result, 'favorites_used', None)
-        limit = getattr(result, 'favorites_limit', None)
+        used = result.favorites_used
+        limit = result.favorites_limit
         if used is not None and limit is not None:
             # server-owned budget counters — the client never counts
             output.append(self._white(f'Favorites used: {used} of {limit}'))

@@ -70,9 +70,9 @@ version and `pyproject.toml` raises `polyswarm_api>=` to it. `pip` then refuses 
 combination that would fail, at install time, before a single test runs — so a test
 can simply use the surface.
 
-This replaces an earlier convention of per-test skip guards (`hasattr` on a method, a
-built resource's attribute, a parameter in the installed signature). They are gone, and
-should not come back. What was wrong with them:
+**Do not reintroduce per-test skip guards** — `hasattr` on a method, a built resource's
+attribute, a parameter in the installed signature. They are the shape this rule exists to
+exclude, and the reasons are worth keeping written down:
 
 - **The fact lived twice.** The pin said one thing; each guard re-derived the same
   thing at runtime. Nothing kept them in sync, so every guard was one edit away from

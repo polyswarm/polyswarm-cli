@@ -2,8 +2,6 @@ import logging
 
 import click
 
-from polyswarm.client import utils
-
 logger = logging.getLogger(__name__)
 
 
@@ -38,12 +36,12 @@ def live_stop(ctx, ruleset_id):
                    '(default: 86400 — 24h, the window the ruleset badge counts). '
                    'Pass 0 for no time filter at all.')
 # click.INT matches every other id option in the CLI and rejects a typo before
-# it reaches the server; IntRange(min=0) refuses a negative here rather than
-# letting it silently mean unbounded.
+# it reaches the server.
 @click.option('-i', '--livescan-id', type=click.INT,
               help="Scope the feed to one live hunt (a ruleset's Live Hunt Id, "
                    'a 17-digit number). Shows one community at a time, while '
                    'the badge counts all of them, so the counts need not match.')
+# IntRange(min=0) refuses a negative rather than letting it silently mean unbounded.
 @click.option('-m', '--max-results', type=click.IntRange(min=0),
               help='Stop after this many results. Unset or 0 means no bound — '
                    'every page, as before.')

@@ -1,17 +1,13 @@
 """The hunt-page tracking legs of the text formatter, and the flag that
 reaches them.
 
-Pins three contracts:
+Pins two contracts:
 
-* the rendering legs against REAL SDK resources built from literal dicts (not
-  hand-built namespaces): the getattr guards convert an attribute-name
-  mismatch into silent omission, so only real resources couple these tests to
-  the SDK's actual attribute names — and they additionally pin that
-  ``favorited_at`` / ``rule_modified`` arrive as parsed datetimes;
-* the old-SDK degradation path — a result object without the attributes at
-  all (SimpleNamespace on purpose: an installed SDK predating the fields has
-  no such attributes to build from) renders without raising and simply omits
-  the new lines; and
+* the rendering legs against REAL SDK resources built from literal dicts, so
+  the tests are coupled to the SDK's actual attribute names — and they
+  additionally pin that ``favorited_at`` / ``rule_modified`` arrive as parsed
+  datetimes. The pin guarantees those attributes exist, so ``None`` here means
+  the SERVER had no answer; and
 * the command plumbing: an UNFILTERED ``rules list`` still calls a
   zero-argument ``ruleset_list()`` (a False flag is not a filter), a
   FILTERED one forwards exactly the filters given, ``live feed`` forwards
@@ -23,7 +19,6 @@ Pins three contracts:
 """
 import io
 import pathlib
-import types
 from unittest import TestCase, mock
 
 from click.testing import CliRunner
@@ -244,14 +239,10 @@ class RulesFavoriteCommandTest(TestCase):
 
     @staticmethod
     def _response(favorite):
-        # A namespace, not the SDK resource: TextOutput.ruleset_favorite reads
-        # `.id` plus getattrs, so building the real class would make these
-        # command tests depend on the RESOURCE and a rename would silently skip
-        # the only coverage that `rules favorite` calls the SDK at all.
-        return types.SimpleNamespace(
-            id='5', favorite=favorite,
-            favorited_at='2026-08-25T12:00:00+00:00' if favorite else None,
-            favorites_used=1, favorites_limit=5)
+        return resources.YaraRulesetFavorite(
+            {'id': '5', 'favorite': favorite,
+             'favorited_at': '2026-08-25T12:00:00+00:00' if favorite else None,
+             'favorites_used': 1, 'favorites_limit': 5}, api=None)
     def test_favorite_calls_the_sdk_and_renders_the_budget(self):
         result, toggle = self._invoke(['5'], return_value=self._response(True))
         assert result.exit_code == 0, result.output
