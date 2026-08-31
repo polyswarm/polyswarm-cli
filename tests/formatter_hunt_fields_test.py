@@ -368,7 +368,11 @@ class RulesFavoriteCommandTest(TestCase):
     def test_other_refusals_still_raise(self):
         request = mock.Mock()
         request.errors = None
-        refusal = exceptions.RequestException(request)
+        # Every production raise site passes a message alongside the request
+        # (`RequestException(request, err_msg)`), so build it that way: with no
+        # message the refusal renders blank and there is nothing positive left
+        # to assert.
+        refusal = exceptions.RequestException(request, 'Ruleset not found.')
         with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_favorite',
                         autospec=True, side_effect=refusal):
             result = CliRunner().invoke(
@@ -376,12 +380,13 @@ class RulesFavoriteCommandTest(TestCase):
                 ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
                  'rules', 'favorite', '5'])
         assert result.exit_code == 2                      # PolyswarmException family
-        # The claim is that a non-limit refusal FALLS THROUGH, so the thing to
-        # assert is the absence of the limit-specific message. Asserting only
-        # that the raw code doesn't leak did not test that: the fall-through
-        # message doesn't contain the literal 'FAVORITE_LIMIT' either, so the
-        # test passed with the branch forced to treat every refusal as the
-        # limit case. Verified by doing exactly that.
+        # The claim is that a non-limit refusal FALLS THROUGH, so assert the
+        # server's own message reaches the user and the limit-specific message
+        # does not. Asserting only that the raw code stayed out of the output
+        # tested neither: the handler's message doesn't contain the literal
+        # 'FAVORITE_LIMIT' either, so the test passed with the branch forced to
+        # treat every refusal as the limit case. Verified by doing exactly that.
+        assert 'Ruleset not found.' in result.output
         assert 'Favorite limit reached' not in result.output
         assert 'FAVORITE_LIMIT' not in result.output      # nor the raw code
         assert 'Traceback' not in result.output
