@@ -103,11 +103,18 @@ the SDK:
 
 **Two consequences, both worth knowing before you do it.**
 
-*Release order is forced.* This repo cannot be released to PyPI until the SDK version
-its floor names is on PyPI — so the SDK's `develop → master` must merge and release
-first. CI is unaffected: `.gitlab-ci.yml` installs the SDK from git by branch name
-(`$CI_COMMIT_BRANCH.zip`, falling back to `develop.zip`), so an unreleased version
-tests fine.
+*Merge order is forced too, and it bites earlier than release.* CI installs the SDK by
+branch name — `$CI_COMMIT_BRANCH.zip`, falling back to `develop.zip`. On a feature
+branch that resolves to the paired SDK branch, so an unreleased version tests fine. But
+**once this repo merges, its `develop` CI asks for the SDK's `develop.zip`** — and if the
+SDK has not merged to `develop` yet, that archive still declares the old version, `pip
+install .[tests]` cannot satisfy the new floor from it or from PyPI, and **`develop` CI
+breaks for every subsequent PR**, not just this one. So the SDK merges to `develop`
+first, then this repo.
+
+*Release order is forced separately.* This repo cannot be released to PyPI until the SDK
+version its floor names is on PyPI, so the SDK's `develop → master` must merge and
+release before this repo's does. Merging to `develop` publishes nothing.
 
 *A missing paired branch now fails loudly.* If the SDK branch does not exist, CI falls
 back to the SDK's `develop`, whose version does not satisfy the new floor, and
