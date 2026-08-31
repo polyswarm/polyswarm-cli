@@ -8,14 +8,11 @@ from unittest import TestCase, mock
 from polyswarm_api import resources
 from pathlib import Path
 
-
 import vcr as vcr_
-
 import click
 from click.testing import CliRunner
 
 from polyswarm.client import polyswarm as client
-
 
 vcr = vcr_.VCR(cassette_library_dir='tests/vcr',
                path_transformer=vcr_.VCR.ensure_suffix('.vcr'))
