@@ -81,7 +81,7 @@ When a CLI feature needs an SDK surface that doesn't exist yet:
 
 ### Current floor — `polyswarm_api>=4.4.0`
 
-The floor moved to **4.4.0** with the hunt-page change set; before that **4.3.0** with #264 (`pyproject.toml` has said `>=4.3.0` since then; this header lagged at 4.2.0 — the drift itself is why the floor lives in ONE authoritative place, the pin, and this doc must follow it). The 4.2.0 rationale below still holds transitively; on 4.1.0 both behaviours fail *silently*, which is why the floor is a hard requirement rather than a preference:
+The floor is whatever `pyproject.toml` pins; this header follows it. It lives in ONE authoritative place for a reason — a copy here drifted behind the pin once already. The 4.2.0 rationale below still holds transitively; on 4.1.0 both behaviours fail *silently*, which is why the floor is a hard requirement rather than a preference:
 
 1. **`llm_report_create` sends the client's community.** 4.2.0 passes `community=self.community` when it builds the report resource; 4.1.0 omits it. `report llm-create` (`client/report.py`) supplies no community of its own — it relies entirely on the client's — so on 4.1.0 a report requested for a sample in a private community is created without one. No error, wrong resource.
 2. **A streaming download answered `204 No Content` raises `NoResultsException`.** The streaming path bypasses `parse_response`, so the 204 has to be raised by the session itself; 4.2.0 does that, 4.1.0 has no such raise anywhere in its session. The CLI's `download` commands depend on it for the no-results **exit code `1`** (§No-results signalling); against 4.1.0 an empty response reads as a successful download and exits `0`.

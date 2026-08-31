@@ -11,6 +11,9 @@ How the CLI is tested: the `CliRunner` harness, the two mocking styles (SDK-boun
 
   **One sanctioned exception, where the two pin different things:** a refusal whose *rendering* is a CLI decision and whose *envelope shape* is an SDK contract. `FAVORITE_LIMIT` is covered both ways deliberately — the SDK-boundary mock pins the message and the exit code, the recorded 400 pins where in the envelope the machine-readable code actually lives. Neither substitutes for the other, and dropping the cassette would leave the CLI asserting a shape nothing checks. Use this only when you can name what each half pins.
 - **VCR is an efficiency cache, not a load-bearing requirement.** The suite must pass against a live e2e stack with VCR off. Don't hardcode `record_mode='none'`; if a test only works against its recorded cassette, that's a bug in the test.
+
+  **The one exception is an assertion that needs a stack STATE the suite cannot create**, and it must be named here rather than left implicit. `test_ruleset_favorite_limit_text` records the server refusing at the favorite cap; producing a genuinely full budget on a shared stack would consume every slot the other favorite tests need, so a VCR-off run gets a 200 and the assertions fail. The paired SDK reached the same conclusion for the same refusal and pinned it with a stubbed transport rather than a recording.
+  What covers this ground when VCR is off: the SDK-boundary mock pins the message and the exit code, and the SDK's own respx suite pins the envelope shape. The cassette adds the end-to-end seam between them — worth having, but it is the one test that cannot stand alone against a live stack.
 - **Never `cp` a cassette from a sibling test, never hand-edit cassette bytes.** Re-record against a live stack.
 
 ## Running the suite
@@ -41,11 +44,10 @@ Helpers in `cli_test.py`: `_run_cli(args)` invokes the command tree under a cass
 
 ### Re-recording a cassette
 
-Some cassettes need a **stack state**, not just a live stack, and the steps below will
-not produce it on their own. `test_ruleset_favorite_limit_text` needs the team's favorite
-budget already saturated, because it records the server's refusal; re-recording it against
-a fresh stack yields a 200 and a cassette that no longer tests anything. Set the state
-first, then record.
+Some cassettes need a **stack state**, not just a live stack (see the VCR invariant
+above). `test_ruleset_favorite_limit_text` needs the team's favorite budget already
+saturated; re-recording it against a fresh stack yields a 200 and a cassette that no
+longer tests anything. Set the state first, then record.
 
 ```bash
 rm tests/vcr/<name>.vcr            # (and regenerate <name>.click from the new run)
