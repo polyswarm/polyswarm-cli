@@ -31,7 +31,9 @@ def live_stop(ctx, ruleset_id):
 
 
 @live.command('feed', short_help='Get results from live hunt.')
-@click.option('-s', '--since', type=click.INT, default=86400,
+# IntRange(min=0) for the same reason as --max-results below: 0 is meaningful
+# (no time filter), a negative is not, and bare INT would forward it.
+@click.option('-s', '--since', type=click.IntRange(min=0), default=86400,
               help='How far back in SECONDS to request results '
                    '(default: 86400 — 24h). '
                    'Pass 0 for no time filter at all.')

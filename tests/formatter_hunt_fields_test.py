@@ -213,19 +213,41 @@ class LiveFeedOptionsTest(TestCase):
         assert live_feed.call_args[0][1] == 0
 
 
+    @staticmethod
+    def _assert_refused_at_parse_time(result, option):
+        """A non-zero exit is NOT enough here. An unvalidated value is forwarded
+        and the request then fails on its own (no such host), which also exits
+        non-zero — so `exit_code != 0` passes whether or not the guard exists.
+        Click refuses a bad value with a UsageError before any request is made:
+        exit 2, and a message naming the option. Assert that instead.
+        """
+        assert result.exit_code == 2, result.output
+        assert 'Invalid value' in result.output, result.output
+        assert option in result.output, result.output
+
     def test_a_negative_max_results_is_refused_at_the_interface(self):
         result = CliRunner().invoke(
             client.polyswarm_cli,
             ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
              'live', 'feed', '--max-results', '-1'])
-        assert result.exit_code != 0
+        self._assert_refused_at_parse_time(result, '--max-results')
+
+    def test_a_negative_since_is_refused_at_the_interface(self):
+        """--since 0 is meaningful (no time filter, asserted above) but a
+        negative is not, and it would be forwarded verbatim to the server.
+        Same guard as --max-results, for the same reason."""
+        result = CliRunner().invoke(
+            client.polyswarm_cli,
+            ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+             'live', 'feed', '--since', '-1'])
+        self._assert_refused_at_parse_time(result, '--since')
 
     def test_a_non_numeric_livescan_id_is_refused_before_the_server(self):
         result = CliRunner().invoke(
             client.polyswarm_cli,
             ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
              'live', 'feed', '--livescan-id', 'not-an-id'])
-        assert result.exit_code != 0
+        self._assert_refused_at_parse_time(result, '--livescan-id')
 
 
 
