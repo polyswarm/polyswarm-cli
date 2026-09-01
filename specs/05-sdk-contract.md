@@ -79,7 +79,7 @@ When a CLI feature needs an SDK surface that doesn't exist yet:
 
   **Read the declared version off the archive's own tree, and mind pre-release suffixes.** PEP 440 orders `4.2.0.dev1 < 4.2.0`, so a `develop` head carrying a dev suffix (the SDK's `pyproject.toml` has a `[tool.bumpversion.parts.dev]`) would *not* satisfy a `>=4.2.0` floor even though it looks like 4.2.0 — and the archive build would be silently replaced from PyPI. Check the version string in the SDK branch's `pyproject.toml` / `__init__.py`, not the last release tag. When the floor was last verified this way both were read from `origin/develop` as `4.2.0`, no suffix; the pin has since moved on (§Current floor is the one authoritative statement of its value), and every bump should be re-checked the same way.
 
-### Current floor — `polyswarm_api>=4.4.0`
+### Current floor — `polyswarm_api>=4.5.0`
 
 The floor is whatever `pyproject.toml` pins; this header follows it. It lives in ONE authoritative place for a reason — a copy here drifted behind the pin once already. The 4.2.0 rationale below still holds transitively; on 4.1.0 both behaviours fail *silently*, which is why the floor is a hard requirement rather than a preference:
 
@@ -99,7 +99,11 @@ that is not supported rather than against a version the floor permits.) The hunt
 formatters render — are what moved the floor to 4.4.0, together with
 `matched_strings` / `matched_strings_dropped` on the four hunt-result classes
 (the yara evidence behind a hit; see [`03-formatters.md`](./03-formatters.md)
-§Matched strings on hunt results). Code and tests use them directly.
+§Matched strings on hunt results). `rules list --sort active-first` forwards
+`ruleset_list(sort='active_first')`, a keyword 4.5.0 adds, and that is what moved the
+floor to 4.5.0 (the `tests/formatter_hunt_fields_test.py` autospec assertion is the
+signature check: against a 4.4.0 SDK it fails at the mock, not at the server). Code and
+tests use them directly.
 
 **Raising the floor is the whole procedure** when this repo needs something new from
 the SDK:
