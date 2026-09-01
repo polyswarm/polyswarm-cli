@@ -168,6 +168,46 @@ class RulesListZeroArgTest(TestCase):
             mock.ANY, name='alpha', status='active',
             favorites_only=True, has_new_results=True)
 
+    def test_sort_active_first_is_forwarded_as_the_server_token(self):
+        """`--sort active-first` (CLI spelling, hyphen) reaches the SDK as
+        the server's `sort='active_first'` token — and, like the filters, only
+        when given: the unsorted default sends no `sort` at all, so the list
+        keeps its id-desc order and the request stays byte-compatible."""
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        autospec=True, return_value=iter(())) as ruleset_list:
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list', '--sort', 'active-first'],
+                catch_exceptions=False)
+        assert result.exit_code == 0, result.output
+        ruleset_list.assert_called_once_with(mock.ANY, sort='active_first')
+
+    def test_sort_composes_with_the_filters(self):
+        # The kwargs comprehension is the one site that could drop or
+        # mistranslate the sort when filters ride along.
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        autospec=True, return_value=iter(())) as ruleset_list:
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list', '--status', 'active', '--favorites-only',
+                 '--sort', 'active-first'],
+                catch_exceptions=False)
+        assert result.exit_code == 0, result.output
+        ruleset_list.assert_called_once_with(
+            mock.ANY, status='active', favorites_only=True, sort='active_first')
+
+    def test_sort_rejects_an_unknown_order(self):
+        # A closed choice on the CLI side too: the server would 400 an unknown
+        # sort, but the CLI should not have to make the round trip to say so.
+        result = CliRunner().invoke(
+            client.polyswarm_cli,
+            ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+             'rules', 'list', '--sort', 'newest'])
+        assert result.exit_code == 2, result.output
+        assert 'active-first' in result.output
+
 
 
 class LiveFeedOptionsTest(TestCase):

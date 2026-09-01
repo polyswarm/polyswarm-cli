@@ -38,19 +38,26 @@ def delete(ctx, rule_id):
 @click.option('--favorites-only', is_flag=True, help='Only favorited (starred) rulesets.')
 @click.option('--has-new-results', is_flag=True,
               help='Only rulesets whose stored new-results counter is positive.')
+@click.option('--sort', type=click.Choice(['active-first']),
+              help='Order: rulesets with a running live hunt first (as recorded by the '
+                   "server's live-hunt link, the same one Livescan Id renders from), "
+                   'newest first within each block. Default is newest first.')
 @click.pass_context
-def list_rules(ctx, name, status, favorites_only, has_new_results):
+def list_rules(ctx, name, status, favorites_only, has_new_results, sort):
     """List rulesets, optionally filtered. All filters are conjunctive.
 
-    Filtering is applied SERVER-side: the list is keyset-paginated, so a
-    client filtering locally would have to walk every page to find matches.
+    Filtering and ordering are applied SERVER-side: the list is
+    keyset-paginated, so a client filtering or sorting locally would have to
+    walk every page to get it right.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
     # A False flag is not a filter: send only what the caller actually asked for.
+    # The CLI spells the sort with a hyphen; the server token is 'active_first'.
     kwargs = {k: v for k, v in (('name', name), ('status', status),
                                 ('favorites_only', favorites_only or None),
-                                ('has_new_results', has_new_results or None))
+                                ('has_new_results', has_new_results or None),
+                                ('sort', sort.replace('-', '_') if sort else None))
               if v is not None}
     for ruleset in api.ruleset_list(**kwargs):
         output.ruleset(ruleset)
