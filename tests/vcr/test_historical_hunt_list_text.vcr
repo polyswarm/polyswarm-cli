@@ -1,37 +1,43 @@
 interactions:
 - request:
-    body: null
+    body: ''
     headers:
-      Accept:
+      accept:
       - '*/*'
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate
-      Authorization:
+      authorization:
       - '11111111111111111111111111111111'
-      Connection:
+      connection:
       - keep-alive
-      User-Agent:
-      - polyswarm-api/3.4.2 (x86_64-Linux-CPython-3.10.7)
+      host:
+      - artifact-index-e2e:9696
+      user-agent:
+      - polyswarm_api/4.3.0 (x86_64-Darwin-CPython-3.11.3)
     method: GET
     uri: http://artifact-index-e2e:9696/v3/hunt/historical/list?community=gamma
   response:
     body:
-      string: '{"has_more":false,"limit":2,"result":[{"created":"2023-08-23T15:14:52.254659","id":"30246442833374528","progress":null,"results_csv_uri":null,"ruleset_name":"eicar.yara","status":"PENDING","summary":null,"yara":null},{"created":"2023-08-23T15:12:38.073323","id":"76083665328102613","progress":100.0,"results_csv_uri":null,"ruleset_name":"eicar.yara","status":"STOPPED","summary":null,"yara":null}],"status":"OK"}
+      string: '{"has_more":false,"limit":50,"result":[{"account_number":"111","archives_in_flight":0,"archives_scanned":0,"archives_total":0,"created":"2026-08-25T18:27:00.531607+00:00","id":"67346782704448208","progress":null,"results_csv_uri":null,"rule_id":null,"rule_modified":null,"ruleset_name":"eicar.yara","source_rule_changed":null,"status":"PENDING","summary":null,"user_account_number":"111","yara":null},{"account_number":"111","archives_in_flight":0,"archives_scanned":0,"archives_total":0,"created":"2026-08-25T18:27:00.017968+00:00","id":"58957063950682201","progress":null,"results_csv_uri":null,"rule_id":null,"rule_modified":null,"ruleset_name":"eicar.yara","source_rule_changed":null,"status":"PENDING","summary":null,"user_account_number":"111","yara":null},{"account_number":"111","archives_in_flight":0,"archives_scanned":0,"archives_total":0,"created":"2026-08-25T18:25:52.550248+00:00","id":"3220090199138422","progress":null,"results_csv_uri":null,"rule_id":null,"rule_modified":null,"ruleset_name":null,"source_rule_changed":null,"status":"DELETING","summary":null,"user_account_number":"111","yara":null}],"status":"OK"}
 
         '
     headers:
-      Connection:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Authorization
+      connection:
       - keep-alive
-      Content-Length:
-      - '413'
-      Content-Type:
+      content-length:
+      - '1133'
+      content-type:
       - application/json
-      Date:
-      - Wed, 23 Aug 2023 15:15:11 GMT
-      Server:
+      date:
+      - Tue, 25 Aug 2026 18:27:01 GMT
+      server:
       - gunicorn
-      X-Billing-ID:
-      - '1'
+      x-billing-id:
+      - '111'
     status:
       code: 200
       message: OK

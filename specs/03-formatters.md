@@ -14,7 +14,7 @@ How command output is rendered: the `BaseOutput` interface, the concrete formatt
 
 ## The interface — `base.py`
 
-`BaseOutput(output, **kwargs)` holds the output stream and exposes a method per resource type, each raising `NotImplementedError`. The set includes (non-exhaustive): `artifact_instance`, `historical_result`, `hunt`, `hunt_deletion`, `local_artifact`, `ruleset`, `ioc`, `iocs`, `known_host`, `metadata`, `artifact_metadata`, `tag_link`, `family`, `tag`, `known_good`, `sandbox_list`, `sandbox_task`, `sandbox_tasks`, `bundle_task`, `sample`. Concrete formatters add further methods as command families grow (e.g. `report_task`, `webhook`, `llm_prompt_config`, `metadata_field_properties`); keep `text` and `json` in sync.
+`BaseOutput(output, **kwargs)` holds the output stream and exposes a method per resource type, each raising `NotImplementedError`. The set includes (non-exhaustive): `artifact_instance`, `historical_result`, `hunt`, `hunt_deletion`, `local_artifact`, `ruleset`, `ruleset_favorite`, `ioc`, `iocs`, `known_host`, `metadata`, `artifact_metadata`, `tag_link`, `family`, `tag`, `known_good`, `sandbox_list`, `sandbox_task`, `sandbox_tasks`, `bundle_task`, `sample`. Concrete formatters add further methods as command families grow (e.g. `report_task`, `webhook`, `llm_prompt_config`, `metadata_field_properties`); keep `text` and `json` in sync.
 
 ## Concrete formatters
 
@@ -141,10 +141,38 @@ Both attributes are read with `getattr(..., None)` so a CLI on an older SDK (mis
 either field) never raises `AttributeError`; an SDK without `.state` simply never takes
 the known-good branch, which is the safe fallback — the pre-known-good rendering. That
 degradation is belt-and-braces, not a supported configuration: `.state` is load-bearing
-here with no substitute. Both attributes ship in SDK **4.1.0**, well under the dependency floor
-(`polyswarm_api>=4.3.0`; see [`05-sdk-contract.md`](./05-sdk-contract.md) §Current floor),
-so every supported install has them. `JSONOutput` needs no change — it dumps the resource's
+here with no substitute. Both attributes ship in SDK **4.1.0**, but the dependency floor is
+the value in `pyproject.toml` — see [05-sdk-contract.md](./05-sdk-contract.md)
+§Current floor, which is authoritative, since repeating the number here is what let this
+line go stale before. Its *rationale* is two behaviours that landed in 4.2.0 and still hold
+transitively; those two
+fail silently on 4.1.0 (see [`05-sdk-contract.md`](./05-sdk-contract.md) §Version pin) — so
+every supported install has them. `JSONOutput` needs no change — it dumps the resource's
 `.json`, which already carries the raw `state` and `known_good` keys.
+
+## Hunt-page tracking fields (rulesets + historical hunts)
+
+Rendering rules that are deliberate, not incidental. Every one of these fields is
+parsed by the pinned SDK, so the attribute always exists and `None` means the
+**server** had no answer — never an older SDK (the floor forbids one; see
+[`05-sdk-contract.md`](./05-sdk-contract.md) §Current floor). The formatters read
+the attributes directly:
+
+- `rule_count` / `historical_hunt_count`: `0` renders as a real zero;
+  `None` (the server had no answer) omits the line — never shown as 0.
+- `favorite` is truthy-only ("Favorite: yes"): False and None both print
+  nothing, deliberately indistinguishable.
+- `new_results_count` is the server's STORED badge (refreshed by its
+  scheduled job; the window is the server's and the response does not carry
+  it, so the label deliberately does not name one): a number renders with its
+  `new_results_counted_at` staleness marker beside it; `None` (never
+  refreshed / no live hunt) omits both lines.
+- `ruleset_favorite` renders the toggle response: `Favorite: yes/no`, the
+  `favorited_at` timestamp when starred, and the server-owned budget as
+  "Favorites used: N of M" — the client never counts.
+- `source_rule_changed` is tri-state: `None` means UNKNOWN, not "unchanged",
+  and prints nothing; the label names its reference point — "changed since
+  this hunt froze it" — so it cannot read as "edited recently".
 
 ## Matched strings on hunt results
 
@@ -168,7 +196,7 @@ rather than assumed.** If a list route ever returned `[]` per row instead, every
 large hunt would carry the loud "matched without byte evidence" line — the permanent
 false alarm this design exists to avoid, arriving through the branch deliberately kept
 loud. The server pins it for **both** hunt pairs in artifact-index's
-`test_list_serializers_never_touch_storage`, which asserts the key is present-and-null on
+`test_list_serializers_render_nulls_not_payloads`, which asserts the key is present-and-null on
 `ScanResultListSerializer` *and* `LiveResultListSerializer`, against fixture rows that do
 carry evidence. This repo cannot verify it; it relies on that test.
 
@@ -186,13 +214,11 @@ Two constraints, both counter-intuitive enough to be worth stating:
   is a real answer to "why did this hit". Since the analyzer always sends `strings` once
   this feature ships, `None` on a detail route means a result predating it — nothing to
   say.
-- **The attribute is defended; the entry keys are not, and that is deliberate.**
-  `matched_strings` / `matched_strings_dropped` are read with `getattr(..., None)` because
-  the *dependency floor* admits SDKs without them — a version-skew problem. The keys
-  *inside* an entry (`identifier`, `offset`, `length`, `data`, `truncated`) are
-  subscripted, because a partial entry is not version skew but a producer violating its
-  own contract, and rendering half a match as though it were whole is worse than failing.
-  The two look inconsistent side by side and are answering different questions.
+- **The entry keys are subscripted, deliberately.** `identifier`, `offset`, `length`,
+  `data` and `truncated` are read by subscript, because a partial entry is not version
+  skew but a producer violating its own contract, and rendering half a match as though it
+  were whole is worse than failing. The attribute itself needs no such defence: the floor
+  names an SDK that parses it (§Current floor in [`05-sdk-contract.md`](./05-sdk-contract.md)).
 - **`data` is sanitised before rendering.** It is the only sample-derived field in a hunt
   result, so it is attacker-controlled end to end. yara escapes non-printables upstream
   and the analyzer preserves that rendering, so `_safe_data` is a no-op on valid input —
@@ -241,8 +267,7 @@ discarding the count is the precise wrong inference this line exists to prevent.
 
 This is not cosmetic. Without it a truncated list reads as the whole truth and a user
 concludes their rule hit twice when it hit twenty-one times — the same wrong-inference
-class the three-state contract above exists to prevent, one level down. Read with
-`getattr(..., None)` for the same SDK-floor reason as `matched_strings` itself.
+class the three-state contract above exists to prevent, one level down.
 
 `JSONOutput` needs no change — it dumps the resource's `.json`, which already carries the
 raw `matched_strings` and `matched_strings_dropped` keys.
