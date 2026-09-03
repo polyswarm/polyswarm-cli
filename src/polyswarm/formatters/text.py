@@ -1,5 +1,6 @@
 import sys
 import functools
+import re
 import json
 from datetime import datetime
 
@@ -15,6 +16,18 @@ def pretty_print_datetime(value):
     if isinstance(value, str):
         value = parse_isoformat(value)
     return datetime.strftime(value, '%Y-%m-%d %H:%M:%S UTC')
+
+
+# `data` and `identifier` are sample-derived, so attacker-controlled; the escaping that
+# makes them safe is upstream's contract, not ours. Whitelist, not blacklist -- an
+# earlier blacklist stopped at \x7f and let U+009B (8-bit CSI) through.
+# Rationale: specs/03-formatters.md, Matched strings.
+_UNPRINTABLE = re.compile(r'[^\x20-\x7e]')
+
+
+def _safe_data(value):
+    """Matched bytes as yara rendered them, with anything unprintable neutralised."""
+    return _UNPRINTABLE.sub('.', value)
 
 
 def is_grouped(fn):
@@ -40,6 +53,33 @@ class TextOutput(base.BaseOutput):
             return self._yellow
         else:
             return self._red
+
+    # Three-state, and NOT interchangeable: None renders nothing (it is dominated by list
+    # routes, which can never carry strings), [] keeps its line, a list renders entries.
+    # Do not collapse them or add a line for None. Why: specs/03-formatters.md.
+    def _matched_strings(self, strings, dropped=None):
+        if strings is None:
+            return []
+        if not strings:
+            if dropped:
+                # Contradictory input (the analyzer keeps a match's first string).
+                # Report only what is certain rather than assert a rule property.
+                return [self._yellow(
+                    f'Matched Strings: none shown ({dropped:d} withheld, result size limit)')]
+            return [self._white('Matched Strings: none -- the rule matched without byte '
+                                'evidence (a structural or negative match, or private strings)')]
+        lines = [self._white('Matched Strings:')]
+        for string in strings:
+            size = f'{string["length"]:d} bytes'
+            if string['truncated']:
+                size += ', truncated'
+            lines.append(self._white(
+                f'  {_safe_data(string["identifier"])} @ 0x{string["offset"]:x} ({size}): {_safe_data(string["data"])}'))
+        if dropped:
+            # Yellow: the one line here reporting something the platform withheld.
+            lines.append(self._yellow(
+                f'  ... {dropped:d} more not shown (result size limit)'))
+        return lines
 
     def _output(self, output, write):
         if write:
@@ -252,6 +292,8 @@ class TextOutput(base.BaseOutput):
                     output.append(self._white(malicious))
         if result.tags:
             output.append(self._white(f'Tags: {result.tags}'))
+        output.extend(self._matched_strings(result.matched_strings,
+                                            result.matched_strings_dropped))
         if result.download_url:
             output.append(self._white(f'Download Url: {result.download_url}'))
         return self._output(output, write)
@@ -283,6 +325,8 @@ class TextOutput(base.BaseOutput):
                     output.append(self._white(malicious))
         if result.tags:
             output.append(self._white(f'Tags: {result.tags}'))
+        output.extend(self._matched_strings(result.matched_strings,
+                                            result.matched_strings_dropped))
         if result.download_url:
             output.append(self._white(f'Download Url: {result.download_url}'))
         return self._output(output, write)
