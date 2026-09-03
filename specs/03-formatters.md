@@ -224,27 +224,22 @@ Two constraints, both counter-intuitive enough to be worth stating:
   and the analyzer preserves that rendering, so `_safe_data` is a no-op on valid input —
   it exists because the guarantee lives in another repo, and a raw CSI sequence reaching
   a terminal would repaint or clear an analyst's screen.
-- **ASCII only, and true of this whole block.** The literals are ASCII, and both
-  server-supplied fields inside the matched-strings block — `data` and `identifier` — go
-  through `_safe_data`. Fields *outside* the block (`rule_name`, `tags`) are unfiltered
-  and outside this claim. Stdout under a C/POSIX locale replaces non-ASCII with `?`.
+- **ASCII only, and true of this whole block.** The literals are ASCII; the two
+  server-supplied *string* fields — `data` and `identifier` — go through `_safe_data`;
+  and the three server-supplied *numbers* — `offset`, `length`, `dropped` — carry an
+  integer format spec (`:x` / `:d`), which is what pins them rather than `_safe_data`.
+  Fields *outside* the block (`rule_name`, `tags`) are unfiltered and outside this claim.
+  Stdout under a C/POSIX locale replaces non-ASCII with `?`.
 - **`truncated` is not a byte count.** The stored length is capped server-side, so the
   marker means "there was more than this" and over-reports at exactly the cap. Never
   render it as an exact size.
 
-**Read with `getattr(result, 'matched_strings', None)`, never a bare attribute access** —
-the same defence, for the same reason, as the known-good attributes above. The attribute
-ships in the paired SDK release, but the dependency floor admits older SDKs whose
-resources lack it entirely, and a bare read would `AttributeError` on *every* text-mode
-hunt command, not just the new output: `live result` / `live feed` / `live results-delete`
-and the three `historical` equivalents all funnel through these two methods. A missing
-attribute degrades to the silent `None` branch, which is also the honest reading — an SDK
-that cannot see the field genuinely does not know.
-
-Nothing else can catch this. The rendering tests build resources from the *installed*
-SDK, so with a paired SDK on the path a bare read passes every one of them;
-`test_an_sdk_without_the_attribute_does_not_raise` deletes the attribute to stand in for
-an older SDK, and is the only guard.
+**Read both attributes directly** — `result.matched_strings`, no `getattr`. The floor
+(`polyswarm_api>=4.4.0`, [`05-sdk-contract.md`](./05-sdk-contract.md) §Current floor)
+names an SDK that parses them, so `pip` refuses the install a probe would guard against;
+`specs/05-project-standards.md` §16 has the general rule. `None` then means exactly what
+the table above says — the *server* did not report — which is the reading the silent
+branch depends on.
 
 ### The dropped-count line
 
@@ -272,7 +267,11 @@ class the three-state contract above exists to prevent, one level down.
 `JSONOutput` needs no change — it dumps the resource's `.json`, which already carries the
 raw `matched_strings` and `matched_strings_dropped` keys.
 
-Coverage is `tests/hunt_matched_strings_test.py` (Style 3 — the formatter driven directly
-with constructed SDK resources). The `cli_test.py` cassettes predate the field, so every result they
-render takes the silent `None` branch — they pin that no stray line appears, and nothing
-more. They are not a substitute for those unit tests.
+Coverage is two modules. `tests/hunt_matched_strings_test.py` is Style 3 — the formatter
+driven directly with constructed SDK resources — and owns *which line a field value
+produces*. `tests/hunt_matched_strings_cli_test.py` is the Style 1 counterpart
+[`04-testing.md`](./04-testing.md) requires: it drives `live result` through `CliRunner`
+so a broken `output.extend` call is caught, which the Style 3 module cannot see because
+it calls `_matched_strings` itself. The `cli_test.py` cassettes predate the field, so
+every result they render takes the silent `None` branch — they pin that no stray line
+appears, and nothing more.

@@ -33,20 +33,3 @@ The SDK pin and the paired-PR `## Requires` convention ([`05-sdk-contract.md`](.
 **Status:** open.
 
 The `Polyswarm(PolyswarmAPI)` wrapper holds CLI-only orchestration (parallel fan-out, multi-step flows). Some of it (e.g. `submit_url`'s inline `/instance/url` endpoint) arguably belongs in the SDK so the CLI is a pure wrapper. **Action:** as the SDK grows methods that subsume wrapper logic, migrate the wrapper to call them and shrink the CLI-owned surface.
-
-## SDK floor for the matched-strings attributes
-
-**Status:** blocked on a release.
-
-`matched_strings` / `matched_strings_dropped` are not covered by the dependency floor —
-the SDK carrying them is not on PyPI, so neither precondition in
-[`05-sdk-contract.md`](./05-sdk-contract.md) §Version pin is met. The CLI reads both with
-`getattr(..., None)` and degrades to rendering nothing, and
-`tests/hunt_matched_strings_test.py` carries a `needs_sdk_fields` mark on the tests that
-construct populated resources — deliberately **per-test, not module-level**, so the two
-older-SDK tests still run on a floor SDK, which is the only install where they guard
-anything.
-
-**Action once the SDK releases:** record the version in `05-sdk-contract.md` §Current
-floor, decide whether to raise the floor past it, and if so drop *both* the `getattr`
-defence and the test skip — they exist only to tolerate SDKs the floor still admits.

@@ -65,22 +65,20 @@ class TextOutput(base.BaseOutput):
                 # Contradictory input (the analyzer keeps a match's first string).
                 # Report only what is certain rather than assert a rule property.
                 return [self._yellow(
-                    f'Matched Strings: none shown ({dropped} withheld, result size limit)')]
+                    f'Matched Strings: none shown ({dropped:d} withheld, result size limit)')]
             return [self._white('Matched Strings: none -- the rule matched without byte '
                                 'evidence (a structural or negative match, or private strings)')]
         lines = [self._white('Matched Strings:')]
         for string in strings:
-            size = f'{string["length"]} bytes'
+            size = f'{string["length"]:d} bytes'
             if string['truncated']:
-                # Subscripted, unlike the attributes above -- a partial entry is a
-                # producer breaking its contract, not version skew. specs/03 records why.
                 size += ', truncated'
             lines.append(self._white(
                 f'  {_safe_data(string["identifier"])} @ 0x{string["offset"]:x} ({size}): {_safe_data(string["data"])}'))
         if dropped:
             # Yellow: the one line here reporting something the platform withheld.
             lines.append(self._yellow(
-                f'  ... {dropped} more not shown (result size limit)'))
+                f'  ... {dropped:d} more not shown (result size limit)'))
         return lines
 
     def _output(self, output, write):
@@ -294,10 +292,8 @@ class TextOutput(base.BaseOutput):
                     output.append(self._white(malicious))
         if result.tags:
             output.append(self._white(f'Tags: {result.tags}'))
-        # getattr: the pin admits SDKs predating these fields (specs/05-sdk-contract.md).
-        output.extend(self._matched_strings(
-            getattr(result, 'matched_strings', None),
-            getattr(result, 'matched_strings_dropped', None)))
+        output.extend(self._matched_strings(result.matched_strings,
+                                            result.matched_strings_dropped))
         if result.download_url:
             output.append(self._white(f'Download Url: {result.download_url}'))
         return self._output(output, write)
@@ -329,10 +325,8 @@ class TextOutput(base.BaseOutput):
                     output.append(self._white(malicious))
         if result.tags:
             output.append(self._white(f'Tags: {result.tags}'))
-        # getattr: the pin admits SDKs predating these fields (specs/05-sdk-contract.md).
-        output.extend(self._matched_strings(
-            getattr(result, 'matched_strings', None),
-            getattr(result, 'matched_strings_dropped', None)))
+        output.extend(self._matched_strings(result.matched_strings,
+                                            result.matched_strings_dropped))
         if result.download_url:
             output.append(self._white(f'Download Url: {result.download_url}'))
         return self._output(output, write)

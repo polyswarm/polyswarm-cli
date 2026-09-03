@@ -39,28 +39,6 @@ _STRINGS = [
 ]
 
 # (resource class, formatter method name)
-def _sdk_carries_the_fields():
-    """Whether the installed SDK parses the attributes this module renders.
-
-    The declared pin (`polyswarm_api>=4.3.0`) still admits SDKs predating them -- 4.3.0
-    itself is released without them -- so `pip install .[tests] && pytest` against the
-    floor would fail this module wholesale. CI resolves the paired SDK branch and runs it
-    for real. Remove this guard when the floor is raised past the release that adds them
-    (specs/05-sdk-contract.md, §Current floor).
-    """
-    probe = resources.LiveHuntResult(dict(_COMMON, livescan_id=3))
-    return hasattr(probe, 'matched_strings') and hasattr(probe, 'matched_strings_dropped')
-
-
-# Applied per-test, NOT as a module-level pytestmark. The two older-SDK tests below build
-# a resource and pop the attribute off, so they pass on a floor SDK -- and that is the ONE
-# install where they guard anything. A module-level skip took them out of exactly the
-# configuration they model, leaving the getattr defence verified by nothing there.
-needs_sdk_fields = pytest.mark.skipif(
-    not _sdk_carries_the_fields(),
-    reason='installed SDK predates matched_strings / matched_strings_dropped')
-
-
 PATHS = [
     (resources.LiveHuntResult, 'live_result'),
     (resources.HistoricalHuntResult, 'historical_result'),
@@ -87,7 +65,6 @@ def _matched_lines(text):
     return lines[start:end]
 
 
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_absent_renders_nothing(cls, method):
     """None is dominated by the list route, which can never carry strings -- `live feed`
@@ -97,14 +74,12 @@ def test_absent_renders_nothing(cls, method):
     assert 'Matched Strings' not in _render(cls, method)
 
 
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_explicit_null_renders_the_same_as_absent(cls, method):
     assert _matched_lines(_render(cls, method)) == \
         _matched_lines(_render(cls, method, matched_strings=None))
 
 
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_empty_says_the_rule_matched_without_evidence(cls, method):
     """`[]` must NOT read as an error or as the absent case — the rule really did match."""
@@ -113,7 +88,6 @@ def test_empty_says_the_rule_matched_without_evidence(cls, method):
     assert 'without byte evidence' in line
 
 
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_empty_and_absent_are_distinguishable(cls, method):
     """The whole reason the server keeps them apart; collapsing them here wastes that.
@@ -123,7 +97,6 @@ def test_empty_and_absent_are_distinguishable(cls, method):
     assert len(_matched_lines(_render(cls, method, matched_strings=[]))) == 1
 
 
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_populated_renders_identifier_offset_length_and_data(cls, method):
     header, first, second = _matched_lines(_render(cls, method, matched_strings=_STRINGS))
@@ -132,7 +105,6 @@ def test_populated_renders_identifier_offset_length_and_data(cls, method):
     assert second == '  $mz @ 0x0 (512 bytes, truncated): 4D 5A 90 00 ...'
 
 
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_truncation_is_marked_only_where_it_applies(cls, method):
     _, first, second = _matched_lines(_render(cls, method, matched_strings=_STRINGS))
@@ -140,7 +112,6 @@ def test_truncation_is_marked_only_where_it_applies(cls, method):
     assert 'truncated' in second
 
 
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_block_sits_between_tags_and_download_url(cls, method):
     """Placement is the acceptance criteria — alongside Rule / Tags, not appended last."""
@@ -152,30 +123,6 @@ def test_block_sits_between_tags_and_download_url(cls, method):
     assert tags < matched < download
 
 
-@pytest.mark.parametrize('cls,method', PATHS)
-def test_an_sdk_without_the_attribute_does_not_raise(cls, method):
-    """The dependency pin admits SDKs predating `matched_strings`, and nothing else here
-    would catch a bare `result.matched_strings`.
-
-    Every other test in this file builds resources from the INSTALLED SDK, so with a
-    paired SDK on the path a bare attribute read passes all of them and then
-    AttributeErrors in the field -- on every text-mode hunt command, not just the new
-    output. Deleting the attribute is what an older SDK's resource looks like.
-    """
-    content = dict(_COMMON)
-    content['livescan_id' if cls is resources.LiveHuntResult else 'historicalscan_id'] = 3
-    result = cls(content)
-    # pop, not `del`: on an SDK that never SET the attribute -- exactly the configuration
-    # this test models, and one inside the declared pin -- `del` raises AttributeError and
-    # the test errors instead of passing.
-    result.__dict__.pop('matched_strings', None)
-    assert not hasattr(result, 'matched_strings')
-    rendered = click.unstyle('\n'.join(getattr(TextOutput(color=False), method)(result, write=False)))
-    assert 'Matched Strings' not in rendered
-    assert 'Rule: dos_stub_message' in rendered   # the rest of the row still renders
-
-
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_dropped_count_is_reported_to_the_user(cls, method):
     """A short list must not read as the whole truth.
@@ -189,14 +136,12 @@ def test_dropped_count_is_reported_to_the_user(cls, method):
     assert '19 more not shown' in lines[-1]
 
 
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_no_dropped_line_when_nothing_was_dropped(cls, method):
     rendered = _render(cls, method, matched_strings=_STRINGS)
     assert 'not shown' not in rendered
 
 
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_dropped_line_does_not_fabricate_a_strings_block(cls, method):
     """A dropped count with no strings is not a thing the server can send -- the
@@ -205,27 +150,6 @@ def test_dropped_line_does_not_fabricate_a_strings_block(cls, method):
     assert 'Matched Strings' not in rendered
 
 
-@pytest.mark.parametrize('cls,method', PATHS)
-def test_older_sdk_without_the_dropped_attribute_does_not_raise(cls, method):
-    """Same pin as matched_strings: the dependency floor admits SDKs without it.
-
-    matched_strings is INJECTED rather than passed in the content dict. Relying on the SDK
-    to parse it makes the test require the very field the floor does not guarantee -- it
-    then fails at the floor, which is the one install where it guards anything. The sibling
-    above escapes this only because it asserts an ABSENCE.
-    """
-    content = dict(_COMMON)
-    content['livescan_id' if cls is resources.LiveHuntResult else 'historicalscan_id'] = 3
-    result = cls(content)
-    result.__dict__['matched_strings'] = _STRINGS
-    result.__dict__.pop('matched_strings_dropped', None)   # see the sibling test: not `del`
-    assert not hasattr(result, 'matched_strings_dropped')
-    rendered = click.unstyle('\n'.join(getattr(TextOutput(color=False), method)(result, write=False)))
-    assert 'Matched Strings:' in rendered
-    assert 'not shown' not in rendered
-
-
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_empty_list_with_a_dropped_count_does_not_claim_no_evidence(cls, method):
     """Contradictory input must not produce a confident false statement.
@@ -240,7 +164,6 @@ def test_empty_list_with_a_dropped_count_does_not_claim_no_evidence(cls, method)
     assert '19' in line and 'withheld' in line, 'the count must survive'
 
 
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_empty_list_without_a_count_still_says_no_evidence(cls, method):
     """The normal empty case is unchanged."""
@@ -248,7 +171,6 @@ def test_empty_list_without_a_count_still_says_no_evidence(cls, method):
     assert 'without byte evidence' in line
 
 
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_control_characters_in_data_are_neutralised(cls, method):
     """`data` is sample-derived, so it is the one attacker-controlled field here.
@@ -270,7 +192,6 @@ def test_control_characters_in_data_are_neutralised(cls, method):
     assert 'A.[2JB..C.D.2JE.F' in rendered
 
 
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_ordinary_data_is_untouched_by_the_sanitiser(cls, method):
     """The escaping is a no-op on what yara actually emits."""
@@ -278,7 +199,6 @@ def test_ordinary_data_is_untouched_by_the_sanitiser(cls, method):
     assert '54 68 69 73 20 70 72 6F 67 72 61 6D 20 63' in rendered
 
 
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_output_is_ascii_only(cls, method):
     """stdout under a C/POSIX locale replaces non-ASCII with '?'. Nothing here needs it."""
@@ -301,7 +221,6 @@ def _render_styled(cls, method, **extra):
     return '\n'.join(getattr(TextOutput(color=True), method)(cls(content), write=False))
 
 
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_dropped_count_line_is_yellow(cls, method):
     """specs/03 states the colour as a deliberate signal: it is the one line in the block
@@ -312,7 +231,6 @@ def test_dropped_count_line_is_yellow(cls, method):
     assert expected in rendered, rendered
 
 
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_empty_with_a_count_line_is_yellow(cls, method):
     """The other withheld-reporting line, and the one a reader is most likely to meet."""
@@ -322,7 +240,6 @@ def test_empty_with_a_count_line_is_yellow(cls, method):
     assert expected in rendered, rendered
 
 
-@needs_sdk_fields
 @pytest.mark.parametrize('cls,method', PATHS)
 def test_the_ordinary_block_is_not_yellow(cls, method):
     """Otherwise the two tests above would pass on a formatter that painted everything."""
