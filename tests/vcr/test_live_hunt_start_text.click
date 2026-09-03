@@ -1,16 +1,20 @@
-result: 'Ruleset Id: 17388152480558505
+result: 'Ruleset Id: 44051669277897879
 
-  Live Hunt Id: 51856636346307547
+  Live Hunt Id: 22291404616795831
 
-  Live Hunt Created at: 2022-05-26T19:37:18.353094
+  Live Hunt Created at: 2026-08-25T18:26:50.161371+00:00
 
-  Name: eicar
+  Name: recording-live
 
   Description: None
 
-  Created at: 2022-05-26 18:25:35.109366
+  Created at: 2026-08-25 18:25:52.247009+00:00
 
-  Modified at: 2022-05-26 19:37:18.284777
+  Modified at: 2026-08-25 18:26:49.909685+00:00
+
+  Rules in ruleset: 2
+
+  Historical hunts triggered: 0
 
 
   '

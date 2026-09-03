@@ -8,7 +8,9 @@ How the CLI is tested: the `CliRunner` harness, the two mocking styles (SDK-boun
 
 - **Anything that is command behaviour is driven through `click.testing.CliRunner`** — argument parsing, the SDK call, the wiring, the exit code: exercise the real command tree, never an internal function standing in for it. No live PolySwarm stack is required. The one sanctioned exception is pure rendering logic — see [Style 3](#style-3--formatter-unit-tests).
 - **Mock at the SDK boundary, or replay HTTP with VCR — never both for the same path.** A test either patches `polyswarm_api.api.PolyswarmAPI.<method>` (unit-style) or lets VCR replay recorded HTTP (end-to-end). The CLI's own code is exercised either way.
-- **VCR is an efficiency cache, not a load-bearing requirement.** The suite must pass against a live e2e stack with VCR off. Don't hardcode `record_mode='none'`; if a test only works against its recorded cassette, that's a bug in the test.
+
+- **VCR is an efficiency cache, not a load-bearing requirement.** The suite must pass against a live e2e stack with VCR off. Don't hardcode `record_mode='none'`; if a test only works against its recorded cassette, that's a bug in the test. Note this is about a test's *logic*, not its fixtures: a `.click` snapshot pins server-generated ids and timestamps, so re-recording needs a stack in a particular state — see [Re-recording a cassette](#re-recording-a-cassette).
+
 - **Never `cp` a cassette from a sibling test, never hand-edit cassette bytes.** Re-record against a live stack.
 
 ## Running the suite
@@ -39,6 +41,36 @@ Helpers in `cli_test.py`: `_run_cli(args)` invokes the command tree under a cass
 
 ### Re-recording a cassette
 
+Some cassettes need a **stack state**, not just a live stack. The ruleset-favorite ones do,
+because `_assert_text_result` compares the whole rendered block verbatim and the budget
+counter is part of it: `test_ruleset_favorite_text` pins `Favorites used: 2 of 5` and
+`test_ruleset_unfavorite_text` pins `1 of 5`. Their counters only make sense as a
+sequence (star, star, unstar), so re-recording one alone produces a set that contradicts
+itself.
+
+Re-recording them is harder than it looks, and the shipped set is **not** what a single
+pass produces — `test_ruleset_favorite_text` acts on a ruleset that does not appear in
+`test_ruleset_list_json`'s inventory at all, so the two were recorded against different
+stack states. Two couplings to plan around before starting:
+
+- `unittest` runs methods in **sorted-name** order, and `test_ruleset_list_json` sorts
+  *between* `favorite_text` and `unfavorite_text`. Its snapshot pins `"favorite": false` on
+  every ruleset, so a full-suite recording captures it while a ruleset is starred and that
+  snapshot changes too. Re-record it with the others, or not at all.
+- Renaming or reordering any of these methods changes the sequence **silently**: replay
+  keeps passing, and only the next re-record surfaces the contradiction.
+
+If keeping them consistent stops being worth it, break the coupling rather than documenting
+a wider one — `_assert_text_result` already takes a `replace=` hook, and normalising the
+budget counter there makes each cassette independent of what ran before it.
+
+**A refusal at the favorite cap is deliberately not recorded here.** Saturating the budget
+takes all five team slots, which is exactly the state the tests above must *not* be in, so
+the cassette and its siblings cannot both be satisfiable in one VCR-off run. That refusal is
+pinned without a stack instead: the CLI's message and exit code at the SDK boundary, the
+envelope spelling against a real `PolyswarmRequest`, and the wire shape by the SDK's own
+stubbed-transport suite, which declined a recording for the same reason.
+
 ```bash
 rm tests/vcr/<name>.vcr            # (and regenerate <name>.click from the new run)
 pytest tests/cli_test.py::<Class>::<test>   # records against whatever stack your env points at
@@ -61,3 +93,42 @@ Use it **only** for that. Argument parsing, SDK calls, generator consumption, `c
 ## Incremental — to be expanded
 
 This spec describes the harness as it stands. Not yet documented (add as the suite grows): a per-command coverage matrix, a documented "VCR-off against live e2e" CI job, and conventions for fixture/`.click` generation. See [`99-open-questions.md`](./99-open-questions.md).
+
+## The SDK floor is a version pin, not a runtime probe
+
+**A test never asks the installed SDK whether it has a feature. The pin guarantees
+it.** (For the one pre-existing render guard this does not cover, see
+[`03-formatters.md`](./03-formatters.md) §Known-good artifact instances.) When this repo needs a surface the SDK does not yet publish, the SDK bumps its
+version and `pyproject.toml` raises `polyswarm_api>=` to it. `pip` then refuses the
+combination that would fail, at install time, before a single test runs — so a test
+can simply use the surface.
+
+**Do not reintroduce per-test skip guards** — `hasattr` on a method, a built resource's
+attribute, a parameter in the installed signature. They are the shape this rule exists to
+exclude, and the reasons are worth keeping written down:
+
+- **The fact lived twice.** The pin said one thing; each guard re-derived the same
+  thing at runtime. Nothing kept them in sync, so every guard was one edit away from
+  disagreeing with the tests it gated.
+- **Both ways of disagreeing are defects.** A guard that checks *less* than its test
+  uses lets the test run and **fail** where it should have skipped. One that checks
+  *more* **skips** a test that would have passed — silently dropping coverage while CI
+  stays green. The second is the dangerous one, because nothing reports it.
+- **It never verified the thing it claimed to protect.** A green run against the paired
+  SDK said nothing about the floor install the guards existed for.
+
+The version contract has none of that: the claim is checked once, by a tool, against
+the artifact that will actually be installed.
+
+**When you need a new SDK surface**, in order: add it in `polyswarm-api` → bump that
+repo's version (minor, for an additive surface) **in the same PR**, because this repo's
+floor cannot name a version the SDK has not declared → raise the floor here → use the
+surface in code and tests with no guard. CI installs the SDK from git by branch name,
+so an unreleased version is not an obstacle; see
+[`05-sdk-contract.md`](./05-sdk-contract.md) §Current floor for the ordering that
+forces at release time.
+
+**The failure mode to expect**, and it is a good one: if the paired SDK branch is
+missing, CI falls back to the SDK's `develop`, whose version does not satisfy the new
+floor, and `pip install .[tests]` fails loudly. Before, that fallback silently tested
+against the wrong SDK.

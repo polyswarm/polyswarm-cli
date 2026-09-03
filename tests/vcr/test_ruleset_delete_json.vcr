@@ -1,91 +1,60 @@
 interactions:
 - request:
-    body: null
+    body: '{"community":"gamma"}'
     headers:
-      Accept:
+      accept:
       - '*/*'
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate
-      Authorization:
+      authorization:
       - '11111111111111111111111111111111'
-      Connection:
+      connection:
       - keep-alive
-      Content-Length:
-      - '0'
-      User-Agent:
-      - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.6.5)
+      content-length:
+      - '21'
+      content-type:
+      - application/json
+      host:
+      - artifact-index-e2e:9696
+      user-agent:
+      - polyswarm_api/4.3.0 (x86_64-Darwin-CPython-3.11.3)
     method: DELETE
-    uri: http://artifact-index-e2e:9696/v3/hunt/rule?id=71213140536342873
+    uri: http://artifact-index-e2e:9696/v3/hunt/rule?id=4202182245812695
   response:
     body:
-      string: '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-
-        <title>Redirecting...</title>
-
-        <h1>Redirecting...</h1>
-
-        <p>You should be redirected automatically to target URL: <a href="http://artifact-index-e2e:9696/v3/hunt/rule/?id=71213140536342873">http://artifact-index-e2e:9696/v3/hunt/rule/?id=71213140536342873</a>.  If
-        not click the link.'
-    headers:
-      Content-Length:
-      - '337'
-      Content-Type:
-      - text/html; charset=utf-8
-      Date:
-      - Thu, 26 May 2022 20:00:32 GMT
-      Location:
-      - http://artifact-index-e2e:9696/v3/hunt/rule/?id=71213140536342873
-      Server:
-      - Werkzeug/1.0.1 Python/3.9.6
-    status:
-      code: 308
-      message: PERMANENT REDIRECT
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Authorization:
-      - '11111111111111111111111111111111'
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      User-Agent:
-      - polyswarm-api/3.0.0 (x86_64-Linux-CPython-3.6.5)
-    method: DELETE
-    uri: http://artifact-index-e2e:9696/v3/hunt/rule/?id=71213140536342873
-  response:
-    body:
-      string: '{"result":{"created":"2022-05-26T19:08:31.291890","deleted":true,"description":null,"id":"71213140536342873","livescan_created":null,"livescan_id":null,"modified":"2022-05-26T20:00:32.664781","name":"test2","yara":"rule
-        eicar_av_test {\n    /*\n       Per standard, match only if entire file is
-        EICAR string plus optional trailing whitespace.\n       The raw EICAR string
-        to be matched is:\n       X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\n    */\n\n    meta:\n        description
+      string: '{"result":{"created":"2026-08-25T18:25:51.926590+00:00","deleted":true,"description":null,"favorite":false,"favorited_at":null,"historical_hunt_count":0,"id":"4202182245812695","livescan_created":null,"livescan_id":null,"modified":"2026-08-25T18:26:38.540071+00:00","name":"test2","rule_count":2,"yara":"rule
+        eicar_av_test : eicar match {\n    /*\n       Per standard, match only if
+        entire file is EICAR string plus optional trailing whitespace.\n       The
+        raw EICAR string to be matched is:\n       X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\n    */\n\n    meta:\n        description
         = \"This is a standard AV test, intended to verify that BinaryAlert is working
         correctly.\"\n        author = \"Austin Byers | Airbnb CSIRT\"\n        reference
         = \"http://www.eicar.org/86-0-Intended-use.html\"\n\n    strings:\n        $eicar_regex
         = /^X5O!P%@AP\\[4\\\\PZX54\\(P\\^\\)7CC\\)7\\}\\$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!\\$H\\+H\\*\\s*$/\n\n    condition:\n        all
-        of them\n}\n\nrule eicar_substring_test {\n    /*\n       More generic - match
-        just the embedded EICAR string (e.g. in packed executables, PDFs, etc)\n    */\n\n    meta:\n        description
-        = \"Standard AV test, checking for an EICAR substring\"\n        author =
-        \"Austin Byers | Airbnb CSIRT\"\n\n    strings:\n        $eicar_substring
-        = \"$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!\"\n\n    condition:\n        all
+        of them\n}\n\nrule eicar_substring_test : eicar substring {\n    /*\n       More
+        generic - match just the embedded EICAR string (e.g. in packed executables,
+        PDFs, etc)\n    */\n\n    meta:\n        description = \"Standard AV test,
+        checking for an EICAR substring\"\n        author = \"Austin Byers | Airbnb
+        CSIRT\"\n\n    strings:\n        $eicar_substring = \"$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!\"\n\n    condition:\n        all
         of them\n}"},"status":"OK"}
 
         '
     headers:
-      Content-Length:
-      - '1334'
-      Content-Type:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Authorization
+      connection:
+      - keep-alive
+      content-length:
+      - '1455'
+      content-type:
       - application/json
-      Date:
-      - Thu, 26 May 2022 20:00:32 GMT
-      Server:
-      - Werkzeug/1.0.1 Python/3.9.6
-      X-Billing-ID:
-      - '1'
+      date:
+      - Tue, 25 Aug 2026 18:26:38 GMT
+      server:
+      - gunicorn
+      x-billing-id:
+      - '111'
     status:
       code: 200
       message: OK

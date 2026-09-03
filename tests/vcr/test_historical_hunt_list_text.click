@@ -1,21 +1,26 @@
-result: 'Hunt Id: 30246442833374528
+result: 'Hunt Id: 67346782704448208
 
   Status: PENDING
 
-  Created at: 2023-08-23 15:14:52.254659
+  Created at: 2026-08-25 18:27:00.531607+00:00
 
   Ruleset Name: eicar.yara
 
 
-  Hunt Id: 76083665328102613
+  Hunt Id: 58957063950682201
 
-  Status: STOPPED
+  Status: PENDING
 
-  Progress: 100.00%
-
-  Created at: 2023-08-23 15:12:38.073323
+  Created at: 2026-08-25 18:27:00.017968+00:00
 
   Ruleset Name: eicar.yara
+
+
+  Hunt Id: 3220090199138422
+
+  Status: DELETING
+
+  Created at: 2026-08-25 18:25:52.550248+00:00
 
 
   '

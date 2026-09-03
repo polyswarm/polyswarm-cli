@@ -18,7 +18,7 @@ How the CLI depends on the `polyswarm-api` SDK: which parts of the SDK's public 
 | `from polyswarm_api.api import PolyswarmAPI` | Base class of the `Polyswarm` wrapper (`src/polyswarm/polyswarm.py`). |
 | `from polyswarm_api import settings` | Defaults: `DEFAULT_SCAN_TIMEOUT`, `DEFAULT_REPORT_TIMEOUT`, etc. |
 | `from polyswarm_api import resources` | Result-parser classes for power-user calls (e.g. `resources.ArtifactInstance`); resource attributes the formatters read. |
-| `from polyswarm_api import exceptions as api_exceptions` | Caught in `ExceptionHandlingGroup` and `utils.parallel_executor` (`NoResultsException`, `NotFoundException`, `FailedInstanceException`, `PolyswarmException`). |
+| `from polyswarm_api import exceptions as api_exceptions` | Caught in `ExceptionHandlingGroup` and `utils.parallel_executor` (`NoResultsException`, `NotFoundException`, `FailedInstanceException`, `PolyswarmException`). Also `RequestException`, caught by `rules favorite` (`client/rules.py`) to read the machine-readable `FAVORITE_LIMIT` refusal off `exc.request.errors['code']` — and, when the envelope carries no counters, `exc.request.json['result']` as the server's own message. Note the spelling: the request object exposes the response envelope as `.json` and keeps only a private `._result`, so `exc.request.result` is not a thing — reading it yields `None` silently. The SDK does not raise a typed exception for that refusal by design: `.request.errors` is a plain dict the server's error envelope populates. It is pinned without a recording — the SDK's stubbed-transport suite fixes the wire shape, and both CLI branches are unit-pinned against a real `PolyswarmRequest` (not a hand-built mock, which fabricates whatever attribute it is asked for and so cannot detect a rename). It cannot be cassette-pinned: the server sends the counters on every `FAVORITE_LIMIT`, so the envelope the fallback exists for is one no recording can produce. The fallback is defensive against a server that omits them, and the unit test is what fixes the spelling it reads. |
 | `from polyswarm_api.core import parse_isoformat` | Date rendering in `formatters/text.py`. |
 | `import polyswarm_api` (`__version__`) | `--api-version`. |
 
@@ -70,34 +70,82 @@ When a CLI feature needs an SDK surface that doesn't exist yet:
 - The CLI is **sync-only** — it imports `polyswarm_api.api.PolyswarmAPI`, never `polyswarm_api.aio`. Don't add the `polyswarm_api[async]` extra.
 - Bumping the pin is a normal code change; bumping the CLI's *own* version is a release step (`AGENTS.md` §Gitflow). They're unrelated.
 - There is **no lock file / compiled requirements** to keep in step: `pyproject.toml` is the only place the SDK version is expressed, and CI installs the SDK straight from the SDK repo's branch archive (see §Coordinated changes). A pin change is a one-file change *in this repo*, but it is not free of interactions — see below.
-- **The floor must be satisfied by the SDK archive CI installs, and by PyPI.** CI installs the archive build and *then* runs `pip install .[tests]`; if the archive's declared version is below the floor, that second install silently pulls a newer SDK from PyPI **over** the archive build, and CI stops testing the SDK branch at all — the mechanism §Coordinated changes rests on, defeated with no error. Symmetrically, a floor above the newest **published** version breaks `pip install polyswarm-cli` for every consumer the moment it reaches `master`. So a floor bump has two preconditions: the version is on PyPI, and the SDK's `develop` declares at least that version.
+- **The floor must be satisfied by the SDK archive CI installs, and by PyPI.** CI installs the archive build and *then* runs `pip install .[tests]`; if the archive's declared version is below the floor, that second install silently pulls a newer SDK from PyPI **over** the archive build, and CI stops testing the SDK branch at all — the mechanism §Coordinated changes rests on, defeated with no error. Symmetrically, a floor above the newest **published** version breaks `pip install polyswarm-cli` for every consumer the moment it reaches `master`. So a floor bump has two preconditions, and they fall due at **different moments** — conflating them is what makes a correct bump look wrong:
 
-  **Read the declared version off the archive's own tree, and mind pre-release suffixes.** PEP 440 orders `4.2.0.dev1 < 4.2.0`, so a `develop` head carrying a dev suffix (the SDK's `pyproject.toml` has a `[tool.bumpversion.parts.dev]`) would *not* satisfy a `>=4.2.0` floor even though it looks like 4.2.0 — and the archive build would be silently replaced from PyPI. Check the version string in the SDK branch's `pyproject.toml` / `__init__.py`, not the last release tag. Worked example from when the floor was **4.2.0**: both were read from `origin/develop` as `version = "4.2.0"` / `__version__ = '4.2.0'`, no suffix. (The floor is now 4.3.0 — see §Current floor below. The check is the point, not the number.)
+  - **To merge here:** the SDK's `develop` must declare at least the floor. Nothing about PyPI applies yet; merging to `develop` publishes nothing.
+  - **To release here:** the floor version must be on PyPI, which needs the SDK's own `develop → master` first.
 
-### Current floor — `polyswarm_api>=4.3.0`
+  A floor naming a version that is declared on the SDK's `develop` but not yet released is therefore correct and mergeable — that is the normal state of a paired change between the two merges.
 
-`pyproject.toml` floors at **4.3.0**, raised from 4.2.0 by `cdb7926` for the typed
-known-good refusal (`KnownGoodWithheldException`, absent in 4.2.0) and the probe fixes.
-That commit touched no spec, so the per-behaviour writeup below is still the **4.2.0**
-one; it remains accurate about why 4.2.0 was needed, it is simply no longer the binding
-constraint. Anyone raising the floor again should extend this section rather than
-replace it.
+  **Read the declared version off the archive's own tree, and mind pre-release suffixes.** PEP 440 orders `4.2.0.dev1 < 4.2.0`, so a `develop` head carrying a dev suffix (the SDK's `pyproject.toml` has a `[tool.bumpversion.parts.dev]`) would *not* satisfy a `>=4.2.0` floor even though it looks like 4.2.0 — and the archive build would be silently replaced from PyPI. Check the version string in the SDK branch's `pyproject.toml` / `__init__.py`, not the last release tag. When the floor was last verified this way both were read from `origin/develop` as `4.2.0`, no suffix; the pin has since moved on (§Current floor is the one authoritative statement of its value), and every bump should be re-checked the same way.
 
-Two behaviours the CLI relies on only exist from **4.2.0**; on 4.1.0 both fail *silently*, which is why the floor is a hard requirement rather than a preference:
+### Current floor — `polyswarm_api>=4.4.0`
+
+The floor is whatever `pyproject.toml` pins; this header follows it. It lives in ONE authoritative place for a reason — a copy here drifted behind the pin once already. The 4.2.0 rationale below still holds transitively; on 4.1.0 both behaviours fail *silently*, which is why the floor is a hard requirement rather than a preference:
 
 1. **`llm_report_create` sends the client's community.** 4.2.0 passes `community=self.community` when it builds the report resource; 4.1.0 omits it. `report llm-create` (`client/report.py`) supplies no community of its own — it relies entirely on the client's — so on 4.1.0 a report requested for a sample in a private community is created without one. No error, wrong resource.
 2. **A streaming download answered `204 No Content` raises `NoResultsException`.** The streaming path bypasses `parse_response`, so the 204 has to be raised by the session itself; 4.2.0 does that, 4.1.0 has no such raise anywhere in its session. The CLI's `download` commands depend on it for the no-results **exit code `1`** (§No-results signalling); against 4.1.0 an empty response reads as a successful download and exits `0`.
 
 The known-good rendering attributes (`ArtifactInstance.state`, `.known_good`/`.known_good_sources`, read by `formatters/text.py` — see [`03-formatters.md`](./03-formatters.md) §Known-good artifact instances) ship in **4.1.0**, so they are *not* what sets the floor; they are simply covered by it.
 
-`matched_strings` / `matched_strings_dropped` are the opposite case and the floor does
-**not** yet cover them: they are unreleased at the time of writing, so the CLI reads both
-with `getattr(..., None)` and degrades to rendering nothing (see
-[`03-formatters.md`](./03-formatters.md) §Matched strings). Raising the floor is not
-possible until the SDK carrying them is on PyPI — §Version pin's two preconditions — so
-**record the version here once it releases**, and only then decide whether the graceful
-degradation is still wanted or the floor should move. Without a version written down
-nothing prompts that decision.
+**The floor is how this repo expresses every SDK dependency.** No runtime probes for the
+surfaces the floor names, and no per-test skip guards: if the CLI uses an SDK surface, the
+floor names a version that has it, and `pip` enforces that at install time. (One carve-out
+predates this and is documented where it lives: the known-good rendering attributes in
+[`03-formatters.md`](./03-formatters.md), guarded belt-and-braces against a configuration
+that is not supported rather than against a version the floor permits.) The hunt-page surfaces —
+`ruleset_favorite` and the `YaraRulesetFavorite` resource, the `ruleset_list` filters,
+`live_feed(livescan_id=, max_results=)`, and the tracking/provenance fields the
+formatters render — are what moved the floor to 4.4.0, together with
+`matched_strings` / `matched_strings_dropped` on the four hunt-result classes
+(the yara evidence behind a hit; see [`03-formatters.md`](./03-formatters.md)
+§Matched strings on hunt results). Code and tests use them directly.
+
+**Raising the floor is the whole procedure** when this repo needs something new from
+the SDK:
+
+1. Add the surface in `polyswarm-api`.
+2. Bump the SDK's version **in that same PR** — minor for an additive surface. The
+   floor here cannot name a version the SDK has not declared, so this is the one case
+   where a feature PR carries the bump rather than the release step.
+3. Raise `polyswarm_api>=` here to that version.
+4. Use it. No guard, no `getattr`, no signature inspection.
+
+**Two consequences, both worth knowing before you do it.**
+
+*The two `develop` branches move in lockstep, by design.* CI installs the SDK by branch
+name — `$CI_COMMIT_BRANCH.zip`, falling back to `develop.zip` — so a paired feature
+branch tests against its opposite number, and once merged, each repo's `develop` tests
+against the other's. That is the point: both ends carry the latest features and are
+exercised against each other continuously, without waiting on a release. A change that
+spans the pair is pushed to both ends together and merged to both `develop`s together.
+
+Out of lockstep, the mechanism says so immediately: this repo's `develop` asks for the
+SDK's `develop.zip`, and if that archive does not yet declare the floor, `pip install
+.[tests]` fails. That is the pairing being broken, not a trap to design around — the fix
+is to land the SDK side, not to loosen the floor.
+
+*Publication is a separate, later cutoff.* Merging to `develop` publishes nothing; PyPI
+only sees a version when `develop → master` merges. So the floor a feature PR sets is a
+working value that `develop` integration validates. **At cutoff:** bump the SDK version
+if the repo files do not already carry it, then set this repo's dependency to the version
+actually being released. This repo cannot be released before that SDK release exists.
+
+*Behaviour changes to existing invocations are called out at the same cutoff.* This repo
+has no CHANGELOG, so a change that alters what an unchanged command line does — a default
+that moves, an argument that starts being rejected — is visible to users only if the
+`develop → master` PR says so. List them there, and let the release be at least a minor.
+A note that lives only in a spec is not a release note.
+
+*A missing paired branch now fails loudly.* If the SDK branch does not exist, CI falls
+back to the SDK's `develop`, whose version does not satisfy the new floor, and
+`pip install .[tests]` fails. That is the intended behaviour and an improvement: the
+old fallback silently tested against an SDK that lacked the surfaces.
+
+*Version strings must be clean.* PEP 440 orders `4.4.0.dev0` **below** `4.4.0`, so a
+dev-suffixed SDK build does not satisfy `>=4.4.0` — CI then goes to PyPI for a version
+that does not exist yet. The SDK's `bump-my-version` config can emit that form; its
+`AGENTS.md` carries the check.
 
 ## Worked example — the httpx SDK migration
 
