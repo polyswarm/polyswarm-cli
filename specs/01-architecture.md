@@ -38,6 +38,14 @@ The console-script entry (`__main__.py`) calls `polyswarm_cli(prog_name='polyswa
 
 The transport-error branch matches by **ancestry class name** — it intersects `{c.__name__ for c in type(e).__mro__}` with `{'HTTPError', 'RequestException', 'ConnectionError', 'SSLError'}` — because those classes come from the SDK's HTTP dependency (`httpx`; `requests` historically) and shouldn't be imported here directly. `httpx` roots every request/transport/status error at `HTTPError`, so ancestry matching covers all its leaf classes (`ConnectError`, `ReadTimeout`, `RemoteProtocolError`, `ProxyError`, …) without enumerating them.
 
+**The order of the `except` clauses is load-bearing, not stylistic.** The SDK has its own
+`api_exceptions.RequestException`, which subclasses `PolyswarmException` but shares the bare
+name `requests` used — so it satisfies the ancestry-name test above and would take the
+transport branch (exit `1`, "contact support") if it ever reached it. It exits `2` only
+because the `PolyswarmException` clause is matched **before** the transport branch. Reordering
+those clauses silently changes the exit code of every SDK request refusal, `FAVORITE_LIMIT`
+included; `ExitCodeHierarchyTest` pins the subclass relation the ordering rests on.
+
 ## The SDK wrapper — `polyswarm.py`
 
 `class Polyswarm(PolyswarmAPI)` subclasses the SDK's sync client to add **CLI-only** behaviour the SDK has no reason to ship:
@@ -74,7 +82,8 @@ The catalogue of groups and the SDK methods each wraps is in [`02-commands.md`](
 
 ## Support — `utils.py`, `exceptions.py`
 
-- **`utils.py`** — `parallelize`/`parallel_executor` (thread-pool fan-out with per-item exception aggregation: collects results, logs per-item no-results, raises an aggregate `NoResultsException`/`NotFoundException`/`InternalFailureException` at the end), `parallel_executor_iterable_results` (the same, for SDK methods that return generators — it materialises each generator inside the worker so per-item exception handling still fires), and input parsing/validation (`parse_hashes`, hash/IP detection).
+- **`utils.py`** — `parallelize`/`parallel_executor` (thread-pool fan-out with per-item exception aggregation: collects results, logs per-item no-results, raises an aggregate `NoResultsException`/`NotFoundException`/`InternalFailureException` at the end) and `parallel_executor_iterable_results` (the same, for SDK methods that return generators — it materialises each generator inside the worker so per-item exception handling still fires), plus `collect_files` and the detection helpers (`is_valid_id`, `is_ip`, `is_domain`, `is_url`).
+- **`client/utils.py`** — `parse_hashes` and the click parameter validators (`validate_id`, `validate_hash(es)`, `validate_key`, …). Note the module is `client/utils.py`, not the top-level `utils.py` above — the two are distinct and easily confused.
 - **`exceptions.py`** — the CLI's own hierarchy, **distinct from the SDK's**: `PolyswarmException` → `NoResultsException`, `NotFoundException`, `InternalFailureException`, `PartialResultsException`. `ExceptionHandlingGroup` catches both these and the SDK's `api_exceptions.*`.
 
 ## Lifecycle of a command (end to end)

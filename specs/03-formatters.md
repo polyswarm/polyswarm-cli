@@ -14,7 +14,7 @@ How command output is rendered: the `BaseOutput` interface, the concrete formatt
 
 ## The interface — `base.py`
 
-`BaseOutput(output, **kwargs)` holds the output stream and exposes a method per resource type, each raising `NotImplementedError`. The set includes (non-exhaustive): `artifact_instance`, `historical_result`, `hunt`, `hunt_deletion`, `local_artifact`, `ruleset`, `ioc`, `iocs`, `known_host`, `metadata`, `artifact_metadata`, `tag_link`, `family`, `tag`, `known_good`, `sandbox_list`, `sandbox_task`, `sandbox_tasks`, `bundle_task`, `sample`. Concrete formatters add further methods as command families grow (e.g. `report_task`, `webhook`, `llm_prompt_config`, `metadata_field_properties`); keep `text` and `json` in sync.
+`BaseOutput(output, **kwargs)` holds the output stream and exposes a method per resource type, each raising `NotImplementedError`. The set includes (non-exhaustive): `artifact_instance`, `historical_result`, `hunt`, `hunt_deletion`, `local_artifact`, `ruleset`, `ruleset_favorite`, `ioc`, `iocs`, `known_host`, `metadata`, `artifact_metadata`, `tag_link`, `family`, `tag`, `known_good`, `sandbox_list`, `sandbox_task`, `sandbox_tasks`, `bundle_task`, `sample`. Concrete formatters add further methods as command families grow (e.g. `report_task`, `webhook`, `llm_prompt_config`, `metadata_field_properties`); keep `text` and `json` in sync.
 
 ## Concrete formatters
 
@@ -142,7 +142,34 @@ either field) never raises `AttributeError`; an SDK without `.state` simply neve
 the known-good branch, which is the safe fallback — the pre-known-good rendering. That
 degradation is belt-and-braces, not a supported configuration: `.state` is load-bearing
 here with no substitute. Both attributes ship in SDK **4.1.0**, but the dependency floor is
-`polyswarm_api>=4.2.0` — set by two *other* behaviours the CLI depends on, both of which
+the value in `pyproject.toml` — see [05-sdk-contract.md](./05-sdk-contract.md)
+§Current floor, which is authoritative, since repeating the number here is what let this
+line go stale before. Its *rationale* is two behaviours that landed in 4.2.0 and still hold
+transitively; those two
 fail silently on 4.1.0 (see [`05-sdk-contract.md`](./05-sdk-contract.md) §Version pin) — so
 every supported install has them. `JSONOutput` needs no change — it dumps the resource's
 `.json`, which already carries the raw `state` and `known_good` keys.
+
+## Hunt-page tracking fields (rulesets + historical hunts)
+
+Rendering rules that are deliberate, not incidental. Every one of these fields is
+parsed by the pinned SDK, so the attribute always exists and `None` means the
+**server** had no answer — never an older SDK (the floor forbids one; see
+[`05-sdk-contract.md`](./05-sdk-contract.md) §Current floor). The formatters read
+the attributes directly:
+
+- `rule_count` / `historical_hunt_count`: `0` renders as a real zero;
+  `None` (the server had no answer) omits the line — never shown as 0.
+- `favorite` is truthy-only ("Favorite: yes"): False and None both print
+  nothing, deliberately indistinguishable.
+- `new_results_count` is the server's STORED badge (refreshed by its
+  scheduled job; the window is the server's and the response does not carry
+  it, so the label deliberately does not name one): a number renders with its
+  `new_results_counted_at` staleness marker beside it; `None` (never
+  refreshed / no live hunt) omits both lines.
+- `ruleset_favorite` renders the toggle response: `Favorite: yes/no`, the
+  `favorited_at` timestamp when starred, and the server-owned budget as
+  "Favorites used: N of M" — the client never counts.
+- `source_rule_changed` is tri-state: `None` means UNKNOWN, not "unchanged",
+  and prints nothing; the label names its reference point — "changed since
+  this hunt froze it" — so it cannot read as "edited recently".
