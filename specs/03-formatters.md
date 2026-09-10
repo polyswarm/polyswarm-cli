@@ -173,3 +173,105 @@ the attributes directly:
 - `source_rule_changed` is tri-state: `None` means UNKNOWN, not "unchanged",
   and prints nothing; the label names its reference point — "changed since
   this hunt froze it" — so it cannot read as "edited recently".
+
+## Matched strings on hunt results
+
+`TextOutput.historical_result` / `TextOutput.live_result` render `result.matched_strings`
+— the yara strings behind a hit — between `Tags:` and `Download Url:`, via the shared
+`TextOutput._matched_strings` helper.
+
+The attribute is **three-state** (the SDK's `05-downstream-contract.md` is authoritative)
+and the three must stay distinguishable in the output — but they do **not** each get a
+line.
+
+| `matched_strings` | Rendered |
+|---|---|
+| `None` | *nothing* — no line is emitted |
+| `[]`, no count | `Matched Strings: none -- the rule matched without byte evidence (a structural or negative match, or private strings)` |
+| `[]`, count > 0 | `Matched Strings: none shown (N withheld, result size limit)` — the count **overrides** the row above, because asserting a structural match while discarding a withheld count would be a confident false statement. Should be unreachable; see below. |
+| `[…]` | `Matched Strings:` followed by one indented `  $ident @ 0xOFFSET (N bytes[, truncated]): DATA` line per entry |
+
+**The silent-`None` branch depends on list routes sending `null`, and that is measured
+rather than assumed.** If a list route ever returned `[]` per row instead, every row of a
+large hunt would carry the loud "matched without byte evidence" line — the permanent
+false alarm this design exists to avoid, arriving through the branch deliberately kept
+loud. The server pins it for **both** hunt pairs in artifact-index's
+`test_list_serializers_render_nulls_not_payloads`, which asserts the key is present-and-null on
+`ScanResultListSerializer` *and* `LiveResultListSerializer`, against fixture rows that do
+carry evidence. This repo cannot verify it; it relies on that test.
+
+Two constraints, both counter-intuitive enough to be worth stating:
+
+- **`None` emits nothing, and `[]` must not follow it into silence.** The instinct is to
+  explain the absence. Resist it: `None` overwhelmingly means "this is a list route",
+  which *can never* carry strings, so a line there is a permanent false alarm on every
+  row rather than information — and `live feed` loops over this same method, with nothing
+  on the resource to tell the routes apart (`live_feed` and `live_result` both yield a
+  `LiveHuntResult`). Route-awareness would mean threading a flag from the command layer
+  into a new parameter on **every** `BaseOutput` implementation (`text`, `json`, all three
+  `hashes` subclasses), which buys too little. `[]` is the opposite case and keeps its
+  line: it only ever reaches a detail route, and "the rule matched with no byte evidence"
+  is a real answer to "why did this hit". Since the analyzer always sends `strings` once
+  this feature ships, `None` on a detail route means a result predating it — nothing to
+  say.
+- **The entry keys are subscripted, deliberately.** `identifier`, `offset`, `length`,
+  `data` and `truncated` are read by subscript, because a partial entry is not version
+  skew but a producer violating its own contract, and rendering half a match as though it
+  were whole is worse than failing. The attribute itself needs no such defence: the floor
+  names an SDK that parses it (§Current floor in [`05-sdk-contract.md`](./05-sdk-contract.md)).
+- **`data` is sanitised before rendering.** It is the only sample-derived field in a hunt
+  result, so it is attacker-controlled end to end. yara escapes non-printables upstream
+  and the analyzer preserves that rendering, so `_safe_data` is a no-op on valid input —
+  it exists because the guarantee lives in another repo, and a raw CSI sequence reaching
+  a terminal would repaint or clear an analyst's screen.
+- **ASCII only, and true of this whole block.** The literals are ASCII; the two
+  server-supplied *string* fields — `data` and `identifier` — go through `_safe_data`;
+  and the three server-supplied *numbers* — `offset`, `length`, `dropped` — carry an
+  integer format spec (`:x` / `:d`), which is what pins them rather than `_safe_data`.
+  Fields *outside* the block (`rule_name`, `tags`) are unfiltered and outside this claim.
+  Stdout under a C/POSIX locale replaces non-ASCII with `?`.
+- **`truncated` is not a byte count.** The stored length is capped server-side, so the
+  marker means "there was more than this" and over-reports at exactly the cap. Never
+  render it as an exact size.
+
+**Read both attributes directly** — `result.matched_strings`, no `getattr`. The floor
+(`polyswarm_api>=4.4.0`, [`05-sdk-contract.md`](./05-sdk-contract.md) §Current floor)
+names an SDK that parses them, so `pip` refuses the install a probe would guard against;
+`specs/05-project-standards.md` §16 has the general rule. `None` then means exactly what
+the table above says — the *server* did not report — which is the reading the silent
+branch depends on.
+
+### The dropped-count line
+
+When `result.matched_strings_dropped` is non-zero, a final line is appended **inside** the
+block, in **yellow** rather than white:
+
+```
+  ... 19 more not shown (result size limit)
+```
+
+It is the one line here reporting something the platform withheld, which is why it is not
+white like the entries above it. Omitted entirely when the count is zero or `None`.
+
+**An empty list with a non-zero count does not claim "no byte evidence".** That
+combination should be unreachable — the analyzer keeps a match's first string, so
+`[] ⇒ dropped == 0` — but the renderer must not *depend* on an invariant owned by another
+repo while making a positive claim about the rule. It reports what is certain instead
+(`none shown (N withheld, result size limit)`), because asserting a structural match and
+discarding the count is the precise wrong inference this line exists to prevent.
+
+This is not cosmetic. Without it a truncated list reads as the whole truth and a user
+concludes their rule hit twice when it hit twenty-one times — the same wrong-inference
+class the three-state contract above exists to prevent, one level down.
+
+`JSONOutput` needs no change — it dumps the resource's `.json`, which already carries the
+raw `matched_strings` and `matched_strings_dropped` keys.
+
+Coverage is two modules. `tests/hunt_matched_strings_test.py` is Style 3 — the formatter
+driven directly with constructed SDK resources — and owns *which line a field value
+produces*. `tests/hunt_matched_strings_cli_test.py` is the Style 1 counterpart
+[`04-testing.md`](./04-testing.md) requires: it drives `live result` through `CliRunner`
+so a broken `output.extend` call is caught, which the Style 3 module cannot see because
+it calls `_matched_strings` itself. The `cli_test.py` cassettes predate the field, so
+every result they render takes the silent `None` branch — they pin that no stray line
+appears, and nothing more.

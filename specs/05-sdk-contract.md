@@ -96,8 +96,10 @@ predates this and is documented where it lives: the known-good rendering attribu
 that is not supported rather than against a version the floor permits.) The hunt-page surfaces —
 `ruleset_favorite` and the `YaraRulesetFavorite` resource, the `ruleset_list` filters,
 `live_feed(livescan_id=, max_results=)`, and the tracking/provenance fields the
-formatters render — are what moved the floor to 4.4.0. Code and tests use them
-directly.
+formatters render — are what moved the floor to 4.4.0, together with
+`matched_strings` / `matched_strings_dropped` on the four hunt-result classes
+(the yara evidence behind a hit; see [`03-formatters.md`](./03-formatters.md)
+§Matched strings on hunt results). Code and tests use them directly.
 
 **Raising the floor is the whole procedure** when this repo needs something new from
 the SDK:
