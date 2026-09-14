@@ -39,9 +39,11 @@ def delete(ctx, rule_id):
 @click.option('--has-new-results', is_flag=True,
               help='Only rulesets whose stored new-results counter is positive.')
 @click.option('--sort', type=click.Choice(['active-first']),
-              help='Order: rulesets with a running live hunt first (as recorded by the '
-                   "server's live-hunt link, the same one Live Hunt Id renders from), "
-                   'newest first within each block. Default is newest first.')
+              help='Order: rulesets carrying a live hunt link first, newest first '
+                   'within each block. Default is newest first. The rank is the '
+                   'stored link, which is wider than what Live Hunt Id renders '
+                   'from: a legacy row whose hunt was stopped without clearing '
+                   'the link leads the list with an empty Live Hunt Id.')
 @click.pass_context
 def list_rules(ctx, name, status, favorites_only, has_new_results, sort):
     """List rulesets, optionally filtered. All filters are conjunctive.
