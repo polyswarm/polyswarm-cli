@@ -40,7 +40,7 @@ def delete(ctx, rule_id):
               help='Only rulesets whose stored new-results counter is positive.')
 @click.option('--sort', type=click.Choice(['active-first']),
               help='Order: rulesets with a running live hunt first (as recorded by the '
-                   "server's live-hunt link, the same one Livescan Id renders from), "
+                   "server's live-hunt link, the same one Live Hunt Id renders from), "
                    'newest first within each block. Default is newest first.')
 @click.pass_context
 def list_rules(ctx, name, status, favorites_only, has_new_results, sort):
