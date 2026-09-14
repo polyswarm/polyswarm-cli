@@ -219,6 +219,22 @@ class RulesListZeroArgTest(TestCase):
         # The row between the duplicates still renders — dedupe, not truncation.
         assert 'other' in result.output, result.output
 
+    def test_two_rulesets_sharing_a_name_both_render(self):
+        """The key is the id, and only the id. Ruleset names are not unique, so
+        an implementation that deduped on the name — or on the whole rendered
+        block — would swallow a real row from an inventory listing while passing
+        every other test in this class."""
+        rows = [_ruleset(id='5', name='dup'), _ruleset(id='7', name='dup')]
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        autospec=True, return_value=iter(rows)):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list', '--sort', 'active-first'],
+                catch_exceptions=False)
+        assert result.exit_code == 0, result.output
+        assert result.output.count('dup') == 2, result.output
+
     def test_the_default_order_is_not_narrowed_by_the_dedupe(self):
         # The id-desc default cannot repeat a row, so every row it yields must
         # still reach the output; the dedupe is unconditional and must be inert
