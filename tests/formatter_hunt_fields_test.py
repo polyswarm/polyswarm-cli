@@ -15,7 +15,10 @@ Pins two contracts:
   favorite`` renders the toggle response and converts the machine-readable
   FAVORITE_LIMIT refusal into a clean message. All are asserted through
   autospec'd mocks, so every call is signature-checked against the SDK the
-  pin actually installs.
+  pin actually installs; and
+* the active-first order (4.5.0): the ``--sort`` token that reaches the server,
+  and what walking every page of a MUTABLY ordered list obliges this command to
+  do — dedupe by id, first copy wins, stale values and all.
 """
 from unittest import TestCase, mock
 
@@ -132,10 +135,13 @@ class FormatterHuntFieldsTest(TestCase):
 
 
 class RulesListZeroArgTest(TestCase):
-    """`rules list` calls a zero-argument ``ruleset_list()`` — a False flag
-    is not a filter, so an unfiltered list forwards no
-    behaviour at all. autospec makes the assertion a signature check against
-    the installed SDK."""
+    """`rules list` calls a zero-argument ``ruleset_list()`` — a False flag is
+    not a filter, so an unfiltered list forwards no behaviour at all, and a
+    filtered one forwards exactly the filters given. autospec makes each
+    assertion a signature check against the installed SDK.
+
+    The `--sort` token and the mid-walk dedupe live in
+    ``RulesListSortAndDedupeTest`` below."""
 
     def test_list_passes_no_kwargs_at_all(self):
         with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
@@ -167,6 +173,22 @@ class RulesListZeroArgTest(TestCase):
         ruleset_list.assert_called_once_with(
             mock.ANY, name='alpha', status='active',
             favorites_only=True, has_new_results=True)
+
+
+class RulesListSortAndDedupeTest(TestCase):
+    """`rules list --sort active-first` — the token that reaches the server, and
+    what walking every page of a MUTABLY ordered list obliges this command to do.
+
+    Two separate contracts. The token: the CLI spelling is hyphenated, the
+    server's is not, the sort is forwarded only when given, and an unknown one
+    is refused here rather than at the server. The walk: the ordering key is the
+    live-hunt link the sort ranks on, so a row whose hunt changes mid-walk is
+    served twice or missed — this command dedupes by id, keeps the FIRST copy,
+    and therefore renders that row's PRE-transition values
+    (specs/05-sdk-contract.md §A mutable order makes the walk the caller's
+    problem). Each dedupe test fails against a different wrong implementation:
+    keyed on the name, or last-wins.
+    """
 
     def test_sort_active_first_is_forwarded_as_the_server_token(self):
         """`--sort active-first` (CLI spelling, hyphen) reaches the SDK as
