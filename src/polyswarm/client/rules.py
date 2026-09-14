@@ -41,9 +41,11 @@ def delete(ctx, rule_id):
 @click.option('--sort', type=click.Choice(['active-first']),
               help='Order: rulesets carrying a live hunt link first, newest first '
                    'within each block. Default is newest first. The rank is the '
-                   'stored link, which is wider than what Live Hunt Id renders '
+                   'stored link, which is WIDER than what Live Hunt Id renders '
                    'from: a legacy row whose hunt was stopped without clearing '
-                   'the link leads the list with an empty Live Hunt Id.')
+                   'the link leads the list while rendering no Live Hunt Id at '
+                   'all, indistinguishable from an idle one. Read the field, '
+                   'never the position.')
 @click.pass_context
 def list_rules(ctx, name, status, favorites_only, has_new_results, sort):
     """List rulesets, optionally filtered. All filters are conjunctive.
@@ -51,6 +53,16 @@ def list_rules(ctx, name, status, favorites_only, has_new_results, sort):
     Filtering and ordering are applied SERVER-side: the list is
     keyset-paginated, so a client filtering or sorting locally would have to
     walk every page to get it right.
+
+    This command walks EVERY page, which makes it the consumer the SDK puts the
+    dedupe obligation on: under --sort active-first the ordering key is mutable
+    (it is the live-hunt link the sort ranks on), so a ruleset whose hunt stops
+    between two page fetches drops below the cursor and the server serves it a
+    second time. Rows are therefore emitted at most once per run, keyed on id.
+
+    The symmetric case cannot be repaired from here and is not hidden: a hunt
+    STARTED mid-walk moves its ruleset above the cursor, so that row never
+    reaches this client at all. A re-run lists it.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -61,7 +73,15 @@ def list_rules(ctx, name, status, favorites_only, has_new_results, sort):
                                 ('has_new_results', has_new_results or None),
                                 ('sort', sort.replace('-', '_') if sort else None))
               if v is not None}
+    seen = set()
     for ruleset in api.ruleset_list(**kwargs):
+        # Unconditional rather than gated on `sort`: the id is unique either
+        # way, one set of ids costs nothing next to the rows already rendered,
+        # and a gate would be a second place to update when another mutable
+        # order appears. Under the default order this never drops anything.
+        if ruleset.id in seen:
+            continue
+        seen.add(ruleset.id)
         output.ruleset(ruleset)
 
 

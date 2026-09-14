@@ -198,6 +198,42 @@ class RulesListZeroArgTest(TestCase):
         ruleset_list.assert_called_once_with(
             mock.ANY, status='active', favorites_only=True, sort='active_first')
 
+    def test_a_row_served_twice_by_the_mutable_sort_is_printed_once(self):
+        """The command walks every page, so it is the consumer the SDK puts the
+        dedupe obligation on. Under the active-first order a ruleset whose hunt
+        stops between two page fetches falls below the cursor and the server
+        serves it again; without the dedupe the run prints it twice and any
+        script counting the output double-counts it."""
+        repeated = [_ruleset(id='5', name='stops-mid-walk'),
+                    _ruleset(id='7', name='other'),
+                    _ruleset(id='5', name='stops-mid-walk')]
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        autospec=True, return_value=iter(repeated)):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list', '--sort', 'active-first'],
+                catch_exceptions=False)
+        assert result.exit_code == 0, result.output
+        assert result.output.count('stops-mid-walk') == 1, result.output
+        # The row between the duplicates still renders — dedupe, not truncation.
+        assert 'other' in result.output, result.output
+
+    def test_the_default_order_is_not_narrowed_by_the_dedupe(self):
+        # The id-desc default cannot repeat a row, so every row it yields must
+        # still reach the output; the dedupe is unconditional and must be inert
+        # here rather than dropping a distinct row that happens to look alike.
+        rows = [_ruleset(id='5', name='first'), _ruleset(id='7', name='second')]
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        autospec=True, return_value=iter(rows)):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list'],
+                catch_exceptions=False)
+        assert result.exit_code == 0, result.output
+        assert 'first' in result.output and 'second' in result.output, result.output
+
     def test_sort_rejects_an_unknown_order(self):
         # A closed choice on the CLI side too: the server would 400 an unknown
         # sort, but the CLI should not have to make the round trip to say so.
