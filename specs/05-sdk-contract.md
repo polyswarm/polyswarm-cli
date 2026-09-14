@@ -39,6 +39,32 @@ for item in api.iocs_by_hash(type, value):
 
 Because the generators are **lazy**, calling one does no I/O and raises nothing until iterated. Code that runs SDK calls through a thread pool must consume the generator **inside the worker** so per-item exception handling fires where it's expected — this is why `utils.parallel_executor_iterable_results` materialises each generator inside the submitted callable (see `01-architecture.md`).
 
+### A mutable order makes the walk the caller's problem
+
+Most list endpoints are keyset-paginated on an immutable key, so a walk sees every row once.
+`ruleset_list(sort='active_first')` is the exception in the current surface: its key is the
+live-hunt link, which the hunt itself flips, and the SDK's own docstring puts the consequence
+on the caller — *"This generator streams pages and does not dedupe — dedupe by `id` if you
+consume more than one page"*.
+
+A command that walks every page of such an endpoint must therefore:
+
+- **Dedupe by `id`.** A row whose key changes mid-walk drops below the cursor and is served
+  again. `rules list` keeps a `seen` set (`client/rules.py`); the dedupe is unconditional,
+  because the id is unique under either order and a gate is one more thing to update when the
+  next mutable order appears.
+- **Keep the FIRST copy, and know what that costs.** A streaming printer has already written
+  copy one when copy two arrives, so first-wins is the only option — and copy one carries the
+  PRE-transition values. A ruleset whose hunt stopped mid-walk prints with its old
+  `Live Hunt Id`. Under a mutable order neither the position nor the row's own fields are
+  authoritative for a row that moved; a fresh run shows the settled state.
+- **Say both in the command's help**, not only here. The user reading `--help` is the one who
+  will act on a stale field.
+
+What cannot be repaired client-side: a row whose key changes so that it moves ABOVE the
+cursor is never served at all, so it is missing from that walk entirely. Document it; a
+re-run lists it.
+
 ### No-results signalling
 
 A search that the server answers `204 No Content` raises `NoResultsException` from the SDK **when the generator is iterated**. The CLI's `ExceptionHandlingGroup` maps that (and the CLI's own aggregate `NoResultsException` from `parallel_executor`) to exit code `1`. Don't swallow it in command code.

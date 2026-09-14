@@ -44,8 +44,10 @@ def delete(ctx, rule_id):
                    'stored link, which is WIDER than what Live Hunt Id renders '
                    'from: a legacy row whose hunt was stopped without clearing '
                    'the link leads the list while rendering no Live Hunt Id at '
-                   'all, indistinguishable from an idle one. Read the field, '
-                   'never the position.')
+                   'all, indistinguishable from an idle one — so the position '
+                   'is not evidence that a hunt is running. Neither is the '
+                   'field for a row that MOVED during the walk: see the note '
+                   'on stale copies below.')
 @click.pass_context
 def list_rules(ctx, name, status, favorites_only, has_new_results, sort):
     """List rulesets, optionally filtered. All filters are conjunctive.
@@ -59,6 +61,13 @@ def list_rules(ctx, name, status, favorites_only, has_new_results, sort):
     (it is the live-hunt link the sort ranks on), so a ruleset whose hunt stops
     between two page fetches drops below the cursor and the server serves it a
     second time. Rows are therefore emitted at most once per run, keyed on id.
+
+    The copy that survives is the FIRST one, which is the only choice a
+    streaming printer has — it wrote that copy before the second arrived — and
+    it carries the values from BEFORE the transition. So the one row the dedupe
+    acts on prints its old Live Hunt Id, for a hunt that has since stopped.
+    Under this order a moved row is authoritative in neither its position nor
+    its fields; a fresh run shows the settled state.
 
     The symmetric case cannot be repaired from here and is not hidden: a hunt
     STARTED mid-walk moves its ruleset above the cursor, so that row never

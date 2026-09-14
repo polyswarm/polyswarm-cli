@@ -203,10 +203,13 @@ class RulesListZeroArgTest(TestCase):
         dedupe obligation on. Under the active-first order a ruleset whose hunt
         stops between two page fetches falls below the cursor and the server
         serves it again; without the dedupe the run prints it twice and any
-        script counting the output double-counts it."""
-        repeated = [_ruleset(id='5', name='stops-mid-walk'),
+        script counting the output double-counts it.
+
+        The two copies differ in the field the sort ranks on — that is WHY the
+        row moved — so this is the real re-serve shape, not a repeated row."""
+        repeated = [_ruleset(id='5', name='stops-mid-walk', livescan_id='77'),
                     _ruleset(id='7', name='other'),
-                    _ruleset(id='5', name='stops-mid-walk')]
+                    _ruleset(id='5', name='stops-mid-walk', livescan_id=None)]
         with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
                         autospec=True, return_value=iter(repeated)):
             result = CliRunner().invoke(
@@ -218,6 +221,29 @@ class RulesListZeroArgTest(TestCase):
         assert result.output.count('stops-mid-walk') == 1, result.output
         # The row between the duplicates still renders — dedupe, not truncation.
         assert 'other' in result.output, result.output
+
+    def test_the_surviving_copy_is_the_first_one_stale_values_and_all(self):
+        """First-wins is a decision, not an accident of the loop: a streaming
+        printer has already written copy one when copy two arrives. The cost is
+        that the surviving copy carries the PRE-transition values — the row
+        prints the Live Hunt Id of a hunt that has since stopped — which is why
+        the help and specs/05 say a moved row is authoritative in neither its
+        position nor its fields. A last-wins rewrite would flip this."""
+        served = [_ruleset(id='5', name='stops-mid-walk', livescan_id='77'),
+                  _ruleset(id='5', name='stops-mid-walk', livescan_id=None)]
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        autospec=True, return_value=iter(served)):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list', '--sort', 'active-first'],
+                catch_exceptions=False)
+        assert result.exit_code == 0, result.output
+        assert result.output.count('stops-mid-walk') == 1, result.output
+        # The formatter gates the pair on a truthy livescan_id, so the line is
+        # present iff the copy that survived is the one from before the stop.
+        assert 'Live Hunt Id' in result.output, result.output
+        assert '77' in result.output, result.output
 
     def test_two_rulesets_sharing_a_name_both_render(self):
         """The key is the id, and only the id. Ruleset names are not unique, so
