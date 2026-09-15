@@ -15,7 +15,10 @@ Pins two contracts:
   favorite`` renders the toggle response and converts the machine-readable
   FAVORITE_LIMIT refusal into a clean message. All are asserted through
   autospec'd mocks, so every call is signature-checked against the SDK the
-  pin actually installs.
+  pin actually installs; and
+* the active-first order (4.5.0): the ``--sort`` token that reaches the server,
+  and what walking every page of a MUTABLY ordered list obliges this command to
+  do — dedupe by id, first copy wins, stale values and all.
 """
 from unittest import TestCase, mock
 
@@ -132,10 +135,13 @@ class FormatterHuntFieldsTest(TestCase):
 
 
 class RulesListZeroArgTest(TestCase):
-    """`rules list` calls a zero-argument ``ruleset_list()`` — a False flag
-    is not a filter, so an unfiltered list forwards no
-    behaviour at all. autospec makes the assertion a signature check against
-    the installed SDK."""
+    """`rules list` calls a zero-argument ``ruleset_list()`` — a False flag is
+    not a filter, so an unfiltered list forwards no behaviour at all, and a
+    filtered one forwards exactly the filters given. autospec makes each
+    assertion a signature check against the installed SDK.
+
+    The `--sort` token and the mid-walk dedupe live in
+    ``RulesListSortAndDedupeTest`` below."""
 
     def test_list_passes_no_kwargs_at_all(self):
         with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
@@ -167,6 +173,156 @@ class RulesListZeroArgTest(TestCase):
         ruleset_list.assert_called_once_with(
             mock.ANY, name='alpha', status='active',
             favorites_only=True, has_new_results=True)
+
+
+class RulesListSortAndDedupeTest(TestCase):
+    """`rules list --sort active-first` — the token that reaches the server, and
+    what walking every page of a MUTABLY ordered list obliges this command to do.
+
+    Two separate contracts. The token: the CLI spelling is hyphenated, the
+    server's is not, the sort is forwarded only when given, and an unknown one
+    is refused here rather than at the server. The walk: the ordering key is the
+    live-hunt link the sort ranks on, so a row whose hunt changes mid-walk is
+    served twice or missed — this command dedupes by id, keeps the FIRST copy,
+    and therefore renders that row's PRE-transition values
+    (specs/05-sdk-contract.md §A mutable order makes the walk the caller's
+    problem). Each dedupe test fails against a different wrong implementation:
+    keyed on the name, or last-wins.
+    """
+
+    def test_sort_active_first_is_forwarded_as_the_server_token(self):
+        """`--sort active-first` (CLI spelling, hyphen) reaches the SDK as
+        the server's `sort='active_first'` token — and, like the filters, only
+        when given: the unsorted default sends no `sort` at all, so the list
+        keeps its id-desc order and the request stays byte-compatible."""
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        autospec=True, return_value=iter(())) as ruleset_list:
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list', '--sort', 'active-first'],
+                catch_exceptions=False)
+        assert result.exit_code == 0, result.output
+        ruleset_list.assert_called_once_with(mock.ANY, sort='active_first')
+
+    def test_sort_composes_with_the_filters(self):
+        # The kwargs comprehension is the one site that could drop or
+        # mistranslate the sort when filters ride along.
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        autospec=True, return_value=iter(())) as ruleset_list:
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list', '--status', 'active', '--favorites-only',
+                 '--sort', 'active-first'],
+                catch_exceptions=False)
+        assert result.exit_code == 0, result.output
+        ruleset_list.assert_called_once_with(
+            mock.ANY, status='active', favorites_only=True, sort='active_first')
+
+    def test_a_row_served_twice_by_the_mutable_sort_is_printed_once(self):
+        """The command walks every page, so it is the consumer the SDK puts the
+        dedupe obligation on. Under the active-first order a ruleset whose hunt
+        stops between two page fetches falls below the cursor and the server
+        serves it again; without the dedupe the run prints it twice and any
+        script counting the output double-counts it.
+
+        The two copies differ in the field the sort ranks on — that is WHY the
+        row moved — so this is the real re-serve shape, not a repeated row."""
+        repeated = [_ruleset(id='5', name='stops-mid-walk', livescan_id='77'),
+                    _ruleset(id='7', name='other'),
+                    _ruleset(id='5', name='stops-mid-walk', livescan_id=None)]
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        autospec=True, return_value=iter(repeated)):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list', '--sort', 'active-first'],
+                catch_exceptions=False)
+        assert result.exit_code == 0, result.output
+        assert result.output.count('stops-mid-walk') == 1, result.output
+        # The row between the duplicates still renders — dedupe, not truncation.
+        assert 'other' in result.output, result.output
+
+    def test_the_surviving_copy_is_the_first_one_stale_values_and_all(self):
+        """First-wins is a decision, not an accident of the loop: a streaming
+        printer has already written copy one when copy two arrives. The cost is
+        that the surviving copy carries the PRE-transition values — the row
+        prints the Live Hunt Id of a hunt that has since stopped — which is why
+        the help and specs/05 say a moved row is authoritative in neither its
+        position nor its fields. A last-wins rewrite would flip this."""
+        served = [_ruleset(id='5', name='stops-mid-walk', livescan_id='77'),
+                  _ruleset(id='5', name='stops-mid-walk', livescan_id=None)]
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        autospec=True, return_value=iter(served)):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list', '--sort', 'active-first'],
+                catch_exceptions=False)
+        assert result.exit_code == 0, result.output
+        assert result.output.count('stops-mid-walk') == 1, result.output
+        # The formatter gates the pair on a truthy livescan_id, so the line is
+        # present iff the copy that survived is the one from before the stop.
+        assert 'Live Hunt Id' in result.output, result.output
+        assert '77' in result.output, result.output
+
+    def test_two_rulesets_sharing_a_name_both_render(self):
+        """The key is the id, and only the id. Ruleset names are not unique, so
+        an implementation that deduped on the name — or on the whole rendered
+        block — would swallow a real row from an inventory listing while passing
+        every other test in this class."""
+        rows = [_ruleset(id='5', name='dup'), _ruleset(id='7', name='dup')]
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        autospec=True, return_value=iter(rows)):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list', '--sort', 'active-first'],
+                catch_exceptions=False)
+        assert result.exit_code == 0, result.output
+        assert result.output.count('dup') == 2, result.output
+
+    def test_the_default_order_is_not_narrowed_by_the_dedupe(self):
+        # The id-desc default cannot repeat a row, so every row it yields must
+        # still reach the output; the dedupe is unconditional and must be inert
+        # here rather than dropping a distinct row that happens to look alike.
+        rows = [_ruleset(id='5', name='first'), _ruleset(id='7', name='second')]
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        autospec=True, return_value=iter(rows)):
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list'],
+                catch_exceptions=False)
+        assert result.exit_code == 0, result.output
+        assert 'first' in result.output and 'second' in result.output, result.output
+
+    def test_exclude_favorites_is_forwarded_only_when_given(self):
+        """The inverse filter the hunt page sends alongside the sort: the
+        favorites are their own list above the page, so the paginated list asks
+        for the non-favorites. Like every other flag here, a False one is not a
+        filter and must not reach the SDK."""
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        autospec=True, return_value=iter(())) as ruleset_list:
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list', '--exclude-favorites', '--sort', 'active-first'],
+                catch_exceptions=False)
+        assert result.exit_code == 0, result.output
+        ruleset_list.assert_called_once_with(
+            mock.ANY, exclude_favorites=True, sort='active_first')
+
+    def test_sort_rejects_an_unknown_order(self):
+        # A closed choice on the CLI side too: the server would 400 an unknown
+        # sort, but the CLI should not have to make the round trip to say so.
+        result = CliRunner().invoke(
+            client.polyswarm_cli,
+            ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+             'rules', 'list', '--sort', 'newest'])
+        assert result.exit_code == 2, result.output
+        assert 'active-first' in result.output
 
 
 

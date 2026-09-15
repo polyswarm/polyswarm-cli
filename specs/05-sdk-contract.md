@@ -39,6 +39,32 @@ for item in api.iocs_by_hash(type, value):
 
 Because the generators are **lazy**, calling one does no I/O and raises nothing until iterated. Code that runs SDK calls through a thread pool must consume the generator **inside the worker** so per-item exception handling fires where it's expected — this is why `utils.parallel_executor_iterable_results` materialises each generator inside the submitted callable (see `01-architecture.md`).
 
+### A mutable order makes the walk the caller's problem
+
+Most list endpoints are keyset-paginated on an immutable key, so a walk sees every row once.
+`ruleset_list(sort='active_first')` is the exception in the current surface: its key is the
+live-hunt link, which the hunt itself flips, and the SDK's own docstring puts the consequence
+on the caller — *"This generator streams pages and does not dedupe — dedupe by `id` if you
+consume more than one page"*.
+
+A command that walks every page of such an endpoint must therefore:
+
+- **Dedupe by `id`.** A row whose key changes mid-walk drops below the cursor and is served
+  again. `rules list` keeps a `seen` set (`client/rules.py`); the dedupe is unconditional,
+  because the id is unique under either order and a gate is one more thing to update when the
+  next mutable order appears.
+- **Keep the FIRST copy, and know what that costs.** A streaming printer has already written
+  copy one when copy two arrives, so first-wins is the only option — and copy one carries the
+  PRE-transition values. A ruleset whose hunt stopped mid-walk prints with its old
+  `Live Hunt Id`. Under a mutable order neither the position nor the row's own fields are
+  authoritative for a row that moved; a fresh run shows the settled state.
+- **Say both in the command's help**, not only here. The user reading `--help` is the one who
+  will act on a stale field.
+
+What cannot be repaired client-side: a row whose key changes so that it moves ABOVE the
+cursor is never served at all, so it is missing from that walk entirely. Document it; a
+re-run lists it.
+
 ### No-results signalling
 
 A search that the server answers `204 No Content` raises `NoResultsException` from the SDK **when the generator is iterated**. The CLI's `ExceptionHandlingGroup` maps that (and the CLI's own aggregate `NoResultsException` from `parallel_executor`) to exit code `1`. Don't swallow it in command code.
@@ -79,7 +105,7 @@ When a CLI feature needs an SDK surface that doesn't exist yet:
 
   **Read the declared version off the archive's own tree, and mind pre-release suffixes.** PEP 440 orders `4.2.0.dev1 < 4.2.0`, so a `develop` head carrying a dev suffix (the SDK's `pyproject.toml` has a `[tool.bumpversion.parts.dev]`) would *not* satisfy a `>=4.2.0` floor even though it looks like 4.2.0 — and the archive build would be silently replaced from PyPI. Check the version string in the SDK branch's `pyproject.toml` / `__init__.py`, not the last release tag. When the floor was last verified this way both were read from `origin/develop` as `4.2.0`, no suffix; the pin has since moved on (§Current floor is the one authoritative statement of its value), and every bump should be re-checked the same way.
 
-### Current floor — `polyswarm_api>=4.4.0`
+### Current floor — `polyswarm_api>=4.5.0`
 
 The floor is whatever `pyproject.toml` pins; this header follows it. It lives in ONE authoritative place for a reason — a copy here drifted behind the pin once already. The 4.2.0 rationale below still holds transitively; on 4.1.0 both behaviours fail *silently*, which is why the floor is a hard requirement rather than a preference:
 
@@ -99,7 +125,11 @@ that is not supported rather than against a version the floor permits.) The hunt
 formatters render — are what moved the floor to 4.4.0, together with
 `matched_strings` / `matched_strings_dropped` on the four hunt-result classes
 (the yara evidence behind a hit; see [`03-formatters.md`](./03-formatters.md)
-§Matched strings on hunt results). Code and tests use them directly.
+§Matched strings on hunt results). `rules list --sort active-first` forwards
+`ruleset_list(sort='active_first')`, a keyword 4.5.0 adds, and that is what moved the
+floor to 4.5.0 (the `tests/formatter_hunt_fields_test.py` autospec assertion is the
+signature check: against a 4.4.0 SDK it fails at the mock, not at the server). Code and
+tests use them directly.
 
 **Raising the floor is the whole procedure** when this repo needs something new from
 the SDK:
