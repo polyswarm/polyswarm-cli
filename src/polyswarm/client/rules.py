@@ -36,6 +36,10 @@ def delete(ctx, rule_id):
 @click.option('-s', '--status', type=click.Choice(['active']),
               help='Only rulesets whose live hunt is currently running.')
 @click.option('--favorites-only', is_flag=True, help='Only favorited (starred) rulesets.')
+@click.option('--exclude-favorites', is_flag=True,
+              help='Only rulesets that are NOT favorited. The inverse of '
+                   '--favorites-only, and refused together with it. For a '
+                   'client that lists the favorites separately.')
 @click.option('--has-new-results', is_flag=True,
               help='Only rulesets whose stored new-results counter is positive.')
 @click.option('--sort', type=click.Choice(['active-first']),
@@ -49,7 +53,7 @@ def delete(ctx, rule_id):
                    'field for a row that MOVED during the walk: see the note '
                    'on stale copies below.')
 @click.pass_context
-def list_rules(ctx, name, status, favorites_only, has_new_results, sort):
+def list_rules(ctx, name, status, favorites_only, exclude_favorites, has_new_results, sort):
     """List rulesets, optionally filtered. All filters are conjunctive.
 
     Filtering and ordering are applied SERVER-side: the list is
@@ -79,6 +83,7 @@ def list_rules(ctx, name, status, favorites_only, has_new_results, sort):
     # The CLI spells the sort with a hyphen; the server token is 'active_first'.
     kwargs = {k: v for k, v in (('name', name), ('status', status),
                                 ('favorites_only', favorites_only or None),
+                                ('exclude_favorites', exclude_favorites or None),
                                 ('has_new_results', has_new_results or None),
                                 ('sort', sort.replace('-', '_') if sort else None))
               if v is not None}

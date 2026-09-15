@@ -298,6 +298,22 @@ class RulesListSortAndDedupeTest(TestCase):
         assert result.exit_code == 0, result.output
         assert 'first' in result.output and 'second' in result.output, result.output
 
+    def test_exclude_favorites_is_forwarded_only_when_given(self):
+        """The inverse filter the hunt page sends alongside the sort: the
+        favorites are their own list above the page, so the paginated list asks
+        for the non-favorites. Like every other flag here, a False one is not a
+        filter and must not reach the SDK."""
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.ruleset_list',
+                        autospec=True, return_value=iter(())) as ruleset_list:
+            result = CliRunner().invoke(
+                client.polyswarm_cli,
+                ['-a', '1' * 32, '-u', 'http://ai:9696/v3', '-c', 'gamma',
+                 'rules', 'list', '--exclude-favorites', '--sort', 'active-first'],
+                catch_exceptions=False)
+        assert result.exit_code == 0, result.output
+        ruleset_list.assert_called_once_with(
+            mock.ANY, exclude_favorites=True, sort='active_first')
+
     def test_sort_rejects_an_unknown_order(self):
         # A closed choice on the CLI side too: the server would 400 an unknown
         # sort, but the CLI should not have to make the round trip to say so.
