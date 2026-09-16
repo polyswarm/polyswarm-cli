@@ -120,13 +120,27 @@ class TextOutput(base.BaseOutput):
         # below the dependency floor, so the pin already guarantees them. This is
         # belt-and-braces for an unsupported configuration, NOT the version-probing
         # the floor replaced -- don't add siblings for a version the floor permits.
-        # The bounty state (KNOWN_GOOD) is the only reliable signal that this artifact is
+        # The reported state (KNOWN_GOOD) is the only reliable signal that this artifact is
         # a known-good binary whose bytes are withheld — it alone decides. known_good_sources
-        # (the flagging feeds) is emitted for any instance whose sha256 matches a known-good
-        # record, including a fully scanned one carrying real detections, so it only shapes
-        # the message; reading it as the signal would render a scanned artifact "not scanned".
-        is_known_good = getattr(instance, 'state', None) == 'KNOWN_GOOD'
+        # (the flagging feeds) only shapes the message.
+        #
+        # The server gates the `known_good` field on the SAME predicate it reports
+        # KNOWN_GOOD from, so the feeds can never arrive without the state. The converse
+        # does not hold — the state can arrive with no feeds, when the catalogue entry
+        # stopped resolving between the gate and the render — which is why the attribution
+        # below is guarded on `known_good_sources` rather than assuming it is populated.
+        # Read once and compare twice — a second `getattr` for the same attribute would be
+        # the sibling the note above warns against.
+        reported_state = getattr(instance, 'state', None)
+        is_known_good = reported_state == 'KNOWN_GOOD'
         known_good_sources = (getattr(instance, 'known_good_sources', None) or []) if is_known_good else []
+        # NOT_STORED is a different fact from "never scanned" and from "not found": the
+        # platform knows this hash and deliberately never kept its bytes, because it was
+        # declined as a known-good binary at submission and is no longer currently
+        # known-good. Resubmitting the file scans it. Without its own branch it fell
+        # through to "Assertion window closed" — these records carry window_closed=True —
+        # which reads as a finished scan that produced nothing.
+        is_not_stored = reported_state == 'NOT_STORED'
 
         if is_known_good and not instance.failed:
             # A known-good binary can still carry results: an instance scanned before the
@@ -198,6 +212,13 @@ class TextOutput(base.BaseOutput):
                 output.append(self._red(f'Failure Reason: {instance.failed_reason}'))
         elif is_known_good:
             output.append(self._green('Status: Known good'))
+        elif is_not_stored:
+            # Ahead of window_closed deliberately: these records carry window_closed=True,
+            # so the ordinary branch would claim a finished scan for an artifact that has
+            # never been scanned and holds no bytes to scan.
+            output.append(self._white(
+                'Status: Not stored. Its bytes were declined as a known-good binary when '
+                'submitted; resubmit the file to scan it.'))
         elif instance.window_closed:
             output.append(self._white('Status: Assertion window closed'))
         elif instance.community == 'stream':

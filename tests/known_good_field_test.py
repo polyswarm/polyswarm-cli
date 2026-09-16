@@ -238,3 +238,32 @@ class TestKnownGoodFeedsAreNotTheSignal:
         # The real scan results are reported, never overwritten by a "not scanned" claim.
         assert 'Detections: 1/2 engines reported malicious' in text
         assert 'it is not scanned' not in text
+
+
+class TestNotStoredRendering:
+    """NOT_STORED — the platform knows the hash and deliberately never kept its bytes.
+
+    Distinct from KNOWN_GOOD (bytes withheld, but the hash IS currently known-good) and
+    from a plain miss. These records are the ones a submission declined at ingest, whose
+    hash later stopped being currently known-good (specs/05 case 2b).
+    """
+
+    def test_not_stored_names_its_cause_instead_of_claiming_a_finished_scan(self):
+        # These records carry window_closed=True, so before NOT_STORED had its own
+        # branch they fell through to "Assertion window closed" — which reads as a finished
+        # scan that found nothing, for an artifact that was never scanned and holds no bytes
+        # to scan. That is what sent the reporter looking for a retention bug.
+        text = _render(_instance(state='NOT_STORED'))
+        assert 'Status: Not stored.' in text
+        assert 'declined as a known-good binary when submitted' in text
+        assert 'resubmit the file to scan it' in text
+        assert 'Status: Assertion window closed' not in text
+
+    def test_not_stored_is_not_reported_as_known_good(self):
+        # The hash is no longer CURRENTLY known-good — that is the whole reason the state is
+        # NOT_STORED rather than KNOWN_GOOD — so neither the known-good status nor a feed
+        # attribution may appear, even when the server sent a feed list.
+        text = _render(_instance(state='NOT_STORED', known_good=FEEDS))
+        assert 'Status: Known good' not in text
+        assert 'flagged by' not in text
+        assert 'Status: Not stored.' in text
