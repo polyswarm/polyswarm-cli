@@ -62,6 +62,17 @@ The top-level command groups, what each is for, and the primary `polyswarm-api` 
 > likeliest origin of the original mistake — check which endpoint you are on
 > before copying a default between them.
 
+## Global `--refang/--no-refang` (IoC refanging)
+
+Threat-intel reports print indicators defanged (`hxxps[:]//evil[.]com`, `127[.]0[.]0[.]1`); pasted verbatim they never match a search, and a submitted one becomes a broken URL artifact. The root group's `--refang/--no-refang` (default on) is passed to the client as `Polyswarm(..., refang_iocs=…)`, and the SDK refangs the URL / domain / IP inputs of its own endpoint methods (`polyswarm_api.refang`; rules and gate in the SDK's downstream-contract spec). So `search url`, `search metadata -p/-u/-d` (never the free-form query), `search ioc ip|domain`, `search known`, `known add/update`, and `scan url` (including `-r/--url-file` lines) need no CLI code.
+
+Two places handle the value in the CLI and call `utils.refang_input(api, value)` — the SDK's `refang_ioc`, gated on `api.refang_iocs`:
+
+- **Validation before the SDK sees the value.** `scan url` and `sandbox url` check positional URLs with `is_url`; they validate the refanged form, so `hxxps[:]//evil[.]com` is accepted instead of rejected as invalid. With `--no-refang` the defanged URL is still rejected, exactly as before.
+- **CLI-owned requests.** `metadata analyze-ip` goes through `Polyswarm.submit_url`, which builds its request with `_single` rather than an SDK endpoint method, so it refangs explicitly.
+
+Hashes, ids and QR-code files are never touched. Tests: `tests/refang_test.py`, mocking at the SDK's `_paginate` / `_single` so the SDK's own refang is exercised (a mock on `search_url` itself would bypass it).
+
 ## Adding to the catalogue
 
 When you add or materially change a group, update its row (and add per-subcommand detail here if the behaviour is non-obvious). The `AGENTS.md` §"When adding a new command family" checklist covers the wiring + formatter + test steps.
