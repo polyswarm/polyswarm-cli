@@ -147,6 +147,31 @@ class RefangCliTest(TestCase):
         self.assertIn('is not valid', result.output)
         self.assertEqual(self.requests, [])
 
+    # ── QR-code submissions: the argument is an image path, never refanged ──
+    #
+    # The exemption lives in the SDK: a ``preprocessing={'type': 'qrcode'}``
+    # submission skips refanging entirely. ``qr[.]png`` would otherwise pass
+    # the gate (``png`` has the shape of a TLD) and be rewritten to
+    # ``qr.png``, a path that does not exist.
+
+    def test_scan_url_qrcode_file_path_is_not_refanged(self):
+        with self.cli.isolated_filesystem():
+            with open('qr[.]png', 'wb') as f:
+                f.write(b'not really a png')
+            result = self._run('scan', 'url', '--nowait', '--qrcode-file', 'qr[.]png')
+        self.assertNotIsInstance(result.exception, TypeError)
+        self.assertEqual(self._first_body()['artifact_name'], 'qr[.]png')
+
+    def test_sandbox_url_qrcode_file_submits_with_no_url(self):
+        # The qrcode branch hands the SDK ``url=None``; refanging must let it
+        # through untouched rather than fail on a non-string.
+        with self.cli.isolated_filesystem():
+            with open('qr[.]png', 'wb') as f:
+                f.write(b'not really a png')
+            result = self._run('sandbox', 'url', 'provider', '--qrcode-file', 'qr[.]png', '--vm_slug', 'vm')
+        self.assertNotIsInstance(result.exception, TypeError)
+        self.assertEqual(self._first_body()['artifact_name'], 'qr[.]png')
+
     # ── known-host catalogue writes ───────────────────────────────────────
 
     def test_known_add_refangs_the_host(self):
