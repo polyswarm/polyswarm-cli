@@ -4,7 +4,7 @@ import click
 
 
 from polyswarm.client import utils
-from polyswarm.utils import is_url
+from polyswarm.utils import is_url, refang_input
 
 logger = logging.getLogger(__name__)
 
@@ -117,17 +117,19 @@ def url(ctx, url, qrcode_file, provider, vm_slug, browser):
     """
     Submit an url to be sandboxed.
     """
+    api = ctx.obj['api']
+    output = ctx.obj['output']
     if qrcode_file:
         if url:
             raise click.BadArgumentUsage('--qrcode-file cannot be used with URL.')
         preprocessing = {'type': 'qrcode'}
     else:
         preprocessing = None
+        # Refang before validating (see ``refang_input``).
+        url = refang_input(api, url) if url else url
         if url and not is_url(url):
             raise click.BadArgumentUsage(f'URL "{url}" is not valid. '
                                          'Make sure the protocol "https://" or "http://" is set.')
-    api = ctx.obj['api']
-    output = ctx.obj['output']
     output.sandbox_task(api.sandbox_url(url,
                                         provider,
                                         vm_slug,

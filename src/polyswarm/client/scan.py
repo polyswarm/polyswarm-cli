@@ -5,7 +5,7 @@ import click
 from polyswarm_api import settings
 
 from polyswarm.client import utils
-from polyswarm.utils import is_url
+from polyswarm.utils import is_url, refang_input
 
 logger = logging.getLogger(__name__)
 
@@ -100,10 +100,13 @@ def url_(ctx, qrcode_file, url_file, timeout, nowait, url, scan_config, expirati
         urls = [qrcode_file]
         preprocessing = {'type': 'qrcode'}
     else:
-        urls = list(url)
+        # Refang before validating, so a defanged URL is judged in the form
+        # that will actually be submitted instead of being rejected.
+        positional = [refang_input(api, u) for u in url]
+        urls = list(positional)
         if url_file:
             urls.extend([u.strip() for u in url_file.readlines()])
-        for _url in url:
+        for _url in positional:
             if not is_url(_url):
                 raise click.BadArgumentUsage(f'URL "{_url}" is not valid. '
                                              'Make sure the protocol "https://" or "http://" is set.')

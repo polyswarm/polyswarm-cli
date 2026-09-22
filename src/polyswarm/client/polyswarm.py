@@ -204,11 +204,14 @@ class ExceptionHandlingGroup(click.Group):
               help='Community to use.', show_envvar=True)
 @click.option('--parallel', default=8, help='Number of threads to be used in parallel http requests.')
 @click.option('--verify/--no-verify', default=True, help='Verify TLS connections.')
+@click.option('--refang/--no-refang', default=True,
+              help='Refang defanged URL, domain and IP inputs (e.g. hxxps[:]//evil[.]com) '
+                   'before sending them. On by default; free-form metadata queries and hashes are never changed.')
 @click.version_option(polyswarm.__version__, '--version', prog_name='polyswarm-cli')
 @click.version_option(polyswarm_api.__version__, '--api-version', prog_name='polyswarm-api')
 @click.pass_context
 def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verbose, community, parallel, verify,
-                  prod, stage, local, prod_eu, stage_eu):
+                  refang, prod, stage, local, prod_eu, stage_eu):
     """
     This is a PolySwarm CLI client, which allows you to interact directly
     with the PolySwarm network to scan files, search hashes, and more.
@@ -229,7 +232,8 @@ def polyswarm_cli(ctx, api_key, api_uri, output_file, output_format, color, verb
                               {'prod': prod, 'stage': stage, 'local': local,
                                'prod_eu': prod_eu, 'stage_eu': stage_eu})
 
-    ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community, parallel=parallel, verify=verify)
+    ctx.obj['api'] = Polyswarm(api_key, uri=api_uri, community=community, parallel=parallel, verify=verify,
+                               refang_iocs=refang)
     ctx.obj['output'] = formatters[output_format](color=color, output=output_file)
 
 
