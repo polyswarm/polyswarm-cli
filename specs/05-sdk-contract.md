@@ -81,7 +81,9 @@ return self._single(
 )
 ```
 
-`_single` builds the request descriptor, executes it via `self.session`, and returns the parsed resource. Do **not** import `PolyswarmRequest` and call `.execute()`/`.result()` — those are not part of the supported surface.
+`_single` builds the request descriptor, executes it via `self.session`, and returns the parsed resource. Production code must **not** import `PolyswarmRequest` and call `.execute()`/`.result()` itself — those are not part of the supported surface.
+
+**Test-only dependency:** `tests/refang_test.py` (testing Style 4) patches `PolyswarmSession.execute(request)` and reads `request.params` / `request.input_json`. That is the SDK's session customization point, used here only as a test seam, never called from production code. An SDK rename of the seam or those fields breaks those tests, which is the intended signal.
 
 ## Coordinated changes (paired PRs)
 
