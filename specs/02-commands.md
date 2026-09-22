@@ -71,7 +71,7 @@ Two places handle the value in the CLI and call `utils.refang_input(api, value)`
 - **Validation before the SDK sees the value.** `scan url` and `sandbox url` check positional URLs with `is_url`; they validate the refanged form, so `hxxps[:]//evil[.]com` is accepted instead of rejected as invalid. With `--no-refang` the defanged URL is still rejected, exactly as before.
 - **CLI-owned requests.** `metadata analyze-ip` goes through `Polyswarm.submit_url`, which builds its request with `_single` rather than an SDK endpoint method, so it refangs explicitly.
 
-Hashes, ids and QR-code files are never touched. Tests: `tests/refang_test.py`, mocking at the SDK's `_paginate` / `_single` so the SDK's own refang is exercised (a mock on `search_url` itself would bypass it).
+Hashes, ids and QR-code files are never touched. Tests: `tests/refang_test.py`, mocking at the SDK's transport — `PolyswarmSession.execute`, the documented session customization point, which receives the fully built request descriptor — so the SDK's own refang is exercised. A mock on `search_url` and the other endpoint methods would bypass it, because the refang runs inside them.
 
 ## Adding to the catalogue
 

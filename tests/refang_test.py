@@ -6,10 +6,11 @@ a request (``polyswarm_api.refang``); these tests pin that every CLI entry point
 that takes such an input reaches the wire refanged, that ``--no-refang`` sends
 it verbatim, and that live input is unchanged.
 
-The SDK is mocked at its request-execution helpers (``_paginate`` /
-``_single``, part of the documented SDK surface) rather than at the endpoint
-methods: the refang happens INSIDE those methods, so a mock on
-``search_url`` itself would see the raw argument and prove nothing.
+The SDK is mocked at its transport: ``PolyswarmSession.execute``, the
+documented session customization point, receives the fully built
+``PolyswarmRequest`` descriptor, and the tests read its ``params`` /
+``input_json`` directly. Mocking any higher — at ``search_url`` and friends —
+would prove nothing, because the refang runs INSIDE those endpoint methods.
 """
 from unittest import TestCase, mock
 
@@ -24,7 +25,7 @@ _COMMUNITY = 'gamma'
 
 
 class _Stop(Exception):
-    """Stops a multi-step flow after its first request, which carries the IoC."""
+    """Stops the command at its first request, which is the one carrying the IoC."""
 
 
 def _params(request):
@@ -45,21 +46,14 @@ class RefangCliTest(TestCase):
         self.cli = CliRunner()
         self.requests = []
 
-        def fake_paginate(api, request, *args, **kwargs):
-            self.requests.append(api._to_request(request))
-            return iter(())
-
-        def fake_single(api, request, *args, **kwargs):
-            self.requests.append(api._to_request(request, *args, **kwargs))
+        def fake_execute(session, request):
+            self.requests.append(request)
             raise _Stop()
 
-        patches = [
-            mock.patch('polyswarm_api.api.PolyswarmAPI._paginate', autospec=True, side_effect=fake_paginate),
-            mock.patch('polyswarm_api.api.PolyswarmAPI._single', autospec=True, side_effect=fake_single),
-        ]
-        for p in patches:
-            p.start()
-            self.addCleanup(p.stop)
+        patcher = mock.patch('polyswarm_api.session.PolyswarmSession.execute',
+                             autospec=True, side_effect=fake_execute)
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def _run(self, *cmd, refang=True):
         flags = [] if refang else ['--no-refang']
@@ -146,6 +140,30 @@ class RefangCliTest(TestCase):
         result = self._run('sandbox', 'url', 'provider', 'hxxps[:]//evil[.]com/x', '--vm_slug', 'vm')
         self.assertNotIn('is not valid', result.output)
         self.assertEqual(self._first_body()['artifact_name'], 'https://evil.com/x')
+
+    def test_sandbox_url_no_refang_keeps_rejecting_a_defanged_url(self):
+        result = self._run('sandbox', 'url', 'provider', 'hxxps[:]//evil[.]com/x', '--vm_slug', 'vm',
+                           refang=False)
+        self.assertIn('is not valid', result.output)
+        self.assertEqual(self.requests, [])
+
+    # ── known-host catalogue writes ───────────────────────────────────────
+
+    def test_known_add_refangs_the_host(self):
+        self._run('known', 'add', 'domain', 'good[.]example', 'feed')
+        self.assertEqual(self._first_body()['host'], 'good.example')
+
+    def test_known_add_no_refang_sends_raw(self):
+        self._run('known', 'add', 'domain', 'good[.]example', 'feed', refang=False)
+        self.assertEqual(self._first_body()['host'], 'good[.]example')
+
+    def test_known_update_refangs_the_host(self):
+        self._run('known', 'update', '7', 'domain', 'good[.]example', 'feed', '-g', 'true')
+        self.assertEqual(self._first_body()['host'], 'good.example')
+
+    def test_known_update_no_refang_sends_raw(self):
+        self._run('known', 'update', '7', 'domain', 'good[.]example', 'feed', '-g', 'true', refang=False)
+        self.assertEqual(self._first_body()['host'], 'good[.]example')
 
     def test_metadata_analyze_ip_refangs(self):
         # CLI-owned request (it bypasses the SDK endpoint methods), so the CLI
