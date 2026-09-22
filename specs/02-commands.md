@@ -64,7 +64,7 @@ The top-level command groups, what each is for, and the primary `polyswarm-api` 
 
 ## Global `--refang/--no-refang` (IoC refanging)
 
-Threat-intel reports print indicators defanged (`hxxps[:]//evil[.]com`, `127[.]0[.]0[.]1`); pasted verbatim they never match a search, and a submitted one becomes a broken URL artifact. The root group's `--refang/--no-refang` (default on) is passed to the client as `Polyswarm(..., refang_iocs=…)`, and the SDK refangs the URL / domain / IP inputs of its own endpoint methods (`polyswarm_api.refang`; rules and gate in the SDK's downstream-contract spec). So `search url`, `search metadata -p/-u/-d` (never the free-form query), `search ioc ip|domain`, `search known`, `known add/update`, and `scan url` (including `-r/--url-file` lines) need no CLI code.
+Threat-intel reports print indicators defanged (`hxxps[:]//evil[.]com`, `127[.]0[.]0[.]1`); pasted verbatim they never match a search, and a submitted one becomes a broken URL artifact. The root group's `--refang/--no-refang` (default on) is passed to the client as `Polyswarm(..., refang_iocs=…)`. The SDK's own default is off (its refanging is opt-in, so the SDK release stays a minor bump); the CLI opts in unless `--no-refang` is given, and the SDK refangs the URL / domain / IP inputs of its own endpoint methods (`polyswarm_api.refang`; rules and gate in the SDK's downstream-contract spec). So `search url`, `search metadata -p/-u/-d` (never the free-form query), `search ioc ip|domain`, `search known`, `known add/update`, and `scan url` (including `-r/--url-file` lines) need no CLI code.
 
 Two places handle the value in the CLI and call `utils.refang_input(api, value)` — the SDK's `refang_ioc`, gated on `api.refang_iocs`:
 
