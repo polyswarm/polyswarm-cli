@@ -215,9 +215,11 @@ class RefangCliTest(TestCase):
 
     def test_behaviour_change_is_in_each_affected_commands_help(self):
         # A behaviour change is noted in the command's own --help, not only in
-        # the specs (specs/02-commands.md): scan url / sandbox url submit, and
-        # known add / update store, the live form of a defanged input.
-        for cmd in (['scan', 'url'], ['sandbox', 'url'], ['known', 'add'], ['known', 'update']):
+        # the specs (specs/02-commands.md): scan url / sandbox url / analyze-ip
+        # submit, known add / update store, and search known looks up, the live
+        # form of a defanged input.
+        for cmd in (['scan', 'url'], ['sandbox', 'url'], ['known', 'add'], ['known', 'update'],
+                    ['search', 'known'], ['metadata', 'analyze-ip']):
             result = self._run(*cmd, '--help')
             self.assertIn('--no-refang', result.output, cmd)
 

@@ -49,6 +49,10 @@ def analyze_ip(ctx, url):
     Creates an ArtifactInstance immediately (no S3 upload), triggers only
     the IP analyzer, and consumes no quota.
 
+    \b
+    A defanged URL or IP (127[.]0[.]0[.]1) is submitted in its live form;
+    pass --no-refang to the root command to submit it verbatim.
+
     URL is the URL or IP address to submit for analysis.
     """
     api = ctx.obj['api']
