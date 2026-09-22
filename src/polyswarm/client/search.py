@@ -124,6 +124,10 @@ def search_known(ctx, ip, domain):
 def add(ctx, type, host, source):
     """
     Add a known good ip or domain.
+
+    \b
+    A defanged host (evil[.]com) is stored in its live form (evil.com); pass
+    --no-refang to the root command to store it verbatim.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -141,6 +145,10 @@ def add(ctx, type, host, source):
 def update(ctx, id, type, host, source, good):
     """
     Update a known ip address or domain.
+
+    \b
+    A defanged host (evil[.]com) is stored in its live form (evil.com); pass
+    --no-refang to the root command to store it verbatim.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']

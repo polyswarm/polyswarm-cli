@@ -116,6 +116,11 @@ def file(ctx, path, provider, vm_slug, internet_disabled, is_zip, zip_password, 
 def url(ctx, url, qrcode_file, provider, vm_slug, browser):
     """
     Submit an url to be sandboxed.
+
+    \b
+    Defanged URLs (hxxps[:]//evil[.]com) are refanged before they are
+    validated and submitted, so the live form is what gets sandboxed; pass
+    --no-refang to the root command to send them verbatim.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -126,9 +131,11 @@ def url(ctx, url, qrcode_file, provider, vm_slug, browser):
     else:
         preprocessing = None
         # Refang before validating (see ``refang_input``).
+        # The error quotes what was typed, not the rewrite.
+        typed = url
         url = refang_input(api, url) if url else url
         if url and not is_url(url):
-            raise click.BadArgumentUsage(f'URL "{url}" is not valid. '
+            raise click.BadArgumentUsage(f'URL "{typed}" is not valid. '
                                          'Make sure the protocol "https://" or "http://" is set.')
     output.sandbox_task(api.sandbox_url(url,
                                         provider,

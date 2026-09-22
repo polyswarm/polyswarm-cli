@@ -202,6 +202,25 @@ class RefangCliTest(TestCase):
 
     # ── the flag itself ───────────────────────────────────────────────────
 
+    def test_invalid_defanged_url_error_quotes_what_was_typed(self):
+        # Validation runs on the refanged form, but the message must quote the
+        # input the user pasted, so the error is greppable against it.
+        # Refangs to ftp://files.example.org: a network IoC for the gate, but
+        # not a URL is_url accepts (http(s), a domain or an IP only).
+        typed = 'fxp://files[.]example[.]org'
+        for cmd in (['scan', 'url', '--nowait', typed],
+                    ['sandbox', 'url', 'provider', typed, '--vm_slug', 'vm']):
+            result = self._run(*cmd)
+            self.assertIn(f'URL "{typed}" is not valid', result.output)
+
+    def test_behaviour_change_is_in_each_affected_commands_help(self):
+        # A behaviour change is noted in the command's own --help, not only in
+        # the specs (specs/02-commands.md): scan url / sandbox url submit, and
+        # known add / update store, the live form of a defanged input.
+        for cmd in (['scan', 'url'], ['sandbox', 'url'], ['known', 'add'], ['known', 'update']):
+            result = self._run(*cmd, '--help')
+            self.assertIn('--no-refang', result.output, cmd)
+
     def test_no_refang_flag_is_documented_in_help(self):
         result = self.cli.invoke(client.polyswarm_cli, ['--help'])
         self.assertIn('--no-refang', result.output)

@@ -91,6 +91,11 @@ def file(ctx, recursive, timeout, nowait, path, scan_config, is_zip, zip_passwor
 def url_(ctx, qrcode_file, url_file, timeout, nowait, url, scan_config, expiration_window):
     """
     Scan files or directories via PolySwarm
+
+    \b
+    Defanged URLs (hxxps[:]//evil[.]com) are refanged before they are
+    validated and submitted, so the live form is what gets scanned; pass
+    --no-refang to the root command to send them verbatim.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -102,13 +107,14 @@ def url_(ctx, qrcode_file, url_file, timeout, nowait, url, scan_config, expirati
     else:
         # Refang before validating, so a defanged URL is judged in the form
         # that will actually be submitted instead of being rejected.
-        positional = [refang_input(api, u) for u in url]
-        urls = list(positional)
+        # The error quotes what was typed, not the rewrite.
+        positional = [(u, refang_input(api, u)) for u in url]
+        urls = [live for _, live in positional]
         if url_file:
             urls.extend([u.strip() for u in url_file.readlines()])
-        for _url in positional:
-            if not is_url(_url):
-                raise click.BadArgumentUsage(f'URL "{_url}" is not valid. '
+        for typed, live in positional:
+            if not is_url(live):
+                raise click.BadArgumentUsage(f'URL "{typed}" is not valid. '
                                              'Make sure the protocol "https://" or "http://" is set.')
         preprocessing = None
     for instance in api.scan_url(urls, timeout, nowait, scan_config, preprocessing, expiration_window):
