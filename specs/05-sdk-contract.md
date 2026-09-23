@@ -21,6 +21,7 @@ How the CLI depends on the `polyswarm-api` SDK: which parts of the SDK's public 
 | `from polyswarm_api import exceptions as api_exceptions` | Caught in `ExceptionHandlingGroup` and `utils.parallel_executor` (`NoResultsException`, `NotFoundException`, `FailedInstanceException`, `PolyswarmException`). Also `RequestException`, caught by `rules favorite` (`client/rules.py`) to read the machine-readable `FAVORITE_LIMIT` refusal off `exc.request.errors['code']` — and, when the envelope carries no counters, `exc.request.json['result']` as the server's own message. Note the spelling: the request object exposes the response envelope as `.json` and keeps only a private `._result`, so `exc.request.result` is not a thing — reading it yields `None` silently. The SDK does not raise a typed exception for that refusal by design: `.request.errors` is a plain dict the server's error envelope populates. It is pinned without a recording — the SDK's stubbed-transport suite fixes the wire shape, and both CLI branches are unit-pinned against a real `PolyswarmRequest` (not a hand-built mock, which fabricates whatever attribute it is asked for and so cannot detect a rename). It cannot be cassette-pinned: the server sends the counters on every `FAVORITE_LIMIT`, so the envelope the fallback exists for is one no recording can produce. The fallback is defensive against a server that omits them, and the unit test is what fixes the spelling it reads. |
 | `from polyswarm_api.core import parse_isoformat` | Date rendering in `formatters/text.py`. |
 | `import polyswarm_api` (`__version__`) | `--api-version`. |
+| `from polyswarm_api import refang` | `utils.refang_input` — the SDK's `refang_ioc`, for the values the CLI handles itself (pre-SDK URL validation, the CLI-owned `submit_url` request); gated on the client's public `refang_iocs` attribute, which `--refang/--no-refang` sets through the constructor. See [`02-commands.md`](./02-commands.md) §Global `--refang/--no-refang`. |
 
 All of the above are part of the SDK's documented public surface. If a future change needs something not on that list, that's a signal to add a method/export to the SDK rather than reach into internals.
 
@@ -80,7 +81,9 @@ return self._single(
 )
 ```
 
-`_single` builds the request descriptor, executes it via `self.session`, and returns the parsed resource. Do **not** import `PolyswarmRequest` and call `.execute()`/`.result()` — those are not part of the supported surface.
+`_single` builds the request descriptor, executes it via `self.session`, and returns the parsed resource. Production code must **not** import `PolyswarmRequest` and call `.execute()`/`.result()` itself — those are not part of the supported surface.
+
+**Test-only dependency:** `tests/refang_test.py` (testing Style 4) patches `PolyswarmSession.execute(request)` and reads `request.params` / `request.input_json`. That is the SDK's session customization point, used here only as a test seam, never called from production code. An SDK rename of the seam or those fields breaks those tests, which is the intended signal.
 
 ## Coordinated changes (paired PRs)
 
@@ -105,7 +108,7 @@ When a CLI feature needs an SDK surface that doesn't exist yet:
 
   **Read the declared version off the archive's own tree, and mind pre-release suffixes.** PEP 440 orders `4.2.0.dev1 < 4.2.0`, so a `develop` head carrying a dev suffix (the SDK's `pyproject.toml` has a `[tool.bumpversion.parts.dev]`) would *not* satisfy a `>=4.2.0` floor even though it looks like 4.2.0 — and the archive build would be silently replaced from PyPI. Check the version string in the SDK branch's `pyproject.toml` / `__init__.py`, not the last release tag. When the floor was last verified this way both were read from `origin/develop` as `4.2.0`, no suffix; the pin has since moved on (§Current floor is the one authoritative statement of its value), and every bump should be re-checked the same way.
 
-### Current floor — `polyswarm_api>=4.5.0`
+### Current floor — `polyswarm_api>=4.6.0`
 
 The floor is whatever `pyproject.toml` pins; this header follows it. It lives in ONE authoritative place for a reason — a copy here drifted behind the pin once already. The 4.2.0 rationale below still holds transitively; on 4.1.0 both behaviours fail *silently*, which is why the floor is a hard requirement rather than a preference:
 
@@ -128,8 +131,12 @@ formatters render — are what moved the floor to 4.4.0, together with
 §Matched strings on hunt results). `rules list --sort active-first` forwards
 `ruleset_list(sort='active_first')`, a keyword 4.5.0 adds, and that is what moved the
 floor to 4.5.0 (the `tests/formatter_hunt_fields_test.py` autospec assertion is the
-signature check: against a 4.4.0 SDK it fails at the mock, not at the server). Code and
-tests use them directly.
+signature check: against a 4.4.0 SDK it fails at the mock, not at the server). IoC
+refanging — the `polyswarm_api.refang` module, the `refang_iocs=` constructor keyword and
+the refang inside the SDK's endpoint methods, which `--refang/--no-refang` relies on — is
+4.6.0, and that is what moved the floor to 4.6.0 (on 4.5.0 the constructor rejects
+`refang_iocs=` and every command fails). This is a paired change: the SDK branch of the
+same name declares 4.6.0. Code and tests use them directly.
 
 **Raising the floor is the whole procedure** when this repo needs something new from
 the SDK:
