@@ -71,7 +71,7 @@ def metadata(ctx, query_string, include, exclude, ip, url, domain):
         output.metadata(metadata_result)
 
 
-@search.command('ioc', short_help='Retrieve IOCs by artifact hash.')
+@search.command('ioc', short_help='Retrieve IOCs by artifact hash, or artifacts by IOC.')
 @click.option('-h', '--hide-known-good', type=click.BOOL, is_flag=True)
 @click.option('--with-artifacts', is_flag=True,
               help='For ip|domain|ttp|imphash: return the matching artifacts\' metadata '

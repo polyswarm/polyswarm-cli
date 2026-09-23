@@ -135,13 +135,15 @@ class SearchIocWithArtifactsCliTest(TestCase):
         assert result.exit_code == 0, result.output
         assert json.loads(result.output) == _ioc_artifact_row()
 
-    def test_sha256_output_format_prints_the_hash(self):
-        row = resources.Metadata(_ioc_artifact_row())
-        with self._patched([row]):
-            result = self._run('search', 'ioc', 'domain', 'evil.test', '--with-artifacts',
-                               fmt='sha256')
-        assert result.exit_code == 0, result.output
-        assert result.output.strip() == _FOUND_HASH
+    def test_hash_output_formats_print_the_matching_hash(self):
+        row_json = _ioc_artifact_row()
+        for fmt in ('sha256', 'sha1', 'md5'):
+            with self.subTest(fmt=fmt):
+                with self._patched([resources.Metadata(row_json)]):
+                    result = self._run('search', 'ioc', 'domain', 'evil.test',
+                                       '--with-artifacts', fmt=fmt)
+                assert result.exit_code == 0, result.output
+                assert result.output.strip() == row_json['artifact'][fmt]
 
     def test_without_the_flag_the_call_is_unchanged(self):
         with self._patched([]) as search_by_ioc:
