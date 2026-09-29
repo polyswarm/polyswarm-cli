@@ -108,7 +108,7 @@ When a CLI feature needs an SDK surface that doesn't exist yet:
 
   **Read the declared version off the archive's own tree, and mind pre-release suffixes.** PEP 440 orders `4.2.0.dev1 < 4.2.0`, so a `develop` head carrying a dev suffix (the SDK's `pyproject.toml` has a `[tool.bumpversion.parts.dev]`) would *not* satisfy a `>=4.2.0` floor even though it looks like 4.2.0 — and the archive build would be silently replaced from PyPI. Check the version string in the SDK branch's `pyproject.toml` / `__init__.py`, not the last release tag. When the floor was last verified this way both were read from `origin/develop` as `4.2.0`, no suffix; the pin has since moved on (§Current floor is the one authoritative statement of its value), and every bump should be re-checked the same way.
 
-### Current floor — `polyswarm_api>=4.6.0`
+### Current floor — `polyswarm_api>=4.7.0`
 
 The floor is whatever `pyproject.toml` pins; this header follows it. It lives in ONE authoritative place for a reason — a copy here drifted behind the pin once already. The 4.2.0 rationale below still holds transitively; on 4.1.0 both behaviours fail *silently*, which is why the floor is a hard requirement rather than a preference:
 
@@ -135,8 +135,11 @@ signature check: against a 4.4.0 SDK it fails at the mock, not at the server). I
 refanging — the `polyswarm_api.refang` module, the `refang_iocs=` constructor keyword and
 the refang inside the SDK's endpoint methods, which `--refang/--no-refang` relies on — is
 4.6.0, and that is what moved the floor to 4.6.0 (on 4.5.0 the constructor rejects
-`refang_iocs=` and every command fails). This is a paired change: the SDK branch of the
-same name declares 4.6.0. Code and tests use them directly.
+`refang_iocs=` and every command fails). `search ioc … --with-artifacts` forwards
+`search_by_ioc(with_artifacts=True)`, a keyword 4.7.0 adds, and that is what moved the
+floor to 4.7.0 (the autospec assertions in `tests/search_test.py` are its signature
+check). Both are paired changes: the SDK branch of the same name declares the floor.
+Code and tests use them directly.
 
 **Raising the floor is the whole procedure** when this repo needs something new from
 the SDK:
