@@ -71,15 +71,19 @@ def metadata(ctx, query_string, include, exclude, ip, url, domain):
         output.metadata(metadata_result)
 
 
-@search.command('ioc', short_help='Retrieve IOCs by artifact hash.')
+@search.command('ioc', short_help='Retrieve IOCs by artifact hash, or artifacts by IOC.')
 @click.option('-h', '--hide-known-good', type=click.BOOL, is_flag=True)
+@click.option('--with-artifacts', is_flag=True,
+              help='For ip|domain|ttp|imphash: return the matching artifacts\' metadata '
+                   'instead of bare sha256s.')
 @click.argument('type',  required=True,
                 type=click.Choice(['ip', 'domain', 'ttp', 'imphash', 'sha256', 'sha1', 'md5'], case_sensitive=False))
 @click.argument('value', required=True)
 @click.pass_context
-def iocs_by_hash(ctx, type, value, hide_known_good):
+def iocs_by_hash(ctx, type, value, hide_known_good, with_artifacts):
     """
-    Provide an artifact hash to get the associated IOCs.
+    Provide an artifact hash to get the associated IOCs, or an ip, domain,
+    ttp or imphash to get the artifacts that reported it.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -93,7 +97,14 @@ def iocs_by_hash(ctx, type, value, hide_known_good):
     elif type == 'imphash':
         params['imphash'] = value
 
-    if params:
+    if with_artifacts and not params:
+        raise click.UsageError('--with-artifacts applies only to ip, domain, ttp and imphash searches.')
+
+    if with_artifacts:
+        # Rows are metadata-search documents, so they render like `search metadata`.
+        for result in api.search_by_ioc(with_artifacts=True, **params):
+            output.metadata(result)
+    elif params:
         for result in api.search_by_ioc(**params):
             output.ioc(result)
     else:
