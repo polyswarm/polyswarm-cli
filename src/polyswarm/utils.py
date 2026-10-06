@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from itertools import zip_longest
 
 from polyswarm_api import exceptions as api_exceptions
+from polyswarm_api import refang
 
 from polyswarm import exceptions
 
@@ -133,3 +134,16 @@ def is_url(value):
     return value.startswith("https://") or value.startswith("http://") \
         or is_domain(value) \
         or is_ip(value)
+
+
+def refang_input(api, value):
+    """Refang a URL / domain / IP argument the way the SDK does, if enabled.
+
+    The SDK refangs the inputs of its own endpoint methods, so most commands
+    need nothing. This is for the two places the CLI handles the value itself:
+    validation that runs before the SDK sees it (``scan url``, ``sandbox url``
+    would otherwise reject ``hxxps[:]//evil[.]com`` as invalid), and requests
+    the CLI builds without an SDK endpoint method (``Polyswarm.submit_url``).
+    Honours ``--no-refang`` through the client's ``refang_iocs``.
+    """
+    return refang.refang_ioc(value) if api.refang_iocs else value

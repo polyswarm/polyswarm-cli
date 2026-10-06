@@ -16,7 +16,7 @@ The components of the CLI and how a command flows from `argv` to rendered output
 
 `polyswarm_cli` is the top-level `click.Group`, constructed with `cls=ExceptionHandlingGroup`. It:
 
-1. Declares the **global options** — `--api-key` (env `POLYSWARM_API_KEY`), `--api-uri` (env `POLYSWARM_API_URI`), the **endpoint shortcuts** `--prod` / `--stage` / `--local` / `--prod-eu` / `--stage-eu`, `--output-file`, `--output-format`/`--fmt` (`text`|`json`|…), `--color/--no-color`, `--verbose`, `--community` (env `POLYSWARM_COMMUNITY`), `--parallel`, `--verify/--no-verify`, plus `--version` / `--api-version`.
+1. Declares the **global options** — `--api-key` (env `POLYSWARM_API_KEY`), `--api-uri` (env `POLYSWARM_API_URI`), the **endpoint shortcuts** `--prod` / `--stage` / `--local` / `--prod-eu` / `--stage-eu`, `--output-file`, `--output-format`/`--fmt` (`text`|`json`|…), `--color/--no-color`, `--verbose`, `--community` (env `POLYSWARM_COMMUNITY`), `--parallel`, `--verify/--no-verify`, `--refang/--no-refang` (default on; see [`02-commands.md`](./02-commands.md) §Global `--refang/--no-refang`), plus `--version` / `--api-version`.
 
    **Endpoint resolution** (`resolve_api_uri`): the shortcuts are convenience aliases for known public endpoints (`API_URI_SHORTCUTS`); `--prod` is an explicit alias for the production endpoint (identical to the no-flag default, offered for symmetry). Precedence is **explicit command-line flag → `POLYSWARM_API_URI` env var → production default** (`PROD_API_URI` = `https://api.polyswarm.network/v3`). Specifically: a shortcut and an explicit *command-line* `--api-uri` are mutually exclusive (conflict → `click.UsageError`, exit 2), as are two shortcuts; a shortcut **wins over** an ambient `POLYSWARM_API_URI` (the env var is consulted only when no shortcut is given) — so `--prod` forces production even when the env var points elsewhere; and a command-line `--api-uri` wins over the env var (click's own source precedence). The command-line-vs-env distinction uses `ctx.get_parameter_source('api_uri') == ParameterSource.COMMANDLINE`.
 2. **Seeds `ctx.obj`** — constructs a `Polyswarm(...)` client (the SDK wrapper) as `ctx.obj['api']` and the selected formatter as `ctx.obj['output']`.
@@ -82,13 +82,13 @@ The catalogue of groups and the SDK methods each wraps is in [`02-commands.md`](
 
 ## Support — `utils.py`, `exceptions.py`
 
-- **`utils.py`** — `parallelize`/`parallel_executor` (thread-pool fan-out with per-item exception aggregation: collects results, logs per-item no-results, raises an aggregate `NoResultsException`/`NotFoundException`/`InternalFailureException` at the end) and `parallel_executor_iterable_results` (the same, for SDK methods that return generators — it materialises each generator inside the worker so per-item exception handling still fires), plus `collect_files` and the detection helpers (`is_valid_id`, `is_ip`, `is_domain`, `is_url`).
+- **`utils.py`** — `parallelize`/`parallel_executor` (thread-pool fan-out with per-item exception aggregation: collects results, logs per-item no-results, raises an aggregate `NoResultsException`/`NotFoundException`/`InternalFailureException` at the end) and `parallel_executor_iterable_results` (the same, for SDK methods that return generators — it materialises each generator inside the worker so per-item exception handling still fires), plus `collect_files` and the detection helpers (`is_valid_id`, `is_ip`, `is_domain`, `is_url`), and `refang_input(api, value)` — not a detection helper but the refang one: it applies the SDK's `polyswarm_api.refang.refang_ioc` only when the client's `refang_iocs` is on, for the few places the CLI handles a value before (or instead of) an SDK endpoint method.
 - **`client/utils.py`** — `parse_hashes` and the click parameter validators (`validate_id`, `validate_hash(es)`, `validate_key`, …). Note the module is `client/utils.py`, not the top-level `utils.py` above — the two are distinct and easily confused.
 - **`exceptions.py`** — the CLI's own hierarchy, **distinct from the SDK's**: `PolyswarmException` → `NoResultsException`, `NotFoundException`, `InternalFailureException`, `PartialResultsException`. `ExceptionHandlingGroup` catches both these and the SDK's `api_exceptions.*`.
 
 ## Lifecycle of a command (end to end)
 
-1. `polyswarm_cli` parses global options, builds `Polyswarm(api_key, uri=…, community=…, parallel=…, verify=…)` and the formatter into `ctx.obj`.
+1. `polyswarm_cli` parses global options, builds `Polyswarm(api_key, uri=…, community=…, parallel=…, verify=…, refang_iocs=…)` and the formatter into `ctx.obj`.
 2. The subcommand reads `api`/`output` from `ctx.obj`, parses its own args, and calls one or more SDK methods (directly or via a wrapper fan-out method).
 3. Results are rendered through the formatter; collections are iterated.
 4. Any exception propagates to `ExceptionHandlingGroup.invoke`, which logs it and raises `Exit(<code>)`.

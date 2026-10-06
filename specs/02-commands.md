@@ -16,7 +16,7 @@ The top-level command groups, what each is for, and the primary `polyswarm-api` 
 
 | Group / commands (module) | Purpose | Primary SDK methods wrapped |
 |---|---|---|
-| `search` (`search.py`) | Search by hash / URL / metadata / IOC / scans; metadata mapping; `field-property` subgroup | `search_hashes`, `search_urls`, `search_by_metadata`, `search_by_ioc`, `iocs_by_hash`, `search_scans`, `metadata_mapping`, `metadata_field_properties_{write,get,delete,list}` |
+| `search` (`search.py`) | Search by hash / URL / metadata / IOC / scans; metadata mapping; `field-property` subgroup. `search ioc <type> <value>` with an ip, domain, ttp or imphash type is the reverse IOC search and prints one sha256 per matching artifact; `--with-artifacts` asks the server for each artifact's metadata-search row instead (SDK 4.7.0, guaranteed by the pin — see [05-sdk-contract.md](./05-sdk-contract.md) §Current floor) and renders it with the `metadata` formatter, the same block `search metadata` prints, so the `sha256` / `sha1` / `md5` output formats work on it. The flag is refused (exit 2, a click `UsageError`) on the sha256 / sha1 / md5 forward lookup, which has no artifact rows to return. It needs a server that supports the parameter: an older one ignores it and answers sha256 strings, which the SDK cannot parse as metadata rows | `search_hashes`, `search_urls`, `search_by_metadata`, `search_by_ioc`, `iocs_by_hash`, `search_scans`, `metadata_mapping`, `metadata_field_properties_{write,get,delete,list}` |
 | `known` + `search known` (`search.py`) | Manage / check known-good/-bad hosts | `add_known_good_host`, `add_known_bad_host`, `update_known_good_host`, `delete_known_good_host`, `check_known_hosts` |
 | `kgb` (`kgb.py`) | Known Good **Binaries** — internal-only CRUD on a sha256-keyed known-good record (`create` / `get` / `delete`, no update). Distinct from `known`, which manages known-good/-bad *hosts*. | `known_good_create`, `known_good_get`, `known_good_delete` |
 | `scan`, `lookup`, `wait`, `rescan`, `rescan-id` (`scan.py`) | Submit files/dirs and await results; look up / rescan existing scans | `scan_file`, `scan_lookup`, `wait_for`, `rescan`, `rescan_id` (wrapper methods over `submit`/`lookup`/`rescan`/`rescan_id`) |
@@ -61,6 +61,19 @@ The top-level command groups, what each is for, and the primary `polyswarm-api` 
 > `1440` is the same literal `live feed` is being corrected away from, and is the
 > likeliest origin of the original mistake — check which endpoint you are on
 > before copying a default between them.
+
+## Global `--refang/--no-refang` (IoC refanging)
+
+Threat-intel reports print indicators defanged (`hxxps[:]//evil[.]com`, `127[.]0[.]0[.]1`); pasted verbatim they never match a search, and a submitted one becomes a broken URL artifact. The root group's `--refang/--no-refang` (default on) is passed to the client as `Polyswarm(..., refang_iocs=…)`. The SDK's own default is off (its refanging is opt-in, so the SDK release stays a minor bump); the CLI opts in unless `--no-refang` is given, and the SDK refangs the URL / domain / IP inputs of its own endpoint methods (`polyswarm_api.refang`; rules and gate in the SDK's downstream-contract spec). So `search url`, `search metadata -p/-u/-d` (never the free-form query), `search ioc ip|domain`, `search known`, `known add/update`, and the `-r/--url-file` lines of `scan url` (which reach the wire only through the SDK's `submit`) need no CLI code. Positional `scan url` / `sandbox url` URLs are the exception below.
+
+**Write paths change too, not only searches.** With refanging on (the default), `known add` / `known update` store the live host (`known add domain evil[.]com feed` stores `evil.com`), so rows an earlier CLI wrote verbatim as `evil[.]com` are no longer reachable from `search known -d evil[.]com`, which now sends `evil.com`. And `scan url` / `sandbox url` given a defanged URL submit a different artifact (content, `artifact_name`, sha — and the quota it costs) than the same invocation did before. Pass `--no-refang` to keep the verbatim behaviour, e.g. to reach catalogue rows stored defanged.
+
+Two places handle the value in the CLI and call `utils.refang_input(api, value)` — the SDK's `refang_ioc`, gated on `api.refang_iocs`:
+
+- **Validation before the SDK sees the value.** `scan url` and `sandbox url` check positional URLs with `is_url`; they validate the refanged form, so `hxxps[:]//evil[.]com` is accepted instead of rejected as invalid. With `--no-refang` the defanged URL is still rejected, exactly as before.
+- **CLI-owned requests.** `metadata analyze-ip` goes through `Polyswarm.submit_url`, which builds its request with `_single` rather than an SDK endpoint method, so it refangs explicitly.
+
+Hashes and ids are never touched. Neither is a `--qrcode-file` path on `scan url` / `sandbox url`, and that exemption lives in the SDK, not in CLI code: a `preprocessing={'type': 'qrcode'}` submission skips refanging entirely (pinned here by the two qrcode tests in `tests/refang_test.py`). Tests: `tests/refang_test.py`, mocking at the SDK transport so the SDK's own refang is exercised — see [`04-testing.md`](./04-testing.md) §Style 4.
 
 ## Adding to the catalogue
 

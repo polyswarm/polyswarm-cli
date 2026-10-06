@@ -2,12 +2,12 @@
 
 ## Scope
 
-How the CLI is tested: the `CliRunner` harness, the two mocking styles (SDK-boundary mocks vs VCR cassettes), the formatter-unit style for pure rendering, the cassette layout and record workflow, and how to run the suite. Files: `tests/`, `tests/vcr/`, `src/conftest.py`, `pyproject.toml` (`[project.optional-dependencies].tests`, `[tool.pytest.ini_options]`).
+How the CLI is tested: the `CliRunner` harness, the mocking styles (SDK-boundary mocks, SDK-transport mocks, VCR cassettes), the formatter-unit style for pure rendering, the cassette layout and record workflow, and how to run the suite. Files: `tests/`, `tests/vcr/`, `src/conftest.py`, `pyproject.toml` (`[project.optional-dependencies].tests`, `[tool.pytest.ini_options]`).
 
 ## Invariants
 
 - **Anything that is command behaviour is driven through `click.testing.CliRunner`** — argument parsing, the SDK call, the wiring, the exit code: exercise the real command tree, never an internal function standing in for it. No live PolySwarm stack is required. The one sanctioned exception is pure rendering logic — see [Style 3](#style-3--formatter-unit-tests).
-- **Mock at the SDK boundary, or replay HTTP with VCR — never both for the same path.** A test either patches `polyswarm_api.api.PolyswarmAPI.<method>` (unit-style) or lets VCR replay recorded HTTP (end-to-end). The CLI's own code is exercised either way.
+- **Mock at exactly one point per path — the SDK method, the SDK transport, or VCR.** A test patches `polyswarm_api.api.PolyswarmAPI.<method>` (unit-style, the default), patches the SDK transport `PolyswarmSession.execute` when the behaviour under test runs *inside* the SDK method ([Style 4](#style-4--sdk-transport-mocks)), or lets VCR replay recorded HTTP (end-to-end). Never two of them for the same path. The CLI's own code is exercised either way.
 
 - **VCR is an efficiency cache, not a load-bearing requirement.** The suite must pass against a live e2e stack with VCR off. Don't hardcode `record_mode='none'`; if a test only works against its recorded cassette, that's a bug in the test. Note this is about a test's *logic*, not its fixtures: a `.click` snapshot pins server-generated ids and timestamps, so re-recording needs a stack in a particular state — see [Re-recording a cassette](#re-recording-a-cassette).
 
@@ -83,6 +83,14 @@ Point your environment at a live e2e stack, run the test, and commit the freshly
 For **rendering logic with no command-tree behaviour** — which labelled line a given field set produces — construct the formatter directly (`TextOutput(color=False)`) and call the resource method with an SDK resource built from a literal dict, asserting on the returned lines (`write=False`, no stream, no cassette). Example: `tests/known_good_field_test.py` renders `ArtifactInstance`s that differ only in `state` / `known_good` and asserts which Detections/Status line comes out. This is the right choice when the branch matrix is wide and every branch is a function of the resource's fields — a cassette per branch would mean recording a server state that only the formatter cares about.
 
 Use it **only** for that. Argument parsing, SDK calls, generator consumption, `ctx.obj` wiring and exit codes are command behaviour: a formatter unit test can't observe them, so those need Style 1 or Style 2. A command whose rendering is covered by Style 3 still needs at least one `CliRunner` test proving the command reaches the formatter at all.
+
+## Style 4 — SDK-transport mocks
+
+For behaviour that happens **inside** an SDK endpoint method, a Style 1 mock proves nothing: patching `PolyswarmAPI.search_url` replaces the very code under test. IoC refanging is the case today — the SDK refangs `search_url`'s argument (and the other URL / domain / IP inputs) before it builds the request, so the observable effect is the request that reaches the transport.
+
+Patch `polyswarm_api.session.PolyswarmSession.execute` — the SDK's documented session customization point — and assert on the `PolyswarmRequest` it receives: `request.params` (query string) and `request.input_json` (JSON body), read-only. Example: `tests/refang_test.py`.
+
+Use this style only when Style 1 would bypass the behaviour under test. Moving these tests "up" to endpoint-method mocks would keep them green while dropping their coverage. The dependency it adds (the `execute(request)` seam and those two request fields) is recorded in [`05-sdk-contract.md`](./05-sdk-contract.md); an SDK rename there breaks these tests, which is the intended signal.
 
 ## What to test for a new command
 

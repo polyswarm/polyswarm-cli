@@ -285,6 +285,8 @@ class Polyswarm(PolyswarmAPI):
         :return: An ArtifactInstance resource.
         """
         from polyswarm_api import resources
+        # A CLI-owned request: no SDK endpoint method refangs it for us.
+        url = utils.refang_input(self, url)
         logger.info('Submitting URL for IP analysis: %s', url)
         return self._single(
             {
