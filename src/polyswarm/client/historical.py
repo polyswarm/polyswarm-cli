@@ -26,7 +26,7 @@ def historical_view(ctx, hunt_id):
 @click.argument('rule_file', type=click.File('r'), required=False)
 @click.option('-r', '--rule-id', type=click.INT, help='If provided, create the historical hunt from the existing ruleset.')
 @click.option('-n', '--name', help='Explicitly set the ruleset name for this hunt.')
-@click.option('-w', '--window-days', type=click.Choice(['30', '60', '90', '180']),
+@click.option('--window-days', type=click.Choice(['30', '60', '90', '180']),
               help='How many days back the hunt reaches. Omit it for the platform maximum.')
 @click.pass_context
 @utils.any_provided('rule_file', 'rule_id')

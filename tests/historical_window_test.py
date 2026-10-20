@@ -44,7 +44,7 @@ class HistoricalStartWindowTest(TestCase):
     def test_each_window_is_forwarded_as_an_int(self):
         for days in (30, 60, 90, 180):
             with self.subTest(days=days):
-                result, historical_create = self._start(str(_RULE_FILE), '-w', str(days))
+                result, historical_create = self._start(str(_RULE_FILE), '--window-days', str(days))
                 assert result.exit_code == 0, result.output
                 historical_create.assert_called_once_with(
                     mock.ANY, _RULE_FILE.read_text(), ruleset_name='eicar.yara',
@@ -66,7 +66,7 @@ class HistoricalStartWindowTest(TestCase):
         historical_create.assert_called_once_with(mock.ANY, 5, window_days=90)
 
     def test_a_window_outside_the_choices_is_a_usage_error(self):
-        result, historical_create = self._start(str(_RULE_FILE), '-w', '45')
+        result, historical_create = self._start(str(_RULE_FILE), '--window-days', '45')
         assert result.exit_code == 2, result.output
         # Names the refused value and what is allowed; click's wording varies by version.
         for text in ('45', '30', '60', '90', '180'):
@@ -79,7 +79,7 @@ class HistoricalStartWindowTest(TestCase):
             catch_exceptions=False)
         assert result.exit_code == 0, result.output
         helptext = ' '.join(result.output.split())
-        assert '-w, --window-days [30|60|90|180]' in helptext, helptext
+        assert '--window-days [30|60|90|180]' in helptext, helptext
         assert 'platform maximum' in helptext, helptext
 
 
@@ -119,7 +119,7 @@ class HistoricalStartRendersTimeRangeTest(TestCase):
                 catch_exceptions=False)
 
     def test_the_started_hunt_shows_the_window_it_was_started_with(self):
-        result = self._start('-w', '60', side_effect=_echo_window)
+        result = self._start('--window-days', '60', side_effect=_echo_window)
         assert result.exit_code == 0, result.output
         assert 'Time Range: Last 60 days' in result.output
 
