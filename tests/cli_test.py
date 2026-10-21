@@ -208,6 +208,20 @@ class HistoricalHuntTest(BaseTestCase):
         self._assert_text_result(result, self.click_vcr(result))
 
     @vcr.use_cassette()
+    def test_historical_hunt_create_window_json(self):
+        result = self._run_cli([
+            '--output-format', 'json', 'historical', 'start', self.resource('eicar.yara'),
+            '--window-days', '30'])
+        self._assert_json_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
+    def test_historical_hunt_create_window_text(self):
+        result = self._run_cli([
+            '--output-format', 'text', 'historical', 'start', self.resource('eicar.yara'),
+            '--window-days', '30'])
+        self._assert_text_result(result, self.click_vcr(result))
+
+    @vcr.use_cassette()
     def test_historical_hunt_delete_json(self):
         result = self._run_cli([
             '--output-format', 'json', 'historical', 'delete', '32808041501095355'])
