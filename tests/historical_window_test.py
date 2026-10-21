@@ -80,7 +80,7 @@ class HistoricalStartWindowTest(TestCase):
         assert result.exit_code == 0, result.output
         helptext = ' '.join(result.output.split())
         assert '--window-days [30|60|90|180]' in helptext, helptext
-        assert 'platform maximum' in helptext, helptext
+        assert 'Defaults to max' in helptext, helptext
 
 
 class HuntTimeRangeFormatterTest(TestCase):
