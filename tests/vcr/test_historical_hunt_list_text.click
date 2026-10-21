@@ -4,6 +4,8 @@ result: 'Hunt Id: 67346782704448208
 
   Created at: 2026-08-25 18:27:00.531607+00:00
 
+  Time Range: Platform maximum
+
   Ruleset Name: eicar.yara
 
 
@@ -13,6 +15,8 @@ result: 'Hunt Id: 67346782704448208
 
   Created at: 2026-08-25 18:27:00.017968+00:00
 
+  Time Range: Platform maximum
+
   Ruleset Name: eicar.yara
 
 
@@ -21,6 +25,8 @@ result: 'Hunt Id: 67346782704448208
   Status: DELETING
 
   Created at: 2026-08-25 18:25:52.550248+00:00
+
+  Time Range: Platform maximum
 
 
   '

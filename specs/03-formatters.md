@@ -173,6 +173,14 @@ the attributes directly:
 - `source_rule_changed` is tri-state: `None` means UNKNOWN, not "unchanged",
   and prints nothing; the label names its reference point — "changed since
   this hunt froze it" — so it cannot read as "edited recently".
+- `window_days` renders as `Time Range:` right after `Created at:`, on every
+  historical hunt (`output.hunt` is only ever called for those): `Last N days`
+  for an int, `Platform maximum` for `None`. Unlike the fields above, `None` is
+  an answer rather than an absence — a hunt created without a window reaches
+  the platform maximum — so it prints a line instead of omitting one, and the
+  label names no day count because the server owns that maximum. The web UI
+  uses the same two labels. `JSONOutput` needs no change: it dumps the
+  resource's `.json`, which already carries the raw key (an int or `null`).
 
 ## Matched strings on hunt results
 
