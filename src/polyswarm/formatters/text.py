@@ -230,6 +230,11 @@ class TextOutput(base.BaseOutput):
         if result.active is not None:
             output.append(self._white(f'Active: {result.active}'))
         output.append(self._white(f'Created at: {result.created}'))
+        # None: no window was requested, so the hunt reaches the platform maximum.
+        if result.window_days is None:
+            output.append(self._white('Time Range: Platform maximum'))
+        else:
+            output.append(self._white(f'Time Range: Last {result.window_days} days'))
         if result.summary:
             output.append(self._white(f'Total count: {result.summary["count"]}'))
             self._open_group()

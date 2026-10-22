@@ -26,9 +26,11 @@ def historical_view(ctx, hunt_id):
 @click.argument('rule_file', type=click.File('r'), required=False)
 @click.option('-r', '--rule-id', type=click.INT, help='If provided, create the historical hunt from the existing ruleset.')
 @click.option('-n', '--name', help='Explicitly set the ruleset name for this hunt.')
+@click.option('--window-days', type=click.Choice(['30', '60', '90', '180']),
+              help='How many days back the hunt reaches. Defaults to max')
 @click.pass_context
 @utils.any_provided('rule_file', 'rule_id')
-def historical_start(ctx, rule_file, rule_id, name):
+def historical_start(ctx, rule_file, rule_id, name, window_days):
     api = ctx.obj['api']
     output = ctx.obj['output']
     params = {}
@@ -39,6 +41,8 @@ def historical_start(ctx, rule_file, rule_id, name):
         rule = rule_id
     if name:
         params['ruleset_name'] = name
+    if window_days is not None:
+        params['window_days'] = int(window_days)
     result = api.historical_create(rule, **params)
     output.hunt(result)
 
