@@ -1,5 +1,8 @@
 import logging
 
+from polyswarm_api import exceptions as api_exceptions
+
+from polyswarm import exceptions
 from polyswarm.client import utils
 
 import click
@@ -84,6 +87,10 @@ def iocs_by_hash(ctx, type, value, hide_known_good, with_artifacts):
     """
     Provide an artifact hash to get the associated IOCs, or an ip, domain,
     ttp or imphash to get the artifacts that reported it.
+
+    \b
+    A sha1 or md5 that matches several artifacts is refused; the error lists
+    their sha256s, so re-run with one of them.
     """
     api = ctx.obj['api']
     output = ctx.obj['output']
@@ -108,8 +115,23 @@ def iocs_by_hash(ctx, type, value, hide_known_good, with_artifacts):
         for result in api.search_by_ioc(**params):
             output.ioc(result)
     else:
-        for result in api.iocs_by_hash(type, value, hide_known_good=hide_known_good):
-            output.ioc(result)
+        try:
+            for result in api.iocs_by_hash(type, value, hide_known_good=hide_known_good):
+                output.ioc(result)
+        except api_exceptions.RequestException as exc:
+            errors = getattr(exc.request, 'errors', None) or {}
+            if isinstance(errors, dict) and errors.get('code') == 'AMBIGUOUS_HASH':
+                raise exceptions.PolyswarmException(_ambiguous_hash_message(type, errors)) from exc
+            raise
+
+
+def _ambiguous_hash_message(hash_type, errors):
+    sha256s = [s for s in errors.get('sha256s') or [] if isinstance(s, str)]
+    more = ' (and more)' if errors.get('truncated') else ''
+    listing = ''.join(f'\n  {sha256}' for sha256 in sha256s)
+    # PolyswarmException exits 2; exit 1 is reserved for no-results/not-found.
+    return (f'The {hash_type} matches several artifacts{more}; '
+            f'run `polyswarm search ioc sha256 <sha256>` with one of:{listing}')
 
 
 @search.command('known', short_help='Check if host is known.')
