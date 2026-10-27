@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 
 from click.testing import CliRunner
 from polyswarm_api import exceptions as api_exceptions
-from polyswarm_api import resources
+from polyswarm_api import core, resources
 
 from polyswarm.client import polyswarm as client
 
@@ -183,7 +183,8 @@ class SearchIocByHashCliTest(TestCase):
                                                      hide_known_good=False)
 
     def _refused(self, errors):
-        request = mock.Mock()
+        # A real PolyswarmRequest, not a Mock, so a renamed attribute fails here (specs/05).
+        request = core.PolyswarmRequest(api=None, method='GET', url='http://x')
         request.errors = errors
         refusal = api_exceptions.RequestException(request)
 
@@ -208,3 +209,9 @@ class SearchIocByHashCliTest(TestCase):
         result = self._refused({'code': 'SOMETHING_ELSE'})
         assert result.exit_code == 2, result.output
         assert 'matches several artifacts' not in result.output
+
+    def test_an_ambiguous_md5_without_candidates_still_reads_cleanly(self):
+        result = self._refused({'code': 'AMBIGUOUS_HASH', 'hash_type': 'md5'})
+        assert result.exit_code == 2, result.output
+        assert 'The md5 matches several artifacts; query by sha256 instead.' in result.output
+        assert 'with one of:' not in result.output

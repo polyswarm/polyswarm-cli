@@ -128,8 +128,11 @@ def iocs_by_hash(ctx, type, value, hide_known_good, with_artifacts):
 def _ambiguous_hash_message(hash_type, errors):
     sha256s = [s for s in errors.get('sha256s') or [] if isinstance(s, str)]
     more = ' (and more)' if errors.get('truncated') else ''
-    listing = ''.join(f'\n  {sha256}' for sha256 in sha256s)
     # PolyswarmException exits 2; exit 1 is reserved for no-results/not-found.
+    if not sha256s:
+        return (f'The {hash_type} matches several artifacts{more}; '
+                f'query by sha256 instead.')
+    listing = ''.join(f'\n  {sha256}' for sha256 in sha256s)
     return (f'The {hash_type} matches several artifacts{more}; '
             f'run `polyswarm search ioc sha256 <sha256>` with one of:{listing}')
 
