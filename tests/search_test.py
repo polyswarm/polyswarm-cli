@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 
 from click.testing import CliRunner
 from polyswarm_api import exceptions as api_exceptions
-from polyswarm_api import resources
+from polyswarm_api import core, resources
 
 from polyswarm.client import polyswarm as client
 
@@ -162,3 +162,56 @@ class SearchIocWithArtifactsCliTest(TestCase):
         assert '--with-artifacts applies only to ip, domain, ttp and imphash' in result.output
         iocs_by_hash.assert_not_called()
         search_by_ioc.assert_not_called()
+
+
+class SearchIocByHashCliTest(TestCase):
+    """``search ioc <sha256|sha1|md5> <value>``, the forward lookup."""
+
+    def _run(self, *cmd):
+        return CliRunner().invoke(
+            client.polyswarm_cli,
+            ['-a', _API_KEY, '-u', _API_URL, '-c', _COMMUNITY] + list(cmd))
+
+    def test_sha1_and_md5_are_forwarded_with_their_type(self):
+        for hash_type, value in (('sha1', 'a' * 40), ('md5', 'a' * 32)):
+            with self.subTest(hash_type=hash_type):
+                with mock.patch('polyswarm_api.api.PolyswarmAPI.iocs_by_hash', autospec=True,
+                                return_value=iter([])) as iocs_by_hash:
+                    result = self._run('search', 'ioc', hash_type, value)
+                assert result.exit_code == 0, result.output
+                iocs_by_hash.assert_called_once_with(mock.ANY, hash_type, value,
+                                                     hide_known_good=False)
+
+    def _refused(self, errors):
+        # A real PolyswarmRequest, not a Mock, so a renamed attribute fails here (specs/05).
+        request = core.PolyswarmRequest(api=None, method='GET', url='http://x')
+        request.errors = errors
+        refusal = api_exceptions.RequestException(request)
+
+        def raising(*_args, **_kwargs):
+            raise refusal
+            yield  # pragma: no cover — a lazy generator, as the SDK's
+
+        with mock.patch('polyswarm_api.api.PolyswarmAPI.iocs_by_hash', autospec=True,
+                        side_effect=raising):
+            return self._run('search', 'ioc', 'md5', 'c' * 32)
+
+    def test_an_ambiguous_md5_lists_the_candidates_at_exit_2(self):
+        result = self._refused({'code': 'AMBIGUOUS_HASH', 'hash_type': 'md5',
+                                'sha256s': ['d' * 64, 'e' * 64], 'truncated': True})
+        assert result.exit_code == 2, result.output
+        assert 'The md5 matches several artifacts (and more)' in result.output
+        assert 'd' * 64 in result.output and 'e' * 64 in result.output
+        assert 'polyswarm search ioc sha256' in result.output
+        assert 'Traceback' not in result.output
+
+    def test_any_other_refusal_is_not_relabelled(self):
+        result = self._refused({'code': 'SOMETHING_ELSE'})
+        assert result.exit_code == 2, result.output
+        assert 'matches several artifacts' not in result.output
+
+    def test_an_ambiguous_md5_without_candidates_still_reads_cleanly(self):
+        result = self._refused({'code': 'AMBIGUOUS_HASH', 'hash_type': 'md5'})
+        assert result.exit_code == 2, result.output
+        assert 'The md5 matches several artifacts; query by sha256 instead.' in result.output
+        assert 'with one of:' not in result.output
