@@ -108,6 +108,10 @@ When a CLI feature needs an SDK surface that doesn't exist yet:
 
   **Read the declared version off the archive's own tree, and mind pre-release suffixes.** PEP 440 orders `4.2.0.dev1 < 4.2.0`, so a `develop` head carrying a dev suffix (the SDK's `pyproject.toml` has a `[tool.bumpversion.parts.dev]`) would *not* satisfy a `>=4.2.0` floor even though it looks like 4.2.0 — and the archive build would be silently replaced from PyPI. Check the version string in the SDK branch's `pyproject.toml` / `__init__.py`, not the last release tag. When the floor was last verified this way both were read from `origin/develop` as `4.2.0`, no suffix; the pin has since moved on (§Current floor is the one authoritative statement of its value), and every bump should be re-checked the same way.
 
+### Assertion display name
+
+`formatters/text.py` reads `Assertion.engine_display_name` (SDK; falls back to `engine_name` for servers that omit `engine.display_name`). The attribute is newer than the current floor: the floor must be raised to the SDK release that ships it before this CLI is released. The SDK's version bump belongs to its own release step, so the pin is left as is until that version is declared.
+
 ### Current floor — `polyswarm_api>=4.8.0`
 
 The floor is whatever `pyproject.toml` pins; this header follows it. It lives in ONE authoritative place for a reason — a copy here drifted behind the pin once already. The 4.2.0 rationale below still holds transitively; on 4.1.0 both behaviours fail *silently*, which is why the floor is a hard requirement rather than a preference:
