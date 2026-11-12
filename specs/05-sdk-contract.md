@@ -110,9 +110,9 @@ When a CLI feature needs an SDK surface that doesn't exist yet:
 
 ### Assertion display name
 
-`formatters/text.py` reads `Assertion.engine_display_name` (SDK; falls back to `engine_name` for servers that omit `engine.display_name`). The attribute is newer than the current floor: the floor must be raised to the SDK release that ships it before this CLI is released. The SDK's version bump belongs to its own release step, so the pin is left as is until that version is declared.
+`formatters/text.py` reads `Assertion.engine_display_name` (SDK; falls back to `engine_name` for servers that omit `engine.display_name`). The attribute ships in SDK 4.9.0, which is the current floor (§Current floor).
 
-### Current floor — `polyswarm_api>=4.8.0`
+### Current floor — `polyswarm_api>=4.9.0`
 
 The floor is whatever `pyproject.toml` pins; this header follows it. It lives in ONE authoritative place for a reason — a copy here drifted behind the pin once already. The 4.2.0 rationale below still holds transitively; on 4.1.0 both behaviours fail *silently*, which is why the floor is a hard requirement rather than a preference:
 
@@ -146,7 +146,9 @@ check). `historical start --window-days` forwards `historical_create(window_days
 keyword 4.8.0 adds together with the `HistoricalHunt.window_days` attribute the text
 formatter reads, and that is what moved the floor to 4.8.0 (the autospec assertions in
 `tests/historical_window_test.py` are its signature check, and on 4.7.0 every hunt render
-would raise on the missing attribute). Each is a paired change: the SDK branch of the
+would raise on the missing attribute). `Assertion.engine_display_name`, which the text
+formatter prints, is 4.9.0, and that is what moved the floor to 4.9.0 (on 4.8.0 every
+assertion render would raise on the missing attribute). Each is a paired change: the SDK branch of the
 same name declares the floor. Code and tests use them directly.
 
 **Raising the floor is the whole procedure** when this repo needs something new from
