@@ -39,6 +39,10 @@ Formatters don't set exit codes — that's `ExceptionHandlingGroup`'s job, by ex
 3. Match the style of the existing labelled blocks for text output.
 4. Call it from the command (`output.<resource>(...)`), iterating if the SDK method returns a generator.
 
+## Engine names in assertion lines
+
+`TextOutput.artifact_instance` labels each assertion line (`Clean`, `Engine chose not to respond...`, `Malicious`) with `assertion.engine_display_name`, the engine's human-facing name. `JSONOutput` is untouched: it emits the raw payload, so `engine.name` (and `author_name`) stay the stable identifiers scripts key on, next to `engine.display_name` when the server sends it. The SDK falls back to the plain name when the server predates `display_name`, so the text output degrades to what it showed before. Needs the SDK attribute: see [`05-sdk-contract.md`](./05-sdk-contract.md) § Assertion display name.
+
 ## Known-good artifact instances
 
 `TextOutput.artifact_instance` special-cases a known-good binary, rendering a

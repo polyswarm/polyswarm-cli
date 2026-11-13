@@ -181,14 +181,14 @@ class TextOutput(base.BaseOutput):
         self._open_group()
         for assertion in instance.assertions:
             if assertion.verdict is False:
-                output.append(f'{self._green(assertion.engine_name)}: {"Clean"}')
+                output.append(f'{self._green(assertion.engine_display_name)}: {"Clean"}')
             elif assertion.verdict is None or assertion.mask is False:
-                output.append(f"{self._blue(assertion.engine_name)}: Engine chose not to respond to this bounty.")
+                output.append(f"{self._blue(assertion.engine_display_name)}: Engine chose not to respond to this bounty.")
             else:
                 value = 'Malicious'
                 if assertion.metadata:
                     value += f', metadata: {json.dumps(assertion.metadata, sort_keys=True)}'
-                output.append(f'{self._red(assertion.engine_name)}: {value}')
+                output.append(f'{self._red(assertion.engine_display_name)}: {value}')
         self._close_group()
         output.append(self._blue(f'Scan id: {instance.id}'))
         output.extend(self.artifact(instance, write=False))
