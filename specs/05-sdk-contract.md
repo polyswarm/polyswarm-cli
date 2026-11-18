@@ -18,7 +18,7 @@ How the CLI depends on the `polyswarm-api` SDK: which parts of the SDK's public 
 | `from polyswarm_api.api import PolyswarmAPI` | Base class of the `Polyswarm` wrapper (`src/polyswarm/polyswarm.py`). |
 | `from polyswarm_api import settings` | Defaults: `DEFAULT_SCAN_TIMEOUT`, `DEFAULT_REPORT_TIMEOUT`, etc. |
 | `from polyswarm_api import resources` | Result-parser classes for power-user calls (e.g. `resources.ArtifactInstance`); resource attributes the formatters read. |
-| `from polyswarm_api import exceptions as api_exceptions` | Caught in `ExceptionHandlingGroup` and `utils.parallel_executor` (`NoResultsException`, `NotFoundException`, `FailedInstanceException`, `PolyswarmException`). Also `RequestException`, caught by `rules favorite` (`client/rules.py`) to read the machine-readable `FAVORITE_LIMIT` refusal off `exc.request.errors['code']` — and, when the envelope carries no counters, `exc.request.json['result']` as the server's own message. Note the spelling: the request object exposes the response envelope as `.json` and keeps only a private `._result`, so `exc.request.result` is not a thing — reading it yields `None` silently. The SDK does not raise a typed exception for that refusal by design: `.request.errors` is a plain dict the server's error envelope populates. It is pinned without a recording — the SDK's stubbed-transport suite fixes the wire shape, and both CLI branches are unit-pinned against a real `PolyswarmRequest` (not a hand-built mock, which fabricates whatever attribute it is asked for and so cannot detect a rename). It cannot be cassette-pinned: the server sends the counters on every `FAVORITE_LIMIT`, so the envelope the fallback exists for is one no recording can produce. The fallback is defensive against a server that omits them, and the unit test is what fixes the spelling it reads. |
+| `from polyswarm_api import exceptions as api_exceptions` | Caught in `ExceptionHandlingGroup` and `utils.parallel_executor` (`NoResultsException`, `NotFoundException`, `FailedInstanceException`, `PolyswarmException`). Also `RequestException`, caught by `rules favorite` (`client/rules.py`) to read the machine-readable `FAVORITE_LIMIT` refusal off `exc.request.errors['code']` — and, when the envelope carries no counters, `exc.request.json['result']` as the server's own message. `search ioc` (`client/search.py`) catches it the same way for the `AMBIGUOUS_HASH` refusal of the forward sha1/md5 lookup, reading `code`, `sha256s` and `truncated` off `exc.request.errors` (an empty or missing `sha256s` falls back to a message without the list). Note the spelling: the request object exposes the response envelope as `.json` and keeps only a private `._result`, so `exc.request.result` is not a thing — reading it yields `None` silently. The SDK does not raise a typed exception for that refusal by design: `.request.errors` is a plain dict the server's error envelope populates. It is pinned without a recording — the SDK's stubbed-transport suite fixes the wire shape, and both `rules favorite` branches and the `search ioc` branch are unit-pinned against a real `PolyswarmRequest` (not a hand-built mock, which fabricates whatever attribute it is asked for and so cannot detect a rename). It cannot be cassette-pinned: the server sends the counters on every `FAVORITE_LIMIT`, so the envelope the fallback exists for is one no recording can produce. The fallback is defensive against a server that omits them, and the unit test is what fixes the spelling it reads. |
 | `from polyswarm_api.core import parse_isoformat` | Date rendering in `formatters/text.py`. |
 | `import polyswarm_api` (`__version__`) | `--api-version`. |
 | `from polyswarm_api import refang` | `utils.refang_input` — the SDK's `refang_ioc`, for the values the CLI handles itself (pre-SDK URL validation, the CLI-owned `submit_url` request); gated on the client's public `refang_iocs` attribute, which `--refang/--no-refang` sets through the constructor. See [`02-commands.md`](./02-commands.md) §Global `--refang/--no-refang`. |
@@ -108,7 +108,11 @@ When a CLI feature needs an SDK surface that doesn't exist yet:
 
   **Read the declared version off the archive's own tree, and mind pre-release suffixes.** PEP 440 orders `4.2.0.dev1 < 4.2.0`, so a `develop` head carrying a dev suffix (the SDK's `pyproject.toml` has a `[tool.bumpversion.parts.dev]`) would *not* satisfy a `>=4.2.0` floor even though it looks like 4.2.0 — and the archive build would be silently replaced from PyPI. Check the version string in the SDK branch's `pyproject.toml` / `__init__.py`, not the last release tag. When the floor was last verified this way both were read from `origin/develop` as `4.2.0`, no suffix; the pin has since moved on (§Current floor is the one authoritative statement of its value), and every bump should be re-checked the same way.
 
-### Current floor — `polyswarm_api>=4.8.0`
+### Assertion display name
+
+`formatters/text.py` reads `Assertion.engine_display_name` (SDK; falls back to `engine_name` for servers that omit `engine.display_name`). The attribute ships in SDK 4.9.0, which is the current floor (§Current floor).
+
+### Current floor — `polyswarm_api>=4.9.0`
 
 The floor is whatever `pyproject.toml` pins; this header follows it. It lives in ONE authoritative place for a reason — a copy here drifted behind the pin once already. The 4.2.0 rationale below still holds transitively; on 4.1.0 both behaviours fail *silently*, which is why the floor is a hard requirement rather than a preference:
 
@@ -142,7 +146,9 @@ check). `historical start --window-days` forwards `historical_create(window_days
 keyword 4.8.0 adds together with the `HistoricalHunt.window_days` attribute the text
 formatter reads, and that is what moved the floor to 4.8.0 (the autospec assertions in
 `tests/historical_window_test.py` are its signature check, and on 4.7.0 every hunt render
-would raise on the missing attribute). Each is a paired change: the SDK branch of the
+would raise on the missing attribute). `Assertion.engine_display_name`, which the text
+formatter prints, is 4.9.0, and that is what moved the floor to 4.9.0 (on 4.8.0 every
+assertion render would raise on the missing attribute). Each is a paired change: the SDK branch of the
 same name declares the floor. Code and tests use them directly.
 
 **Raising the floor is the whole procedure** when this repo needs something new from
