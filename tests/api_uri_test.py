@@ -50,7 +50,7 @@ class ResolveApiUriTest(TestCase):
             'prod': 'https://api.polyswarm.network/v3',
             'stage': 'https://api.stage-blue.polyswarm.network/v3',
             'local': 'http://localhost:9696/v3',
-            'prod_eu': 'https://api.prod-eu-v3.polyswarm.network/v3',
+            'prod_eu': 'https://api.eu.polyswarm.network/v3',
             'stage_eu': 'https://api.stage-eu-blue.polyswarm.network/v3',
         }
         # guard against the constant drifting from the verified ingress hosts
@@ -130,7 +130,7 @@ class ApiUriCliTest(TestCase):
         assert self._resolved_base('--local') == 'http://localhost:9696/v3'
 
     def test_prod_eu_shortcut(self):
-        assert self._resolved_base('--prod-eu') == 'https://api.prod-eu-v3.polyswarm.network/v3'
+        assert self._resolved_base('--prod-eu') == 'https://api.eu.polyswarm.network/v3'
 
     def test_stage_eu_shortcut(self):
         assert self._resolved_base('--stage-eu') == 'https://api.stage-eu-blue.polyswarm.network/v3'
