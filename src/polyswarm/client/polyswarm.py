@@ -50,7 +50,7 @@ API_URI_SHORTCUTS = {
     'prod': PROD_API_URI,
     'stage': 'https://api.stage-blue.polyswarm.network/v3',
     'local': 'http://localhost:9696/v3',
-    'prod_eu': 'https://api.prod-eu-v3.polyswarm.network/v3',
+    'prod_eu': 'https://api.eu.polyswarm.network/v3',
     'stage_eu': 'https://api.stage-eu-blue.polyswarm.network/v3',
 }
 
@@ -192,7 +192,7 @@ class ExceptionHandlingGroup(click.Group):
 @click.option('--local', is_flag=True, default=False,
               help='Target a local API (http://localhost:9696/v3).')
 @click.option('--prod-eu', 'prod_eu', is_flag=True, default=False,
-              help='Target the EU production API (https://api.prod-eu-v3.polyswarm.network/v3).')
+              help='Target the EU production API (https://api.eu.polyswarm.network/v3).')
 @click.option('--stage-eu', 'stage_eu', is_flag=True, default=False,
               help='Target the EU staging API (https://api.stage-eu-blue.polyswarm.network/v3).')
 @click.option('-o', '--output-file', type=click.File('w', encoding='utf8'), help='Path to output file.')
