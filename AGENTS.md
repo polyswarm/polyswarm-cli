@@ -100,11 +100,11 @@ Details in [`specs/04-testing.md`](./specs/04-testing.md). The shape:
 - Small, scoped commits — each one should be independently reviewable.
 - **Don't reference ticket IDs or internal project codes in commit messages, PR titles, or PR descriptions.** This repo is public; published artefacts shouldn't leak internal references. Track tickets in the internal tracker, not the git history.
 - **Branch names are the exception, and the merge is where they're contained.** A change spanning this repo and the SDK must use the *identical* branch name in both, because CI resolves the companion SDK by `$CI_COMMIT_BRANCH` (`.gitlab-ci.yml`) — so a shared ticket-prefixed name is often the coordinating key and is deliberately allowed. It does reach public history, but only through the **default merge subject** (`Merge pull request #N from org/TICKET-…`). **Squash-merge with an explicit clean subject**, and it never lands. Prefer a shared descriptive name over a ticket prefix when one reads just as well.
-- **Don't name private companion repos in PR descriptions or commit messages on this repo.** Refer to internal services by category, not by repo name.
+- **Don't name private companion repos in PR descriptions or commit messages on this repo.** That includes the server repo (`artifact-index`): write "the server". Refer to other internal services by category, not by repo name. Public companions (below) may be named.
 - No AI-attribution trailers on commits (`Co-Authored-By: Claude …`, "Generated with Claude Code", etc.) — they're noise and they don't belong in project history.
 - PRs that depend on an unreleased `polyswarm-api` surface must link the SDK PR under a `## Requires` section (see `specs/05-sdk-contract.md`).
 
-## Companion repos (public)
+## Companion repos
 
-- `polyswarm-api` — the SDK these commands wrap. SDK changes that need a CLI surface usually ship as a pair (`polyswarm-api` PR + `polyswarm-cli` PR with the SDK PR linked under `## Requires`).
-- `artifact-index` — the server-side API the SDK talks to. New endpoints land there first; the SDK PR comes after; the CLI PR comes last.
+- `polyswarm-api` (**public**) — the SDK these commands wrap. SDK changes that need a CLI surface usually ship as a pair (`polyswarm-api` PR + `polyswarm-cli` PR with the SDK PR linked under `## Requires`).
+- `artifact-index` (**private**; in PR and commit text say "the server") — the server-side API the SDK talks to. New endpoints land there first; the SDK PR comes after; the CLI PR comes last.
