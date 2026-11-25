@@ -10,7 +10,7 @@ Precedence under test:
 - a command-line --api-uri wins over the env var;
 - shortcuts are mutually exclusive with each other;
 - trailing slashes are stripped from a flag/env URI;
-- a flag/env URI not ending in /v3 warns on stderr (stdout stays clean), never fails.
+- a flag/env URI not ending in /vN warns on stderr (stdout stays clean), never fails.
 
 resolve_api_uri is unit-tested directly; the CLI integration tests drive the
 real option parsing (incl. the env var via CliRunner's `env=`) and assert the
@@ -74,14 +74,19 @@ class ResolveApiUriTest(TestCase):
         assert resolve_api_uri('http://x.test/v3/', True, _shortcuts()) == 'http://x.test/v3'
         assert resolve_api_uri('http://x.test/v3///', False, _shortcuts()) == 'http://x.test/v3'
 
-    def test_missing_v3_warns_on_stderr_without_rewriting(self):
-        with mock.patch.object(click, 'echo') as echo:
-            assert resolve_api_uri('http://x.test/', True, _shortcuts()) == 'http://x.test'
-        assert echo.call_args.kwargs == {'err': True}
-        assert 'does not end in /v3' in echo.call_args.args[0]
+    def test_missing_version_warns_on_stderr_without_rewriting(self):
+        for uri in ('http://x.test', 'http://x.test/', 'http://x.test/vX', 'http://x.test/v',
+                    'https://vault.example', 'http://x.test/api'):
+            with mock.patch.object(click, 'echo') as echo:
+                assert resolve_api_uri(uri, True, _shortcuts()) == uri.rstrip('/')
+            assert echo.call_args.kwargs == {'err': True}, uri
+            assert 'does not end in /vN' in echo.call_args.args[0], uri
 
-    def test_v3_uri_does_not_warn(self):
+    def test_any_numeric_version_does_not_warn(self):
         with mock.patch.object(click, 'echo') as echo:
+            for uri in ('http://x.test/v3', 'http://x.test/v4/', 'http://x.test/v12',
+                        'https://vault.example/v3'):
+                resolve_api_uri(uri, True, _shortcuts())
             resolve_api_uri(_CLI_URI, True, _shortcuts())
             resolve_api_uri(None, False, _shortcuts(stage=True))
             resolve_api_uri(None, False, _shortcuts())
@@ -142,12 +147,12 @@ class ApiUriCliTest(TestCase):
         assert self._resolved_base('--stage',
                                    env={'POLYSWARM_API_URI': _ENV_URI}) == API_URI_SHORTCUTS['stage']
 
-    # --- normalization and /v3 warning ---
+    # --- normalization and /vN warning ---
     def test_trailing_slash_stripped_from_env_and_flag(self):
         assert self._resolved_base(env={'POLYSWARM_API_URI': _ENV_URI + '/'}) == _ENV_URI
         assert self._resolved_base('--api-uri', _CLI_URI + '//') == _CLI_URI
 
-    def test_missing_v3_warns_on_stderr_only(self):
+    def test_missing_version_warns_on_stderr_only(self):
         fake = MagicMock()
         fake.json = {'id': 1}
         with mock.patch('polyswarm_api.api.PolyswarmAPI._single', return_value=fake):
@@ -157,15 +162,15 @@ class ApiUriCliTest(TestCase):
                 env={'POLYSWARM_API_URI': 'http://env.example.test/'},
             )
         assert result.exit_code == 0, result.output
-        assert 'does not end in /v3' in result.stderr
+        assert 'does not end in /vN' in result.stderr
         assert 'warning' not in result.stdout
         assert json.loads(result.stdout)
 
-    def test_v3_uri_emits_no_warning(self):
+    def test_versioned_uri_emits_no_warning(self):
         with mock.patch('polyswarm_api.api.PolyswarmAPI._single', return_value=MagicMock(json={'id': 1})):
-            result = self._error('--api-uri', _CLI_URI, '--output-format', 'json')
+            result = self._error('--api-uri', 'http://cli.example.test/v4', '--output-format', 'json')
         assert result.exit_code == 0, result.output
-        assert 'does not end in /v3' not in result.stderr
+        assert 'does not end in /vN' not in result.stderr
 
     # --- each shortcut ---
     def test_stage_shortcut(self):
