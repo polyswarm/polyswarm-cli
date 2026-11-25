@@ -18,7 +18,7 @@ def sandbox():
 @click.argument('provider_slug', type=click.STRING)
 @click.argument('artifact-id', nargs=-1, callback=utils.validate_id)
 @click.option('--vm_slug', 'vm_slug', type=click.STRING)
-@click.option('--internet-disabled', 'internet_disabled', type=click.BOOL, is_flag=True, default=False)
+@click.option('--internet-disabled', 'internet_disabled', is_flag=True, default=False)
 @click.pass_context
 def submit(ctx, provider_slug, artifact_id, vm_slug, internet_disabled):
     """
@@ -38,7 +38,7 @@ def submit(ctx, provider_slug, artifact_id, vm_slug, internet_disabled):
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
 @click.option('--hash-type', help='Hash type [default:autodetect, sha256|sha1|md5].', default=None)
 @click.option('--vm_slug', 'vm_slug', type=click.STRING)
-@click.option('--internet-disabled', 'internet_disabled', type=click.BOOL, is_flag=True, default=False)
+@click.option('--internet-disabled', 'internet_disabled', is_flag=True, default=False)
 @click.pass_context
 def hash_(ctx, provider_slug, hash_value, hash_file, hash_type, vm_slug, internet_disabled):
     """
@@ -65,12 +65,12 @@ def hash_(ctx, provider_slug, hash_value, hash_file, hash_type, vm_slug, interne
 @click.argument('provider', type=click.STRING)
 @click.argument('path', type=click.Path(exists=True), required=True)
 @click.option('--vm_slug', 'vm_slug', type=click.STRING)
-@click.option('--internet-disabled', 'internet_disabled', type=click.BOOL, is_flag=True, default=False)
-@click.option('-z', '--is-zip', type=click.BOOL, is_flag=True,
+@click.option('--internet-disabled', 'internet_disabled', is_flag=True, default=False)
+@click.option('-z', '--is-zip', is_flag=True,
               help='Will handle the provided file as a zip and decompress server-side.')
 @click.option('-p', '--zip-password', type=click.STRING,
               help='Will use this password to decompress the zip file. If provided, will handle the file as a zip.')
-@click.option('--is-pdf', type=click.BOOL, is_flag=True,
+@click.option('--is-pdf', is_flag=True,
               help='Will handle the provided file as an encrypted PDF.')
 @click.option('--pdf-password', type=click.STRING,
               help='Will use this password to decrypt the PDF file. If provided, will handle the file as an encrypted PDF.')

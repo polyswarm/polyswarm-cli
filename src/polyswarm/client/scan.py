@@ -23,17 +23,17 @@ def scan():
               help='Does not wait for the scan window to close, just create it and return right away.')
 @click.option('-s', '--scan-config', type=click.STRING, default=None,
               help='Configuration template to be used in the scan. E.g.: "default", "more-time", "most-time".')
-@click.option('-z', '--is-zip', type=click.BOOL, is_flag=True,
+@click.option('-z', '--is-zip', is_flag=True,
               help='Will handle the provided file as a zip and decompress server-side.')
 @click.option('-p', '--zip-password', type=click.STRING,
               help='Will use this password to decompress the zip file. If provided, will handle the file as a zip.')
-@click.option('-b', '--is-base64', type=click.BOOL, is_flag=True,
+@click.option('-b', '--is-base64', is_flag=True,
               help='Will handle the provided file as containing base64-encoded content to decode server-side.')
-@click.option('--is-7zip', type=click.BOOL, is_flag=True,
+@click.option('--is-7zip', is_flag=True,
               help='Will handle the provided file as a 7zip archive and decompress server-side.')
 @click.option('--sevenzip-password', type=click.STRING,
               help='Will use this password to decompress the 7zip file. If provided, will handle the file as a 7zip.')
-@click.option('--is-pdf', type=click.BOOL, is_flag=True,
+@click.option('--is-pdf', is_flag=True,
               help='Will handle the provided file as an encrypted PDF.')
 @click.option('--pdf-password', type=click.STRING,
               help='Will use this password to decrypt the PDF file. If provided, will handle the file as an encrypted PDF.')

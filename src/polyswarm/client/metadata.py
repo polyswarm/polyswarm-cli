@@ -12,7 +12,7 @@ def metadata():
 @click.option('-r', '--hash-file', help='File of hashes, one per line.', type=click.File('r'))
 @click.option('-a', '--analysis', type=click.STRING, multiple=True,
               help='Analysis to be execute on the Artifact.')
-@click.option('-s', '--skip-es', type=click.BOOL, is_flag=True,
+@click.option('-s', '--skip-es', is_flag=True,
               help='Skip the upload to ES when evaluating the new metadata value.')
 @click.argument('hashes', nargs=-1)
 @click.pass_context
