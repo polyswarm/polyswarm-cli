@@ -76,7 +76,8 @@ def resolve_api_uri(api_uri, api_uri_from_cli, shortcuts):
     command-line --api-uri. An ambient ``POLYSWARM_API_URI`` does **not**
     conflict with a shortcut — the explicit flag wins. With no shortcut, an
     explicit --api-uri or the env var is used; with nothing at all, default to
-    production.
+    production. That URI loses any trailing ``/`` and, if it does not end in
+    ``/v3``, triggers a warning on stderr (it is never rewritten).
     """
     selected = [name for name, enabled in shortcuts.items() if enabled]
     if len(selected) > 1:
@@ -88,6 +89,10 @@ def resolve_api_uri(api_uri, api_uri_from_cli, shortcuts):
     if selected:
         return API_URI_SHORTCUTS[selected[0]]
     if api_uri is not None:
+        api_uri = api_uri.rstrip('/')
+        # stderr only: keeps json/pipe output on stdout clean
+        if not api_uri.endswith('/v3'):
+            click.echo(f"warning: API URI '{api_uri}' does not end in /v3; requests may 404.", err=True)
         return api_uri
     return PROD_API_URI
 
