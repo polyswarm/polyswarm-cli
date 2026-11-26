@@ -10,6 +10,7 @@ How the CLI depends on the `polyswarm-api` SDK: which parts of the SDK's public 
 - **The SDK owns the wire; the CLI owns the UX.** If the CLI needs a new server capability, the SDK gets the method first (`AGENTS.md` §"When adding a command family", step 1).
 - **SDK + CLI changes that depend on each other ship as a pair.** The SDK PR opens first; the CLI PR links it under `## Requires` and must not merge before the SDK surface it needs is released / on the SDK's `develop` (CI installs the SDK from there — see below).
 - **The SDK version pin in `pyproject.toml` is the compatibility contract.** Floor it at the lowest SDK version that exposes every method/behaviour the CLI relies on.
+- **The `click` floor follows the same rule: `click>=8.0`**, the lowest version with `ParameterSource` / `ctx.get_parameter_source` (`client/polyswarm.py`); 7.1 cannot import it. The `tests` extra pins `click>=8.2` because two `tests/api_uri_test.py` tests read `CliRunner` `result.stderr`, which older versions do not separate.
 
 ## What the CLI imports from the SDK
 

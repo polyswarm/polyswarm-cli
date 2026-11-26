@@ -17,7 +17,7 @@ def report_template():
 
 @report_template.command('create', short_help='Create a report template.')
 @click.argument('template_name', type=click.STRING)
-@click.option('--is-default', type=click.BOOL, is_flag=True, default=False)
+@click.option('--is-default', is_flag=True, default=False)
 @click.option('--primary-color', type=click.STRING)
 @click.option('--footer-text', type=click.STRING)
 @click.option('--last-page-text', type=click.STRING)
@@ -48,7 +48,7 @@ def create(ctx, template_name, is_default, primary_color,
 @report_template.command('update', short_help='Edit a report template.')
 @click.argument('template-id', callback=utils.validate_id)
 @click.option('--template-name', type=click.STRING)
-@click.option('--is-default', type=click.BOOL, is_flag=True, help='Make the report template is default or not.')
+@click.option('--is-default', is_flag=True, help='Make the report template is default or not.')
 @click.option('--primary-color', type=click.STRING)
 @click.option('--footer-text', type=click.STRING)
 @click.option('--last-page-text', type=click.STRING)
@@ -96,7 +96,7 @@ def delete(ctx, template_id):
 
 
 @report_template.command('list', short_help='List all templates.')
-@click.option('--is-default', type=click.BOOL, is_flag=True, default=False)
+@click.option('--is-default', is_flag=True, default=False)
 @click.pass_context
 def list_templates(ctx, is_default):
     api = ctx.obj['api']

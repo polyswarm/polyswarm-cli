@@ -14,7 +14,7 @@ def link():
 @click.option('-t', '--tag', type=click.STRING, multiple=True)
 @click.option('-f', '--family', type=click.STRING, multiple=True)
 @click.option('-e', '--emerging', type=click.BOOL)
-@click.option('-r', '--remove', type=click.BOOL, is_flag=True)
+@click.option('-r', '--remove', is_flag=True)
 @click.pass_context
 @utils.any_provided('tag', 'family', 'emerging')
 @utils.any_provided('sha256', 'hash_file')

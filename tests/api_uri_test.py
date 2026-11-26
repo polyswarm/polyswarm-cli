@@ -8,12 +8,15 @@ Precedence under test:
 - a shortcut wins over an ambient POLYSWARM_API_URI;
 - a shortcut conflicts with an explicit command-line --api-uri (mutually exclusive);
 - a command-line --api-uri wins over the env var;
-- shortcuts are mutually exclusive with each other.
+- shortcuts are mutually exclusive with each other;
+- trailing slashes are stripped from a flag/env URI;
+- a flag/env URI not ending in /vN warns on stderr (stdout stays clean), never fails.
 
 resolve_api_uri is unit-tested directly; the CLI integration tests drive the
 real option parsing (incl. the env var via CliRunner's `env=`) and assert the
 resolved endpoint reaches the client.
 """
+import json
 from unittest import TestCase, mock
 from unittest.mock import MagicMock
 
@@ -66,6 +69,28 @@ class ResolveApiUriTest(TestCase):
     def test_shortcut_wins_over_env_var(self):
         # env-derived api_uri present, but the shortcut flag is explicit -> flag wins.
         assert resolve_api_uri(_ENV_URI, False, _shortcuts(stage=True)) == API_URI_SHORTCUTS['stage']
+
+    def test_trailing_slashes_stripped(self):
+        assert resolve_api_uri('http://x.test/v3/', True, _shortcuts()) == 'http://x.test/v3'
+        assert resolve_api_uri('http://x.test/v3///', False, _shortcuts()) == 'http://x.test/v3'
+
+    def test_missing_version_warns_on_stderr_without_rewriting(self):
+        for uri in ('http://x.test', 'http://x.test/', 'http://x.test/vX', 'http://x.test/v',
+                    'https://vault.example', 'http://x.test/api'):
+            with mock.patch.object(click, 'echo') as echo:
+                assert resolve_api_uri(uri, True, _shortcuts()) == uri.rstrip('/')
+            assert echo.call_args.kwargs == {'err': True}, uri
+            assert 'does not end in /vN' in echo.call_args.args[0], uri
+
+    def test_any_numeric_version_does_not_warn(self):
+        with mock.patch.object(click, 'echo') as echo:
+            for uri in ('http://x.test/v3', 'http://x.test/v4/', 'http://x.test/v12',
+                        'https://vault.example/v3'):
+                resolve_api_uri(uri, True, _shortcuts())
+            resolve_api_uri(_CLI_URI, True, _shortcuts())
+            resolve_api_uri(None, False, _shortcuts(stage=True))
+            resolve_api_uri(None, False, _shortcuts())
+        echo.assert_not_called()
 
     def test_shortcut_conflicts_with_cli_api_uri(self):
         with self.assertRaises(click.UsageError):
@@ -121,6 +146,31 @@ class ApiUriCliTest(TestCase):
     def test_shortcut_beats_env_var(self):
         assert self._resolved_base('--stage',
                                    env={'POLYSWARM_API_URI': _ENV_URI}) == API_URI_SHORTCUTS['stage']
+
+    # --- normalization and /vN warning ---
+    def test_trailing_slash_stripped_from_env_and_flag(self):
+        assert self._resolved_base(env={'POLYSWARM_API_URI': _ENV_URI + '/'}) == _ENV_URI
+        assert self._resolved_base('--api-uri', _CLI_URI + '//') == _CLI_URI
+
+    def test_missing_version_warns_on_stderr_only(self):
+        fake = MagicMock()
+        fake.json = {'id': 1}
+        with mock.patch('polyswarm_api.api.PolyswarmAPI._single', return_value=fake):
+            result = self.cli.invoke(
+                client.polyswarm_cli,
+                ['-a', _API_KEY, '--output-format', 'json', 'metadata', 'analyze-ip', '1.2.3.4'],
+                env={'POLYSWARM_API_URI': 'http://env.example.test/'},
+            )
+        assert result.exit_code == 0, result.output
+        assert 'does not end in /vN' in result.stderr
+        assert 'warning' not in result.stdout
+        assert json.loads(result.stdout)
+
+    def test_versioned_uri_emits_no_warning(self):
+        with mock.patch('polyswarm_api.api.PolyswarmAPI._single', return_value=MagicMock(json={'id': 1})):
+            result = self._error('--api-uri', 'http://cli.example.test/v4', '--output-format', 'json')
+        assert result.exit_code == 0, result.output
+        assert 'does not end in /vN' not in result.stderr
 
     # --- each shortcut ---
     def test_stage_shortcut(self):

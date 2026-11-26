@@ -18,7 +18,7 @@ def bundle():
 @click.option('-i', '--instance-id', type=click.STRING, multiple=True,
               help='The ID of an instance to include in the bundle archive.')
 @click.option('-n', '--archive-name', type=click.STRING, help='Name of the archive that will be created.')
-@click.option('-p', '--preserve-filenames', type=click.BOOL, is_flag=True, default=False,
+@click.option('-p', '--preserve-filenames', is_flag=True, default=False,
               help='Preserve the names of the files in the bundle.')
 @click.pass_context
 def create(ctx, instance_id, archive_name, preserve_filenames):
